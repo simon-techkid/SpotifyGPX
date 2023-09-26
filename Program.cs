@@ -15,7 +15,7 @@ class Program
     {
         if (args.Length != 2)
         {
-            Console.WriteLine("[INFO] Valid arguments: [json] [gpx]");
+            Console.WriteLine("[INFO] Valid arguments: <json_file> <gpx_file>");
             return;
         }
 
@@ -109,6 +109,13 @@ class Program
             // Set the nearest song calculated to the identified result
             nearestSong = task.Result;
 
+            // NEW FEATURE:
+            // Create list of all songs in the spotify json
+            // Find the index of the first and last song in the spotify song list that is correlated to the GPX
+            // If any are spotify SongEntry list items between the first and last index that are not sent to the GPX, warn the user (this assumes all songs listened to during the GPX period should be included in the GPX at all costs)
+            
+
+
             // Ensures the identified song does not contain duplicate entries
             if (nearestSong != null && !Spotify.IsSameSong(nearestSong, currentSong))
             {
@@ -148,6 +155,11 @@ public static class Spotify
 
         // Initialize variable to hold max time difference, starting at infinity working downward
         double nearestTimeDifference = double.MaxValue;
+
+        // use this to keep track of last index of spotifyData list
+        double lastIndex;
+
+        // if this doesn't match last one, warn that a song was missed, and print the entry
 
         foreach (SpotifyEntry entry in spotifyData)
         {
