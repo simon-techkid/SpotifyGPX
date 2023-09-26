@@ -286,6 +286,11 @@ public static class GPX
             name.InnerText = SongResponse.Identifier(song, "name");
             waypoint.AppendChild(name);
 
+            // Set the url of the GPX point to the Spotify URI
+            XmlElement url = document.CreateElement("url");
+            url.InnerText = song.spotify_track_uri;
+            waypoint.AppendChild(url);
+
             // Set the time of the GPX point to the original time
             XmlElement time = document.CreateElement("time");
             time.InnerText = point.Time.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
