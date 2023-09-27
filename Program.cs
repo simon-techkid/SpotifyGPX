@@ -156,8 +156,17 @@ public static class Spotify
         // Initialize variable to hold max time difference, starting at infinity working downward
         double nearestTimeDifference = double.MaxValue;
 
+        // use this to track which index the loop is on, starting at zero
+        int loopIndex = -1;
+
         // use this to keep track of last index of spotifyData list
-        double lastIndex;
+        int currentIndex = -1;
+
+        // use this to hold maximum list index
+        int maxIndex = int.MaxValue;
+
+        // use this to hold minimum list index
+        int minIndex = 0;
 
         // if this doesn't match last one, warn that a song was missed, and print the entry
 
@@ -171,6 +180,9 @@ public static class Spotify
             // Calculate the time difference in seconds between the GPX point timestamp and the song end timestamp
             double timeDifferenceSec = Math.Abs((songEndTimestamp - trkptTimestamp).TotalSeconds);
 
+            // Add one to loopIndex, constituting the number of Spotify songs having been looped through
+            loopIndex++;
+
             // Check if this song is closer than the previous song to the GPX point
             if (timeDifferenceSec < nearestTimeDifference)
             {
@@ -182,15 +194,45 @@ public static class Spotify
                     
                     nearestSong = entry;
                     nearestTimeDifference = timeDifferenceSec;
+
+                    // Check if this index is the first found
+                    if (currentIndex == -1)
+                    {
+                        // This is the first relevant Spotify index, store it as the minimum
+                        minIndex = loopIndex;
+                    }
+
+                    // Check if the current index is consecutive
+                    if (currentIndex != -1 && loopIndex != currentIndex + 1)
+                    {
+                        // Handle non-consecutive index here
+
+                        // Calculate which index of the list was missed
+                        int missed = loopIndex - currentIndex;
+
+                        // Print the missed index information
+                        Console.WriteLine($"[ERROR] Missed Index: '{SongResponse.Identifier(spotifyData[missed], "name")}'");
+                    }
+
+                    currentIndex = loopIndex; // Update current index
                 }
             }
             else
             {
                 // If this song is farther than the previous (reader has passed relevant songs), skip it:
-                
+
+                // The latest song (max distance into the Spotify file) was the prior)
+                maxIndex = loopIndex - 1;
+
+                // The loop is being exited, reset the tracked index
+                currentIndex = -1;
+
+                // Exit the loop
                 break;
             }
         }
+
+        Console.WriteLine($"[INFO] Min/Max Spotify Record Indexes: {minIndex}/{maxIndex}");
 
         // Return the calculated nearest song of the point
         return nearestSong;

@@ -16,15 +16,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Program - best.cs" />
-    <Compile Remove="Program - experimental.cs" />
-    <Compile Remove="Program - fast.cs" />
-    <Compile Remove="Program - latest.cs" />
-    <Compile Remove="Program - original.cs" />
-    <Compile Remove="Program_copy.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
