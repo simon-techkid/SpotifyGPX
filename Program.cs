@@ -211,7 +211,7 @@ namespace SpotifyGPX.Parsing
                         }
                         else if (loopIndex != currentIndex + 1)
                         {
-                            // this could contain the contents of the below statement, consolidate following testing
+                            // this could contain the contents of the below statement, please consolidate following testing
                         }
 
                         // Check if the current index is consecutive
@@ -225,7 +225,7 @@ namespace SpotifyGPX.Parsing
                             // Print the missed index information
                             Console.WriteLine($"[ERROR] Missed Index: '{SongResponse.Identifier(spotifyData[missed], "name")}'");
                         }
-
+                        
                         currentIndex = loopIndex; // Update current index
                     }
                 }
