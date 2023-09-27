@@ -4,10 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using System.Xml;
 using System.Xml.Linq;
 using System.Globalization;
 using System.Threading.Tasks;
-using System.Xml;
+using SpotifyGPX.Parsing;
+using SpotifyGPX.Dependencies;
 
 class Program
 {
@@ -19,9 +21,9 @@ class Program
             return;
         }
 
-        string spotifyJsonPath = args[0]; // JSON file path
-        string gpxFilePath = args[1]; // GPX file path
-        string finalFilePath; // GPX file path
+        string spotifyJsonPath = args[0]; // Spotify JSON file path
+        string gpxFilePath = args[1]; // Input GPX file path
+        string finalFilePath; // Output GPX file path
 
         if (!File.Exists(spotifyJsonPath))
         {
@@ -60,7 +62,7 @@ class Program
                 // Specified GPX does carry GPX extension
 
                 // Input GPX: 20230924.gpx
-                // Resulting output GPX: 20230924_Spotify.gpx
+                // Resulting output GPX: 20230924_Spotify.gpx                
                 finalFilePath = Path.Combine(Directory.GetParent(gpxFilePath).ToString(), $"{Path.GetFileNameWithoutExtension(gpxFilePath)}_Spotify.gpx");
                 
                 // Abort if there is already a GPX there
@@ -73,17 +75,28 @@ class Program
             }
         }
 
-        // Load Spotify JSON data
-        List<SpotifyEntry> spotifyDump = JsonConvert.DeserializeObject<List<SpotifyEntry>>(File.ReadAllText(spotifyJsonPath));
+        List<SpotifyEntry> spotifyDump = new();
+
+        try
+        {
+            // Load Spotify JSON data
+            spotifyDump = JsonConvert.DeserializeObject<List<SpotifyEntry>>(File.ReadAllText(spotifyJsonPath));
+        }
+        catch (Exception ex)
+        {
+            // Handle parsing errors here
+            Console.WriteLine($"[ERROR] Problem parsing JSON file: {ex.Message}");
+            return;
+        }        
 
         // Load GPX data
         List<GPXPoint> gpxPoints = GPX.ParseGPXFile(gpxFilePath);
 
         // Create song variable to hold the previous song
-        SpotifyEntry currentSong = null;
+        SpotifyEntry? currentSong = null;
 
         // Create a variable to hold the nearest calculated song
-        SpotifyEntry nearestSong = null;
+        SpotifyEntry? nearestSong = null;
 
         // Create a list of each task created
         List<Task> createdTasks = new();
@@ -108,13 +121,6 @@ class Program
 
             // Set the nearest song calculated to the identified result
             nearestSong = task.Result;
-
-            // NEW FEATURE:
-            // Create list of all songs in the spotify json
-            // Find the index of the first and last song in the spotify song list that is correlated to the GPX
-            // If any are spotify SongEntry list items between the first and last index that are not sent to the GPX, warn the user (this assumes all songs listened to during the GPX period should be included in the GPX at all costs)
-            
-
 
             // Ensures the identified song does not contain duplicate entries
             if (nearestSong != null && !Spotify.IsSameSong(nearestSong, currentSong))
@@ -146,222 +152,226 @@ class Program
     }
 }
 
-public static class Spotify
+namespace SpotifyGPX.Parsing
 {
-    public static SpotifyEntry FindNearestSong(List<SpotifyEntry> spotifyData, DateTimeOffset trkptTimestamp)
+    public static class Spotify
     {
-        // Initialize variables to keep track of the nearest song
-        SpotifyEntry nearestSong = null;
-
-        // Initialize variable to hold max time difference, starting at infinity working downward
-        double nearestTimeDifference = double.MaxValue;
-
-        // use this to track which index the loop is on, starting at zero
-        int loopIndex = -1;
-
-        // use this to keep track of last index of spotifyData list
-        int currentIndex = -1;
-
-        // use this to hold maximum list index
-        int maxIndex = int.MaxValue;
-
-        // use this to hold minimum list index
-        int minIndex = 0;
-
-        // if this doesn't match last one, warn that a song was missed, and print the entry
-
-        foreach (SpotifyEntry entry in spotifyData)
+        public static SpotifyEntry FindNearestSong(List<SpotifyEntry> spotifyData, DateTimeOffset trkptTimestamp)
         {
-            // For every entry in the Spotify JSON:
+            // Initialize variables to keep track of the nearest song
+            SpotifyEntry nearestSong = null;
 
-            // Parse the date and time when the song ended
-            DateTime songEndTimestamp = DateTime.Parse(entry.ts);
+            // Initialize variable to hold max time difference, starting at infinity working downward
+            double nearestTimeDifference = double.MaxValue;
 
-            // Calculate the time difference in seconds between the GPX point timestamp and the song end timestamp
-            double timeDifferenceSec = Math.Abs((songEndTimestamp - trkptTimestamp).TotalSeconds);
+            // use this to track which index the loop is on, starting at zero
+            int loopIndex = -1;
 
-            // Add one to loopIndex, constituting the number of Spotify songs having been looped through
-            loopIndex++;
+            // use this to keep track of last index of spotifyData list
+            int currentIndex = -1;
 
-            // Check if this song is closer than the previous song to the GPX point
-            if (timeDifferenceSec < nearestTimeDifference)
+            // use this to hold maximum list index
+            int maxIndex = int.MaxValue;
+
+            // use this to hold minimum list index
+            int minIndex = 0;
+
+            // if this doesn't match last one, warn that a song was missed, and print the entry
+
+            foreach (SpotifyEntry entry in spotifyData)
             {
-                // If it is closer, continue:
+                // For every entry in the Spotify JSON:
 
-                if (trkptTimestamp <= songEndTimestamp)
+                // Parse the date and time when the song ended
+                DateTime songEndTimestamp = DateTime.Parse(entry.ts);
+
+                // Calculate the time difference in seconds between the GPX point timestamp and the song end timestamp
+                double timeDifferenceSec = Math.Abs((songEndTimestamp - trkptTimestamp).TotalSeconds);
+
+                // Add one to loopIndex, constituting the number of Spotify songs having been looped through
+                loopIndex++;
+
+                // Check if this song is closer than the previous song to the GPX point
+                if (timeDifferenceSec < nearestTimeDifference)
                 {
-                    // The GPX point was taken before the end of the song, it is valid:
-                    
-                    nearestSong = entry;
-                    nearestTimeDifference = timeDifferenceSec;
+                    // If it is closer, continue:
 
-                    // Check if this index is the first found
-                    if (currentIndex == -1)
+                    if (trkptTimestamp <= songEndTimestamp)
                     {
-                        // This is the first relevant Spotify index, store it as the minimum
-                        minIndex = loopIndex;
+                        // The GPX point was taken before the end of the song, it is valid:
+
+                        nearestSong = entry;
+                        nearestTimeDifference = timeDifferenceSec;
+
+                        // Check if this index is the first found
+                        if (currentIndex == -1)
+                        {
+                            // This is the first relevant Spotify index, store it as the minimum
+                            minIndex = loopIndex;
+                        }
+
+                        // Check if the current index is consecutive
+                        if (currentIndex != -1 && loopIndex != currentIndex + 1)
+                        {
+                            // Handle non-consecutive index here
+
+                            // Calculate which index of the list was missed
+                            int missed = loopIndex - currentIndex;
+
+                            // Print the missed index information
+                            Console.WriteLine($"[ERROR] Missed Index: '{SongResponse.Identifier(spotifyData[missed], "name")}'");
+                        }
+
+                        currentIndex = loopIndex; // Update current index
                     }
+                }
+                else
+                {
+                    // If this song is farther than the previous (reader has passed relevant songs), skip it:
 
-                    // Check if the current index is consecutive
-                    if (currentIndex != -1 && loopIndex != currentIndex + 1)
-                    {
-                        // Handle non-consecutive index here
+                    // The latest song (max distance into the Spotify file) was the prior)
+                    maxIndex = loopIndex - 1;
 
-                        // Calculate which index of the list was missed
-                        int missed = loopIndex - currentIndex;
+                    // The loop is being exited, reset the tracked index
+                    currentIndex = -1;
 
-                        // Print the missed index information
-                        Console.WriteLine($"[ERROR] Missed Index: '{SongResponse.Identifier(spotifyData[missed], "name")}'");
-                    }
-
-                    currentIndex = loopIndex; // Update current index
+                    // Exit the loop
+                    break;
                 }
             }
-            else
-            {
-                // If this song is farther than the previous (reader has passed relevant songs), skip it:
 
-                // The latest song (max distance into the Spotify file) was the prior)
-                maxIndex = loopIndex - 1;
+            Console.WriteLine($"[INFO] Min/Max Spotify Record Indexes: {minIndex}/{maxIndex}");
 
-                // The loop is being exited, reset the tracked index
-                currentIndex = -1;
-
-                // Exit the loop
-                break;
-            }
+            // Return the calculated nearest song of the point
+            return nearestSong;
         }
 
-        Console.WriteLine($"[INFO] Min/Max Spotify Record Indexes: {minIndex}/{maxIndex}");
-
-        // Return the calculated nearest song of the point
-        return nearestSong;
-    }
-
-    public static bool IsSameSong(SpotifyEntry song1, SpotifyEntry song2)
-    {
-        // Check if two Spotify entries represent the same song
-        return song1 != null && song2 != null && song1.master_metadata_track_name == song2.master_metadata_track_name;
-    }
-}
-
-public static class GPX
-{
-    public static List<GPXPoint> ParseGPXFile(string filePath)
-    {
-        // Create a list of all GPX <trkpt> latitudes, longitudes, and times
-        List<GPXPoint> gpxPoints = new();
-
-        try
+        public static bool IsSameSong(SpotifyEntry song1, SpotifyEntry song2)
         {
-            // Load the GPX
-            XDocument gpxDoc = XDocument.Load(filePath);
+            // Check if two Spotify entries represent the same song
+            return song1 != null && song2 != null && song1.master_metadata_track_name == song2.master_metadata_track_name;
+        }
+    }
 
-            // Import the GPX 1.0 Namespace
-            XNamespace gpxns = "http://www.topografix.com/GPX/1/0";
+    public static class GPX
+    {
+        public static List<GPXPoint> ParseGPXFile(string filePath)
+        {
+            // Create a list of all GPX <trkpt> latitudes, longitudes, and times
+            List<GPXPoint> gpxPoints = new();
 
-            foreach (XElement trackPoint in gpxDoc.Descendants(gpxns + "trkpt"))
+            try
             {
-                // For every <trkpt> record:
+                // Load the GPX
+                XDocument gpxDoc = XDocument.Load(filePath);
 
-                double latitude = (double)trackPoint.Attribute("lat"); // Latitude
-                double longitude = (double)trackPoint.Attribute("lon"); // Longitude
+                // Import the GPX 1.0 Namespace
+                XNamespace gpxns = "http://www.topografix.com/GPX/1/0";
 
-                // Parse GPX timestamp including offset
-                DateTimeOffset timestamp = DateTimeOffset.ParseExact(
-                    trackPoint.Element(gpxns + "time").Value,
-                    "yyyy-MM-ddTHH:mm:ss.fffzzz",
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.AssumeUniversal
-                );
-
-                // Create GPX point data for that record
-                GPXPoint gpxPoint = new()
+                foreach (XElement trackPoint in gpxDoc.Descendants(gpxns + "trkpt"))
                 {
-                    Latitude = latitude,
-                    Longitude = longitude,
-                    Time = timestamp
-                };
+                    // For every <trkpt> record:
 
-                // Add each record to a list
-                gpxPoints.Add(gpxPoint);
+                    double latitude = (double)trackPoint.Attribute("lat"); // Latitude
+                    double longitude = (double)trackPoint.Attribute("lon"); // Longitude
+
+                    // Parse GPX timestamp including offset
+                    DateTimeOffset timestamp = DateTimeOffset.ParseExact(
+                        trackPoint.Element(gpxns + "time").Value,
+                        "yyyy-MM-ddTHH:mm:ss.fffzzz",
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.AssumeUniversal
+                    );
+
+                    // Create GPX point data for that record
+                    GPXPoint gpxPoint = new()
+                    {
+                        Latitude = latitude,
+                        Longitude = longitude,
+                        Time = timestamp
+                    };
+
+                    // Add each record to a list
+                    gpxPoints.Add(gpxPoint);
+                }
             }
+            catch (Exception ex)
+            {
+                // Handle parsing errors here
+                Console.WriteLine($"[ERROR] Problem parsing GPX file: {ex.Message}");
+            }
+
+            // Return the list of points from the GPX
+            return gpxPoints;
         }
-        catch (Exception ex)
+
+        public static XmlDocument CreateGPXFile(List<(SpotifyEntry, GPXPoint)> finalPoints, string gpxFile)
         {
-            // Handle parsing errors here
-            Console.WriteLine("Error parsing GPX file: " + ex.Message);
+            // Create a new GPX document
+            XmlDocument document = new();
+
+            // Create the XML header
+            XmlNode header = document.CreateXmlDeclaration("1.0", "utf-8", null);
+            document.AppendChild(header);
+
+            // Create the GPX header
+            XmlElement GPX = document.CreateElement("gpx");
+            document.AppendChild(GPX);
+
+            // Add GPX header attributes
+            GPX.SetAttribute("version", "1.0");
+            GPX.SetAttribute("creator", "SpotifyGPX");
+            GPX.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+            GPX.SetAttribute("xmlns", "http://www.topografix.com/GPX/1/0");
+            GPX.SetAttribute("xsi:schemaLocation", "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd");
+
+            // Add name of GPX file, based on input GPX name
+            XmlElement gpxname = document.CreateElement("name");
+            gpxname.InnerText = gpxFile;
+            GPX.AppendChild(gpxname);
+
+            // Initialize variable to count the number of songs added
+            double songCount = 0;
+
+            foreach ((SpotifyEntry song, GPXPoint point) in finalPoints)
+            {
+                // Create waypoint for each song
+                XmlElement waypoint = document.CreateElement("wpt");
+                GPX.AppendChild(waypoint);
+
+                // Set the lat and lon of the waypoing to the original point
+                waypoint.SetAttribute("lat", point.Latitude.ToString());
+                waypoint.SetAttribute("lon", point.Longitude.ToString());
+
+                // Set the name of the GPX point to the name of the song
+                XmlElement name = document.CreateElement("name");
+                name.InnerText = SongResponse.Identifier(song, "name");
+                waypoint.AppendChild(name);
+
+                // Set the url of the GPX point to the Spotify URI
+                XmlElement url = document.CreateElement("url");
+                url.InnerText = song.spotify_track_uri;
+                waypoint.AppendChild(url);
+
+                // Set the time of the GPX point to the original time
+                XmlElement time = document.CreateElement("time");
+                time.InnerText = point.Time.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
+                waypoint.AppendChild(time);
+
+                // Set the description of the point to that defined in options
+                XmlElement description = document.CreateElement("desc");
+                description.InnerText = SongResponse.Identifier(song, "desc");
+                waypoint.AppendChild(description);
+
+                // Inform the user of the creation of GPX point
+                Console.WriteLine($"[INFO] Created GPX Point: '{name.InnerText}'");
+                songCount++;
+            }
+
+            Console.WriteLine($"[INFO] {songCount} songs written to GPX!");
+
+            return document;
         }
-
-        // Return the list of points from the GPX
-        return gpxPoints;
-    }
-
-    public static XmlDocument CreateGPXFile(List<(SpotifyEntry, GPXPoint)> finalPoints, string gpxFile)
-    {
-        // Create a new GPX document
-        XmlDocument document = new();
-
-        // Create the XML header
-        XmlNode header = document.CreateXmlDeclaration("1.0", "utf-8", null);
-        document.AppendChild(header);
-
-        // Create the GPX header
-        XmlElement GPX = document.CreateElement("gpx");
-        document.AppendChild(GPX);
-
-        // Add GPX header attributes
-        GPX.SetAttribute("version", "1.0");
-        GPX.SetAttribute("creator", "SpotifyGPX");
-        GPX.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        GPX.SetAttribute("xmlns", "http://www.topografix.com/GPX/1/0");
-        GPX.SetAttribute("xsi:schemaLocation", "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd");
-
-        // Add name of GPX file, based on input GPX name
-        XmlElement gpxname = document.CreateElement("name");
-        gpxname.InnerText = gpxFile;
-        GPX.AppendChild(gpxname);
-
-        // Initialize variable to count the number of songs added
-        double songCount = 0;
-
-        foreach ((SpotifyEntry song, GPXPoint point) in finalPoints)
-        {
-            // Create waypoint for each song
-            XmlElement waypoint = document.CreateElement("wpt");
-            GPX.AppendChild(waypoint);
-
-            // Set the lat and lon of the waypoing to the original point
-            waypoint.SetAttribute("lat", point.Latitude.ToString());
-            waypoint.SetAttribute("lon", point.Longitude.ToString());
-
-            // Set the name of the GPX point to the name of the song
-            XmlElement name = document.CreateElement("name");
-            name.InnerText = SongResponse.Identifier(song, "name");
-            waypoint.AppendChild(name);
-
-            // Set the url of the GPX point to the Spotify URI
-            XmlElement url = document.CreateElement("url");
-            url.InnerText = song.spotify_track_uri;
-            waypoint.AppendChild(url);
-
-            // Set the time of the GPX point to the original time
-            XmlElement time = document.CreateElement("time");
-            time.InnerText = point.Time.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
-            waypoint.AppendChild(time);
-
-            // Set the description of the point to that defined in options
-            XmlElement description = document.CreateElement("desc");
-            description.InnerText = SongResponse.Identifier(song, "desc");
-            waypoint.AppendChild(description);
-
-            // Inform the user of the creation of GPX point
-            Console.WriteLine($"[INFO] Created GPX Point: '{name.InnerText}'");
-            songCount++;
-        }
-
-        Console.WriteLine($"[INFO] {songCount} songs written to GPX!");
-
-        return document;
     }
 }
+
