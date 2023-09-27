@@ -209,6 +209,10 @@ namespace SpotifyGPX.Parsing
                             // This is the first relevant Spotify index, store it as the minimum
                             minIndex = loopIndex;
                         }
+                        else if (loopIndex != currentIndex + 1)
+                        {
+                            // this could contain the contents of the below statement, consolidate following testing
+                        }
 
                         // Check if the current index is consecutive
                         if (currentIndex != -1 && loopIndex != currentIndex + 1)
