@@ -176,6 +176,19 @@ namespace SpotifyGPX.Parsing
             // use this to hold minimum list index
             int minIndex = 0;
 
+            // HUGE BUG FIX PENDING:
+            // 1. loop through GPX file, adding all points to List<gpxPoints>
+            // 2. Store gpxPoint startPoint, endPoint in dedicated gpxPoint objects based on first and last indexes of List<gpxPoints>
+            // 3. loop through spotify entries, adding each to List<SpotifyEntry>
+            // 4. once the nearest SpotifyEntry to GPX startPoint is found, save the index of the first SpotifyEntry
+            // 5. continue through the list of SpotifyEntry objects until the nearest to GPX endPoint is found, save that index
+            // 6. create a list<SpotifyEntry> of each entry correlated between the start and end GPX point
+            // 7. loop through list<SpotifyEntry>, finding the nearest GPX point to it
+            // 8. create a tuple of SpotifyEntry and gpxPoint objects nearest each other
+
+            // OTHER FEATURES TO ADD:
+            // - JSON exporting (export the relevant part of the Spotify JSON to a new file for future reference)
+
             // if this doesn't match last one, warn that a song was missed, and print the entry
 
             foreach (SpotifyEntry entry in spotifyData)
@@ -183,7 +196,7 @@ namespace SpotifyGPX.Parsing
                 // For every entry in the Spotify JSON:
 
                 // Parse the date and time when the song ended
-                DateTime songEndTimestamp = DateTime.Parse(entry.ts);
+                DateTime songEndTimestamp = DateTime.Parse(entry.endTime);
 
                 // Calculate the time difference in seconds between the GPX point timestamp and the song end timestamp
                 double timeDifferenceSec = Math.Abs((songEndTimestamp - trkptTimestamp).TotalSeconds);
@@ -244,8 +257,6 @@ namespace SpotifyGPX.Parsing
                 }
             }
 
-            Console.WriteLine($"[INFO] Min/Max Spotify Record Indexes: {minIndex}/{maxIndex}");
-
             // Return the calculated nearest song of the point
             return nearestSong;
         }
@@ -253,7 +264,7 @@ namespace SpotifyGPX.Parsing
         public static bool IsSameSong(SpotifyEntry song1, SpotifyEntry song2)
         {
             // Check if two Spotify entries represent the same song
-            return song1 != null && song2 != null && song1.master_metadata_track_name == song2.master_metadata_track_name;
+            return song1 != null && song2 != null && song1.trackName == song2.trackName;
         }
     }
 
@@ -351,11 +362,6 @@ namespace SpotifyGPX.Parsing
                 XmlElement name = document.CreateElement("name");
                 name.InnerText = SongResponse.Identifier(song, "name");
                 waypoint.AppendChild(name);
-
-                // Set the url of the GPX point to the Spotify URI
-                XmlElement url = document.CreateElement("url");
-                url.InnerText = song.spotify_track_uri;
-                waypoint.AppendChild(url);
 
                 // Set the time of the GPX point to the original time
                 XmlElement time = document.CreateElement("time");
