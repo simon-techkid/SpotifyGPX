@@ -108,21 +108,8 @@ class Program
         {
             GPXPoint nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - Spotify.JsonTimeZone(spotifyEntry.endTime)).TotalSeconds)).First();
             correlatedEntries.Add((spotifyEntry, nearestPoint));
-            Console.WriteLine($"[INFO] JSON Entry Identified: '{SongResponse.Identifier(spotifyEntry, "name")}'");
+            Console.WriteLine($"[INFO] Entry Identified: '{SongResponse.Identifier(spotifyEntry, "name")}'");
         }
-
-        // Display the correlated entries
-        foreach (var (spotifyEntry, gpxPoint) in correlatedEntries)
-        {
-            Console.WriteLine($"Spotify Track: {spotifyEntry.trackName} by {spotifyEntry.artistName}");
-            Console.WriteLine($"GPX Point Time: {gpxPoint.Time}, Lat: {gpxPoint.Latitude}, Lon: {gpxPoint.Longitude}");
-            Console.WriteLine();
-        }
-
-        // OTHER FEATURES TO ADD:
-        // - JSON exporting (export the relevant part of the Spotify JSON to a new file for future reference)
-        // - Playlist exporting (export a GPX of song points to a m3u or some such file)
-        // - Spotify linkage (export a series of spotify URI so these can be reimported
         
         // Create a GPX document based on the list of points
         XmlDocument document = GPX.CreateGPXFile(correlatedEntries, Path.GetFileName(gpxFilePath));
