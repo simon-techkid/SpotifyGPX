@@ -6,7 +6,6 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using System.Globalization;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using SpotifyGPX.Parsing;
@@ -14,17 +13,37 @@ using SpotifyGPX.Options;
 
 class Program
 {
-    static async Task Main(string[] args)
+    static void Main(string[] args)
     {
+        string progMode = "gpx";
+        
         if (args.Length != 2)
         {
-            Console.WriteLine("[INFO] Valid arguments: <json_file> <gpx_file>");
-            return;
+            // if there are not two arguments
+            if (args.Length == 3)
+            {
+                // if there is a third argument
+                progMode = args[2];
+            }
+            else
+            {
+                // if there is no third argument
+                Console.WriteLine("[INFO] Valid arguments: <json_file> <gpx_file> [prog_mode]");
+                return;
+            }
         }
 
         string spotifyJsonPath = args[0]; // Spotify JSON file path
         string gpxFilePath = args[1]; // Input GPX file path
-        string finalFilePath; // Output GPX file path
+
+        if (progMode != "gpx")
+        {
+            if (progMode != "json" && progMode != "plist")
+            {
+                Console.WriteLine("[INFO] Valid program modes: [gpx], [json], [plist]");
+                return;
+            }
+        }
 
         if (!File.Exists(spotifyJsonPath))
         {
@@ -32,15 +51,11 @@ class Program
             Console.WriteLine($"[ERROR] Source Spotify JSON is not found!");
             return;
         }
-        else
+        else if (!Path.HasExtension(".json"))
         {
-            // Specified JSON does exist
-            if (!Path.HasExtension(".json"))
-            {
-                // Specified JSON does not carry JSON extension
-                Console.WriteLine($"[ERROR] Source Spotify JSON does not use JSON extension!");
-                return;
-            }
+            // Specified JSON does not carry JSON extension
+            Console.WriteLine($"[ERROR] Source Spotify JSON does not use JSON extension!");
+            return;
         }
 
         if (!File.Exists(gpxFilePath))
@@ -49,39 +64,19 @@ class Program
             Console.WriteLine($"[ERROR] Source GPX file, '{Path.GetFileName(gpxFilePath)}', is not found!");
             return;
         }
-        else
+        else if (!Path.HasExtension(".gpx"))
         {
-            // Specified GPX does exist
-            if (!Path.HasExtension(".gpx"))
-            {
-                // Specified GPX does not carry GPX extension
-                Console.WriteLine($"[ERROR] Source GPX file, '{Path.GetFileName(gpxFilePath)}', does not use GPX extension!");
-                return;
-            }
-            else
-            {
-                // Specified GPX does carry GPX extension
-
-                // Input GPX: 20230924.gpx
-                // Resulting output GPX: 20230924_Spotify.gpx                
-                finalFilePath = Path.Combine(Directory.GetParent(gpxFilePath).ToString(), $"{Path.GetFileNameWithoutExtension(gpxFilePath)}_Spotify.gpx");
-                
-                // Abort if there is already a GPX there
-                if (File.Exists(finalFilePath))
-                {
-                    // If the outgoing GPX would be overwritten, abort:
-                    Console.WriteLine($"[ERROR] Target GPX file, '{Path.GetFileName(finalFilePath)}', already exists!");
-                    return;
-                }
-            }
+            // Specified GPX does not carry GPX extension
+            Console.WriteLine($"[ERROR] Source GPX file, '{Path.GetFileName(gpxFilePath)}', does not use GPX extension!");
+            return;
         }
 
-        List<SpotifyEntry> spotifyEntries = new();
+        List<SpotifyEntry> allSpotifyEntries = new();
 
         try
         {
             // Load Spotify JSON data
-            spotifyEntries = JsonConvert.DeserializeObject<List<SpotifyEntry>>(File.ReadAllText(spotifyJsonPath));
+            allSpotifyEntries = JsonConvert.DeserializeObject<List<SpotifyEntry>>(File.ReadAllText(spotifyJsonPath));
         }
         catch (Exception ex)
         {
@@ -98,27 +93,67 @@ class Program
         DateTimeOffset gpxEndTime = gpxPoints.Max(point => point.Time);
 
         // Filter Spotify entries within the GPX timeframe
-        List<SpotifyEntry> spotifyEntriesInRange = spotifyEntries
+        List<SpotifyEntry> spotifyEntryCandidates = allSpotifyEntries
             .Where(entry => Spotify.JsonTimeZone(entry.endTime) >= gpxStartTime && Spotify.JsonTimeZone(entry.endTime) <= gpxEndTime)
             .ToList();
 
         // Correlate Spotify entries with the nearest GPX points
         List<(SpotifyEntry, GPXPoint)> correlatedEntries = new();
-        foreach (SpotifyEntry spotifyEntry in spotifyEntriesInRange)
+        foreach (SpotifyEntry spotifyEntry in spotifyEntryCandidates)
         {
             GPXPoint nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - Spotify.JsonTimeZone(spotifyEntry.endTime)).TotalSeconds)).First();
             correlatedEntries.Add((spotifyEntry, nearestPoint));
             Console.WriteLine($"[INFO] Entry Identified: '{SongResponse.Identifier(spotifyEntry, "name")}'");
         }
-        
-        // Create a GPX document based on the list of points
-        XmlDocument document = GPX.CreateGPXFile(correlatedEntries, Path.GetFileName(gpxFilePath));
 
-        // Save the GPX to the file
-        document.Save(finalFilePath);
+        if (progMode == "json")
+        {            
+            // Set up the output file path
+            string jsonFileOut = Path.Combine(Directory.GetParent(gpxFilePath).ToString(), $"{Path.GetFileNameWithoutExtension(gpxFilePath)}_Spotify.json");
+
+            if (File.Exists(jsonFileOut))
+            {
+                // If the outgoing file would be overwritten, abort:
+                Console.WriteLine($"[INFO] Target JSON file, '{Path.GetFileName(jsonFileOut)}', already exists!");
+                return;
+            }
+            else
+            {
+                // Create a JSON document based on the list of songs within range
+                string document = JsonConvert.SerializeObject(spotifyEntryCandidates, Newtonsoft.Json.Formatting.Indented);
+
+                // Save the JSON to a file
+                File.WriteAllText(jsonFileOut, document);
+
+                // Send success message
+                Console.WriteLine($"[INFO] JSON file, '{Path.GetFileName(jsonFileOut)}', generated successfully.");
+            }
+        }
+        else if (progMode == "gpx")
+        {
+            // Set up the output file path
+            string gpxFileOut = Path.Combine(Directory.GetParent(gpxFilePath).ToString(), $"{Path.GetFileNameWithoutExtension(gpxFilePath)}_Spotify.gpx");
+
+            if (File.Exists(gpxFileOut))
+            {
+                // If the outgoing file would be overwritten, abort:
+                Console.WriteLine($"[ERROR] Target GPX file, '{Path.GetFileName(gpxFileOut)}', already exists!");
+                return;
+            }
+            else
+            {
+                // Create a GPX document based on the list of points
+                XmlDocument document = GPX.CreateGPXFile(correlatedEntries, Path.GetFileName(gpxFilePath));
+
+                // Save the GPX to the file
+                document.Save(gpxFileOut);
+
+                // Send success message
+                Console.WriteLine($"[INFO] GPX file, '{Path.GetFileName(gpxFileOut)}', generated successfully.");
+            }           
+        }
 
         // Exit the program
-        Console.WriteLine($"[INFO] GPX file, '{Path.GetFileName(finalFilePath)}', generated successfully.");
         return;
     }
 }
