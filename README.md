@@ -41,5 +41,8 @@ Create GPX waypoints based on timed GPX tracks and Spotify listening history. Gr
  1. Use an app such as [GPSLogger](https://github.com/mendhak/gpslogger) to track your position
  2. Ensure the frequency of points is high, since a song is tied to each point
 
+## Future Additions
 
- 
+ - JSON exporting (export the relevant part of the Spotify JSON to a new file for future reference)
+ - Playlist exporting (export a GPX of song points to a m3u or some such file)
+ - Spotify linkage (export a series of spotify URI so these can be reimported

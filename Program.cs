@@ -2,6 +2,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using System.Globalization;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using SpotifyGPX.Parsing;
-using SpotifyGPX.Dependencies;
+using SpotifyGPX.Options;
 
 class Program
 {
@@ -75,12 +76,12 @@ class Program
             }
         }
 
-        List<SpotifyEntry> spotifyDump = new();
+        List<SpotifyEntry> spotifyEntries = new();
 
         try
         {
             // Load Spotify JSON data
-            spotifyDump = JsonConvert.DeserializeObject<List<SpotifyEntry>>(File.ReadAllText(spotifyJsonPath));
+            spotifyEntries = JsonConvert.DeserializeObject<List<SpotifyEntry>>(File.ReadAllText(spotifyJsonPath));
         }
         catch (Exception ex)
         {
@@ -92,56 +93,39 @@ class Program
         // Load GPX data
         List<GPXPoint> gpxPoints = GPX.ParseGPXFile(gpxFilePath);
 
-        // Create song variable to hold the previous song
-        SpotifyEntry? currentSong = null;
+        // Find the start and end times in GPX
+        DateTimeOffset gpxStartTime = gpxPoints.Min(point => point.Time);
+        DateTimeOffset gpxEndTime = gpxPoints.Max(point => point.Time);
 
-        // Create a variable to hold the nearest calculated song
-        SpotifyEntry? nearestSong = null;
+        // Filter Spotify entries within the GPX timeframe
+        List<SpotifyEntry> spotifyEntriesInRange = spotifyEntries
+            .Where(entry => Spotify.JsonTimeZone(entry.endTime) >= gpxStartTime && Spotify.JsonTimeZone(entry.endTime) <= gpxEndTime)
+            .ToList();
 
-        // Create a list of each task created
-        List<Task> createdTasks = new();
-
-        // Create a list of completed tasks, containing their resulting songs
-        List<SpotifyEntry> completedTasks = new();
-
-        // Create a list of songs and points to be used for the final GPX
-        List<(SpotifyEntry, GPXPoint)> finalPoints = new();
-
-        // Iterate through GPX points and find the nearest song
-        foreach (GPXPoint gpxPoint in gpxPoints)
+        // Correlate Spotify entries with the nearest GPX points
+        List<(SpotifyEntry, GPXPoint)> correlatedEntries = new();
+        foreach (SpotifyEntry spotifyEntry in spotifyEntriesInRange)
         {
-            // Find the nearest song based on timestamp
-            Task<SpotifyEntry> task = Task.Run(() => Spotify.FindNearestSong(spotifyDump, gpxPoint.Time));
-
-            // Add the task to the created tasks list
-            createdTasks.Add(task);
-
-            // Add the task's song to the completed tasks list once it is finished calculating
-            completedTasks.Add(await task);
-
-            // Set the nearest song calculated to the identified result
-            nearestSong = task.Result;
-
-            // Ensures the identified song does not contain duplicate entries
-            if (nearestSong != null && !Spotify.IsSameSong(nearestSong, currentSong))
-            {
-                // If this song is different to the prior:
-                
-                Console.WriteLine($"[INFO] JSON entry identified: '{SongResponse.Identifier(nearestSong, "name")}'");
-
-                // Add the calculated nearest song and its point to the final list
-                finalPoints.Add((nearestSong, gpxPoint));
-
-                // Update the current song to avoid duplicates
-                currentSong = nearestSong;
-            }
+            GPXPoint nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - Spotify.JsonTimeZone(spotifyEntry.endTime)).TotalSeconds)).First();
+            correlatedEntries.Add((spotifyEntry, nearestPoint));
+            Console.WriteLine($"[INFO] JSON Entry Identified: '{SongResponse.Identifier(spotifyEntry, "name")}'");
         }
 
-        // Wait for all nearest songs to be calculated and identified
-        Task.WaitAll(createdTasks.ToArray());
+        // Display the correlated entries
+        foreach (var (spotifyEntry, gpxPoint) in correlatedEntries)
+        {
+            Console.WriteLine($"Spotify Track: {spotifyEntry.trackName} by {spotifyEntry.artistName}");
+            Console.WriteLine($"GPX Point Time: {gpxPoint.Time}, Lat: {gpxPoint.Latitude}, Lon: {gpxPoint.Longitude}");
+            Console.WriteLine();
+        }
 
+        // OTHER FEATURES TO ADD:
+        // - JSON exporting (export the relevant part of the Spotify JSON to a new file for future reference)
+        // - Playlist exporting (export a GPX of song points to a m3u or some such file)
+        // - Spotify linkage (export a series of spotify URI so these can be reimported
+        
         // Create a GPX document based on the list of points
-        XmlDocument document = GPX.CreateGPXFile(finalPoints, Path.GetFileName(gpxFilePath));
+        XmlDocument document = GPX.CreateGPXFile(correlatedEntries, Path.GetFileName(gpxFilePath));
 
         // Save the GPX to the file
         document.Save(finalFilePath);
@@ -156,108 +140,31 @@ namespace SpotifyGPX.Parsing
 {
     public static class Spotify
     {
-        public static SpotifyEntry FindNearestSong(List<SpotifyEntry> spotifyData, DateTimeOffset trkptTimestamp)
+        public static DateTimeOffset JsonTimeZone(string inputTime)
         {
-            // Initialize variables to keep track of the nearest song
-            SpotifyEntry? nearestSong = null;
+            DateTimeOffset spotifyTimestamp = DateTimeOffset.ParseExact(inputTime, SongResponse.spotifyJsonTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
 
-            // Initialize variable to hold max time difference, starting at infinity working downward
-            double nearestTimeDifference = double.MaxValue;
-
-            foreach (SpotifyEntry entry in spotifyData)
-            {
-                // For every entry in the Spotify JSON:
-
-                // Parse the date and time when the song ended
-                DateTimeOffset songEndTimestamp = DateTimeOffset.ParseExact(entry.endTime, Spotify.TimeFormat(), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
-
-                // Calculate the time difference in seconds between the GPX point timestamp and the song end timestamp
-                double timeDifferenceSec = Math.Abs((songEndTimestamp - trkptTimestamp).TotalSeconds);
-
-                // Check if this song is closer than the previous song to the GPX point
-                if (timeDifferenceSec < nearestTimeDifference)
-                {
-                    // If it is closer, continue:
-
-                    if (trkptTimestamp <= songEndTimestamp)
-                    {
-                        // The GPX point was taken before the end of the song, it is valid:
-
-                        nearestSong = entry;
-                        nearestTimeDifference = timeDifferenceSec;
-
-                    }
-                }
-                else
-                {
-                    // If this song is farther than the previous (reader has passed relevant songs), skip it:
-                    break;
-                }
-            }
-
-            // Return the calculated nearest song of the point
-            return nearestSong;
-        }
-
-        public static bool IsSameSong(SpotifyEntry song1, SpotifyEntry song2)
-        {
-            // Check if two Spotify entries represent the same song
-            return song1 != null && song2 != null && song1.trackName == song2.trackName;
-        }
-
-        public static string TimeFormat()
-        {
-            return "yyyy-MM-dd HH:mm";
+            return spotifyTimestamp;
         }
     }
 
     public static class GPX
-    {
-        public static List<GPXPoint> ParseGPXFile(string filePath)
+    {        
+        public static List<GPXPoint> ParseGPXFile(string gpxFilePath)
         {
             // Create a list of all GPX <trkpt> latitudes, longitudes, and times
-            List<GPXPoint> gpxPoints = new();
 
-            try
+            XDocument gpxDocument = XDocument.Load(gpxFilePath);
+            XNamespace ns = "http://www.topografix.com/GPX/1/0";
+
+            List<GPXPoint> gpxPoints = gpxDocument.Descendants(ns + "trkpt")
+            .Select(trkpt => new GPXPoint
             {
-                // Load the GPX
-                XDocument gpxDoc = XDocument.Load(filePath);
-
-                // Import the GPX 1.0 Namespace
-                XNamespace gpxns = "http://www.topografix.com/GPX/1/0";
-
-                foreach (XElement trackPoint in gpxDoc.Descendants(gpxns + "trkpt"))
-                {
-                    // For every <trkpt> record:
-
-                    double latitude = (double)trackPoint.Attribute("lat"); // Latitude
-                    double longitude = (double)trackPoint.Attribute("lon"); // Longitude
-
-                    // Parse GPX timestamp including offset
-                    DateTimeOffset timestamp = DateTimeOffset.ParseExact(
-                        trackPoint.Element(gpxns + "time").Value,
-                        "yyyy-MM-ddTHH:mm:ss.fffzzz",
-                        CultureInfo.InvariantCulture,
-                        DateTimeStyles.AssumeUniversal
-                    );
-
-                    // Create GPX point data for that record
-                    GPXPoint gpxPoint = new()
-                    {
-                        Latitude = latitude,
-                        Longitude = longitude,
-                        Time = timestamp
-                    };
-
-                    // Add each record to a list
-                    gpxPoints.Add(gpxPoint);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle parsing errors here
-                Console.WriteLine($"[ERROR] Problem parsing GPX file: {ex.Message}");
-            }
+                Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, SongResponse.gpxPointTimeInp, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+                Latitude = double.Parse(trkpt.Attribute("lat").Value),
+                Longitude = double.Parse(trkpt.Attribute("lon").Value)
+            })
+            .ToList();
 
             // Return the list of points from the GPX
             return gpxPoints;
@@ -308,7 +215,7 @@ namespace SpotifyGPX.Parsing
 
                 // Set the time of the GPX point to the original time
                 XmlElement time = document.CreateElement("time");
-                time.InnerText = point.Time.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
+                time.InnerText = point.Time.ToString(SongResponse.gpxPointTimeOut);
                 waypoint.AppendChild(time);
 
                 // Set the description of the point to that defined in options
