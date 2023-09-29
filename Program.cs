@@ -107,47 +107,6 @@ class Program
         // Create a list of songs and points to be used for the final GPX
         List<(SpotifyEntry, GPXPoint)> finalPoints = new();
 
-        // Get the first GPX point's DateTime in the sequence
-        DateTimeOffset firstGPXPoint = gpxPoints[1].Time;
-
-        Console.WriteLine($"[INFO] GPX First Point Identified: {firstGPXPoint}");
-
-        // Get the last GPX point's DateTime in the sequence
-        DateTimeOffset lastGPXPoint = gpxPoints[gpxPoints.Count - 1].Time;
-
-        Console.WriteLine($"[INFO] GPX Last Point Identified: {lastGPXPoint}");
-
-        Console.WriteLine($"[INFO] GPX Total Duration: {lastGPXPoint - firstGPXPoint}");
-
-        List<SpotifyEntry> containedEntries = new();
-
-        foreach (SpotifyEntry entry in spotifyDump)
-        {
-            // Parse the date and time when the song ended
-
-            DateTimeOffset songEndTimestamp = DateTimeOffset.ParseExact(entry.endTime, Spotify.TimeFormat(), System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeUniversal);
-
-            int first = CompareDateTimeOffsets(songEndTimestamp, firstGPXPoint);
-            int last = CompareDateTimeOffsets(songEndTimestamp, lastGPXPoint);
-
-            if (first > 0)
-            {
-                // Song ends after first GPX point
-                if (last < 0)
-                {
-                    // Song ends before last GPX point
-
-                    containedEntries.Add(entry);
-                    Console.WriteLine($"!Found Entry: {entry.trackName} - {entry.artistName} ({songEndTimestamp})");
-                }
-            }
-        }
-
-        foreach (SpotifyEntry entry in containedEntries)
-        {
-            
-        }
-
         // Iterate through GPX points and find the nearest song
         foreach (GPXPoint gpxPoint in gpxPoints)
         {
@@ -191,16 +150,6 @@ class Program
         Console.WriteLine($"[INFO] GPX file, '{Path.GetFileName(finalFilePath)}', generated successfully.");
         return;
     }
-
-    static int CompareDateTimeOffsets(DateTimeOffset dateTime1, DateTimeOffset dateTime2)
-    {
-        // Convert both DateTimeOffset instances to UTC
-        DateTimeOffset dateTime1Utc = dateTime1.ToOffset(TimeSpan.Zero);
-        DateTimeOffset dateTime2Utc = dateTime2.ToOffset(TimeSpan.Zero);
-
-        // Now you can safely compare them
-        return dateTime1Utc.CompareTo(dateTime2Utc);
-    }
 }
 
 namespace SpotifyGPX.Parsing
@@ -226,21 +175,6 @@ namespace SpotifyGPX.Parsing
 
             // use this to hold minimum list index
             int minIndex = 0;
-
-            // HUGE BUG FIX PENDING:
-            // DONE 1. loop through GPX file, adding all points to List<gpxPoints>
-            // 2. Store gpxPoint startPoint, endPoint in dedicated gpxPoint objects based on first and last indexes of List<gpxPoints>
-            // 3. loop through spotify entries, adding each to List<SpotifyEntry>
-            // 4. once the nearest SpotifyEntry to GPX startPoint is found, save the index of the first SpotifyEntry
-            // 5. continue through the list of SpotifyEntry objects until the nearest to GPX endPoint is found, save that index
-            // 6. create a list<SpotifyEntry> of each entry correlated between the start and end GPX point
-            // 7. loop through list<SpotifyEntry>, finding the nearest GPX point to it
-            // 8. create a tuple of SpotifyEntry and gpxPoint objects nearest each other
-
-            // OTHER FEATURES TO ADD:
-            // - JSON exporting (export the relevant part of the Spotify JSON to a new file for future reference)
-
-            // if this doesn't match last one, warn that a song was missed, and print the entry
 
             foreach (SpotifyEntry entry in spotifyData)
             {

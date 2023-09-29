@@ -21,7 +21,7 @@ namespace SpotifyGPX.Dependencies
                 // ===================== \\
                 // GPX POINT DESCRIPTION \\
                 // ===================== \\
-                return $"{track_name} by {artist}\nEnded: {time_end}";
+                return $"{track_name} by {artist}\nEnded at {time_end}";
             }
             else
             {
