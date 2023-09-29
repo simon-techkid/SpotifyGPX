@@ -8,8 +8,6 @@ using System.Xml.Linq;
 using System.Globalization;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using SpotifyGPX.Parsing;
-using SpotifyGPX.Options;
 
 class Program
 {
@@ -86,7 +84,7 @@ class Program
         }        
 
         // Load GPX data
-        List<GPXPoint> gpxPoints = GPX.ParseGPXFile(gpxFilePath);
+        List<GPXPoint> gpxPoints = ParseGPXFile(gpxFilePath);
 
         // Find the start and end times in GPX
         DateTimeOffset gpxStartTime = gpxPoints.Min(point => point.Time);
@@ -94,16 +92,16 @@ class Program
 
         // Filter Spotify entries within the GPX timeframe
         List<SpotifyEntry> spotifyEntryCandidates = allSpotifyEntries
-            .Where(entry => Spotify.JsonTimeZone(entry.endTime) >= gpxStartTime && Spotify.JsonTimeZone(entry.endTime) <= gpxEndTime)
+            .Where(entry => ReadJsonTime(entry.endTime) >= gpxStartTime && ReadJsonTime(entry.endTime) <= gpxEndTime)
             .ToList();
 
         // Correlate Spotify entries with the nearest GPX points
         List<(SpotifyEntry, GPXPoint)> correlatedEntries = new();
         foreach (SpotifyEntry spotifyEntry in spotifyEntryCandidates)
         {
-            GPXPoint nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - Spotify.JsonTimeZone(spotifyEntry.endTime)).TotalSeconds)).First();
+            GPXPoint nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - ReadJsonTime(spotifyEntry.endTime)).TotalSeconds)).First();
             correlatedEntries.Add((spotifyEntry, nearestPoint));
-            Console.WriteLine($"[INFO] Entry Identified: '{SongResponse.Identifier(spotifyEntry, "name")}'");
+            Console.WriteLine($"[INFO] Entry Identified: '{Options.Identifier(spotifyEntry, "name")}'");
         }
 
         if (progMode == "json")
@@ -129,6 +127,10 @@ class Program
                 Console.WriteLine($"[INFO] JSON file, '{Path.GetFileName(jsonFileOut)}', generated successfully.");
             }
         }
+        else if (progMode == "plist")
+        {
+
+        }
         else if (progMode == "gpx")
         {
             // Set up the output file path
@@ -143,7 +145,7 @@ class Program
             else
             {
                 // Create a GPX document based on the list of points
-                XmlDocument document = GPX.CreateGPXFile(correlatedEntries, Path.GetFileName(gpxFilePath));
+                XmlDocument document = CreateGPXFile(correlatedEntries, Path.GetFileName(gpxFilePath));
 
                 // Save the GPX to the file
                 document.Save(gpxFileOut);
@@ -156,104 +158,91 @@ class Program
         // Exit the program
         return;
     }
-}
 
-namespace SpotifyGPX.Parsing
-{
-    public static class Spotify
+    public static DateTimeOffset ReadJsonTime(string? inputTime)
     {
-        public static DateTimeOffset JsonTimeZone(string inputTime)
-        {
-            DateTimeOffset spotifyTimestamp = DateTimeOffset.ParseExact(inputTime, SongResponse.spotifyJsonTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
-
-            return spotifyTimestamp;
-        }
+        DateTimeOffset spotifyTimestamp = DateTimeOffset.ParseExact(inputTime, Options.spotifyJsonTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+        return spotifyTimestamp;        
     }
 
-    public static class GPX
-    {        
-        public static List<GPXPoint> ParseGPXFile(string gpxFilePath)
+    public static List<GPXPoint> ParseGPXFile(string gpxFilePath)
+    {
+        // Create a list of all GPX <trkpt> latitudes, longitudes, and times
+
+        XDocument gpxDocument = XDocument.Load(gpxFilePath);
+        XNamespace ns = "http://www.topografix.com/GPX/1/0";
+
+        List<GPXPoint> gpxPoints = gpxDocument.Descendants(ns + "trkpt")
+        .Select(trkpt => new GPXPoint
         {
-            // Create a list of all GPX <trkpt> latitudes, longitudes, and times
+            Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, Options.gpxPointTimeInp, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+            Latitude = double.Parse(trkpt.Attribute("lat").Value),
+            Longitude = double.Parse(trkpt.Attribute("lon").Value)
+        })
+        .ToList();
 
-            XDocument gpxDocument = XDocument.Load(gpxFilePath);
-            XNamespace ns = "http://www.topografix.com/GPX/1/0";
+        // Return the list of points from the GPX
+        return gpxPoints;
+    }
 
-            List<GPXPoint> gpxPoints = gpxDocument.Descendants(ns + "trkpt")
-            .Select(trkpt => new GPXPoint
-            {
-                Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, SongResponse.gpxPointTimeInp, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
-                Latitude = double.Parse(trkpt.Attribute("lat").Value),
-                Longitude = double.Parse(trkpt.Attribute("lon").Value)
-            })
-            .ToList();
+    public static XmlDocument CreateGPXFile(List<(SpotifyEntry, GPXPoint)> finalPoints, string gpxFile)
+    {
+        // Create a new GPX document
+        XmlDocument document = new();
 
-            // Return the list of points from the GPX
-            return gpxPoints;
+        // Create the XML header
+        XmlNode header = document.CreateXmlDeclaration("1.0", "utf-8", null);
+        document.AppendChild(header);
+
+        // Create the GPX header
+        XmlElement GPX = document.CreateElement("gpx");
+        document.AppendChild(GPX);
+
+        // Add GPX header attributes
+        GPX.SetAttribute("version", "1.0");
+        GPX.SetAttribute("creator", "SpotifyGPX");
+        GPX.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        GPX.SetAttribute("xmlns", "http://www.topografix.com/GPX/1/0");
+        GPX.SetAttribute("xsi:schemaLocation", "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd");
+
+        // Add name of GPX file, based on input GPX name
+        XmlElement gpxname = document.CreateElement("name");
+        gpxname.InnerText = gpxFile;
+        GPX.AppendChild(gpxname);
+
+        // Initialize variable to count the number of songs added
+        double songCount = 0;
+
+        foreach ((SpotifyEntry song, GPXPoint point) in finalPoints)
+        {
+            // Create waypoint for each song
+            XmlElement waypoint = document.CreateElement("wpt");
+            GPX.AppendChild(waypoint);
+
+            // Set the lat and lon of the waypoing to the original point
+            waypoint.SetAttribute("lat", point.Latitude.ToString());
+            waypoint.SetAttribute("lon", point.Longitude.ToString());
+
+            // Set the name of the GPX point to the name of the song
+            XmlElement name = document.CreateElement("name");
+            name.InnerText = Options.Identifier(song, "name");
+            waypoint.AppendChild(name);
+
+            // Set the time of the GPX point to the original time
+            XmlElement time = document.CreateElement("time");
+            time.InnerText = point.Time.ToString(Options.gpxPointTimeOut);
+            waypoint.AppendChild(time);
+
+            // Set the description of the point to that defined in options
+            XmlElement description = document.CreateElement("desc");
+            description.InnerText = Options.Identifier(song, "desc");
+            waypoint.AppendChild(description);
+
+            songCount++;
         }
 
-        public static XmlDocument CreateGPXFile(List<(SpotifyEntry, GPXPoint)> finalPoints, string gpxFile)
-        {
-            // Create a new GPX document
-            XmlDocument document = new();
+        Console.WriteLine($"[INFO] {songCount} songs written to GPX!");
 
-            // Create the XML header
-            XmlNode header = document.CreateXmlDeclaration("1.0", "utf-8", null);
-            document.AppendChild(header);
-
-            // Create the GPX header
-            XmlElement GPX = document.CreateElement("gpx");
-            document.AppendChild(GPX);
-
-            // Add GPX header attributes
-            GPX.SetAttribute("version", "1.0");
-            GPX.SetAttribute("creator", "SpotifyGPX");
-            GPX.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-            GPX.SetAttribute("xmlns", "http://www.topografix.com/GPX/1/0");
-            GPX.SetAttribute("xsi:schemaLocation", "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd");
-
-            // Add name of GPX file, based on input GPX name
-            XmlElement gpxname = document.CreateElement("name");
-            gpxname.InnerText = gpxFile;
-            GPX.AppendChild(gpxname);
-
-            // Initialize variable to count the number of songs added
-            double songCount = 0;
-
-            foreach ((SpotifyEntry song, GPXPoint point) in finalPoints)
-            {
-                // Create waypoint for each song
-                XmlElement waypoint = document.CreateElement("wpt");
-                GPX.AppendChild(waypoint);
-
-                // Set the lat and lon of the waypoing to the original point
-                waypoint.SetAttribute("lat", point.Latitude.ToString());
-                waypoint.SetAttribute("lon", point.Longitude.ToString());
-
-                // Set the name of the GPX point to the name of the song
-                XmlElement name = document.CreateElement("name");
-                name.InnerText = SongResponse.Identifier(song, "name");
-                waypoint.AppendChild(name);
-
-                // Set the time of the GPX point to the original time
-                XmlElement time = document.CreateElement("time");
-                time.InnerText = point.Time.ToString(SongResponse.gpxPointTimeOut);
-                waypoint.AppendChild(time);
-
-                // Set the description of the point to that defined in options
-                XmlElement description = document.CreateElement("desc");
-                description.InnerText = SongResponse.Identifier(song, "desc");
-                waypoint.AppendChild(description);
-
-                // Inform the user of the creation of GPX point
-                Console.WriteLine($"[INFO] Created GPX Point: '{name.InnerText}'");
-                songCount++;
-            }
-
-            Console.WriteLine($"[INFO] {songCount} songs written to GPX!");
-
-            return document;
-        }
+        return document;
     }
 }
-
