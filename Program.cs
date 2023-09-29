@@ -1,13 +1,13 @@
 ﻿// SpotifyGPX by Simon Field
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
 using System.Xml;
 using System.Xml.Linq;
 using System.Globalization;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 using SpotifyGPX.Parsing;
 using SpotifyGPX.Dependencies;
 
@@ -126,8 +126,6 @@ class Program
             // Parse the date and time when the song ended
 
             DateTimeOffset songEndTimestamp = DateTimeOffset.ParseExact(entry.endTime, Spotify.TimeFormat(), System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeUniversal);
-
-            //DateTimeOffset songEndTimestamp = DateTime.Parse(entry.endTime);
 
             int first = CompareDateTimeOffsets(songEndTimestamp, firstGPXPoint);
             int last = CompareDateTimeOffsets(songEndTimestamp, lastGPXPoint);
@@ -249,7 +247,7 @@ namespace SpotifyGPX.Parsing
                 // For every entry in the Spotify JSON:
 
                 // Parse the date and time when the song ended
-                DateTime songEndTimestamp = DateTime.Parse(entry.endTime);
+                DateTimeOffset songEndTimestamp = DateTimeOffset.ParseExact(entry.endTime, Spotify.TimeFormat(), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
 
                 // Calculate the time difference in seconds between the GPX point timestamp and the song end timestamp
                 double timeDifferenceSec = Math.Abs((songEndTimestamp - trkptTimestamp).TotalSeconds);
