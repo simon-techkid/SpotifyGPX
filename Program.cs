@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using SpotifyGPX;
+using System.Drawing;
 
 class Program
 {
@@ -116,7 +117,7 @@ class Spotify
 
         // Filter Spotify entries within the GPX timeframe
         List<SpotifyEntry> spotifyEntryCandidates = spotifyEntries
-            .Where(entry => ReadJsonTime(entry.Time_End) >= gpxStartTime && ReadJsonTime(entry.Time_End) <= gpxEndTime)
+            .Where(entry => entry.Time_End >= gpxStartTime && entry.Time_End <= gpxEndTime)
             .ToList();
 
         return spotifyEntryCandidates;
@@ -129,9 +130,9 @@ class Spotify
 
         foreach (SpotifyEntry spotifyEntry in filteredEntries)
         {
-            GPXPoint nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - Spotify.ReadJsonTime(spotifyEntry.Time_End)).TotalSeconds)).First();
+            GPXPoint nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time_End).TotalSeconds)).First();
             correlatedEntries.Add((spotifyEntry, nearestPoint));
-            Console.WriteLine($"[INFO] Entry Identified: '{Options.Identifier(spotifyEntry, "name")}'");
+            Console.WriteLine($"[INFO] Entry Identified: '{Options.Identifier(spotifyEntry, new TimeSpan(), "name")}'");
         }
 
         return correlatedEntries;
@@ -143,13 +144,6 @@ class Spotify
         string document = JsonConvert.SerializeObject(filteredEntries, Newtonsoft.Json.Formatting.Indented);
 
         return document;
-    }
-    
-    public static DateTimeOffset ReadJsonTime(string? inputTime)
-    {
-        DateTimeOffset spotifyTimestamp = DateTimeOffset.ParseExact(inputTime, Options.spotifyJsonTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
-        
-        return spotifyTimestamp;
     }
 
     public static string GenerateOutputPath(string inputFile, string format)
@@ -173,7 +167,7 @@ class GPX
         List<GPXPoint> gpxPoints = gpxDocument.Descendants(ns + "trkpt")
         .Select(trkpt => new GPXPoint
         {
-            Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, Options.gpxPointTimeInp, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+            Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, Options.gpxPointTimeInp, null),
             Latitude = double.Parse(trkpt.Attribute("lat").Value),
             Longitude = double.Parse(trkpt.Attribute("lon").Value)
         })
@@ -223,17 +217,17 @@ class GPX
 
             // Set the name of the GPX point to the name of the song
             XmlElement name = document.CreateElement("name");
-            name.InnerText = Options.Identifier(song, "name");
+            name.InnerText = Options.Identifier(song, point.Time.Offset, "name");
             waypoint.AppendChild(name);
 
             // Set the time of the GPX point to the original time
             XmlElement time = document.CreateElement("time");
-            time.InnerText = point.Time.ToString(Options.gpxPointTimeOut);
+            time.InnerText = point.Time.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
             waypoint.AppendChild(time);
 
-            // Set the description of the point to that defined in options
+            // Set the description of the point 
             XmlElement description = document.CreateElement("desc");
-            description.InnerText = Options.Identifier(song, "desc");
+            description.InnerText = Options.Identifier(song, point.Time.Offset, "desc");
             waypoint.AppendChild(description);
 
             songCount++;
