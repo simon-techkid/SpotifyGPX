@@ -23,27 +23,27 @@ namespace SpotifyGPX
         {
             // Function defining the preferred return strings of GPX point metadata
 
-            // Song Statistics
-            string time_end = Spotify.ReadJsonTime(song.endTime).ToString(gpxPointDescription); // This field is a timestamp indicating when the track stopped playing in UTC (Coordinated Universal Time). The order is year, month and day followed by a timestamp in military time
-            string milliseconds_played = song.msPlayed; // This field is the number of milliseconds the stream was played.
-
             // Track Metadata
-            string track_name = song.trackName; // This field is the name of the track.
-            string artist = song.artistName; // This field is the name of the artist, band or podcast.
+            string Title = song.Song_Name; // This field is the name of the track.
+            string Artist = song.Song_Artist; // This field is the name of the artist, band or podcast.
+
+            // Duration Information
+            string EndedAt = Spotify.ReadJsonTime(song.Time_End).ToString(gpxPointDescription); // This field is a timestamp indicating when the track stopped playing in UTC (Coordinated Universal Time). The order is year, month and day followed by a timestamp in military time
+            string PlayedMs = song.Time_Played; // This field is the number of milliseconds the stream was played.
 
             if (type == "desc")
             {
                 // ===================== \\
                 // GPX POINT DESCRIPTION \\
                 // ===================== \\
-                return $"Ended at {time_end}";
+                return $"Ended at {EndedAt}";
             }
             else
             {
                 // ============== \\
                 // GPX POINT NAME \\
                 // ============== \\
-                return $"{artist} - {track_name}";
+                return $"{Artist} - {Title}";
             }
         }
 
@@ -54,10 +54,10 @@ namespace SpotifyGPX
 
             List<SpotifyEntry> spotifyEntries = jObjects.Select(jObject => new SpotifyEntry
             {
-                endTime = (string?)jObject["endTime"],
-                artistName = (string?)jObject["artistName"],
-                trackName = (string?)jObject["trackName"],
-                msPlayed = (string?)jObject["msPlayed"]
+                Time_End = (string?)jObject["endTime"],
+                Song_Artist = (string?)jObject["artistName"],
+                Song_Name = (string?)jObject["trackName"],
+                Time_Played = (string?)jObject["msPlayed"]
             }).ToList();
 
             return spotifyEntries;
@@ -66,10 +66,14 @@ namespace SpotifyGPX
 
     public struct SpotifyEntry
     {
-        public string? endTime { get; set; }
-        public string? artistName { get; set; }
-        public string? trackName { get; set; }
-        public string? msPlayed { get; set; }
+        [JsonProperty(PropertyName = "endTime")]
+        public string? Time_End { get; set; }
+        [JsonProperty(PropertyName = "artistName")]
+        public string? Song_Artist { get; set; }
+        [JsonProperty(PropertyName = "trackName")]
+        public string? Song_Name { get; set; }
+        [JsonProperty(PropertyName = "msPlayed")]
+        public string? Time_Played { get; set; }
     }
 
     public struct GPXPoint

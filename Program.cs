@@ -104,8 +104,6 @@ class Program
         // Exit the program
         return;
     }
-
-    
 }
 
 class Spotify
@@ -118,7 +116,7 @@ class Spotify
 
         // Filter Spotify entries within the GPX timeframe
         List<SpotifyEntry> spotifyEntryCandidates = spotifyEntries
-            .Where(entry => ReadJsonTime(entry.endTime) >= gpxStartTime && ReadJsonTime(entry.endTime) <= gpxEndTime)
+            .Where(entry => ReadJsonTime(entry.Time_End) >= gpxStartTime && ReadJsonTime(entry.Time_End) <= gpxEndTime)
             .ToList();
 
         return spotifyEntryCandidates;
@@ -131,7 +129,7 @@ class Spotify
 
         foreach (SpotifyEntry spotifyEntry in filteredEntries)
         {
-            GPXPoint nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - Spotify.ReadJsonTime(spotifyEntry.endTime)).TotalSeconds)).First();
+            GPXPoint nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - Spotify.ReadJsonTime(spotifyEntry.Time_End)).TotalSeconds)).First();
             correlatedEntries.Add((spotifyEntry, nearestPoint));
             Console.WriteLine($"[INFO] Entry Identified: '{Options.Identifier(spotifyEntry, "name")}'");
         }
