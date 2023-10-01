@@ -40,11 +40,22 @@ class Program
             // Create a list of all GPX points in the given GPX file
             List<GPXPoint> gpxPoints = GPX.ParseGPXFile(inputGpx);
 
+            Console.WriteLine($"[INFO] {gpxPoints.Count} GPX points loaded!");
+
             // Create a list of songs within the timeframe between the first and last GPX point
             List<SpotifyEntry> filteredEntries = Spotify.FilterSpotifyJson(spotifyEntries, gpxPoints);
 
             // Create a list of paired songs and points based on the closest time between each song and each GPX point
             (List<(SpotifyEntry, GPXPoint)> correlatedEntries, List<double> correlationAccuracy) = Spotify.CorrelateGpxPoints(filteredEntries, gpxPoints);
+
+            Console.WriteLine($"[INFO] {filteredEntries.Count} Spotify entries filtered from {spotifyEntries.Count} total");
+            Console.WriteLine($"[INFO] {correlatedEntries.Count} Spotify entries matched to set of {filteredEntries.Count}");
+
+            if (correlatedEntries.Count < 1)
+            {
+                Console.WriteLine("[ERROR] No entries found to add!");
+                return;
+            }
 
             // Calculate and print the average correlation accuracy in seconds
             Console.WriteLine($"[INFO] Song-Point Correlation Accuracy (avg sec): {Math.Round(Queryable.Average(correlationAccuracy.AsQueryable()))}");
@@ -199,6 +210,8 @@ class GPX
         gpxname.InnerText = gpxFilePath;
         GPX.AppendChild(gpxname);
 
+        double pointCount = 0;
+
         foreach ((SpotifyEntry song, GPXPoint point) in finalPoints)
         {
             // Create waypoint for each song
@@ -223,7 +236,10 @@ class GPX
             XmlElement description = document.CreateElement("desc");
             description.InnerText = Options.Identifier(song, point.Time.Offset, "desc");
             waypoint.AppendChild(description);
+            pointCount++;
         }
+
+        Console.WriteLine($"[INFO] {pointCount} points found in '{Path.GetFileNameWithoutExtension(gpxFilePath)}' added to GPX.");
 
         return document;
     }
