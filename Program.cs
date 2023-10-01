@@ -5,17 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using System.Globalization;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using SpotifyGPX;
-using System.Drawing;
 
 class Program
 {
     static void Main(string[] args)
     {
-        if (".json" == Path.GetExtension(args[0]) && ".gpx" == Path.GetExtension(args[1]))
+        if (args.Length >= 2 && ".json" == Path.GetExtension(args[0]) && ".gpx" == Path.GetExtension(args[1]))
         {
             string inputJson = args[0];
             string inputGpx = args[1];
@@ -38,7 +35,7 @@ class Program
             string outputGpx = Spotify.GenerateOutputPath(inputGpx, "gpx");
 
             // Create a list of all Spotify songs in the given JSON file
-            List<SpotifyEntry> spotifyEntries = Options.ParseSpotifyJson(inputJson);
+            List<SpotifyEntry> spotifyEntries = JSON.ParseSpotifyJson(inputJson);
 
             // Create a list of all GPX points in the given GPX file
             List<GPXPoint> gpxPoints = GPX.ParseGPXFile(inputGpx);
@@ -47,7 +44,10 @@ class Program
             List<SpotifyEntry> filteredEntries = Spotify.FilterSpotifyJson(spotifyEntries, gpxPoints);
 
             // Create a list of paired songs and points based on the closest time between each song and each GPX point
-            List<(SpotifyEntry, GPXPoint)> correlatedEntries = Spotify.CorrelateGpxPoints(filteredEntries, gpxPoints);
+            (List<(SpotifyEntry, GPXPoint)> correlatedEntries, List<double> correlationAccuracy) = Spotify.CorrelateGpxPoints(filteredEntries, gpxPoints);
+
+            // Calculate and print the average correlation accuracy in seconds
+            Console.WriteLine($"[INFO] Song-Point Correlation Accuracy (avg sec): {Math.Round(Queryable.Average(correlationAccuracy.AsQueryable()))}");
 
             // Create a GPX document based on the list of songs and points
             XmlDocument document = GPX.CreateGPXFile(correlatedEntries, Path.GetFileName(inputGpx));
@@ -61,14 +61,14 @@ class Program
                 string outputJson = Spotify.GenerateOutputPath(inputGpx, "json");
 
                 // Write the contents of the JSON
-                File.WriteAllText(outputJson, Spotify.ExportSpotifyJson(filteredEntries));
+                File.WriteAllText(outputJson, JSON.ExportSpotifyJson(filteredEntries));
 
                 Console.WriteLine($"[INFO] JSON file, '{Path.GetFileName(outputJson)}', generated successfully!");
             }
 
-            Console.WriteLine($"[INFO] GPX file, '{Path.GetFileName(outputGpx)}', generated successfully.");
+            Console.WriteLine($"[INFO] GPX file, '{Path.GetFileName(outputGpx)}', generated successfully!");
         }
-        else if (args.Length == 1 && ".gpx" == Path.GetExtension(args[0]) || ".m3u" == Path.GetExtension(args[0]))
+        else if (args.Length == 1 && (".gpx" == Path.GetExtension(args[0]) || ".m3u" == Path.GetExtension(args[0])))
         {
             string inputFile = args[0];
 
@@ -98,7 +98,7 @@ class Program
         {
             // None of these
 
-            Console.WriteLine("[ERROR] Usage: SpotifyGPX [<json> <gpx>] [<json> <json>] [<gpx>] [<m3u>]");
+            Console.WriteLine("[ERROR] Usage: SpotifyGPX [<json> <gpx> [-j]] [<gpx>] [<m3u>]");
             return;
         }
 
@@ -123,27 +123,24 @@ class Spotify
         return spotifyEntryCandidates;
     }
 
-    public static List<(SpotifyEntry, GPXPoint)> CorrelateGpxPoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
+    public static (List<(SpotifyEntry, GPXPoint)>, List<double>) CorrelateGpxPoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
     {
         // Correlate Spotify entries with the nearest GPX points
         List<(SpotifyEntry, GPXPoint)> correlatedEntries = new();
+
+        double songCount = 0;
+        List<double> correlationAccuracy = new();
 
         foreach (SpotifyEntry spotifyEntry in filteredEntries)
         {
             GPXPoint nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time_End).TotalSeconds)).First();
             correlatedEntries.Add((spotifyEntry, nearestPoint));
-            Console.WriteLine($"[INFO] Entry Identified: '{Options.Identifier(spotifyEntry, new TimeSpan(), "name")}'");
+            songCount++;
+            correlationAccuracy.Add(Math.Abs((nearestPoint.Time - spotifyEntry.Time_End).TotalSeconds));
+            Console.WriteLine($"[SONG] [{songCount}] ==> '{Options.Identifier(spotifyEntry, nearestPoint.Time.Offset, "name")}'");
         }
 
-        return correlatedEntries;
-    }
-
-    public static string ExportSpotifyJson(List<SpotifyEntry> filteredEntries)
-    {
-        // Create a JSON document based on the list of songs within range
-        string document = JsonConvert.SerializeObject(filteredEntries, Newtonsoft.Json.Formatting.Indented);
-
-        return document;
+        return (correlatedEntries, correlationAccuracy);
     }
 
     public static string GenerateOutputPath(string inputFile, string format)
@@ -202,9 +199,6 @@ class GPX
         gpxname.InnerText = gpxFilePath;
         GPX.AppendChild(gpxname);
 
-        // Initialize variable to count the number of songs added
-        double songCount = 0;
-
         foreach ((SpotifyEntry song, GPXPoint point) in finalPoints)
         {
             // Create waypoint for each song
@@ -229,11 +223,7 @@ class GPX
             XmlElement description = document.CreateElement("desc");
             description.InnerText = Options.Identifier(song, point.Time.Offset, "desc");
             waypoint.AppendChild(description);
-
-            songCount++;
         }
-
-        Console.WriteLine($"[INFO] {songCount} songs written to GPX!");
 
         return document;
     }

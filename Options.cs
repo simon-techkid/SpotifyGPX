@@ -1,19 +1,13 @@
 ﻿// SpotifyGPX by Simon Field
 
 using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System.Globalization;
 
 namespace SpotifyGPX
 {
     public class Options
     {
         // Output Time Formats
-        public static readonly string gpxPointDescription = "yyyy-MM-dd HH:mm:ss.fffzzz"; // time format used in the <desc> field a GPX song point (your choice)
+        public static readonly string gpxPointDescription = "HH:mm:ss"; // time format used in the <desc> field a GPX song point (your choice)
 
         // Input Time Formats
         public static readonly string gpxPointTimeInp = "yyyy-MM-ddTHH:mm:ss.fffzzz"; // time format used to interpret GPX track <time> tags
@@ -36,7 +30,7 @@ namespace SpotifyGPX
                 // ===================== \\
                 // GPX POINT DESCRIPTION \\
                 // ===================== \\
-                return $"Ended at {EndedAt}";
+                return $"Ended here, at {EndedAt}";
             }
             else
             {
@@ -47,31 +41,13 @@ namespace SpotifyGPX
             }
         }
 
-        public static List<SpotifyEntry> ParseSpotifyJson(string inputJson)
-        {
-            List<JObject> jObjects = JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(inputJson));
-
-            List<SpotifyEntry> spotifyEntries = jObjects.Select(jObject => new SpotifyEntry
-            {
-                Time_End = DateTimeOffset.ParseExact((string?)jObject["endTime"], spotifyJsonTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
-                Song_Artist = (string?)jObject["artistName"],
-                Song_Name = (string?)jObject["trackName"],
-                Time_Played = (string?)jObject["msPlayed"]
-            }).ToList();
-
-            return spotifyEntries;
-        }
     }
 
     public struct SpotifyEntry
     {
-        [JsonProperty(PropertyName = "endTime")]
         public DateTimeOffset Time_End { get; set; }
-        [JsonProperty(PropertyName = "artistName")]
         public string? Song_Artist { get; set; }
-        [JsonProperty(PropertyName = "trackName")]
         public string? Song_Name { get; set; }
-        [JsonProperty(PropertyName = "msPlayed")]
         public string? Time_Played { get; set; }
     }
 
