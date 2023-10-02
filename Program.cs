@@ -167,12 +167,12 @@ class GPX
 {
     public static List<GPXPoint> ParseGPXFile(string gpxFilePath)
     {
-        // Create a list of all GPX <trkpt> latitudes, longitudes, and times
-
-        XDocument gpxDocument = XDocument.Load(gpxFilePath);
+        // Create an XML document based on the file path
+        XDocument document = XDocument.Load(gpxFilePath);
         XNamespace ns = "http://www.topografix.com/GPX/1/0";
 
-        List<GPXPoint> gpxPoints = gpxDocument.Descendants(ns + "trkpt")
+        // Create a list of all GPX <trkpt> latitudes, longitudes, and times
+        List<GPXPoint> gpxPoints = document.Descendants(ns + "trkpt")
         .Select(trkpt => new GPXPoint
         {
             Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, Options.gpxPointTimeInp, null),
@@ -187,7 +187,7 @@ class GPX
 
     public static XmlDocument CreateGPXFile(List<(SpotifyEntry, GPXPoint)> finalPoints, string gpxFilePath)
     {
-        // Create a new GPX document
+        // Create a new XML document
         XmlDocument document = new();
 
         // Create the XML header
@@ -240,6 +240,53 @@ class GPX
         }
 
         Console.WriteLine($"[INFO] {pointCount} points found in '{Path.GetFileNameWithoutExtension(gpxFilePath)}' added to GPX.");
+
+        return document;
+    }
+}
+
+class PLIST
+{
+    public static string ParsePlist(string plistFilePath)
+    {
+        // Create an XML document based on the file path
+        XDocument document = XDocument.Load(plistFilePath);
+        XNamespace ns = "http://xspf.org/ns/0/";
+
+        return null;
+    }
+
+    public static XmlDocument CreatePlist(List<(SpotifyEntry, GPXPoint)> finalPoints, string plistFilePath)
+    {
+        // Create a new XML document
+        XmlDocument document = new();
+
+        // Create the XML header
+        XmlNode header = document.CreateXmlDeclaration("1.0", "utf-8", null);
+        document.AppendChild(header);
+
+        // Create the XSPF header
+        XmlElement XSPF = document.CreateElement("playlist");
+        document.AppendChild(XSPF);
+
+        // Add XSPF header attributes
+        XSPF.SetAttribute("version", "1.0");
+        XSPF.SetAttribute("xmlns", "http://xspf.org/ns/0/");
+
+        // Set the title of the XSPF playlist to the name of the file
+        XmlElement title = document.CreateElement("name");
+        title.InnerText = Path.GetFileNameWithoutExtension(plistFilePath);
+        XSPF.AppendChild(title);
+
+        // Set the title of the XSPF playlist to the name of the file
+        XmlElement creator = document.CreateElement("creator");
+        creator.InnerText = "SpotifyGPX";
+        XSPF.AppendChild(creator);
+
+        // Create the trackList header
+        XmlElement trackList = document.CreateElement("trackList");
+        XSPF.AppendChild(trackList);
+
 
         return document;
     }
