@@ -7,6 +7,9 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Collections.Generic;
 using SpotifyGPX;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.Globalization;
 
 class Program
 {
@@ -16,7 +19,9 @@ class Program
         {
             string inputJson = args[0];
             string inputGpx = args[1];
-            bool exportJson = args.Length == 3 && args[2] == "-j";
+            bool exportJson = args.Length >= 3 && args.Contains("-j");
+            bool exportPlist = args.Length >= 3 && args.Contains("-p");
+            bool noGpxExport = args.Length >= 3 && args.Contains("-n");
 
             if (!File.Exists(inputJson))
             {
@@ -31,11 +36,10 @@ class Program
                 return;
             }
 
-            // Stage an output path for the resulting GPX file
             string outputGpx = Spotify.GenerateOutputPath(inputGpx, "gpx");
 
             // Create a list of all Spotify songs in the given JSON file
-            List<SpotifyEntry> spotifyEntries = JSON.ParseSpotifyJson(inputJson);
+            (List<SpotifyEntry> spotifyEntries, bool spotifyMiniJson) = JSON.ParseSpotifyJson(inputJson);
 
             // Create a list of all GPX points in the given GPX file
             List<GPXPoint> gpxPoints = GPX.ParseGPXFile(inputGpx);
@@ -60,56 +64,43 @@ class Program
             // Calculate and print the average correlation accuracy in seconds
             Console.WriteLine($"[INFO] Song-Point Correlation Accuracy (avg sec): {Math.Round(Queryable.Average(correlationAccuracy.AsQueryable()))}");
 
-            // Create a GPX document based on the list of songs and points
-            XmlDocument document = GPX.CreateGPXFile(correlatedEntries, Path.GetFileName(inputGpx));
+            if (noGpxExport ==  false)
+            {
+                // Create a GPX document based on the list of songs and points
+                XmlDocument document = GPX.CreateGPXFile(correlatedEntries, Path.GetFileName(inputGpx));
 
-            // Save the GPX to the file
-            document.Save(outputGpx);
+                // Save the GPX to the file
+                document.Save(outputGpx);
+
+                Console.WriteLine($"[INFO] {Path.GetExtension(outputGpx)} file, '{Path.GetFileName(outputGpx)}', generated successfully!");
+            }
 
             if (exportJson == true)
             {
-                // Stage an output path for the resulting JSON file
                 string outputJson = Spotify.GenerateOutputPath(inputGpx, "json");
 
                 // Write the contents of the JSON
-                File.WriteAllText(outputJson, JSON.ExportSpotifyJson(filteredEntries));
+                File.WriteAllText(outputJson, JSON.ExportSpotifyJson(filteredEntries, spotifyMiniJson));
 
-                Console.WriteLine($"[INFO] JSON file, '{Path.GetFileName(outputJson)}', generated successfully!");
+                Console.WriteLine($"[INFO] {Path.GetExtension(outputJson)} file, '{Path.GetFileName(outputJson)}', generated successfully!");
             }
 
-            Console.WriteLine($"[INFO] GPX file, '{Path.GetFileName(outputGpx)}', generated successfully!");
-        }
-        else if (args.Length == 1 && (".gpx" == Path.GetExtension(args[0]) || ".m3u" == Path.GetExtension(args[0])))
-        {
-            string inputFile = args[0];
+            if (exportPlist == true)
+            {
+                string outputPlist = Spotify.GenerateOutputPath(inputGpx, "xspf");
 
-            if (!File.Exists(inputFile))
-            {
-                Console.WriteLine($"[INFO] Source {Path.GetExtension(args[0])} file, '{Path.GetFileName(inputFile)}', does not exist!");
-                return;
-            }
+                XmlDocument playlist = XSPF.CreatePlist(filteredEntries, outputPlist);
 
-            // Convert GPX song points to m3u playlist
-            if (".gpx" == Path.GetExtension(args[0]))
-            {
-                // Stage an output path for the resulting M3U file
-                string outputPlist = Spotify.GenerateOutputPath(inputFile, "m3u");
-                
-                Console.WriteLine("[INFO] Convert GPX to m3u");
-            }
-            else if (".m3u" == Path.GetExtension(args[0]))
-            {
-                // Stage an output path for the resulting GPX file
-                string outputGpx = Spotify.GenerateOutputPath(inputFile, "gpx");                
-                
-                Console.WriteLine("[INFO] Convert m3u to GPX");
+                playlist.Save(outputPlist);
+
+                Console.WriteLine($"[INFO] {Path.GetExtension(outputPlist)} file, {Path.GetFileName(outputPlist)}', generated successfully!");
             }
         }
         else
         {
             // None of these
 
-            Console.WriteLine("[ERROR] Usage: SpotifyGPX [<json> <gpx> [-j]] [<gpx>] [<m3u>]");
+            Console.WriteLine("[ERROR] Usage: SpotifyGPX <json> <gpx> [-j] [-p]");
             return;
         }
 
@@ -160,6 +151,89 @@ class Spotify
         string outputFile = Path.Combine(Directory.GetParent(inputFile).ToString(), $"{Path.GetFileNameWithoutExtension(inputFile)}_Spotify.{format}");
 
         return outputFile;
+    }
+}
+
+class JSON
+{
+    public static (List<SpotifyEntry>, bool) ParseSpotifyJson(string inputJson)
+    {
+        List<JObject> jObjects = JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(inputJson));
+
+        // Create a list of how many children for each JSON object
+        List<int> childrenCounts = jObjects.Select(jObject => jObject.Properties().Count()).ToList();
+
+        // Find the average number of children among the entire JSON file
+        double children = Queryable.Average(childrenCounts.AsQueryable());
+
+        // Assume the Spotify JSON isn't formatted as "Extended Streaming History" (verbose)
+        bool spotifyMiniJson = true;
+
+        // Determine the format used for JSON in question
+        if (children == 4)
+        {
+            spotifyMiniJson = true;
+        }
+        else if (children == 21)
+        {
+            spotifyMiniJson = false;
+        }
+        else
+        {
+            throw new Exception("Spotify JSON format unrecognized, not the correct number of children!");
+        }
+
+        List<SpotifyEntry> spotifyEntries = jObjects.Select(jObject => new SpotifyEntry
+        {
+            Time_End = DateTimeOffset.ParseExact((string?)jObject[spotifyMiniJson ? "endTime" : "ts"], spotifyMiniJson ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+            Spotify_Username = spotifyMiniJson ? null : (string?)jObject["username"],
+            Spotify_Platform = spotifyMiniJson ? null : (string?)jObject["platform"],
+            Time_Played = (string?)jObject[spotifyMiniJson ? "msPlayed" : "ms_played"],
+            Spotify_Country = spotifyMiniJson ? null : (string?)jObject["conn_country"],
+            Spotify_IP = spotifyMiniJson ? null : (string?)jObject["ip_addr_decrypted"],
+            Spotify_UA = spotifyMiniJson ? null : (string?)jObject["user_agent_decrypted"],
+            Song_Name = (string?)jObject[spotifyMiniJson ? "trackName" : "master_metadata_track_name"],
+            Song_Artist = (string?)jObject[spotifyMiniJson ? "artistName" : "master_metadata_album_artist_name"],
+            Song_Album = spotifyMiniJson ? null : (string?)jObject["master_metadata_album_album_name"],
+            Song_URI = spotifyMiniJson ? null : (string?)jObject["spotify_track_uri"],
+            Episode_Name = spotifyMiniJson ? null : (string?)jObject["episode_name"],
+            Episode_Show = spotifyMiniJson ? null : (string?)jObject["episode_show_name"],
+            Episode_URI = spotifyMiniJson ? null : (string?)jObject["spotify_episode_uri"],
+            Song_StartReason = spotifyMiniJson ? null : (string?)jObject["reason_start"],
+            Song_EndReason = spotifyMiniJson ? null : (string?)jObject["reason_end"],
+            Song_Shuffle = spotifyMiniJson ? null : (string?)jObject["shuffle"],
+            Song_Skipped = spotifyMiniJson ? null : (string?)jObject["skipped"],
+            Spotify_Offline = spotifyMiniJson ? null : (string?)jObject["offline"],
+            Spotify_OfflineTS = spotifyMiniJson ? null : (string?)jObject["offline_timestamp"],
+            Spotify_Incognito = spotifyMiniJson ? null : (string?)jObject["incognito"]
+        }).ToList();
+
+        return (spotifyEntries, spotifyMiniJson);
+    }
+
+    public static string ExportSpotifyJson(List<SpotifyEntry> tracks, bool spotifyMiniJson)
+    {
+        // Create a list of JSON objects
+        List<JObject> json = new();
+
+        foreach (SpotifyEntry entry in tracks)
+        {
+            // Create a JSON object containing each element of a SpotifyEntry
+            JObject songEntry = new()
+            {
+                ["endTime"] = entry.Time_End.ToString(spotifyMiniJson ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                ["artistName"] = entry.Song_Artist,
+                ["trackName"] = entry.Song_Name,
+                ["msPlayed"] = entry.Time_Played
+            };
+
+            json.Add(songEntry);
+        }
+
+        // Create a JSON document based on the list of songs within range
+        string document = JsonConvert.SerializeObject(json, Newtonsoft.Json.Formatting.Indented);
+
+        return document;
     }
 }
 
@@ -245,18 +319,29 @@ class GPX
     }
 }
 
-class PLIST
+class XSPF
 {
-    public static string ParsePlist(string plistFilePath)
+    public static List<SpotifyEntry> ParsePlist(string plistFilePath)
     {
         // Create an XML document based on the file path
         XDocument document = XDocument.Load(plistFilePath);
         XNamespace ns = "http://xspf.org/ns/0/";
 
-        return null;
+        // Create a list of all GPX <trkpt> latitudes, longitudes, and times
+        List<SpotifyEntry> tracks = document.Descendants(ns + "track")
+        .Select(track => new SpotifyEntry
+        {
+            Time_End = DateTimeOffset.ParseExact(track.Element(ns + "annotation").Value, Options.gpxPointTimeInp, null),
+            Song_Artist = track.Attribute("creator").Value,
+            Song_Name = track.Attribute("title").Value,
+            Time_Played = track.Attribute("duration").Value
+        })
+        .ToList();
+
+        return tracks;
     }
 
-    public static XmlDocument CreatePlist(List<(SpotifyEntry, GPXPoint)> finalPoints, string plistFilePath)
+    public static XmlDocument CreatePlist(List<SpotifyEntry> tracks, string plistFilePath)
     {
         // Create a new XML document
         XmlDocument document = new();
@@ -273,10 +358,10 @@ class PLIST
         XSPF.SetAttribute("version", "1.0");
         XSPF.SetAttribute("xmlns", "http://xspf.org/ns/0/");
 
-        // Set the title of the XSPF playlist to the name of the file
-        XmlElement title = document.CreateElement("name");
-        title.InnerText = Path.GetFileNameWithoutExtension(plistFilePath);
-        XSPF.AppendChild(title);
+        // Set the name of the XSPF playlist to the name of the file
+        XmlElement name = document.CreateElement("name");
+        name.InnerText = Path.GetFileNameWithoutExtension(plistFilePath);
+        XSPF.AppendChild(name);
 
         // Set the title of the XSPF playlist to the name of the file
         XmlElement creator = document.CreateElement("creator");
@@ -287,6 +372,32 @@ class PLIST
         XmlElement trackList = document.CreateElement("trackList");
         XSPF.AppendChild(trackList);
 
+        foreach (SpotifyEntry entry in tracks)
+        {
+            // Create track for each song
+            XmlElement track = document.CreateElement("track");
+            trackList.AppendChild(track);
+
+            // Set the creator of the track to the song artist
+            XmlElement artist = document.CreateElement("creator");
+            artist.InnerText = entry.Song_Artist;
+            track.AppendChild(artist);
+
+            // Set the title of the track to the song name
+            XmlElement title = document.CreateElement("title");
+            title.InnerText = entry.Song_Name;
+            track.AppendChild(title);
+
+            // Set the annotation of the song to the end time
+            XmlElement annotation = document.CreateElement("annotation");
+            annotation.InnerText = entry.Time_End.ToString(Options.gpxPointTimeInp);
+            track.AppendChild(annotation);
+
+            // Set the duration of the song to the amount of time it was listened to
+            XmlElement duration = document.CreateElement("duration");
+            duration.InnerText = entry.Time_Played;
+            track.AppendChild(duration);
+        }
 
         return document;
     }

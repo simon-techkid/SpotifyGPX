@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using Newtonsoft.Json;
 using System;
 
 namespace SpotifyGPX
@@ -11,7 +12,6 @@ namespace SpotifyGPX
 
         // Input Time Formats
         public static readonly string gpxPointTimeInp = "yyyy-MM-ddTHH:mm:ss.fffzzz"; // time format used to interpret GPX track <time> tags
-        public static readonly string spotifyJsonTime = "yyyy-MM-dd HH:mm"; // time format of a song entry in Spotify JSON
 
         public static string Identifier(SpotifyEntry song, TimeSpan offset, string type)
         {
@@ -40,7 +40,6 @@ namespace SpotifyGPX
                 return $"{Artist} - {Title}";
             }
         }
-
     }
 
     public struct SpotifyEntry
@@ -49,6 +48,23 @@ namespace SpotifyGPX
         public string? Song_Artist { get; set; }
         public string? Song_Name { get; set; }
         public string? Time_Played { get; set; }
+        public string? Spotify_Username { get; set; }
+        public string? Spotify_Platform { get; set; }
+        public string? Spotify_Country { get; set; }
+        public string? Spotify_IP { get; set; }
+        public string? Spotify_UA { get; set; }
+        public string? Song_Album { get; set; }
+        public string? Song_URI { get; set; }
+        public string? Episode_Name { get; set; }
+        public string? Episode_Show { get; set; }
+        public string? Episode_URI { get; set; }
+        public string? Song_StartReason { get; set; }
+        public string? Song_EndReason { get; set; }
+        public string? Song_Shuffle { get; set; }
+        public string? Song_Skipped { get; set; }
+        public string? Spotify_Offline { get; set; }
+        public string? Spotify_OfflineTS { get; set; }
+        public string? Spotify_Incognito { get; set; }
     }
 
     public struct GPXPoint
