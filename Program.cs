@@ -5,11 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using System.Globalization;
 using System.Collections.Generic;
 using SpotifyGPX;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System.Globalization;
 
 class Program
 {
@@ -321,26 +321,6 @@ class GPX
 
 class XSPF
 {
-    public static List<SpotifyEntry> ParsePlist(string plistFilePath)
-    {
-        // Create an XML document based on the file path
-        XDocument document = XDocument.Load(plistFilePath);
-        XNamespace ns = "http://xspf.org/ns/0/";
-
-        // Create a list of all GPX <trkpt> latitudes, longitudes, and times
-        List<SpotifyEntry> tracks = document.Descendants(ns + "track")
-        .Select(track => new SpotifyEntry
-        {
-            Time_End = DateTimeOffset.ParseExact(track.Element(ns + "annotation").Value, Options.gpxPointTimeInp, null),
-            Song_Artist = track.Attribute("creator").Value,
-            Song_Name = track.Attribute("title").Value,
-            Time_Played = track.Attribute("duration").Value
-        })
-        .ToList();
-
-        return tracks;
-    }
-
     public static XmlDocument CreatePlist(List<SpotifyEntry> tracks, string plistFilePath)
     {
         // Create a new XML document
