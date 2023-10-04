@@ -43,6 +43,6 @@ Create GPX waypoints based on timed GPX tracks and Spotify listening history. Gr
 
 ## Future Additions
 
- - JSON exporting (export the relevant part of the Spotify JSON to a new file for future reference)
- - Playlist exporting (export a GPX of song points to a m3u or some such file)
+ - ~~JSON exporting (export the relevant part of the Spotify JSON to a new file for future reference)~~
+ - ~~Playlist exporting (export a GPX of song points to a m3u or some such file)~~
  - Spotify linkage (export a series of spotify URI so these can be reimported
