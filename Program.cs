@@ -186,26 +186,26 @@ class JSON
         List<SpotifyEntry> spotifyEntries = jObjects.Select(jObject => new SpotifyEntry
         {
             Time_End = DateTimeOffset.ParseExact((string?)jObject[spotifyMiniJson ? "endTime" : "ts"], spotifyMiniJson ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
-            Spotify_Username = spotifyMiniJson ? null : (string?)jObject["username"],
-            Spotify_Platform = spotifyMiniJson ? null : (string?)jObject["platform"],
+            Spotify_Username = (string?)jObject["username"],
+            Spotify_Platform = (string?)jObject["platform"],
             Time_Played = (string?)jObject[spotifyMiniJson ? "msPlayed" : "ms_played"],
-            Spotify_Country = spotifyMiniJson ? null : (string?)jObject["conn_country"],
-            Spotify_IP = spotifyMiniJson ? null : (string?)jObject["ip_addr_decrypted"],
-            Spotify_UA = spotifyMiniJson ? null : (string?)jObject["user_agent_decrypted"],
+            Spotify_Country = (string?)jObject["conn_country"],
+            Spotify_IP = (string?)jObject["ip_addr_decrypted"],
+            Spotify_UA = (string?)jObject["user_agent_decrypted"],
             Song_Name = (string?)jObject[spotifyMiniJson ? "trackName" : "master_metadata_track_name"],
             Song_Artist = (string?)jObject[spotifyMiniJson ? "artistName" : "master_metadata_album_artist_name"],
-            Song_Album = spotifyMiniJson ? null : (string?)jObject["master_metadata_album_album_name"],
-            Song_URI = spotifyMiniJson ? null : (string?)jObject["spotify_track_uri"],
-            Episode_Name = spotifyMiniJson ? null : (string?)jObject["episode_name"],
-            Episode_Show = spotifyMiniJson ? null : (string?)jObject["episode_show_name"],
-            Episode_URI = spotifyMiniJson ? null : (string?)jObject["spotify_episode_uri"],
-            Song_StartReason = spotifyMiniJson ? null : (string?)jObject["reason_start"],
-            Song_EndReason = spotifyMiniJson ? null : (string?)jObject["reason_end"],
-            Song_Shuffle = spotifyMiniJson ? null : (string?)jObject["shuffle"],
-            Song_Skipped = spotifyMiniJson ? null : (string?)jObject["skipped"],
-            Spotify_Offline = spotifyMiniJson ? null : (string?)jObject["offline"],
-            Spotify_OfflineTS = spotifyMiniJson ? null : (string?)jObject["offline_timestamp"],
-            Spotify_Incognito = spotifyMiniJson ? null : (string?)jObject["incognito"]
+            Song_Album = (string?)jObject["master_metadata_album_album_name"],
+            Song_URI = (string?)jObject["spotify_track_uri"],
+            Episode_Name = (string?)jObject["episode_name"],
+            Episode_Show = (string?)jObject["episode_show_name"],
+            Episode_URI = (string?)jObject["spotify_episode_uri"],
+            Song_StartReason = (string?)jObject["reason_start"],
+            Song_EndReason = (string?)jObject["reason_end"],
+            Song_Shuffle = (string?)jObject["shuffle"],
+            Song_Skipped = (string?)jObject["skipped"],
+            Spotify_Offline = (string?)jObject["offline"],
+            Spotify_OfflineTS = (string?)jObject["offline_timestamp"],
+            Spotify_Incognito = (string?)jObject["incognito"]
         }).ToList();
 
         return (spotifyEntries, spotifyMiniJson);
@@ -216,18 +216,37 @@ class JSON
         // Create a list of JSON objects
         List<JObject> json = new();
 
-        foreach (SpotifyEntry entry in tracks)
+        if (spotifyMiniJson)
         {
-            // Create a JSON object containing each element of a SpotifyEntry
-            JObject songEntry = new()
+            foreach (SpotifyEntry entry in tracks)
             {
-                ["endTime"] = entry.Time_End.ToString(spotifyMiniJson ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
-                ["artistName"] = entry.Song_Artist,
-                ["trackName"] = entry.Song_Name,
-                ["msPlayed"] = entry.Time_Played
-            };
+                // Create a JSON object containing each element of a SpotifyEntry
+                JObject songEntry = new()
+                {
+                    ["endTime"] = entry.Time_End.ToString(spotifyMiniJson ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                    ["artistName"] = entry.Song_Artist,
+                    ["trackName"] = entry.Song_Name,
+                    ["msPlayed"] = entry.Time_Played
+                };
 
-            json.Add(songEntry);
+                json.Add(songEntry);
+            }
+        }
+        else if (!spotifyMiniJson)
+        {
+            foreach (SpotifyEntry entry in tracks)
+            {
+                // Create a JSON object containing each element of a SpotifyEntry
+                JObject songEntry = new()
+                {
+                    ["ts"] = entry.Time_End.ToString(spotifyMiniJson ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                    ["master_metadata_album_artist_name"] = entry.Song_Artist,
+                    ["master_metadata_track_name"] = entry.Song_Name,
+                    ["ms_played"] = entry.Time_Played
+                };
+
+                json.Add(songEntry);
+            }
         }
 
         // Create a JSON document based on the list of songs within range
