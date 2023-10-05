@@ -39,7 +39,7 @@ class Program
             string outputGpx = Spotify.GenerateOutputPath(inputGpx, "gpx");
 
             // Step 1: Create a list of all Spotify songs in the given JSON file
-            List<SpotifyEntry> spotifyEntries = new();
+            List<SpotifyEntry> spotifyEntries;
             
             // Create a bool determining the Spotify JSON format used
             bool spotifyMiniJson;
@@ -77,7 +77,7 @@ class Program
             Console.WriteLine($"[INFO] {filteredEntries.Count} Spotify entries filtered from {spotifyEntries.Count} total");
             Console.WriteLine($"[INFO] {correlatedEntries.Count} Spotify entries matched to set of {filteredEntries.Count}");
 
-            if (noGpxExport ==  false)
+            if (noGpxExport == false)
             {
                 // Create a GPX document based on the list of songs and points
                 XmlDocument document = GPX.CreateGPXFile(correlatedEntries, inputGpx);
