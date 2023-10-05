@@ -2,6 +2,12 @@
 
 Create GPX waypoints based on timed GPX tracks and Spotify listening history. Great for road trips!
 
+## Example
+
+Here is an example render using [kepler.gl](https://github.com/keplergl/kepler.gl) with the original GPX track included:
+
+![image](Example.png)
+
 ## Requirements
 
 For using SpotifyGPX:
