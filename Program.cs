@@ -67,7 +67,7 @@ class Program
             if (noGpxExport ==  false)
             {
                 // Create a GPX document based on the list of songs and points
-                XmlDocument document = GPX.CreateGPXFile(correlatedEntries, Path.GetFileName(inputGpx));
+                XmlDocument document = GPX.CreateGPXFile(correlatedEntries, inputGpx);
 
                 // Save the GPX to the file
                 document.Save(outputGpx);
@@ -100,7 +100,7 @@ class Program
         {
             // None of these
 
-            Console.WriteLine("[ERROR] Usage: SpotifyGPX <json> <gpx> [-j] [-p]");
+            Console.WriteLine("[ERROR] Usage: SpotifyGPX <json> <gpx> [-j] [-p] [-n]");
             return;
         }
 
@@ -156,9 +156,9 @@ class Spotify
 
 class JSON
 {
-    public static (List<SpotifyEntry>, bool) ParseSpotifyJson(string inputJson)
+    public static (List<SpotifyEntry>, bool) ParseSpotifyJson(string jsonFile)
     {
-        List<JObject> jObjects = JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(inputJson));
+        List<JObject> jObjects = JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFile));
 
         // Create a list of how many children for each JSON object
         List<int> childrenCounts = jObjects.Select(jObject => jObject.Properties().Count()).ToList();
@@ -275,10 +275,10 @@ class JSON
 
 class GPX
 {
-    public static List<GPXPoint> ParseGPXFile(string gpxFilePath)
+    public static List<GPXPoint> ParseGPXFile(string gpxFile)
     {
         // Create an XML document based on the file path
-        XDocument document = XDocument.Load(gpxFilePath);
+        XDocument document = XDocument.Load(gpxFile);
         XNamespace ns = "http://www.topografix.com/GPX/1/0";
 
         // Create a list of all GPX <trkpt> latitudes, longitudes, and times
@@ -295,7 +295,7 @@ class GPX
         return gpxPoints;
     }
 
-    public static XmlDocument CreateGPXFile(List<(SpotifyEntry, GPXPoint)> finalPoints, string gpxFilePath)
+    public static XmlDocument CreateGPXFile(List<(SpotifyEntry, GPXPoint)> finalPoints, string gpxFile)
     {
         // Create a new XML document
         XmlDocument document = new();
@@ -317,7 +317,7 @@ class GPX
 
         // Add name of GPX file, based on input GPX name
         XmlElement gpxname = document.CreateElement("name");
-        gpxname.InnerText = gpxFilePath;
+        gpxname.InnerText = Path.GetFileName(gpxFile);
         GPX.AppendChild(gpxname);
 
         double pointCount = 0;
@@ -349,7 +349,7 @@ class GPX
             pointCount++;
         }
 
-        Console.WriteLine($"[INFO] {pointCount} points found in '{Path.GetFileNameWithoutExtension(gpxFilePath)}' added to GPX.");
+        Console.WriteLine($"[INFO] {pointCount} points found in '{Path.GetFileNameWithoutExtension(gpxFile)}' added to GPX.");
 
         return document;
     }
@@ -357,7 +357,7 @@ class GPX
 
 class XSPF
 {
-    public static XmlDocument CreatePlist(List<SpotifyEntry> tracks, string plistFilePath)
+    public static XmlDocument CreatePlist(List<SpotifyEntry> tracks, string plistFile)
     {
         // Create a new XML document
         XmlDocument document = new();
@@ -376,7 +376,7 @@ class XSPF
 
         // Set the name of the XSPF playlist to the name of the file
         XmlElement name = document.CreateElement("name");
-        name.InnerText = Path.GetFileNameWithoutExtension(plistFilePath);
+        name.InnerText = Path.GetFileNameWithoutExtension(plistFile);
         XSPF.AppendChild(name);
 
         // Set the title of the XSPF playlist to the name of the file
