@@ -38,31 +38,44 @@ class Program
 
             string outputGpx = Spotify.GenerateOutputPath(inputGpx, "gpx");
 
-            // Create a list of all Spotify songs in the given JSON file
-            (List<SpotifyEntry> spotifyEntries, bool spotifyMiniJson) = JSON.ParseSpotifyJson(inputJson);
+            // Step 1: Create a list of all Spotify songs in the given JSON file
+            List<SpotifyEntry> spotifyEntries = new();
+            
+            // Create a bool determining the Spotify JSON format used
+            bool spotifyMiniJson;
 
-            // Create a list of all GPX points in the given GPX file
-            List<GPXPoint> gpxPoints = GPX.ParseGPXFile(inputGpx);
+            // Step 2: Create a list of all GPX points in the given GPX file
+            List<GPXPoint> gpxPoints;
 
-            Console.WriteLine($"[INFO] {gpxPoints.Count} GPX points loaded!");
+            // Step 3: Create a list of songs within the timeframe between the first and last GPX point
+            List<SpotifyEntry> filteredEntries;
 
-            // Create a list of songs within the timeframe between the first and last GPX point
-            List<SpotifyEntry> filteredEntries = Spotify.FilterSpotifyJson(spotifyEntries, gpxPoints);
+            // Step 4: Create a list of paired songs and points based on the closest time between each song and each GPX point
+            List<(SpotifyEntry, GPXPoint)> correlatedEntries;
 
-            // Create a list of paired songs and points based on the closest time between each song and each GPX point
-            (List<(SpotifyEntry, GPXPoint)> correlatedEntries, List<double> correlationAccuracy) = Spotify.CorrelateGpxPoints(filteredEntries, gpxPoints);
-
-            Console.WriteLine($"[INFO] {filteredEntries.Count} Spotify entries filtered from {spotifyEntries.Count} total");
-            Console.WriteLine($"[INFO] {correlatedEntries.Count} Spotify entries matched to set of {filteredEntries.Count}");
-
-            if (correlatedEntries.Count < 1)
+            try
             {
-                Console.WriteLine("[ERROR] No entries found to add!");
+                // Step 1: Create list of songs contained in the JSON file
+                (spotifyEntries, spotifyMiniJson) = JSON.ParseSpotifyJson(inputJson);
+
+                // Step 2: Create list of GPX points from the GPX file
+                gpxPoints = GPX.ParseGPXFile(inputGpx);
+
+                // Step 3: Create list of songs played during the GPX tracking timeframe
+                filteredEntries = Spotify.FilterSpotifyJson(spotifyEntries, gpxPoints);
+
+                // Step 4: Create list of songs and points paired as close as possible to one another
+                correlatedEntries = Spotify.CorrelateGpxPoints(filteredEntries, gpxPoints);
+            }
+            catch (Exception ex)
+            {
+                // Catch any errors found in the calculation process
+                Console.WriteLine(ex);
                 return;
             }
 
-            // Calculate and print the average correlation accuracy in seconds
-            Console.WriteLine($"[INFO] Song-Point Correlation Accuracy (avg sec): {Math.Round(Queryable.Average(correlationAccuracy.AsQueryable()))}");
+            Console.WriteLine($"[INFO] {filteredEntries.Count} Spotify entries filtered from {spotifyEntries.Count} total");
+            Console.WriteLine($"[INFO] {correlatedEntries.Count} Spotify entries matched to set of {filteredEntries.Count}");
 
             if (noGpxExport ==  false)
             {
@@ -117,32 +130,75 @@ class Spotify
         DateTimeOffset gpxStartTime = gpxPoints.Min(point => point.Time);
         DateTimeOffset gpxEndTime = gpxPoints.Max(point => point.Time);
 
-        // Filter Spotify entries within the GPX timeframe
-        List<SpotifyEntry> spotifyEntryCandidates = spotifyEntries
+        // Create list of Spotify songs covering the tracked GPX path timeframe
+        List<SpotifyEntry> spotifyEntryCandidates = new();
+
+        try
+        {
+            // Attempt to filter Spotify entries within the GPX timeframe
+            spotifyEntryCandidates = spotifyEntries
             .Where(entry => entry.Time_End >= gpxStartTime && entry.Time_End <= gpxEndTime)
             .ToList();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error finding points covering GPX timeframe: {ex}");
+        }
 
         return spotifyEntryCandidates;
     }
 
-    public static (List<(SpotifyEntry, GPXPoint)>, List<double>) CorrelateGpxPoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
+    public static List<(SpotifyEntry, GPXPoint)> CorrelateGpxPoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
     {
         // Correlate Spotify entries with the nearest GPX points
         List<(SpotifyEntry, GPXPoint)> correlatedEntries = new();
 
+        // Create variable to count how many songs are included
         double songCount = 0;
+        
+        // Create a list of correlation accuracies, one for each song
         List<double> correlationAccuracy = new();
 
         foreach (SpotifyEntry spotifyEntry in filteredEntries)
         {
-            GPXPoint nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time_End).TotalSeconds)).First();
+            // Create variable to hold the calculated nearest GPX point to each song
+            GPXPoint nearestPoint = new();
+            
+            try
+            {
+                // Find nearest GPX point using smallest possible absolute value with GPX and song end times
+                nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time_End).TotalSeconds)).First();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error ordering point and song times: {ex}");
+            }
+            
+            // Set the accuracy value to the absolute value in seconds between the GPX and song end times
+            double accuracySec = Math.Abs((nearestPoint.Time - spotifyEntry.Time_End).TotalSeconds);
+
+            // Add correlation accuracy (seconds) to the correlation accuracies list
+            correlationAccuracy.Add(accuracySec);
+
+            // Add both the current Spotify entry and calculated nearest point to the correlated entries list
             correlatedEntries.Add((spotifyEntry, nearestPoint));
+
+            // Add one to the number of songs counted
             songCount++;
-            correlationAccuracy.Add(Math.Abs((nearestPoint.Time - spotifyEntry.Time_End).TotalSeconds));
-            Console.WriteLine($"[SONG] [{songCount}] ==> '{Options.Identifier(spotifyEntry, nearestPoint.Time.Offset, "name")}'");
+
+            Console.WriteLine($"[SONG] [{songCount}] [{accuracySec} sec] ==> '{Options.Identifier(spotifyEntry, nearestPoint.Time.Offset, "name")}'");
         }
 
-        return (correlatedEntries, correlationAccuracy);
+        if (correlatedEntries.Count < 1)
+        {
+            throw new Exception("No entries found to add!");
+        }
+
+        // Calculate and print the average correlation accuracy in seconds
+        Console.WriteLine($"[INFO] Song-Point Correlation Accuracy (avg sec): {Math.Round(Queryable.Average(correlationAccuracy.AsQueryable()))}");
+
+        // Return the correlated entries list (including each Spotify song and its corresponding point), and the list of accuracies
+        return correlatedEntries;
     }
 
     public static string GenerateOutputPath(string inputFile, string format)
@@ -158,55 +214,86 @@ class JSON
 {
     public static (List<SpotifyEntry>, bool) ParseSpotifyJson(string jsonFile)
     {
-        List<JObject> jObjects = JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFile));
+        // Create list of JSON objects
+        List<JObject> jObjects = new();
 
-        // Create a list of how many children for each JSON object
-        List<int> childrenCounts = jObjects.Select(jObject => jObject.Properties().Count()).ToList();
+        // Create variables to store a list of children counts for each JSON object and the average of all items in the list
+        List<int> childrenCounts = new();
+        double avgChildren = new();
 
-        // Find the average number of children among the entire JSON file
-        double children = Queryable.Average(childrenCounts.AsQueryable());
+        List<SpotifyEntry> spotifyEntries = new();
+
+        try
+        {
+            // Attempt to deserialize JSON file to list
+            jObjects = JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFile));
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error deserializing given JSON file: {ex}");
+        }
+
+        try
+        {
+            // List how many children for each JSON object
+            childrenCounts = jObjects.Select(jObject => jObject.Properties().Count()).ToList();
+
+            // Find the average number of children among the entire JSON file
+            avgChildren = Queryable.Average(childrenCounts.AsQueryable());
+        }
+        catch
+        {
+            throw new Exception($"Error calculating average size of JSON children!");
+        }
 
         // Assume the Spotify JSON isn't formatted as "Extended Streaming History" (verbose)
         bool spotifyMiniJson = true;
 
         // Determine the format used for JSON in question
-        if (children == 4)
+        if (avgChildren == 4)
         {
             spotifyMiniJson = true;
         }
-        else if (children == 21)
+        else if (avgChildren == 21)
         {
             spotifyMiniJson = false;
         }
         else
         {
-            throw new Exception("Spotify JSON format unrecognized, not the correct number of children!");
+            throw new Exception("Spotify JSON format invalid, not the correct number of children!");
         }
 
-        List<SpotifyEntry> spotifyEntries = jObjects.Select(jObject => new SpotifyEntry
+        try
         {
-            Time_End = DateTimeOffset.ParseExact((string?)jObject[spotifyMiniJson ? "endTime" : "ts"], spotifyMiniJson ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
-            Spotify_Username = (string?)jObject["username"],
-            Spotify_Platform = (string?)jObject["platform"],
-            Time_Played = (string?)jObject[spotifyMiniJson ? "msPlayed" : "ms_played"],
-            Spotify_Country = (string?)jObject["conn_country"],
-            Spotify_IP = (string?)jObject["ip_addr_decrypted"],
-            Spotify_UA = (string?)jObject["user_agent_decrypted"],
-            Song_Name = (string?)jObject[spotifyMiniJson ? "trackName" : "master_metadata_track_name"],
-            Song_Artist = (string?)jObject[spotifyMiniJson ? "artistName" : "master_metadata_album_artist_name"],
-            Song_Album = (string?)jObject["master_metadata_album_album_name"],
-            Song_URI = (string?)jObject["spotify_track_uri"],
-            Episode_Name = (string?)jObject["episode_name"],
-            Episode_Show = (string?)jObject["episode_show_name"],
-            Episode_URI = (string?)jObject["spotify_episode_uri"],
-            Song_StartReason = (string?)jObject["reason_start"],
-            Song_EndReason = (string?)jObject["reason_end"],
-            Song_Shuffle = (string?)jObject["shuffle"],
-            Song_Skipped = (string?)jObject["skipped"],
-            Spotify_Offline = (string?)jObject["offline"],
-            Spotify_OfflineTS = (string?)jObject["offline_timestamp"],
-            Spotify_Incognito = (string?)jObject["incognito"]
-        }).ToList();
+            spotifyEntries = jObjects.Select(jObject => new SpotifyEntry
+            {
+                Time_End = DateTimeOffset.ParseExact((string?)jObject[spotifyMiniJson ? "endTime" : "ts"], spotifyMiniJson ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+                Spotify_Username = (string?)jObject["username"],
+                Spotify_Platform = (string?)jObject["platform"],
+                Time_Played = (string?)jObject[spotifyMiniJson ? "msPlayed" : "ms_played"],
+                Spotify_Country = (string?)jObject["conn_country"],
+                Spotify_IP = (string?)jObject["ip_addr_decrypted"],
+                Spotify_UA = (string?)jObject["user_agent_decrypted"],
+                Song_Name = (string?)jObject[spotifyMiniJson ? "trackName" : "master_metadata_track_name"],
+                Song_Artist = (string?)jObject[spotifyMiniJson ? "artistName" : "master_metadata_album_artist_name"],
+                Song_Album = (string?)jObject["master_metadata_album_album_name"],
+                Song_URI = (string?)jObject["spotify_track_uri"],
+                Episode_Name = (string?)jObject["episode_name"],
+                Episode_Show = (string?)jObject["episode_show_name"],
+                Episode_URI = (string?)jObject["spotify_episode_uri"],
+                Song_StartReason = (string?)jObject["reason_start"],
+                Song_EndReason = (string?)jObject["reason_end"],
+                Song_Shuffle = (string?)jObject["shuffle"],
+                Song_Skipped = (string?)jObject["skipped"],
+                Spotify_Offline = (string?)jObject["offline"],
+                Spotify_OfflineTS = (string?)jObject["offline_timestamp"],
+                Spotify_Incognito = (string?)jObject["incognito"]
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error parsing contents of JSON to a valid song entry: {ex}");
+        }
 
         return (spotifyEntries, spotifyMiniJson);
     }
@@ -277,19 +364,46 @@ class GPX
 {
     public static List<GPXPoint> ParseGPXFile(string gpxFile)
     {
-        // Create an XML document based on the file path
-        XDocument document = XDocument.Load(gpxFile);
+        // Create a new XML document
+        XDocument document = new();
         XNamespace ns = "http://www.topografix.com/GPX/1/0";
+        
+        // Create a list of interpreted GPX points
+        List<GPXPoint> gpxPoints = new();
 
-        // Create a list of all GPX <trkpt> latitudes, longitudes, and times
-        List<GPXPoint> gpxPoints = document.Descendants(ns + "trkpt")
-        .Select(trkpt => new GPXPoint
+        try
         {
-            Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, Options.gpxPointTimeInp, null),
-            Latitude = double.Parse(trkpt.Attribute("lat").Value),
-            Longitude = double.Parse(trkpt.Attribute("lon").Value)
-        })
-        .ToList();
+            // Attempt to load the contents of the specified file into the XML
+            document = XDocument.Load(gpxFile);
+        }
+        catch (Exception ex)
+        {
+            // If the specified XML is invalid, throw an error
+            throw new Exception($"The defined GPX file is incorrectly formatted: {ex}");
+        }
+
+        if (!document.Descendants(ns + "trkpt").Any())
+        {
+            // If there are no <trkpt> point elements in the GPX, throw an error
+            throw new Exception($"No points found in '{Path.GetFileName(gpxFile)}'!");
+        }
+
+        try
+        {
+            // Attempt to add all GPX <trkpt> latitudes, longitudes, and times to the gpxPoints list
+            gpxPoints = document.Descendants(ns + "trkpt")
+            .Select(trkpt => new GPXPoint
+            {
+                Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, Options.gpxPointTimeInp, null),
+                Latitude = double.Parse(trkpt.Attribute("lat").Value),
+                Longitude = double.Parse(trkpt.Attribute("lon").Value)
+            })
+            .ToList();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"The GPX parameters cannot be parsed: {ex}");
+        }        
 
         // Return the list of points from the GPX
         return gpxPoints;
