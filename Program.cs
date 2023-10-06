@@ -310,7 +310,7 @@ class JSON
                 // Create a JSON object containing each element of a SpotifyEntry
                 JObject songEntry = new()
                 {
-                    ["endTime"] = entry.Time_End.ToString(spotifyMiniJson ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                    ["endTime"] = entry.Time_End.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
                     ["artistName"] = entry.Song_Artist,
                     ["trackName"] = entry.Song_Name,
                     ["msPlayed"] = entry.Time_Played
@@ -326,7 +326,7 @@ class JSON
                 // Create a JSON object containing each element of a SpotifyEntry
                 JObject songEntry = new()
                 {
-                    ["ts"] = entry.Time_End.ToString(spotifyMiniJson ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                    ["ts"] = entry.Time_End.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
                     ["username"] = entry.Spotify_Username,
                     ["platform"] = entry.Spotify_Platform,
                     ["ms_played"] = entry.Time_Played,
