@@ -124,7 +124,7 @@ class Program
                 try
                 {
                     // Get the list of Spotify URIs as a string
-                    clipboard = Spotify.GenerateClipboardData(filteredEntries);
+                    clipboard = JSON.GenerateClipboardData(filteredEntries);
                 }
                 catch (Exception ex)
                 {
@@ -244,28 +244,7 @@ class Spotify
         return outputFile;
     }
 
-    public static string GenerateClipboardData(List<SpotifyEntry> tracks)
-    {
-        // Create string for final clipboard contents
-        string clipboard = "";
-
-        foreach (SpotifyEntry track in tracks)
-        {
-            // Ensures no null values return
-            if (track.Song_URI != null)
-            {
-                clipboard += $"{track.Song_URI}\n";
-            }
-            else
-            {
-                // If null URI, throw exception
-                throw new Exception($"URI null for {track.Song_Name}!");
-            }
-        }
-
-        // Return final clipboard contents
-        return clipboard;
-    }
+    
 }
 
 class JSON
@@ -416,6 +395,29 @@ class JSON
         string document = JsonConvert.SerializeObject(json, Newtonsoft.Json.Formatting.Indented);
 
         return document;
+    }
+
+    public static string GenerateClipboardData(List<SpotifyEntry> tracks)
+    {
+        // Create string for final clipboard contents
+        string clipboard = "";
+
+        foreach (SpotifyEntry track in tracks)
+        {
+            // Ensures no null values return
+            if (track.Song_URI != null)
+            {
+                clipboard += $"{track.Song_URI}\n";
+            }
+            else
+            {
+                // If null URI, throw exception
+                throw new Exception($"URI null for {track.Song_Name}!");
+            }
+        }
+
+        // Return final clipboard contents
+        return clipboard;
     }
 }
 
