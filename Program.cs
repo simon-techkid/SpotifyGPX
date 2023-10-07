@@ -19,9 +19,9 @@ class Program
         {
             string inputJson = args[0];
             string inputGpx = args[1];
+            bool noGpxExport = args.Length >= 3 && args.Contains("-n");
             bool exportJson = args.Length >= 3 && args.Contains("-j");
             bool exportPlist = args.Length >= 3 && args.Contains("-p");
-            bool noGpxExport = args.Length >= 3 && args.Contains("-n");
 
             if (!File.Exists(inputJson))
             {
@@ -82,7 +82,7 @@ class Program
                 // Create a GPX document based on the list of songs and points
                 XmlDocument document = GPX.CreateGPXFile(correlatedEntries, inputGpx);
 
-                // Save the GPX to the file
+                // Write the contents of the GPX
                 document.Save(outputGpx);
 
                 Console.WriteLine($"[INFO] {Path.GetExtension(outputGpx)} file, '{Path.GetFileName(outputGpx)}', generated successfully!");
@@ -90,6 +90,7 @@ class Program
 
             if (exportJson == true)
             {
+                // Stage output path of output JSON
                 string outputJson = Spotify.GenerateOutputPath(inputGpx, "json");
 
                 // Write the contents of the JSON
@@ -100,10 +101,13 @@ class Program
 
             if (exportPlist == true)
             {
+                // Stage output path of output XSPF
                 string outputPlist = Spotify.GenerateOutputPath(inputGpx, "xspf");
 
+                // Create an XML document for the playlist
                 XmlDocument playlist = XSPF.CreatePlist(filteredEntries, outputPlist);
 
+                // Write the contents of the XSPF
                 playlist.Save(outputPlist);
 
                 Console.WriteLine($"[INFO] {Path.GetExtension(outputPlist)} file, {Path.GetFileName(outputPlist)}', generated successfully!");
@@ -221,6 +225,7 @@ class JSON
         List<int> childrenCounts = new();
         double avgChildren = new();
 
+        // Create list to store the parsed Spotify songs
         List<SpotifyEntry> spotifyEntries = new();
 
         try
