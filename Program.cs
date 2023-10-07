@@ -1,5 +1,5 @@
 ﻿// SpotifyGPX by Simon Field
-    
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SpotifyGPX;
@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -19,9 +20,10 @@ class Program
         {
             string inputJson = args[0];
             string inputGpx = args[1];
+            bool noGpxExport = args.Length >= 3 && args.Contains("-n");
             bool exportJson = args.Length >= 3 && args.Contains("-j");
             bool exportPlist = args.Length >= 3 && args.Contains("-p");
-            bool noGpxExport = args.Length >= 3 && args.Contains("-n");
+            bool exportSpotifyURI = args.Length >= 3 && args.Contains("-s");
 
             if (!File.Exists(inputJson))
             {
@@ -82,7 +84,7 @@ class Program
                 // Create a GPX document based on the list of songs and points
                 XmlDocument document = GPX.CreateGPXFile(correlatedEntries, inputGpx);
 
-                // Save the GPX to the file
+                // Write the contents of the GPX
                 document.Save(outputGpx);
 
                 Console.WriteLine($"[INFO] {Path.GetExtension(outputGpx)} file, '{Path.GetFileName(outputGpx)}', generated successfully!");
@@ -90,6 +92,7 @@ class Program
 
             if (exportJson == true)
             {
+                // Stage output path of output JSON
                 string outputJson = Spotify.GenerateOutputPath(inputGpx, "json");
 
                 // Write the contents of the JSON
@@ -100,13 +103,45 @@ class Program
 
             if (exportPlist == true)
             {
+                // Stage output path of output XSPF
                 string outputPlist = Spotify.GenerateOutputPath(inputGpx, "xspf");
 
                 XmlDocument playlist = XSPF.CreatePlist(filteredEntries, outputPlist);
 
+                // Write the contents of the XSPF
                 playlist.Save(outputPlist);
 
                 Console.WriteLine($"[INFO] {Path.GetExtension(outputPlist)} file, {Path.GetFileName(outputPlist)}', generated successfully!");
+            }
+
+            if (exportSpotifyURI == true && spotifyMiniJson == false)
+            {
+                // Stage output path of output URI list
+                string outputTxt = Spotify.GenerateOutputPath(inputGpx, "txt");
+                string clipboard;
+
+                // Attempt to parse SpotifyEntries for URI
+                try
+                {
+                    // Get the list of Spotify URIs as a string
+                    clipboard = Spotify.GenerateClipboardData(filteredEntries);
+                }
+                catch (Exception ex)
+                {
+                    // URI found to be null
+                    Console.WriteLine(ex);
+                    return;
+                }
+
+                // Set the clipboard contents to the string
+                Clipboard.SetText(clipboard);
+
+                // Write the contents of the URI list
+                File.WriteAllText(outputTxt, clipboard);
+
+                Console.WriteLine($"[INFO] {Path.GetExtension(outputTxt)} file, '{Path.GetFileName(outputTxt)}', generated successfully!");
+
+                Console.WriteLine("[INFO] Spotify URIs copied to clipboard, ready to paste into a Spotify playlist!");
             }
         }
         else
@@ -208,6 +243,29 @@ class Spotify
 
         return outputFile;
     }
+
+    public static string GenerateClipboardData(List<SpotifyEntry> tracks)
+    {
+        // Create string for final clipboard contents
+        string clipboard = "";
+
+        foreach (SpotifyEntry track in tracks)
+        {
+            // Ensures no null values return
+            if (track.Song_URI != null)
+            {
+                clipboard += $"{track.Song_URI}\n";
+            }
+            else
+            {
+                // If null URI, throw exception
+                throw new Exception($"URI null for {track.Song_Name}!");
+            }
+        }
+
+        // Return final clipboard contents
+        return clipboard;
+    }
 }
 
 class JSON
@@ -221,6 +279,7 @@ class JSON
         List<int> childrenCounts = new();
         double avgChildren = new();
 
+        // Create list to store the parsed Spotify songs
         List<SpotifyEntry> spotifyEntries = new();
 
         try
