@@ -1,5 +1,5 @@
 ﻿// SpotifyGPX by Simon Field
-    
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SpotifyGPX;
@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -22,6 +23,7 @@ class Program
             bool noGpxExport = args.Length >= 3 && args.Contains("-n");
             bool exportJson = args.Length >= 3 && args.Contains("-j");
             bool exportPlist = args.Length >= 3 && args.Contains("-p");
+            bool exportSpotifyURI = args.Length >= 3 && args.Contains("-s");
 
             if (!File.Exists(inputJson))
             {
@@ -111,6 +113,36 @@ class Program
                 playlist.Save(outputPlist);
 
                 Console.WriteLine($"[INFO] {Path.GetExtension(outputPlist)} file, {Path.GetFileName(outputPlist)}', generated successfully!");
+            }
+
+            if (exportSpotifyURI == true)
+            {
+                // Stage output path of output URI list
+                string outputTxt = GenerateOutputPath(inputGpx, "txt");
+                string clipboard;
+
+                // Attempt to parse SpotifyEntries for URI
+                try
+                {
+                    // Get the list of Spotify URIs as a string
+                    clipboard = JSON.GenerateClipboardData(filteredEntries);
+                }
+                catch (Exception ex)
+                {
+                    // URI found to be null
+                    Console.WriteLine(ex);
+                    return;
+                }
+
+                // Set the clipboard contents to the string
+                Clipboard.SetText(clipboard);
+
+                // Write the contents of the URI list
+                File.WriteAllText(outputTxt, clipboard);
+
+                Console.WriteLine($"[INFO] {Path.GetExtension(outputTxt)} file, '{Path.GetFileName(outputTxt)}', generated successfully!");
+
+                Console.WriteLine("[INFO] Spotify URIs copied to clipboard, ready to paste into a Spotify playlist!");
             }
         }
         else
@@ -260,6 +292,29 @@ class JSON
         string document = JsonConvert.SerializeObject(json, Newtonsoft.Json.Formatting.Indented);
 
         return document;
+    }
+
+    public static string GenerateClipboardData(List<SpotifyEntry> tracks)
+    {
+        // Create string for final clipboard contents
+        string clipboard = "";
+
+        foreach (SpotifyEntry track in tracks)
+        {
+            // Ensures no null values return
+            if (track.Song_URI != null)
+            {
+                clipboard += $"{track.Song_URI}\n";
+            }
+            else
+            {
+                // If null URI, throw exception
+                throw new Exception($"URI null for {track.Song_Name}!");
+            }
+        }
+
+        // Return final clipboard contents
+        return clipboard;
     }
 }
 
