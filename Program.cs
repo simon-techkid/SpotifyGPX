@@ -36,7 +36,7 @@ class Program
                 return;
             }
 
-            string outputGpx = Spotify.GenerateOutputPath(inputGpx, "gpx");
+            string outputGpx = GenerateOutputPath(inputGpx, "gpx");
 
             // Step 1: Create a list of all Spotify songs in the given JSON file
             List<SpotifyEntry> spotifyEntries;
@@ -62,10 +62,10 @@ class Program
                 gpxPoints = GPX.ParseGPXFile(inputGpx);
 
                 // Step 3: Create list of songs played during the GPX tracking timeframe
-                filteredEntries = Spotify.FilterSpotifyJson(spotifyEntries, gpxPoints);
+                filteredEntries = JSON.FilterSpotifyJson(spotifyEntries, gpxPoints);
 
                 // Step 4: Create list of songs and points paired as close as possible to one another
-                correlatedEntries = Spotify.CorrelateGpxPoints(filteredEntries, gpxPoints);
+                correlatedEntries = GPX.CorrelateGpxPoints(filteredEntries, gpxPoints);
             }
             catch (Exception ex)
             {
@@ -91,7 +91,7 @@ class Program
             if (exportJson == true)
             {
                 // Stage output path of output JSON
-                string outputJson = Spotify.GenerateOutputPath(inputGpx, "json");
+                string outputJson = GenerateOutputPath(inputGpx, "json");
 
                 // Write the contents of the JSON
                 File.WriteAllText(outputJson, JSON.ExportSpotifyJson(filteredEntries, spotifyMiniJson));
@@ -102,7 +102,7 @@ class Program
             if (exportPlist == true)
             {
                 // Stage output path of output XSPF
-                string outputPlist = Spotify.GenerateOutputPath(inputGpx, "xspf");
+                string outputPlist = GenerateOutputPath(inputGpx, "xspf");
 
                 // Create an XML document for the playlist
                 XmlDocument playlist = XSPF.CreatePlist(filteredEntries, outputPlist);
@@ -124,88 +124,8 @@ class Program
         // Exit the program
         return;
     }
-}
 
-class Spotify
-{
-    public static List<SpotifyEntry> FilterSpotifyJson(List<SpotifyEntry> spotifyEntries, List<GPXPoint> gpxPoints)
-    {
-        // Find the start and end times in GPX
-        DateTimeOffset gpxStartTime = gpxPoints.Min(point => point.Time);
-        DateTimeOffset gpxEndTime = gpxPoints.Max(point => point.Time);
-
-        // Create list of Spotify songs covering the tracked GPX path timeframe
-        List<SpotifyEntry> spotifyEntryCandidates = new();
-
-        try
-        {
-            // Attempt to filter Spotify entries within the GPX timeframe
-            spotifyEntryCandidates = spotifyEntries
-            .Where(entry => entry.Time_End >= gpxStartTime && entry.Time_End <= gpxEndTime)
-            .ToList();
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error finding points covering GPX timeframe: {ex}");
-        }
-
-        return spotifyEntryCandidates;
-    }
-
-    public static List<(SpotifyEntry, GPXPoint)> CorrelateGpxPoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
-    {
-        // Correlate Spotify entries with the nearest GPX points
-        List<(SpotifyEntry, GPXPoint)> correlatedEntries = new();
-
-        // Create variable to count how many songs are included
-        double songCount = 0;
-
-        // Create a list of correlation accuracies, one for each song
-        List<double> correlationAccuracy = new();
-
-        foreach (SpotifyEntry spotifyEntry in filteredEntries)
-        {
-            // Create variable to hold the calculated nearest GPX point to each song
-            GPXPoint nearestPoint = new();
-
-            try
-            {
-                // Find nearest GPX point using smallest possible absolute value with GPX and song end times
-                nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time_End).TotalSeconds)).First();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error ordering point and song times: {ex}");
-            }
-
-            // Set the accuracy value to the absolute value in seconds between the GPX and song end times
-            double accuracySec = Math.Abs((nearestPoint.Time - spotifyEntry.Time_End).TotalSeconds);
-
-            // Add correlation accuracy (seconds) to the correlation accuracies list
-            correlationAccuracy.Add(accuracySec);
-
-            // Add both the current Spotify entry and calculated nearest point to the correlated entries list
-            correlatedEntries.Add((spotifyEntry, nearestPoint));
-
-            // Add one to the number of songs counted
-            songCount++;
-
-            Console.WriteLine($"[SONG] [{songCount}] [{accuracySec} sec] ==> '{Options.Identifier(spotifyEntry, nearestPoint.Time.Offset, "name")}'");
-        }
-
-        if (correlatedEntries.Count < 1)
-        {
-            throw new Exception("No entries found to add!");
-        }
-
-        // Calculate and print the average correlation accuracy in seconds
-        Console.WriteLine($"[INFO] Song-Point Correlation Accuracy (avg sec): {Math.Round(Queryable.Average(correlationAccuracy.AsQueryable()))}");
-
-        // Return the correlated entries list (including each Spotify song and its corresponding point), and the list of accuracies
-        return correlatedEntries;
-    }
-
-    public static string GenerateOutputPath(string inputFile, string format)
+    static string GenerateOutputPath(string inputFile, string format)
     {
         // Set up the output file path
         string outputFile = Path.Combine(Directory.GetParent(inputFile).ToString(), $"{Path.GetFileNameWithoutExtension(inputFile)}_Spotify.{format}");
@@ -301,6 +221,30 @@ class JSON
         }
 
         return (spotifyEntries, spotifyMiniJson);
+    }
+
+    public static List<SpotifyEntry> FilterSpotifyJson(List<SpotifyEntry> spotifyEntries, List<GPXPoint> gpxPoints)
+    {
+        // Find the start and end times in GPX
+        DateTimeOffset gpxStartTime = gpxPoints.Min(point => point.Time);
+        DateTimeOffset gpxEndTime = gpxPoints.Max(point => point.Time);
+
+        // Create list of Spotify songs covering the tracked GPX path timeframe
+        List<SpotifyEntry> spotifyEntryCandidates = new();
+
+        try
+        {
+            // Attempt to filter Spotify entries within the GPX timeframe
+            spotifyEntryCandidates = spotifyEntries
+            .Where(entry => entry.Time_End >= gpxStartTime && entry.Time_End <= gpxEndTime)
+            .ToList();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error finding points covering GPX timeframe: {ex}");
+        }
+
+        return spotifyEntryCandidates;
     }
 
     public static string ExportSpotifyJson(List<SpotifyEntry> tracks, bool spotifyMiniJson)
@@ -412,6 +356,59 @@ class GPX
 
         // Return the list of points from the GPX
         return gpxPoints;
+    }
+
+    public static List<(SpotifyEntry, GPXPoint)> CorrelateGpxPoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
+    {
+        // Correlate Spotify entries with the nearest GPX points
+        List<(SpotifyEntry, GPXPoint)> correlatedEntries = new();
+
+        // Create variable to count how many songs are included
+        double songCount = 0;
+
+        // Create a list of correlation accuracies, one for each song
+        List<double> correlationAccuracy = new();
+
+        foreach (SpotifyEntry spotifyEntry in filteredEntries)
+        {
+            // Create variable to hold the calculated nearest GPX point to each song
+            GPXPoint nearestPoint = new();
+
+            try
+            {
+                // Find nearest GPX point using smallest possible absolute value with GPX and song end times
+                nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time_End).TotalSeconds)).First();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error ordering point and song times: {ex}");
+            }
+
+            // Set the accuracy value to the absolute value in seconds between the GPX and song end times
+            double accuracySec = Math.Abs((nearestPoint.Time - spotifyEntry.Time_End).TotalSeconds);
+
+            // Add correlation accuracy (seconds) to the correlation accuracies list
+            correlationAccuracy.Add(accuracySec);
+
+            // Add both the current Spotify entry and calculated nearest point to the correlated entries list
+            correlatedEntries.Add((spotifyEntry, nearestPoint));
+
+            // Add one to the number of songs counted
+            songCount++;
+
+            Console.WriteLine($"[SONG] [{songCount}] [{accuracySec} sec] ==> '{Options.Identifier(spotifyEntry, nearestPoint.Time.Offset, "name")}'");
+        }
+
+        if (correlatedEntries.Count < 1)
+        {
+            throw new Exception("No entries found to add!");
+        }
+
+        // Calculate and print the average correlation accuracy in seconds
+        Console.WriteLine($"[INFO] Song-Point Correlation Accuracy (avg sec): {Math.Round(Queryable.Average(correlationAccuracy.AsQueryable()))}");
+
+        // Return the correlated entries list (including each Spotify song and its corresponding point), and the list of accuracies
+        return correlatedEntries;
     }
 
     public static XmlDocument CreateGPXFile(List<(SpotifyEntry, GPXPoint)> finalPoints, string gpxFile)

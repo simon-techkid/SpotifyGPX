@@ -17,10 +17,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Options2.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
