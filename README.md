@@ -11,7 +11,7 @@ Here is an example render using [kepler.gl](https://github.com/keplergl/kepler.g
 ## Requirements
 
 For using SpotifyGPX:
- - have NET 6.0 installed
+ - have .NET Framework 4.7.2 installed
  - have the `Newtonsoft.Json` DLL in the running directory
  - have a GPX file of a tracked journey with timings
  - listened to Spotify during the GPX journey
