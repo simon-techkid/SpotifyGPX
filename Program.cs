@@ -14,6 +14,7 @@ using System.Xml.Linq;
 
 class Program
 {
+    [STAThread]
     static void Main(string[] args)
     {
         if (args.Length >= 2 && ".json" == Path.GetExtension(args[0]) && ".gpx" == Path.GetExtension(args[1]))

@@ -22,9 +22,9 @@ namespace SpotifyGPX
             string? Origin_Country = song.Spotify_Country; // This field is the country code of the country where the stream was played (e.g. SE - Sweden).
             string? IP_Address = song.Spotify_IP; // This field contains the IP address logged when streaming the track.
             string? User_Agent = song.Spotify_UA; // This field contains the user agent used when streaming the track (e.g. a browser, like Mozilla Firefox, or Safari)
-            string? Offline = $"{(song.Spotify_Offline == "true" ? "Yes" : "No")}"; // This field indicates whether the track was played in offline mode (“True”) or not (“False”).
+            string? Offline = $"{(song.Spotify_Offline == null ? null : song.Spotify_Offline == "true" ? "No" : "Yes")}"; // This field indicates whether the track was played in offline mode (“True”) or not (“False”).
             string? Offline_Timestamp = song.Spotify_OfflineTS; // This field is a timestamp of when offline mode was used, if used.
-            string? Incognito = $"{(song.Spotify_Incognito == "true" ? "Enabled" : "Disabled")}"; // This field indicates whether the track was played in incognito mode (“True”) or not (“False”).
+            string? Incognito = $"{(song.Spotify_Incognito == null ? null : song.Spotify_Incognito == "true" ? "Enabled" : "Disabled")}"; // This field indicates whether the track was played in incognito mode (“True”) or not (“False”).
 
             // Track Metadata
             string? Title = song.Song_Name; // This field is the name of the track.
@@ -33,8 +33,8 @@ namespace SpotifyGPX
             string? URL = song.Song_URI;
             string? StartReason = song.Song_StartReason;
             string? EndReason = song.Song_EndReason;
-            string? Shuffled = $"{(song.Song_Shuffle == "true" ? "On" : "Off")}"; // This field has the value True or False depending on if shuffle mode was used when playing the track.
-            string? Skipped = $"{(song.Song_Skipped == "true" ? "Yes" : "No")}"; // This field indicates if the user skipped to the next song
+            string? Shuffled = $"{(song.Song_Shuffle == null ? null : song.Song_Shuffle == "true" ? "On" : "Off")}"; // This field has the value True or False depending on if shuffle mode was used when playing the track.
+            string? Skipped = $"{(song.Song_Skipped == null ? null : song.Song_Skipped == "true" ? "Yes" : "No")}"; // This field indicates if the user skipped to the next song
 
             // Episode Metadata
             string? Episode_Title = song.Episode_Name;
@@ -50,7 +50,17 @@ namespace SpotifyGPX
                 // ===================== \\
                 // GPX POINT DESCRIPTION \\
                 // ===================== \\
-                return $"Ended here, at {EndedAt}";
+
+                string description = "";
+
+                description += $"{(song.Time_End != null ? $"Ended here, at {EndedAt}" : null)}";
+                description += $"{(song.Song_Shuffle != null ? $"\nShuffled: {Shuffled}" : null)}";
+                description += $"{(song.Song_Skipped != null ? $"\nSkipped: {Skipped}" : null)}";
+                description += $"{(song.Spotify_Offline != null ? $"\nOffline: {Offline}" : null)}";
+                description += $"{(song.Spotify_IP != null ? $"\nIP Address: {IP_Address}" : null)}";
+                description += $"{(song.Spotify_Country != null ? $"\nCountry: {Origin_Country}" : null)}";
+
+                return description;
             }
             else
             {
