@@ -1,15 +1,15 @@
 ﻿// SpotifyGPX by Simon Field
-
+    
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SpotifyGPX;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using System.Globalization;
-using System.Collections.Generic;
-using SpotifyGPX;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 
 class Program
 {
@@ -40,7 +40,7 @@ class Program
 
             // Step 1: Create a list of all Spotify songs in the given JSON file
             List<SpotifyEntry> spotifyEntries;
-            
+
             // Create a bool determining the Spotify JSON format used
             bool spotifyMiniJson;
 
@@ -155,7 +155,7 @@ class Spotify
 
         // Create variable to count how many songs are included
         double songCount = 0;
-        
+
         // Create a list of correlation accuracies, one for each song
         List<double> correlationAccuracy = new();
 
@@ -163,7 +163,7 @@ class Spotify
         {
             // Create variable to hold the calculated nearest GPX point to each song
             GPXPoint nearestPoint = new();
-            
+
             try
             {
                 // Find nearest GPX point using smallest possible absolute value with GPX and song end times
@@ -173,7 +173,7 @@ class Spotify
             {
                 throw new Exception($"Error ordering point and song times: {ex}");
             }
-            
+
             // Set the accuracy value to the absolute value in seconds between the GPX and song end times
             double accuracySec = Math.Abs((nearestPoint.Time - spotifyEntry.Time_End).TotalSeconds);
 
@@ -367,7 +367,7 @@ class GPX
         // Create a new XML document
         XDocument document = new();
         XNamespace ns = "http://www.topografix.com/GPX/1/0";
-        
+
         // Create a list of interpreted GPX points
         List<GPXPoint> gpxPoints = new();
 
@@ -403,7 +403,7 @@ class GPX
         catch (Exception ex)
         {
             throw new Exception($"The GPX parameters cannot be parsed: {ex}");
-        }        
+        }
 
         // Return the list of points from the GPX
         return gpxPoints;
