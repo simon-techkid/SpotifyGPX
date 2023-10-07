@@ -85,6 +85,7 @@ namespace SpotifyGPX
         public string? Spotify_Offline { get; set; }
         public string? Spotify_OfflineTS { get; set; }
         public string? Spotify_Incognito { get; set; }
+        public int Number_Children { get; set; }
     }
 
     public struct GPXPoint

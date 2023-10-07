@@ -55,8 +55,8 @@ class Program
 
             try
             {
-                // Step 1: Create list of songs contained in the JSON file
-                (spotifyEntries, spotifyMiniJson) = JSON.ParseSpotifyJson(inputJson);
+                // Step 1: Create list of songs contained in the JSON file, and get the JSON format
+                spotifyEntries = JSON.ParseSpotifyJson(inputJson);
 
                 // Step 2: Create list of GPX points from the GPX file
                 gpxPoints = GPX.ParseGPXFile(inputGpx);
@@ -94,7 +94,7 @@ class Program
                 string outputJson = GenerateOutputPath(inputGpx, "json");
 
                 // Write the contents of the JSON
-                File.WriteAllText(outputJson, JSON.ExportSpotifyJson(filteredEntries, spotifyMiniJson));
+                File.WriteAllText(outputJson, JSON.ExportSpotifyJson(filteredEntries));
 
                 Console.WriteLine($"[INFO] {Path.GetExtension(outputJson)} file, '{Path.GetFileName(outputJson)}', generated successfully!");
             }
@@ -136,14 +136,10 @@ class Program
 
 class JSON
 {
-    public static (List<SpotifyEntry>, bool) ParseSpotifyJson(string jsonFile)
+    public static List<SpotifyEntry> ParseSpotifyJson(string jsonFile)
     {
         // Create list of JSON objects
         List<JObject> jObjects = new();
-
-        // Create variables to store a list of children counts for each JSON object and the average of all items in the list
-        List<int> childrenCounts = new();
-        double avgChildren = new();
 
         // Create list to store the parsed Spotify songs
         List<SpotifyEntry> spotifyEntries = new();
@@ -158,69 +154,46 @@ class JSON
             throw new Exception($"Error deserializing given JSON file: {ex}");
         }
 
-        try
+        // Attempt to parse all possible JSON entries
+        foreach (JObject track in jObjects)
         {
-            // List how many children for each JSON object
-            childrenCounts = jObjects.Select(jObject => jObject.Properties().Count()).ToList();
-
-            // Find the average number of children among the entire JSON file
-            avgChildren = Queryable.Average(childrenCounts.AsQueryable());
-        }
-        catch
-        {
-            throw new Exception($"Error calculating average size of JSON children!");
-        }
-
-        // Assume the Spotify JSON isn't formatted as "Extended Streaming History" (verbose)
-        bool spotifyMiniJson = true;
-
-        // Determine the format used for JSON in question
-        if (avgChildren == 4)
-        {
-            spotifyMiniJson = true;
-        }
-        else if (avgChildren == 21)
-        {
-            spotifyMiniJson = false;
-        }
-        else
-        {
-            throw new Exception("Spotify JSON format invalid, not the correct number of children!");
-        }
-
-        try
-        {
-            spotifyEntries = jObjects.Select(jObject => new SpotifyEntry
+            try
             {
-                Time_End = DateTimeOffset.ParseExact((string?)jObject[spotifyMiniJson ? "endTime" : "ts"], spotifyMiniJson ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
-                Spotify_Username = (string?)jObject["username"],
-                Spotify_Platform = (string?)jObject["platform"],
-                Time_Played = (string?)jObject[spotifyMiniJson ? "msPlayed" : "ms_played"],
-                Spotify_Country = (string?)jObject["conn_country"],
-                Spotify_IP = (string?)jObject["ip_addr_decrypted"],
-                Spotify_UA = (string?)jObject["user_agent_decrypted"],
-                Song_Name = (string?)jObject[spotifyMiniJson ? "trackName" : "master_metadata_track_name"],
-                Song_Artist = (string?)jObject[spotifyMiniJson ? "artistName" : "master_metadata_album_artist_name"],
-                Song_Album = (string?)jObject["master_metadata_album_album_name"],
-                Song_URI = (string?)jObject["spotify_track_uri"],
-                Episode_Name = (string?)jObject["episode_name"],
-                Episode_Show = (string?)jObject["episode_show_name"],
-                Episode_URI = (string?)jObject["spotify_episode_uri"],
-                Song_StartReason = (string?)jObject["reason_start"],
-                Song_EndReason = (string?)jObject["reason_end"],
-                Song_Shuffle = (string?)jObject["shuffle"],
-                Song_Skipped = (string?)jObject["skipped"],
-                Spotify_Offline = (string?)jObject["offline"],
-                Spotify_OfflineTS = (string?)jObject["offline_timestamp"],
-                Spotify_Incognito = (string?)jObject["incognito"]
-            }).ToList();
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error parsing contents of JSON to a valid song entry: {ex}");
+                SpotifyEntry entry = new SpotifyEntry()
+                {
+                    Time_End = DateTimeOffset.ParseExact((string?)track["endTime"] == null ? (string?)track["ts"] : (string?)track["endTime"], "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+                    Spotify_Username = (string?)track["username"],
+                    Spotify_Platform = (string?)track["platform"],
+                    Time_Played = (string?)track["msPlayed"] == null ? (string?)track["ms_played"] : (string?)track["msPlayed"],
+                    Spotify_Country = (string?)track["conn_country"],
+                    Spotify_IP = (string?)track["ip_addr_decrypted"],
+                    Spotify_UA = (string?)track["user_agent_decrypted"],
+                    Song_Name = (string?)track["trackName"] == null ? (string?)track["master_metadata_track_name"] : (string?)track["trackName"],
+                    Song_Artist = (string?)track["artistName"] == null ? (string?)track["master_metadata_album_artist_name"] : (string?)track["artistName"],
+                    Song_Album = (string?)track["master_metadata_album_album_name"],
+                    Song_URI = (string?)track["spotify_track_uri"],
+                    Episode_Name = (string?)track["episode_name"],
+                    Episode_Show = (string?)track["episode_show_name"],
+                    Episode_URI = (string?)track["spotify_episode_uri"],
+                    Song_StartReason = (string?)track["reason_start"],
+                    Song_EndReason = (string?)track["reason_end"],
+                    Song_Shuffle = (string?)track["shuffle"],
+                    Song_Skipped = (string?)track["skipped"],
+                    Spotify_Offline = (string?)track["offline"],
+                    Spotify_OfflineTS = (string?)track["offline_timestamp"],
+                    Spotify_Incognito = (string?)track["incognito"],
+                    Number_Children = track.Properties().Count()
+                };
+
+                spotifyEntries.Add(entry);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error parsing contents of JSON tag: {track} to a valid song entry: {ex}");
+            }
         }
 
-        return (spotifyEntries, spotifyMiniJson);
+        return spotifyEntries;
     }
 
     public static List<SpotifyEntry> FilterSpotifyJson(List<SpotifyEntry> spotifyEntries, List<GPXPoint> gpxPoints)
@@ -247,59 +220,40 @@ class JSON
         return spotifyEntryCandidates;
     }
 
-    public static string ExportSpotifyJson(List<SpotifyEntry> tracks, bool spotifyMiniJson)
+    public static string ExportSpotifyJson(List<SpotifyEntry> tracks)
     {
         // Create a list of JSON objects
         List<JObject> json = new();
 
-        if (spotifyMiniJson)
+        foreach (SpotifyEntry entry in tracks)
         {
-            foreach (SpotifyEntry entry in tracks)
+            // Create a JSON object containing each element of a SpotifyEntry
+            JObject songEntry = new()
             {
-                // Create a JSON object containing each element of a SpotifyEntry
-                JObject songEntry = new()
-                {
-                    ["endTime"] = entry.Time_End.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
-                    ["artistName"] = entry.Song_Artist,
-                    ["trackName"] = entry.Song_Name,
-                    ["msPlayed"] = entry.Time_Played
-                };
+                ["ts"] = entry.Time_End.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                ["username"] = entry.Spotify_Username,
+                ["platform"] = entry.Spotify_Platform,
+                ["ms_played"] = entry.Time_Played,
+                ["conn_country"] = entry.Spotify_Country,
+                ["ip_addr_decrypted"] = entry.Spotify_IP,
+                ["user_agent_decrypted"] = entry.Spotify_UA,
+                ["master_metadata_track_name"] = entry.Song_Name,
+                ["master_metadata_album_artist_name"] = entry.Song_Artist,
+                ["master_metadata_album_album_name"] = entry.Song_Album,
+                ["spotify_track_uri"] = entry.Episode_URI,
+                ["episode_name"] = entry.Episode_Name,
+                ["episode_show_name"] = entry.Episode_Show,
+                ["spotify_episode_uri"] = entry.Episode_URI,
+                ["reason_start"] = entry.Song_StartReason,
+                ["reason_end"] = entry.Song_EndReason,
+                ["shuffle"] = entry.Song_Shuffle,
+                ["skipped"] = entry.Song_Skipped,
+                ["offline"] = entry.Spotify_Offline,
+                ["offline_timestamp"] = entry.Spotify_OfflineTS,
+                ["incognito"] = entry.Spotify_Incognito
+            };
 
-                json.Add(songEntry);
-            }
-        }
-        else if (!spotifyMiniJson)
-        {
-            foreach (SpotifyEntry entry in tracks)
-            {
-                // Create a JSON object containing each element of a SpotifyEntry
-                JObject songEntry = new()
-                {
-                    ["ts"] = entry.Time_End.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
-                    ["username"] = entry.Spotify_Username,
-                    ["platform"] = entry.Spotify_Platform,
-                    ["ms_played"] = entry.Time_Played,
-                    ["conn_country"] = entry.Spotify_Country,
-                    ["ip_addr_decrypted"] = entry.Spotify_IP,
-                    ["user_agent_decrypted"] = entry.Spotify_UA,
-                    ["master_metadata_track_name"] = entry.Song_Name,
-                    ["master_metadata_album_artist_name"] = entry.Song_Artist,
-                    ["master_metadata_album_album_name"] = entry.Song_Album,
-                    ["spotify_track_uri"] = entry.Episode_URI,
-                    ["episode_name"] = entry.Episode_Name,
-                    ["episode_show_name"] = entry.Episode_Show,
-                    ["spotify_episode_uri"] = entry.Episode_URI,
-                    ["reason_start"] = entry.Song_StartReason,
-                    ["reason_end"] = entry.Song_EndReason,
-                    ["shuffle"] = entry.Song_Shuffle,
-                    ["skipped"] = entry.Song_Skipped,
-                    ["offline"] = entry.Spotify_Offline,
-                    ["offline_timestamp"] = entry.Spotify_OfflineTS,
-                    ["incognito"] = entry.Spotify_Incognito
-                };
-
-                json.Add(songEntry);
-            }
+            json.Add(songEntry);
         }
 
         // Create a JSON document based on the list of songs within range
@@ -396,7 +350,7 @@ class GPX
             // Add one to the number of songs counted
             songCount++;
 
-            Console.WriteLine($"[SONG] [{songCount}] [{accuracySec} sec] ==> '{Options.Identifier(spotifyEntry, nearestPoint.Time.Offset, "name")}'");
+            Console.WriteLine($"[SONG] [{songCount}] [{spotifyEntry.Number_Children} tags] [{accuracySec} sec] ==> '{Options.Identifier(spotifyEntry, nearestPoint.Time.Offset, "name")}'");
         }
 
         if (correlatedEntries.Count < 1)
