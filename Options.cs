@@ -2,6 +2,8 @@
 
 using System;
 
+#nullable enable
+
 namespace SpotifyGPX
 {
     public class Options

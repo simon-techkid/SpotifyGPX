@@ -12,6 +12,8 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 
+#nullable enable
+
 class Program
 {
     [STAThread]
@@ -43,9 +45,6 @@ class Program
 
             // Step 1: Create a list of all Spotify songs in the given JSON file
             List<SpotifyEntry> spotifyEntries;
-
-            // Create a bool determining the Spotify JSON format used
-            bool spotifyMiniJson;
 
             // Step 2: Create a list of all GPX points in the given GPX file
             List<GPXPoint> gpxPoints;
@@ -82,8 +81,18 @@ class Program
 
             if (noGpxExport == false)
             {
-                // Create a GPX document based on the list of songs and points
-                XmlDocument document = GPX.CreateGPXFile(correlatedEntries, inputGpx);
+                XmlDocument document = new();
+
+                try
+                {
+                    // Create a GPX document based on the list of songs and points
+                    document = GPX.CreateGPXFile(correlatedEntries, inputGpx);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error creating GPX: {ex}");
+                    return;
+                }
 
                 // Write the contents of the GPX
                 document.Save(outputGpx);
@@ -96,8 +105,16 @@ class Program
                 // Stage output path of output JSON
                 string outputJson = GenerateOutputPath(inputGpx, "json");
 
-                // Write the contents of the JSON
-                File.WriteAllText(outputJson, JSON.ExportSpotifyJson(filteredEntries));
+                try
+                {
+                    // Write the contents of the JSON
+                    File.WriteAllText(outputJson, JSON.ExportSpotifyJson(filteredEntries));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error creating JSON: {ex}");
+                    return;
+                }
 
                 Console.WriteLine($"[INFO] {Path.GetExtension(outputJson)} file, '{Path.GetFileName(outputJson)}', generated successfully!");
             }
@@ -107,8 +124,18 @@ class Program
                 // Stage output path of output XSPF
                 string outputPlist = GenerateOutputPath(inputGpx, "xspf");
 
-                // Create an XML document for the playlist
-                XmlDocument playlist = XSPF.CreatePlist(filteredEntries, outputPlist);
+                XmlDocument playlist = new();
+
+                try
+                {
+                    // Create an XML document for the playlist
+                    playlist = XSPF.CreatePlist(filteredEntries, outputPlist);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error creating playlist: {ex}");
+                    return;
+                }
 
                 // Write the contents of the XSPF
                 playlist.Save(outputPlist);
@@ -131,7 +158,7 @@ class Program
                 catch (Exception ex)
                 {
                     // URI found to be null
-                    Console.WriteLine(ex);
+                    Console.WriteLine($"Error generating clipboard data: {ex}");
                     return;
                 }
 
@@ -172,7 +199,7 @@ class JSON
     public static List<SpotifyEntry> ParseSpotifyJson(string jsonFile)
     {
         // Create list of JSON objects
-        List<JObject> jObjects = new();
+        List<JObject>? jObjects;
 
         // Create list to store the parsed Spotify songs
         List<SpotifyEntry> spotifyEntries = new();
@@ -181,6 +208,10 @@ class JSON
         {
             // Attempt to deserialize JSON file to list
             jObjects = JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFile));
+            if (jObjects == null)
+            {
+                throw new Exception("Deserializing results in null return! Check your JSON!");
+            }
         }
         catch (Exception ex)
         {
@@ -192,17 +223,17 @@ class JSON
         {
             try
             {
-                SpotifyEntry entry = new SpotifyEntry()
+                SpotifyEntry entry = new()
                 {
-                    Time_End = DateTimeOffset.ParseExact((string?)track["endTime"] == null ? (string?)track["ts"] : (string?)track["endTime"], "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+                    Time_End = DateTimeOffset.ParseExact((string?)track["endTime"] ?? (string?)track["ts"], "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
                     Spotify_Username = (string?)track["username"],
                     Spotify_Platform = (string?)track["platform"],
-                    Time_Played = (string?)track["msPlayed"] == null ? (string?)track["ms_played"] : (string?)track["msPlayed"],
+                    Time_Played = (string?)track["msPlayed"] ?? (string?)track["ms_played"],
                     Spotify_Country = (string?)track["conn_country"],
                     Spotify_IP = (string?)track["ip_addr_decrypted"],
                     Spotify_UA = (string?)track["user_agent_decrypted"],
-                    Song_Name = (string?)track["trackName"] == null ? (string?)track["master_metadata_track_name"] : (string?)track["trackName"],
-                    Song_Artist = (string?)track["artistName"] == null ? (string?)track["master_metadata_album_artist_name"] : (string?)track["artistName"],
+                    Song_Name = (string?)track["trackName"] ?? (string?)track["master_metadata_track_name"],
+                    Song_Artist = (string?)track["artistName"] ?? (string?)track["master_metadata_album_artist_name"],
                     Song_Album = (string?)track["master_metadata_album_album_name"],
                     Song_URI = (string?)track["spotify_track_uri"],
                     Episode_Name = (string?)track["episode_name"],
@@ -420,7 +451,7 @@ class GPX
 
         if (correlatedEntries.Count < 1)
         {
-            throw new Exception("No entries found to add!");
+            throw new Exception("No relevant Spotify tracks in JSON!");
         }
 
         // Calculate and print the average correlation accuracy in seconds
