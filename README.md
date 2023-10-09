@@ -10,21 +10,22 @@ Here is an example render using [kepler.gl](https://github.com/keplergl/kepler.g
 
 ## Requirements
 
+You must have the following:
+
 For using SpotifyGPX:
- - have .NET Framework 4.7.2 installed
- - have the `Newtonsoft.Json` DLL in the running directory
- - have a GPX file of a tracked journey with timings
+ - .NET Framework 4.7.2 installed
+ - the `Newtonsoft.Json` DLL in the running directory
+ - a GPX file of a tracked journey with timings
  - listened to Spotify during the GPX journey
- - have the JSON of Spotify history covering the journey
+ - the JSON of Spotify history covering the journey
 
 For use with Spotify as data source:
- - You have access to the Spotify account you listened with
- - You have [downloaded](https://www.spotify.com/account/privacy/) your Spotify listening history JSON
+ - access to the Spotify account you listened with
+ - [downloaded](https://www.spotify.com/account/privacy/) your Spotify listening history JSON
 
 For use with GPX as the tracked GPS format:
- - Your journey is tracked in GPX (if not, [convert other formats to GPX](https://www.gpsvisualizer.com/convert_input))
- - The GPX contains frequent `<trkpt>` objects
- - GPX contains `lat`, `lon`, and `<time>` for each `<trkpt>`
+ - your journey, tracked in GPX (if not, [convert other formats to GPX](https://www.gpsvisualizer.com/convert_input))
+ - the GPX, containing frequent `<trkpt>` objects, as well as `lat`, `lon`, and `<time>`, for each
 
 ## Usage
 
@@ -33,9 +34,11 @@ For use with GPX as the tracked GPS format:
  - `SpotifyGPX` - SpotifyGPX executable
  - **Required:** `json_file` - Path to a Spotify listening history JSON
  - **Required:** `gpx_file` - Path to a GPX file
+ - *Optional:* `-n` - Do not export a GPX from the calculated points
  - *Optional:* `-j` - Save off the relevant part of the Spotify JSON
  - *Optional:* `-p` - Export a `xspf` playlist of the songs
- - *Optional:* `-n` - Do not export a GPX from the calculated points
+ - *Optional:* `-s` - Export a `txt` list of Spotify URIs and copy it to clipboard (can be pasted into Spotify Desktop app playlists)
+ 
 
 ## Obtaining Necessary Data
 
@@ -51,4 +54,4 @@ For use with GPX as the tracked GPS format:
 
  - ~~JSON exporting (export the relevant part of the Spotify JSON to a new file for future reference)~~
  - ~~Playlist exporting (export a GPX of song points to a m3u or some such file)~~
- - Spotify linkage (export a series of spotify URI so these can be pasted into Spotify)
+ - ~~Spotify linkage (export a series of spotify URI so these can be pasted into Spotify)~~
