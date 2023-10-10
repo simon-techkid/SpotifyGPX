@@ -225,7 +225,7 @@ class JSON
             {
                 SpotifyEntry entry = new()
                 {
-                    Time_End = DateTimeOffset.ParseExact((string?)track["endTime"] ?? (string?)track["ts"], "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+                    Time_End = DateTimeOffset.ParseExact((string?)track["endTime"] ?? (string?)track["ts"], (string?)track["ts"] == null ? "yyyy-MM-dd HH:mm" : "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
                     Spotify_Username = (string?)track["username"],
                     Spotify_Platform = (string?)track["platform"],
                     Time_Played = (string?)track["msPlayed"] ?? (string?)track["ms_played"],
