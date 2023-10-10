@@ -81,7 +81,7 @@ class Program
 
             if (noGpxExport == false)
             {
-                XmlDocument document = new();
+                XmlDocument document;
 
                 try
                 {
@@ -124,7 +124,7 @@ class Program
                 // Stage output path of output XSPF
                 string outputPlist = GenerateOutputPath(inputGpx, "xspf");
 
-                XmlDocument playlist = new();
+                XmlDocument playlist;
 
                 try
                 {
@@ -177,7 +177,7 @@ class Program
         {
             // None of these
 
-            Console.WriteLine("[ERROR] Usage: SpotifyGPX <json> <gpx> [-j] [-p] [-n]");
+            Console.WriteLine("[ERROR] Usage: SpotifyGPX <json> <gpx> [-j] [-p] [-n] [-s]");
             return;
         }
 
@@ -218,14 +218,26 @@ class JSON
             throw new Exception($"Error deserializing given JSON file: {ex}");
         }
 
+        string verboseTimeFormat = "MM/dd/yyyy HH:mm:ss";
+        string minifiedTimeFormat = "yyyy-MM-dd HH:mm";
+
         // Attempt to parse all possible JSON entries
         foreach (JObject track in jObjects)
         {
+            DateTimeOffset parsedTime = new();
+
+            bool validDate = DateTimeOffset.TryParseExact((string?)track["endTime"] ?? (string?)track["ts"], (string?)track["ts"] == null ? minifiedTimeFormat : verboseTimeFormat, null, DateTimeStyles.AssumeUniversal, out parsedTime);
+
+            if (!validDate)
+            {
+                throw new Exception($"Error parsing DateTimeOffset from song end timestamp: \n{track}");
+            }
+
             try
             {
                 SpotifyEntry entry = new()
                 {
-                    Time_End = DateTimeOffset.ParseExact((string?)track["endTime"] ?? (string?)track["ts"], (string?)track["ts"] == null ? "yyyy-MM-dd HH:mm" : "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+                    Time_End = parsedTime,
                     Spotify_Username = (string?)track["username"],
                     Spotify_Platform = (string?)track["platform"],
                     Time_Played = (string?)track["msPlayed"] ?? (string?)track["ms_played"],
@@ -253,7 +265,7 @@ class JSON
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error parsing contents of JSON tag: {track} to a valid song entry: {ex}");
+                throw new Exception($"Error parsing contents of JSON tag: \n{track} to a valid song entry: \n{ex}");
             }
         }
 
@@ -297,7 +309,7 @@ class JSON
                 // Create a JSON object containing each element of a SpotifyEntry
                 JObject songEntry = new()
                 {
-                    ["ts"] = entry.Time_End.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                    ["ts"] = entry.Time_End.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture),
                     ["username"] = entry.Spotify_Username,
                     ["platform"] = entry.Spotify_Platform,
                     ["ms_played"] = entry.Time_Played,
@@ -446,7 +458,7 @@ class GPX
             // Add one to the number of songs counted
             songCount++;
 
-            Console.WriteLine($"[SONG] [{songCount}] [{spotifyEntry.Number_Children} tags] [{accuracySec} sec] ==> '{Options.Identifier(spotifyEntry, nearestPoint.Time.Offset, "name")}'");
+            Console.WriteLine($"[SONG] [{songCount}] [{spotifyEntry.Number_Children} tags] [{spotifyEntry.Time_End.ToString(Options.gpxPointDescription)}] ==> [{accuracySec} sec] ==> [{nearestPoint.Time.ToString(Options.gpxPointDescription)}] ({Options.Identifier(spotifyEntry, nearestPoint.Time.Offset, "name")})");
         }
 
         if (correlatedEntries.Count < 1)
@@ -515,7 +527,7 @@ class GPX
             pointCount++;
         }
 
-        Console.WriteLine($"[INFO] {pointCount} points found in '{Path.GetFileNameWithoutExtension(gpxFile)}' added to GPX.");
+        Console.WriteLine($"[INFO] {pointCount} points found in '{Path.GetFileNameWithoutExtension(gpxFile)}' added to GPX");
 
         return document;
     }

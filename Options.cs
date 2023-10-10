@@ -8,11 +8,11 @@ namespace SpotifyGPX
 {
     public class Options
     {
-        // Output Time Formats
-        public static readonly string gpxPointDescription = "HH:mm:ss"; // time format used in the <desc> field a GPX song point (your choice)
-
         // Input Time Formats
         public static readonly string gpxPointTimeInp = "yyyy-MM-ddTHH:mm:ss.fffzzz"; // time format used to interpret GPX track <time> tags
+
+        // Output Time Formats
+        public static readonly string gpxPointDescription = "HH:mm:ss"; // time format used in the <desc> field a GPX song point (your choice)
 
         public static string Identifier(SpotifyEntry song, TimeSpan offset, string type)
         {
