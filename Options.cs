@@ -47,6 +47,12 @@ namespace SpotifyGPX
             string? EndedAt = song.Time_End.Add(offset).ToString(gpxPointDescription); // This field is a timestamp indicating when the track stopped playing in UTC (Coordinated Universal Time). The order is year, month and day followed by a timestamp in military time
             string? PlayedMs = song.Time_Played; // This field is the number of milliseconds the stream was played.
 
+            // here is the correctly offset end time:
+            DateTimeOffset TimeEnded = new(song.Time_End.Ticks, offset);
+            // get rid of this after testing:
+            Console.WriteLine($"ticks: {song.Time_End.Ticks}");
+            Console.WriteLine($"time end: {TimeEnded.ToString(gpxPointTimeInp)}");
+
             if (type == "desc")
             {
                 // ===================== \\
