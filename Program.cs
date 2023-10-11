@@ -199,7 +199,7 @@ class JSON
     public static List<SpotifyEntry> ParseSpotifyJson(string jsonFile)
     {
         // Create list of JSON objects
-        List<JObject>? jObjects;
+        List<JObject>? sourceJson;
 
         // Create list to store the parsed Spotify songs
         List<SpotifyEntry> spotifyEntries = new();
@@ -207,8 +207,8 @@ class JSON
         try
         {
             // Attempt to deserialize JSON file to list
-            jObjects = JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFile));
-            if (jObjects == null)
+            sourceJson = JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFile));
+            if (sourceJson == null)
             {
                 throw new Exception("Deserializing results in null return! Check your JSON!");
             }
@@ -218,11 +218,12 @@ class JSON
             throw new Exception($"Error deserializing given JSON file: {ex}");
         }
 
+        // Define time string formats:
         string verboseTimeFormat = "MM/dd/yyyy HH:mm:ss";
         string minifiedTimeFormat = "yyyy-MM-dd HH:mm";
 
         // Attempt to parse all possible JSON entries
-        foreach (JObject track in jObjects)
+        foreach (JObject track in sourceJson)
         {
             DateTimeOffset parsedTime = new();
 
@@ -253,19 +254,18 @@ class JSON
                     Episode_URI = (string?)track["spotify_episode_uri"],
                     Song_StartReason = (string?)track["reason_start"],
                     Song_EndReason = (string?)track["reason_end"],
-                    Song_Shuffle = (string?)track["shuffle"],
-                    Song_Skipped = (string?)track["skipped"],
-                    Spotify_Offline = (string?)track["offline"],
+                    Song_Shuffle = (bool?)track["shuffle"],
+                    Song_Skipped = (bool?)track["skipped"],
+                    Spotify_Offline = (bool?)track["offline"],
                     Spotify_OfflineTS = (string?)track["offline_timestamp"],
-                    Spotify_Incognito = (string?)track["incognito"],
-                    Number_Children = track.Properties().Count()
+                    Spotify_Incognito = (bool?)track["incognito"]
                 };
 
                 spotifyEntries.Add(entry);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error parsing contents of JSON tag: \n{track} to a valid song entry: \n{ex}");
+                throw new Exception($"Error parsing contents of JSON tag:\n{track} to a valid song entry:\n{ex}");
             }
         }
 
@@ -319,7 +319,7 @@ class JSON
                     ["master_metadata_track_name"] = entry.Song_Name,
                     ["master_metadata_album_artist_name"] = entry.Song_Artist,
                     ["master_metadata_album_album_name"] = entry.Song_Album,
-                    ["spotify_track_uri"] = entry.Episode_URI,
+                    ["spotify_track_uri"] = entry.Song_URI,
                     ["episode_name"] = entry.Episode_Name,
                     ["episode_show_name"] = entry.Episode_Show,
                     ["spotify_episode_uri"] = entry.Episode_URI,
@@ -413,7 +413,7 @@ class GPX
         }
         catch (Exception ex)
         {
-            throw new Exception($"The GPX parameters cannot be parsed: {ex}");
+            throw new Exception($"The GPX parameter cannot be parsed:\n{ex}");
         }
 
         // Return the list of points from the GPX
@@ -424,9 +424,6 @@ class GPX
     {
         // Correlate Spotify entries with the nearest GPX points
         List<(SpotifyEntry, GPXPoint)> correlatedEntries = new();
-
-        // Create variable to count how many songs are included
-        double songCount = 0;
 
         // Create a list of correlation accuracies, one for each song
         List<double> correlationAccuracy = new();
@@ -455,15 +452,7 @@ class GPX
             // Add both the current Spotify entry and calculated nearest point to the correlated entries list
             correlatedEntries.Add((spotifyEntry, nearestPoint));
 
-            // Add one to the number of songs counted
-            songCount++;
-
-            Console.WriteLine($"[SONG] [{songCount}] [{spotifyEntry.Number_Children} tags] [{spotifyEntry.Time_End.ToString(Options.gpxPointDescription)}] ==> [{accuracySec} sec] ==> [{nearestPoint.Time.ToString(Options.gpxPointDescription)}] ({Options.Identifier(spotifyEntry, nearestPoint.Time.Offset, "name")})");
-        }
-
-        if (correlatedEntries.Count < 1)
-        {
-            throw new Exception("No relevant Spotify tracks in JSON!");
+            Console.WriteLine($"[SONG] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Options.consoleReadoutFormat)} ~ {nearestPoint.Time.ToUniversalTime().ToString(Options.consoleReadoutFormat)}] [~{Math.Round(accuracySec)}s] {Options.GpxTitle(spotifyEntry)}");
         }
 
         // Calculate and print the average correlation accuracy in seconds
@@ -512,7 +501,7 @@ class GPX
 
             // Set the name of the GPX point to the name of the song
             XmlElement name = document.CreateElement("name");
-            name.InnerText = Options.Identifier(song, point.Time.Offset, "name");
+            name.InnerText = Options.GpxTitle(song);
             waypoint.AppendChild(name);
 
             // Set the time of the GPX point to the original time
@@ -522,7 +511,7 @@ class GPX
 
             // Set the description of the point 
             XmlElement description = document.CreateElement("desc");
-            description.InnerText = Options.Identifier(song, point.Time.Offset, "desc");
+            description.InnerText = Options.GpxDescription(song, point.Time.Offset);
             waypoint.AppendChild(description);
             pointCount++;
         }

@@ -38,7 +38,6 @@ For use with GPX as the tracked GPS format:
  - *Optional:* `-j` - Save off the relevant part of the Spotify JSON
  - *Optional:* `-p` - Export a `xspf` playlist of the songs
  - *Optional:* `-s` - Export a `txt` list of Spotify URIs and copy it to clipboard (can be pasted into Spotify Desktop app playlists)
- 
 
 ## Obtaining Necessary Data
 
@@ -50,8 +49,6 @@ For use with GPX as the tracked GPS format:
  1. Use an app such as [GPSLogger](https://github.com/mendhak/gpslogger) to track your position
  2. Ensure the frequency of points is high, since a song is tied to each point
 
-## Future Additions
+## Console Example
 
- - ~~JSON exporting (export the relevant part of the Spotify JSON to a new file for future reference)~~
- - ~~Playlist exporting (export a GPX of song points to a m3u or some such file)~~
- - ~~Spotify linkage (export a series of spotify URI so these can be pasted into Spotify)~~
+![image](Console.PNG)
