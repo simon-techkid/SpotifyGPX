@@ -201,9 +201,6 @@ class JSON
         // Create list of JSON objects
         List<JObject>? sourceJson;
 
-        // Create list to store the parsed Spotify songs
-        List<SpotifyEntry> spotifyEntries = new();
-
         try
         {
             // Attempt to deserialize JSON file to list
@@ -222,21 +219,14 @@ class JSON
         string verboseTimeFormat = "MM/dd/yyyy HH:mm:ss";
         string minifiedTimeFormat = "yyyy-MM-dd HH:mm";
 
-        // Attempt to parse all possible JSON entries
-        foreach (JObject track in sourceJson)
+        // Create list to store the parsed Spotify songs
+        List<SpotifyEntry> spotifyEntries = sourceJson.Select(track =>
         {
-            DateTimeOffset parsedTime = new();
-
-            bool validDate = DateTimeOffset.TryParseExact((string?)track["endTime"] ?? (string?)track["ts"], (string?)track["ts"] == null ? minifiedTimeFormat : verboseTimeFormat, null, DateTimeStyles.AssumeUniversal, out parsedTime);
-
-            if (!validDate)
-            {
-                throw new Exception($"Error parsing DateTimeOffset from song end timestamp: \n{track}");
-            }
+            DateTimeOffset parsedTime = DateTimeOffset.TryParseExact((string?)track["endTime"] ?? (string?)track["ts"], (string?)track["ts"] == null ? minifiedTimeFormat : verboseTimeFormat, null, DateTimeStyles.AssumeUniversal, out var parsed) ? parsed : throw new Exception($"Error parsing DateTimeOffset from song end timestamp: \n{track}");
 
             try
             {
-                SpotifyEntry entry = new()
+                return new SpotifyEntry
                 {
                     Time_End = parsedTime,
                     Spotify_Username = (string?)track["username"],
@@ -260,14 +250,12 @@ class JSON
                     Spotify_OfflineTS = (string?)track["offline_timestamp"],
                     Spotify_Incognito = (bool?)track["incognito"]
                 };
-
-                spotifyEntries.Add(entry);
             }
             catch (Exception ex)
             {
                 throw new Exception($"Error parsing contents of JSON tag:\n{track} to a valid song entry:\n{ex}");
             }
-        }
+        }).ToList();
 
         return spotifyEntries;
     }
