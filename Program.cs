@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
@@ -533,9 +532,6 @@ class GPX
 
         int lastDupe = int.MaxValue;
 
-        DateTimeOffset dupeEnd = new();
-        string songEnd = "";
-
         (double lat, double lon) startDupe = new();
         (double lat, double lon) endDupe = new();
         List<(SpotifyEntry, GPXPoint)> dupedSongs = new();
@@ -559,6 +555,8 @@ class GPX
 
                 lastDupe = iterations;
 
+                dupedSongs.Add((song, point));
+
                 Console.WriteLine($"Dupe Location Found: {song.Song_Name}");
             }
             else
@@ -572,21 +570,48 @@ class GPX
 
                     endDupe = (finalPoints[endIndex].Item2.Latitude, finalPoints[endIndex].Item2.Longitude);
 
-                    dupeEnd = finalPoints[endIndex].Item1.Time_End;
-                    songEnd = finalPoints[endIndex].Item1.Song_Name;
+                    dupes.Add((startDupe, endDupe, dupedSongs));
+
                     Console.WriteLine($"End of dupe: {endDupe}");
                 }
             }
         }
+
+        CalculateDupes(dupes);
+
         
         return;
     }
+
+    public static void CalculateDupes(List<((double, double), (double, double), List<(SpotifyEntry, GPXPoint)>)> dupes)
+    {
+        foreach (((double startLat, double startLon), (double endLat, double endLon), List<(SpotifyEntry, GPXPoint)> dupedSongs) in dupes)
+        {
+            int n = dupedSongs.Count;
+
+            int i = 0;
+
+            foreach ((SpotifyEntry song, GPXPoint point) in dupedSongs)
+            {
+                i++;
+                double t = (double)i / (n - 1);
+
+                double intermediateLat = startLat + t * (endLat - startLat);
+                double intermediateLng = startLon + t * (endLon - startLon);
+                Console.WriteLine($"{(intermediateLat, intermediateLng)} - {song.Song_Name}");
+
+            }
+        }
+
+        return;
+    }
+
 
     public static (double, double)[] GenerateIntermediatePoints((double, double) start, (double, double) end, int n)
     {
         if (n < 2)
         {
-            return end;
+            //return end;
         }
 
         (double startLat, double startLng) = start;
