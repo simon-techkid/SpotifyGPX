@@ -577,7 +577,22 @@ class GPX
             }
         }
 
-        CalculateDupes(dupes);
+        var groupedDuplicates = finalPoints.GroupBy(p => (p.Item2.Latitude, p.Item2.Longitude))
+                                          .Where(group => group.Count() > 1);
+
+        foreach (var group in groupedDuplicates)
+        {
+            List<(SpotifyEntry, GPXPoint)> duplicateSongs = group.ToList();
+            (double lat, double lon) startPoint = group.Key;
+            (double lat, double lon) endPoint = group.Key;
+
+            Console.WriteLine($"New dupe sequence: {startPoint}");
+            Console.WriteLine($"Dupe Location Found: {string.Join(", ", duplicateSongs.Select(s => s.Item1.Song_Name))}");
+            Console.WriteLine($"End of dupe: {endPoint}");
+        }
+
+
+        //CalculateDupes(dupes);
 
         
         return;
