@@ -525,102 +525,31 @@ class GPX
 
     public static void CompleteGPX(List<(SpotifyEntry, GPXPoint)> finalPoints)
     {
-
-        int iterations = 0;
-
-        List<(double, double)> knownPoints = new();
-
-        int lastDupe = int.MaxValue;
-
-        (double lat, double lon) startDupe = new();
-        (double lat, double lon) endDupe = new();
-        List<(SpotifyEntry, GPXPoint)> dupedSongs = new();
-
-        List<((double, double), (double, double), List<(SpotifyEntry,GPXPoint)>)> dupes = new();
-
-        foreach ((SpotifyEntry song, GPXPoint point) in finalPoints)
-        {
-            iterations++;
-
-            if (knownPoints.Contains((point.Latitude, point.Longitude)))
-            {
-                // if the last dupe was not the previous song, capture the current song (first in sequence of dupes)
-                if (lastDupe != iterations - 1)
-                {
-                    startDupe = (point.Latitude, point.Longitude);
-                    
-                    Console.WriteLine($"New dupe sequence: {startDupe}");
-                    startDupe = (point.Latitude, point.Longitude);
-                }
-
-                lastDupe = iterations;
-
-                dupedSongs.Add((song, point));
-
-                Console.WriteLine($"Dupe Location Found: {song.Song_Name}");
-            }
-            else
-            {
-                knownPoints.Add((point.Latitude, point.Longitude));
-
-                // if last dupe was previous song, capture the previous song (last in sequence of dupes)
-                if (lastDupe == iterations - 1)
-                {
-                    int endIndex = lastDupe;
-
-                    endDupe = (finalPoints[endIndex].Item2.Latitude, finalPoints[endIndex].Item2.Longitude);
-
-                    dupes.Add((startDupe, endDupe, dupedSongs));
-
-                    Console.WriteLine($"End of dupe: {endDupe}");
-                }
-            }
-        }
-
-        var groupedDuplicates = finalPoints.GroupBy(p => (p.Item2.Latitude, p.Item2.Longitude))
-                                          .Where(group => group.Count() > 1);
+        var groupedDuplicates = finalPoints
+        .GroupBy(p => (p.Item2.Latitude, p.Item2.Longitude))
+        .Where(group => group.Count() > 1);
 
         foreach (var group in groupedDuplicates)
         {
             List<(SpotifyEntry, GPXPoint)> duplicateSongs = group.ToList();
-            (double lat, double lon) startPoint = group.Key;
-            (double lat, double lon) endPoint = group.Key;
 
-            Console.WriteLine($"New dupe sequence: {startPoint}");
-            Console.WriteLine($"Dupe Location Found: {string.Join(", ", duplicateSongs.Select(s => s.Item1.Song_Name))}");
-            Console.WriteLine($"End of dupe: {endPoint}");
-        }
-
-
-        //CalculateDupes(dupes);
-
-        
-        return;
-    }
-
-    public static void CalculateDupes(List<((double, double), (double, double), List<(SpotifyEntry, GPXPoint)>)> dupes)
-    {
-        foreach (((double startLat, double startLon), (double endLat, double endLon), List<(SpotifyEntry, GPXPoint)> dupedSongs) in dupes)
-        {
-            int n = dupedSongs.Count;
-
-            int i = 0;
-
-            foreach ((SpotifyEntry song, GPXPoint point) in dupedSongs)
+            if (duplicateSongs.Count < 2)
             {
-                i++;
-                double t = (double)i / (n - 1);
-
-                double intermediateLat = startLat + t * (endLat - startLat);
-                double intermediateLng = startLon + t * (endLon - startLon);
-                Console.WriteLine($"{(intermediateLat, intermediateLng)} - {song.Song_Name}");
-
+                // Skip this group if there are fewer than 2 points.
+                continue;
             }
+
+            // Sort the duplicate songs by timestamp
+            duplicateSongs.Sort((a, b) => a.Item2.Time.CompareTo(b.Item2.Time));
+
+            (double lat, double lon) startPoint = (duplicateSongs[0].Item2.Latitude, duplicateSongs[0].Item2.Longitude);
+            (double lat, double lon) endPoint = (duplicateSongs[duplicateSongs.Count - 1].Item2.Latitude, duplicateSongs[duplicateSongs.Count - 1].Item2.Longitude);
+
+            Console.WriteLine($"New dupe sequence: {string.Join(", ", duplicateSongs.Select(s => s.Item1.Song_Name))}");
         }
 
         return;
     }
-
 
     public static (double, double)[] GenerateIntermediatePoints((double, double) start, (double, double) end, int n)
     {
