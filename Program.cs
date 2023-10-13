@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
@@ -68,6 +69,8 @@ class Program
 
                 // Step 4: Create list of songs and points paired as close as possible to one another
                 correlatedEntries = GPX.CorrelateGpxPoints(filteredEntries, gpxPoints);
+
+                GPX.CompleteGPX(correlatedEntries);
             }
             catch (Exception ex)
             {
@@ -519,6 +522,86 @@ class GPX
         Console.WriteLine($"[INFO] {pointCount} points found in '{Path.GetFileNameWithoutExtension(gpxFile)}' added to GPX");
 
         return document;
+    }
+
+    public static void CompleteGPX(List<(SpotifyEntry, GPXPoint)> finalPoints)
+    {
+
+        int iterations = 0;
+
+        List<(double, double)> knownPoints = new();
+
+        int lastDupe = int.MaxValue;
+
+        DateTimeOffset dupeEnd = new();
+        string songEnd = "";
+
+        (double lat, double lon) startDupe = new();
+        (double lat, double lon) endDupe = new();
+        List<(SpotifyEntry, GPXPoint)> dupedSongs = new();
+
+        List<((double, double), (double, double), List<(SpotifyEntry,GPXPoint)>)> dupes = new();
+
+        foreach ((SpotifyEntry song, GPXPoint point) in finalPoints)
+        {
+            iterations++;
+
+            if (knownPoints.Contains((point.Latitude, point.Longitude)))
+            {
+                // if the last dupe was not the previous song, capture the current song (first in sequence of dupes)
+                if (lastDupe != iterations - 1)
+                {
+                    startDupe = (point.Latitude, point.Longitude);
+                    
+                    Console.WriteLine($"New dupe sequence: {startDupe}");
+                    startDupe = (point.Latitude, point.Longitude);
+                }
+
+                lastDupe = iterations;
+
+                Console.WriteLine($"Dupe Location Found: {song.Song_Name}");
+            }
+            else
+            {
+                knownPoints.Add((point.Latitude, point.Longitude));
+
+                // if last dupe was previous song, capture the previous song (last in sequence of dupes)
+                if (lastDupe == iterations - 1)
+                {
+                    int endIndex = lastDupe;
+
+                    endDupe = (finalPoints[endIndex].Item2.Latitude, finalPoints[endIndex].Item2.Longitude);
+
+                    dupeEnd = finalPoints[endIndex].Item1.Time_End;
+                    songEnd = finalPoints[endIndex].Item1.Song_Name;
+                    Console.WriteLine($"End of dupe: {endDupe}");
+                }
+            }
+        }
+        
+        return;
+    }
+
+    public static (double, double)[] GenerateIntermediatePoints((double, double) start, (double, double) end, int n)
+    {
+        if (n < 2)
+        {
+            return end;
+        }
+
+        (double startLat, double startLng) = start;
+        (double endLat, double endLng) = end;
+
+        var intermediatePoints = new (double, double)[n];
+        for (int i = 0; i < n; i++)
+        {
+            double t = (double)i / (n - 1);
+            double intermediateLat = startLat + t * (endLat - startLat);
+            double intermediateLng = startLng + t * (endLng - startLng);
+            intermediatePoints[i] = (intermediateLat, intermediateLng);
+        }
+
+        return intermediatePoints;
     }
 }
 
