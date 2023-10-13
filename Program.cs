@@ -240,6 +240,7 @@ class JSON
             {
                 SpotifyEntry entry = new()
                 {
+                    Index = spotifyEntries.Count,
                     Time_End = parsedTime,
                     Spotify_Username = (string?)track["username"],
                     Spotify_Platform = (string?)track["platform"],
@@ -541,6 +542,8 @@ class GPX
 
             // Sort the duplicate songs by timestamp
             duplicateSongs.Sort((a, b) => a.Item2.Time.CompareTo(b.Item2.Time));
+
+            
 
             (double lat, double lon) startPoint = (duplicateSongs[0].Item2.Latitude, duplicateSongs[0].Item2.Longitude);
             (double lat, double lon) endPoint = (duplicateSongs[duplicateSongs.Count - 1].Item2.Latitude, duplicateSongs[duplicateSongs.Count - 1].Item2.Longitude);
