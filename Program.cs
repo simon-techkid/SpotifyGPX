@@ -230,7 +230,6 @@ class JSON
             {
                 return new SpotifyEntry
                 {
-                    Index = spotifyEntries.Count,
                     Time_End = parsedTime,
                     Spotify_Username = (string?)track["username"],
                     Spotify_Platform = (string?)track["platform"],
@@ -514,29 +513,42 @@ class GPX
 
     public static void CompleteGPX(List<(SpotifyEntry, GPXPoint)> finalPoints)
     {
-        var groupedDuplicates = finalPoints
-        .GroupBy(p => (p.Item2.Latitude, p.Item2.Longitude))
-        .Where(group => group.Count() > 1);
+        List<(SpotifyEntry, GPXPoint, int)> newList = finalPoints
+        .Select((item, index) => (item.Item1, item.Item2, index))
+        .ToList();
+
+        var groupedDuplicates = newList
+        .GroupBy(p => (p.Item2.Latitude, p.Item2.Longitude));
 
         foreach (var group in groupedDuplicates)
         {
-            List<(SpotifyEntry, GPXPoint)> duplicateSongs = group.ToList();
+            // For every duplicate cluster:
+
+            // Parse each duplicated song/point to a list
+            List<(SpotifyEntry, GPXPoint, int)> duplicateSongs = group.ToList();
 
             if (duplicateSongs.Count < 2)
             {
-                // Skip this group if there are fewer than 2 points.
+                // Skip this group if it does not constitute a duplicate of two or more songs
                 continue;
             }
 
-            // Sort the duplicate songs by timestamp
-            duplicateSongs.Sort((a, b) => a.Item2.Time.CompareTo(b.Item2.Time));
+            // Sort the duplicate songs by GPS timestamp
+            duplicateSongs.Sort((a, b) => a.Item1.Time_End.CompareTo(b.Item1.Time_End));
 
-            
+
+            Console.WriteLine($"New dupe sequence: {string.Join(", ", duplicateSongs.Select(s => $"{s.Item1.Song_Name} ({s.Item3})"))}");
+
+            foreach ((SpotifyEntry song, GPXPoint point, int index) in duplicateSongs)
+            {
+                Console.WriteLine($"[{index}] {song.Song_Name} - {(point.Latitude, point.Longitude)}");
+            }
 
             (double lat, double lon) startPoint = (duplicateSongs[0].Item2.Latitude, duplicateSongs[0].Item2.Longitude);
             (double lat, double lon) endPoint = (duplicateSongs[duplicateSongs.Count - 1].Item2.Latitude, duplicateSongs[duplicateSongs.Count - 1].Item2.Longitude);
 
-            Console.WriteLine($"New dupe sequence: {string.Join(", ", duplicateSongs.Select(s => s.Item1.Song_Name))}");
+            (double lat, double lon) endPt = (finalPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Latitude, finalPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Longitude);
+            Console.WriteLine(endPt);
         }
 
         return;

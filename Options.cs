@@ -82,7 +82,6 @@ namespace SpotifyGPX
 
     public struct SpotifyEntry
     {
-        public int Index { get; set; }
         public DateTimeOffset Time_End { get; set; }
         public string? Song_Artist { get; set; }
         public string? Song_Name { get; set; }
@@ -108,7 +107,6 @@ namespace SpotifyGPX
 
     public struct GPXPoint
     {
-        public int Index { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public DateTimeOffset Time { get; set; }
