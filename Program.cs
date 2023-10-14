@@ -507,11 +507,11 @@ class GPX
 
     public static void CompleteGPX(List<(SpotifyEntry, GPXPoint)> finalPoints)
     {
-        List<(SpotifyEntry, GPXPoint, int)> newList = finalPoints
+        List<(SpotifyEntry, GPXPoint, int)> indexedPoints = finalPoints
         .Select((item, index) => (item.Item1, item.Item2, index))
         .ToList();
 
-        var groupedDuplicates = newList
+        var groupedDuplicates = indexedPoints
         .GroupBy(p => (p.Item2.Latitude, p.Item2.Longitude));
 
         foreach (var group in groupedDuplicates)
@@ -541,8 +541,9 @@ class GPX
             (double lat, double lon) startPoint = (duplicateSongs[0].Item2.Latitude, duplicateSongs[0].Item2.Longitude);
             (double lat, double lon) endPoint = (duplicateSongs[duplicateSongs.Count - 1].Item2.Latitude, duplicateSongs[duplicateSongs.Count - 1].Item2.Longitude);
 
-            (double lat, double lon) endPt = (finalPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Latitude, finalPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Longitude);
-            Console.WriteLine(endPt);
+            (double lat, double lon) endPt = (indexedPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Latitude, indexedPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Longitude);
+
+            // replace old point in finalPoints before the next group is looped through to ensure tunneled paths are not resetting to actual point
         }
 
         return;
