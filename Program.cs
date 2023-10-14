@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
@@ -33,13 +32,13 @@ class Program
             if (!File.Exists(inputJson))
             {
                 // Ensures the specified JSON exists
-                Console.WriteLine($"[INFO] Source {Path.GetExtension(inputJson)} file, '{Path.GetFileName(inputJson)}', does not exist!");
+                Console.WriteLine($"[INFO] Source file, '{Path.GetFileName(inputJson)}', does not exist!");
                 return;
             }
             else if (!File.Exists(inputGpx))
             {
                 // Ensures the specified GPX exists
-                Console.WriteLine($"[INFO] Source {Path.GetExtension(inputGpx)} file, '{Path.GetFileName(inputGpx)}', does not exist!");
+                Console.WriteLine($"[INFO] Source file, '{Path.GetFileName(inputGpx)}', does not exist!");
                 return;
             }
 
@@ -89,7 +88,9 @@ class Program
                 {
                     if (predictPoints == true)
                     {
-                        correlatedEntries = GPX.PredictPoints(correlatedEntries);
+                        string kmlFile = GenerateOutputPath(inputGpx, "kml");
+                        
+                        correlatedEntries = GPX.PredictPoints(correlatedEntries, File.Exists(kmlFile) ? kmlFile : null);
                     }
 
                     // Create a GPX document based on the list of songs and points
@@ -516,9 +517,9 @@ class GPX
         return document;
     }
 
-    public static List<(SpotifyEntry, GPXPoint, int)> PredictPoints(List<(SpotifyEntry, GPXPoint, int)> finalPoints)
+    public static List<(SpotifyEntry, GPXPoint, int)> PredictPoints(List<(SpotifyEntry, GPXPoint, int)> finalPoints, string? kmlFile)
     {
-        // Create list of grouped duplicate Lat/Lon values from final points list
+        // Create list of grouped duplicate coordinate values from final points list
         var groupedDuplicates = finalPoints
         .GroupBy(p => (p.Item2.Latitude, p.Item2.Longitude));
 
@@ -564,7 +565,7 @@ class GPX
         int dupes = endIndex - startIndex;
 
         // Generate a list of intermediate points based on the start, end, and number of points
-        List<GPXPoint> intermediates = ParseLineStringCoordinates("", dupes)
+        List<GPXPoint> intermediates = (kmlFile != null ? KMLIntermediatePoints(kmlFile, dupes) : GenerateIntermediates(startPoint, endPoint, dupes))
         .Select(point => new GPXPoint
         {
             Latitude = point.Item1,
@@ -586,7 +587,8 @@ class GPX
             // Create a new GPXPoint with updated latitude and longitude (from intermediate calculation
             GPXPoint updatedPoint = new()
             {
-                Predicted = true, // Inform description writer this is a predicted entry
+                Predicted = true, // Inform description this is a predicted entry
+                Time = finalPoints[layer].Item1.Time_End, // get time from song end time
                 Latitude = intermediates[index].Latitude,
                 Longitude = intermediates[index].Longitude
             };
@@ -601,33 +603,9 @@ class GPX
         return finalPoints;
     }
 
-    public static (double, double)[] GenerateIntermediates((double, double) start, (double, double) end, int n)
-    {
-        if (n < 2)
-        {
-            //return end;
-        }
-
-        (double startLat, double startLng) = start;
-        (double endLat, double endLng) = end;
-
-        var intermediatePoints = new (double, double)[n];
-        for (int i = 0; i < n; i++)
-        {
-            double t = (double)i / (n - 1);
-            double intermediateLat = startLat + t * (endLat - startLat);
-            double intermediateLng = startLng + t * (endLng - startLng);
-            intermediatePoints[i] = (intermediateLat, intermediateLng);
-        }
-
-        return intermediatePoints;
-    }
-
-    public static (double, double)[] ParseLineStringCoordinates(string kmlFile, int n)
+    public static (double, double)[] KMLIntermediatePoints(string kmlFile, int n)
     {
         List<(double, double)> coordinates = new();
-
-        kmlFile = @"C:\Users\Simon\Downloads\path.kml";
 
         try
         {
@@ -658,16 +636,13 @@ class GPX
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error parsing KML file: " + ex.Message);
+            throw new Exception("Error parsing KML file: " + ex.Message);
         }
 
         var intermediatePoints = new (double, double)[n];
         for (int i = 0; i < n; i++)
         {
-            // n = 15, this will be done 15 times
-            
             int t = coordinates.Count / n * i;
-            //int t = i / (n - 1);
             double intermediateLat = coordinates[t].Item1;
             double intermediateLng = coordinates[t].Item2;
             intermediatePoints[i] = (intermediateLat, intermediateLng);
@@ -675,6 +650,28 @@ class GPX
 
         return intermediatePoints;
     }
+
+    public static (double, double)[] GenerateIntermediates((double, double) start, (double, double) end, int n)
+    {
+        if (n < 2)
+        {
+            throw new Exception("A duplicate must constitute more than 2 points!");
+        }
+
+        (double startLat, double startLng) = start;
+        (double endLat, double endLng) = end;
+
+        var intermediatePoints = new (double, double)[n];
+        for (int i = 0; i < n; i++)
+        {
+            double t = (double)i / (n - 1);
+            double intermediateLat = startLat + t * (endLat - startLat);
+            double intermediateLng = startLng + t * (endLng - startLng);
+            intermediatePoints[i] = (intermediateLat, intermediateLng);
+        }
+
+        return intermediatePoints;
+    }  
 }
 
 class XSPF
