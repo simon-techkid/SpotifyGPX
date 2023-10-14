@@ -418,29 +418,23 @@ class GPX
 
         foreach (SpotifyEntry spotifyEntry in filteredEntries)
         {
-            // Create variable to hold the calculated nearest GPX point to each song
-            GPXPoint nearestPoint = new();
-
-            try
+            // Create variable to hold the calculated nearest GPX point and its accuracy (absolute value in comparison to each song)
+            var nearestPoint = gpxPoints
+            .Select(point => new
             {
-                // Find nearest GPX point using smallest possible absolute value with GPX and song end times
-                nearestPoint = gpxPoints.OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time_End).TotalSeconds)).First();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error ordering point and song times: {ex}");
-            }
-
-            // Set the accuracy value to the absolute value in seconds between the GPX and song end times
-            double accuracySec = Math.Abs((nearestPoint.Time - spotifyEntry.Time_End).TotalSeconds);
+                Point = point,
+                Accuracy = Math.Abs((point.Time - spotifyEntry.Time_End).TotalSeconds)
+            })
+            .OrderBy(item => item.Accuracy)
+            .First();
 
             // Add correlation accuracy (seconds) to the correlation accuracies list
-            correlationAccuracy.Add(accuracySec);
+            correlationAccuracy.Add(nearestPoint.Accuracy);
 
             // Add both the current Spotify entry and calculated nearest point to the correlated entries list
-            correlatedEntries.Add((spotifyEntry, nearestPoint));
+            correlatedEntries.Add((spotifyEntry, nearestPoint.Point));
 
-            Console.WriteLine($"[SONG] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Options.consoleReadoutFormat)} ~ {nearestPoint.Time.ToUniversalTime().ToString(Options.consoleReadoutFormat)}] [~{Math.Round(accuracySec)}s] {Options.GpxTitle(spotifyEntry)}");
+            Console.WriteLine($"[SONG] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Options.consoleReadoutFormat)} ~ {nearestPoint.Point.Time.ToUniversalTime().ToString(Options.consoleReadoutFormat)}] [~{Math.Round(nearestPoint.Accuracy)}s] {Options.GpxTitle(spotifyEntry)}");
         }
 
         // Calculate and print the average correlation accuracy in seconds
