@@ -90,7 +90,7 @@ class Program
                     {
                         string kmlFile = GenerateOutputPath(inputGpx, "kml");
                         
-                        correlatedEntries = GPX.PredictPoints(correlatedEntries, File.Exists(kmlFile) ? kmlFile : null);
+                        correlatedEntries = PointPredict.PredictPoints(correlatedEntries, File.Exists(kmlFile) ? kmlFile : null);
                     }
 
                     // Create a GPX document based on the list of songs and points
@@ -98,7 +98,7 @@ class Program
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error creating GPX: {ex}");
+                    Console.WriteLine($"Error creating GPX: {ex.Message}");
                     return;
                 }
 
@@ -120,7 +120,7 @@ class Program
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error creating JSON: {ex}");
+                    Console.WriteLine($"Error creating JSON: {ex.Message}");
                     return;
                 }
 
@@ -141,7 +141,7 @@ class Program
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error creating playlist: {ex}");
+                    Console.WriteLine($"Error creating playlist: {ex.Message}");
                     return;
                 }
 
@@ -166,7 +166,7 @@ class Program
                 catch (Exception ex)
                 {
                     // URI found to be null
-                    Console.WriteLine($"Error generating clipboard data: {ex}");
+                    Console.WriteLine($"Error generating clipboard data: {ex.Message}");
                     return;
                 }
 
@@ -220,7 +220,7 @@ class JSON
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error deserializing given JSON file: {ex}");
+            throw new Exception($"Error deserializing given JSON file: {ex.Message}");
         }
 
         // Define time string formats:
@@ -261,7 +261,7 @@ class JSON
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error parsing contents of JSON tag:\n{track} to a valid song entry:\n{ex}");
+                throw new Exception($"Error parsing contents of JSON tag:\n{track} to a valid song entry:\n{ex.Message}");
             }
         }).ToList();
 
@@ -286,7 +286,7 @@ class JSON
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error finding points covering GPX timeframe: {ex}");
+            throw new Exception($"Error finding points covering GPX timeframe: {ex.Message}");
         }
 
         return spotifyEntryCandidates;
@@ -333,7 +333,7 @@ class JSON
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error sending track, '{entry.Song_Name}', to JSON: {ex}");
+                throw new Exception($"Error sending track, '{entry.Song_Name}', to JSON: {ex.Message}");
             }
         }
 
@@ -388,7 +388,7 @@ class GPX
         catch (Exception ex)
         {
             // If the specified XML is invalid, throw an error
-            throw new Exception($"The defined GPX file is incorrectly formatted: {ex}");
+            throw new Exception($"The defined {Path.GetExtension(gpxFile)} file is incorrectly formatted: {ex.Message}");
         }
 
         if (!document.Descendants(ns + "trkpt").Any())
@@ -411,7 +411,7 @@ class GPX
         }
         catch (Exception ex)
         {
-            throw new Exception($"The GPX parameter cannot be parsed:\n{ex}");
+            throw new Exception($"The GPX parameter cannot be parsed:\n{ex.Message}");
         }
 
         // Return the list of points from the GPX
@@ -516,7 +516,10 @@ class GPX
 
         return document;
     }
+}
 
+class PointPredict
+{
     public static List<(SpotifyEntry, GPXPoint, int)> PredictPoints(List<(SpotifyEntry, GPXPoint, int)> finalPoints, string? kmlFile)
     {
         // Create list of grouped duplicate coordinate values from final points list
@@ -552,7 +555,7 @@ class GPX
             Console.Write("[USER] Index of the End of your dupe: ");
             endIndex = int.Parse(Console.ReadLine());
         }
-        catch(FormatException)
+        catch (FormatException)
         {
             throw new FormatException($"You must enter a number!");
         }
@@ -560,9 +563,14 @@ class GPX
         // Generate start and end point coordinate doubles of the specified start and end duplicates
         (double, double) startPoint = (finalPoints[startIndex].Item2.Latitude, finalPoints[startIndex].Item2.Longitude);
         (double, double) endPoint = (finalPoints[endIndex].Item2.Latitude, finalPoints[endIndex].Item2.Longitude);
-        
+
         // Calculate the number of dupes based on the difference between the start and end values
         int dupes = endIndex - startIndex;
+
+        if (dupes < 2)
+        {
+            throw new Exception("A dupe must constitute 2 or more songs!");
+        }
 
         // Generate a list of intermediate points based on the start, end, and number of points
         List<GPXPoint> intermediates = (kmlFile != null ? KMLIntermediatePoints(kmlFile, dupes) : GenerateIntermediates(startPoint, endPoint, dupes))
@@ -603,19 +611,31 @@ class GPX
         return finalPoints;
     }
 
-    public static (double, double)[] KMLIntermediatePoints(string kmlFile, int n)
+    private static (double, double)[] KMLIntermediatePoints(string kmlFile, int dupes)
     {
+        // Create a new XML document
+        XmlDocument doc = new();
+
+        // Use the GPX namespace
+        XmlNamespaceManager nsManager = new(doc.NameTable);
+        nsManager.AddNamespace("kml", "http://www.opengis.net/kml/2.2");
+
+        // Create a list of intermediate coordinates
         List<(double, double)> coordinates = new();
 
         try
         {
-            XmlDocument doc = new XmlDocument();
+            // Attempt to load the contents of the specified file into the XML
             doc.Load(kmlFile);
+        }
+        catch (Exception ex)
+        {
+            // If the specified XML is invalid, throw an error
+            throw new Exception($"The defined {Path.GetExtension(kmlFile)} file is incorrectly formatted: {ex.Message}");
+        }
 
-            // Define the XML namespace for KML
-            XmlNamespaceManager nsManager = new XmlNamespaceManager(doc.NameTable);
-            nsManager.AddNamespace("kml", "http://www.opengis.net/kml/2.2");
-
+        try
+        {
             // Select all LineString coordinates
             XmlNodeList coordinatesNodes = doc.SelectNodes("//kml:LineString/kml:coordinates", nsManager);
 
@@ -636,42 +656,52 @@ class GPX
         }
         catch (Exception ex)
         {
-            throw new Exception("Error parsing KML file: " + ex.Message);
+            throw new Exception($"Error parsing {Path.GetExtension(kmlFile)} file: {ex.Message}");
         }
 
-        var intermediatePoints = new (double, double)[n];
-        for (int i = 0; i < n; i++)
+        // For each dupe, calculate its corresponding KML point
+        var intermediatePoints = new (double, double)[dupes];
+        for (int iteration = 0; iteration < dupes; iteration++)
         {
-            int t = coordinates.Count / n * i;
-            double intermediateLat = coordinates[t].Item1;
-            double intermediateLng = coordinates[t].Item2;
-            intermediatePoints[i] = (intermediateLat, intermediateLng);
+            // Determine the KML point to retrieve based on the number of coordinates in the KML, divided by the number of dupes, times the current iteration
+            int index = coordinates.Count / dupes * iteration;
+
+            // Determine the intermediate lat/lon based on the KML coordinate average index
+            double intermediateLat = coordinates[index].Item1;
+            double intermediateLng = coordinates[index].Item2;
+
+            // Replace the list entry with the intermediate point
+            intermediatePoints[iteration] = (intermediateLat, intermediateLng);
         }
 
+        // Return the updated point list
         return intermediatePoints;
     }
 
-    public static (double, double)[] GenerateIntermediates((double, double) start, (double, double) end, int n)
+    private static (double, double)[] GenerateIntermediates((double, double) start, (double, double) end, int dupes)
     {
-        if (n < 2)
+        // Parse start coordinate and end coordinate to lat and lon doubles
+        (double startLat, double startLon) = start;
+        (double endLat, double endLon) = end;
+
+        // For each dupe, determine its equidistant point
+        var intermediatePoints = new (double, double)[dupes];
+        for (int iteration = 0; iteration < dupes; iteration++)
         {
-            throw new Exception("A duplicate must constitute more than 2 points!");
+            // Determine the average for this iteration based on the number of dupes between the start and end points
+            double average = (double)iteration / (dupes - 1);
+
+            // Determine the intermediate lat/lon based on the start/end point average
+            double intermediateLat = startLat + average * (endLat - startLat);
+            double intermediateLng = startLon + average * (endLon - startLon);
+
+            // Replace the list entry with the intermediate point
+            intermediatePoints[iteration] = (intermediateLat, intermediateLng);
         }
 
-        (double startLat, double startLng) = start;
-        (double endLat, double endLng) = end;
-
-        var intermediatePoints = new (double, double)[n];
-        for (int i = 0; i < n; i++)
-        {
-            double t = (double)i / (n - 1);
-            double intermediateLat = startLat + t * (endLat - startLat);
-            double intermediateLng = startLng + t * (endLng - startLng);
-            intermediatePoints[i] = (intermediateLat, intermediateLng);
-        }
-
+        // Return the updated point list
         return intermediatePoints;
-    }  
+    }
 }
 
 class XSPF
