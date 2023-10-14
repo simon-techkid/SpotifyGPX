@@ -538,10 +538,38 @@ class GPX
                 Console.WriteLine($"[{index}] {song.Song_Name} - {(point.Latitude, point.Longitude)}");
             }
 
-            (double lat, double lon) startPoint = (duplicateSongs[0].Item2.Latitude, duplicateSongs[0].Item2.Longitude);
-            (double lat, double lon) endPoint = (duplicateSongs[duplicateSongs.Count - 1].Item2.Latitude, duplicateSongs[duplicateSongs.Count - 1].Item2.Longitude);
+            (double, double) startPoint = (duplicateSongs[0].Item2.Latitude, duplicateSongs[0].Item2.Longitude);
+            (double, double) endPoint = (indexedPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Latitude, indexedPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Longitude);
 
-            (double lat, double lon) endPt = (indexedPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Latitude, indexedPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Longitude);
+
+            List<GPXPoint> intermediates = GenerateIntermediatePoints(startPoint, endPoint, duplicateSongs.Count)
+                .Select((result, index) => 
+                {
+                    
+                    int layer = duplicateSongs[0].Item3 + index;
+
+
+
+                    indexedPoints[layer].Item2.Latitude = result.Item1;
+                    indexedPoints[layer].Item2.Longitude = result.Item2;
+
+                    Console.WriteLine($"[{layer}] {indexedPoints[layer].Item1.Song_Name} - {(indexedPoints[layer].Item2.Latitude, (indexedPoints[layer].Item2.Longitude))}");
+
+                    return new GPXPoint
+                    {
+                        Latitude = result.Item1,
+                        Longitude = result.Item2
+                    };
+                })
+                .ToList();
+
+            for (int i = 0; i < duplicateSongs.Count; i++)
+            {
+                //Console.WriteLine($"Point {i + 1}: Latitude {intermediates[i].Latitude}, Longitude {intermediates[i].Longitude}");
+
+                //duplicateSongs[i].Item2.Latitude = intermediates[i].Latitude;
+
+            }
 
             // replace old point in finalPoints before the next group is looped through to ensure tunneled paths are not resetting to actual point
         }
