@@ -27,6 +27,7 @@ class Program
             bool exportJson = args.Length >= 3 && args.Contains("-j");
             bool exportPlist = args.Length >= 3 && args.Contains("-p");
             bool exportSpotifyURI = args.Length >= 3 && args.Contains("-s");
+            bool predictPoints = args.Length >= 3 && args.Contains("-g");
 
             if (!File.Exists(inputJson))
             {
@@ -53,7 +54,7 @@ class Program
             List<SpotifyEntry> filteredEntries;
 
             // Step 4: Create a list of paired songs and points based on the closest time between each song and each GPX point
-            List<(SpotifyEntry, GPXPoint)> correlatedEntries;
+            List<(SpotifyEntry, GPXPoint, int)> correlatedEntries;
 
             try
             {
@@ -68,8 +69,6 @@ class Program
 
                 // Step 4: Create list of songs and points paired as close as possible to one another
                 correlatedEntries = GPX.CorrelateGpxPoints(filteredEntries, gpxPoints);
-
-                GPX.CompleteGPX(correlatedEntries);
             }
             catch (Exception ex)
             {
@@ -85,10 +84,17 @@ class Program
             {
                 XmlDocument document;
 
+                List<(SpotifyEntry, GPXPoint, int)> PredictedPoints = null;
+
+                if (predictPoints == true)
+                {
+                    PredictedPoints = GPX.CompleteGPX(correlatedEntries);
+                }
+
                 try
                 {
                     // Create a GPX document based on the list of songs and points
-                    document = GPX.CreateGPXFile(correlatedEntries, inputGpx);
+                    document = GPX.CreateGPXFile(predictPoints == true ? PredictedPoints : correlatedEntries, inputGpx);
                 }
                 catch (Exception ex)
                 {
@@ -410,13 +416,15 @@ class GPX
         return gpxPoints;
     }
 
-    public static List<(SpotifyEntry, GPXPoint)> CorrelateGpxPoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
+    public static List<(SpotifyEntry, GPXPoint, int)> CorrelateGpxPoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
     {
         // Correlate Spotify entries with the nearest GPX points
-        List<(SpotifyEntry, GPXPoint)> correlatedEntries = new();
+        List<(SpotifyEntry, GPXPoint, int)> correlatedEntries = new();
 
         // Create a list of correlation accuracies, one for each song
         List<double> correlationAccuracy = new();
+
+        int count = 0;
 
         foreach (SpotifyEntry spotifyEntry in filteredEntries)
         {
@@ -434,9 +442,11 @@ class GPX
             correlationAccuracy.Add(nearestPoint.Accuracy);
 
             // Add both the current Spotify entry and calculated nearest point to the correlated entries list
-            correlatedEntries.Add((spotifyEntry, nearestPoint.Point));
+            correlatedEntries.Add((spotifyEntry, nearestPoint.Point, count));
 
-            Console.WriteLine($"[SONG] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Options.consoleReadoutFormat)} ~ {nearestPoint.Point.Time.ToUniversalTime().ToString(Options.consoleReadoutFormat)}] [~{Math.Round(nearestPoint.Accuracy)}s] {Options.GpxTitle(spotifyEntry)}");
+            Console.WriteLine($"[SONG] [{count}] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Options.consoleReadoutFormat)} ~ {nearestPoint.Point.Time.ToUniversalTime().ToString(Options.consoleReadoutFormat)}] [~{Math.Round(nearestPoint.Accuracy)}s] {Options.GpxTitle(spotifyEntry)}");
+
+            count++;
         }
 
         // Calculate and print the average correlation accuracy in seconds
@@ -446,7 +456,7 @@ class GPX
         return correlatedEntries;
     }
 
-    public static XmlDocument CreateGPXFile(List<(SpotifyEntry, GPXPoint)> finalPoints, string gpxFile)
+    public static XmlDocument CreateGPXFile(List<(SpotifyEntry, GPXPoint, int)> finalPoints, string gpxFile)
     {
         // Create a new XML document
         XmlDocument document = new();
@@ -473,7 +483,7 @@ class GPX
 
         double pointCount = 0;
 
-        foreach ((SpotifyEntry song, GPXPoint point) in finalPoints)
+        foreach ((SpotifyEntry song, GPXPoint point, _) in finalPoints)
         {
             // Create waypoint for each song
             XmlElement waypoint = document.CreateElement("wpt");
@@ -505,10 +515,10 @@ class GPX
         return document;
     }
 
-    public static void CompleteGPX(List<(SpotifyEntry, GPXPoint)> finalPoints)
+    public static List<(SpotifyEntry, GPXPoint, int)> CompleteGPX(List<(SpotifyEntry, GPXPoint, int)> finalPoints)
     {
         List<(SpotifyEntry, GPXPoint, int)> indexedPoints = finalPoints
-        .Select((item, index) => (item.Item1, item.Item2, index))
+        .Select((item) => (item.Item1, item.Item2, item.Item3))
         .ToList();
 
         var groupedDuplicates = indexedPoints
@@ -530,17 +540,8 @@ class GPX
             // Sort the duplicate songs by GPS timestamp
             duplicateSongs.Sort((a, b) => a.Item1.Time_End.CompareTo(b.Item1.Time_End));
 
-
-            Console.WriteLine($"New dupe sequence: {string.Join(", ", duplicateSongs.Select(s => $"{s.Item1.Song_Name} ({s.Item3})"))}");
-
-            foreach ((SpotifyEntry song, GPXPoint point, int index) in duplicateSongs)
-            {
-                Console.WriteLine($"[{index}] {song.Song_Name} - {(point.Latitude, point.Longitude)}");
-            }
-
             (double, double) startPoint = (duplicateSongs[0].Item2.Latitude, duplicateSongs[0].Item2.Longitude);
             (double, double) endPoint = (indexedPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Latitude, indexedPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Longitude);
-
 
             List<GPXPoint> intermediates = GenerateIntermediatePoints(startPoint, endPoint, duplicateSongs.Count)
             .Select(point => new GPXPoint
@@ -550,15 +551,13 @@ class GPX
             })
             .ToList();
 
-            Console.WriteLine(startPoint);
-
             for (int index = 0; index < intermediates.Count; index++)
             {
                 int layer = duplicateSongs[0].Item3 + index;
                 var (song, point, _) = indexedPoints[layer];
 
                 // Create a new GPXPoint with updated latitude and longitude
-                GPXPoint updatedPoint = new GPXPoint
+                GPXPoint updatedPoint = new()
                 {
                     Latitude = intermediates[index].Latitude,
                     Longitude = intermediates[index].Longitude
@@ -567,13 +566,11 @@ class GPX
                 // Update the indexedPoints list with the new GPXPoint
                 indexedPoints[layer] = (song, updatedPoint, layer);
 
-                Console.WriteLine($"[{layer}] {song.Song_Name} - ({(updatedPoint.Latitude, updatedPoint.Longitude)})");
+                Console.WriteLine($"[DUPE] [{layer}] {(updatedPoint.Latitude, updatedPoint.Longitude)} {song.Song_Name}");
             }
-
-            Console.WriteLine(endPoint);
         }
 
-        return;
+        return indexedPoints;
     }
 
     public static (double, double)[] GenerateIntermediatePoints((double, double) start, (double, double) end, int n)
