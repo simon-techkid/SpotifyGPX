@@ -372,6 +372,8 @@ class GPX
     {
         // Create a new XML document
         XDocument document = new();
+
+        // Use the GPX namespace
         XNamespace ns = "http://www.topografix.com/GPX/1/0";
 
         // Create a list of interpreted GPX points
@@ -562,7 +564,7 @@ class GPX
         int dupes = endIndex - startIndex;
 
         // Generate a list of intermediate points based on the start, end, and number of points
-        List<GPXPoint> intermediates = GenerateIntermediates(startPoint, endPoint, dupes)
+        List<GPXPoint> intermediates = ParseLineStringCoordinates("", dupes)
         .Select(point => new GPXPoint
         {
             Latitude = point.Item1,
@@ -615,6 +617,59 @@ class GPX
             double t = (double)i / (n - 1);
             double intermediateLat = startLat + t * (endLat - startLat);
             double intermediateLng = startLng + t * (endLng - startLng);
+            intermediatePoints[i] = (intermediateLat, intermediateLng);
+        }
+
+        return intermediatePoints;
+    }
+
+    public static (double, double)[] ParseLineStringCoordinates(string kmlFile, int n)
+    {
+        List<(double, double)> coordinates = new();
+
+        kmlFile = @"C:\Users\Simon\Downloads\path.kml";
+
+        try
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(kmlFile);
+
+            // Define the XML namespace for KML
+            XmlNamespaceManager nsManager = new XmlNamespaceManager(doc.NameTable);
+            nsManager.AddNamespace("kml", "http://www.opengis.net/kml/2.2");
+
+            // Select all LineString coordinates
+            XmlNodeList coordinatesNodes = doc.SelectNodes("//kml:LineString/kml:coordinates", nsManager);
+
+            foreach (XmlNode coordinatesNode in coordinatesNodes)
+            {
+                string[] coordinateStrings = coordinatesNode.InnerText.Trim().Split(' ');
+
+                foreach (string coordinateString in coordinateStrings)
+                {
+                    string[] parts = coordinateString.Split(',');
+
+                    if (parts.Length >= 2 && double.TryParse(parts[0], out double longitude) && double.TryParse(parts[1], out double latitude))
+                    {
+                        coordinates.Add((latitude, longitude));
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error parsing KML file: " + ex.Message);
+        }
+
+        var intermediatePoints = new (double, double)[n];
+        for (int i = 0; i < n; i++)
+        {
+            // n = 15, this will be done 15 times
+            
+            int t = coordinates.Count / n * i;
+            //int t = i / (n - 1);
+            double intermediateLat = coordinates[t].Item1;
+            double intermediateLng = coordinates[t].Item2;
             intermediatePoints[i] = (intermediateLat, intermediateLng);
         }
 
