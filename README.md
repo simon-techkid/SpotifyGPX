@@ -38,6 +38,7 @@ For use with GPX as the tracked GPS format:
  - *Optional:* `-j` - Save off the relevant part of the Spotify JSON
  - *Optional:* `-p` - Export a `xspf` playlist of the songs
  - *Optional:* `-s` - Export a `txt` list of Spotify URIs and copy it to clipboard (can be pasted into Spotify Desktop app playlists)
+ - *Optional:* `-g` - Enable point prediction for this run. **Cannot be used with `-n`**
 
 ## Obtaining Necessary Data
 

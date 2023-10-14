@@ -26,7 +26,7 @@ namespace SpotifyGPX
             return $"{song.Song_Artist} - {song.Song_Name}";
         }
 
-        public static string GpxDescription(SpotifyEntry song, TimeSpan offset)
+        public static string GpxDescription(SpotifyEntry song, TimeSpan offset, string? message)
         {
             // Function defining the preferred return strings of GPX point metadata
 
@@ -73,6 +73,7 @@ namespace SpotifyGPX
             description += $"{(song.Spotify_Offline != null ? $"\nOffline: {(Offline == true ? "Yes" : "No")}" : null)}";
             description += $"{(song.Spotify_IP != null ? $"\nIP Address: {IP_Address}" : null)}";
             description += $"{(song.Spotify_Country != null ? $"\nCountry: {Origin_Country}" : null)}";
+            description += $"{(message != null ? $"\n{message}" : null)}";
 
             returnString += description;
 
@@ -107,6 +108,7 @@ namespace SpotifyGPX
 
     public struct GPXPoint
     {
+        public bool Predicted { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public DateTimeOffset Time { get; set; }

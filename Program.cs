@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
@@ -86,13 +87,13 @@ class Program
 
                 List<(SpotifyEntry, GPXPoint, int)> PredictedPoints = null;
 
-                if (predictPoints == true)
-                {
-                    PredictedPoints = GPX.CompleteGPX(correlatedEntries);
-                }
-
                 try
                 {
+                    if (predictPoints == true)
+                    {
+                        PredictedPoints = GPX.CompleteGPX(correlatedEntries);
+                    }
+
                     // Create a GPX document based on the list of songs and points
                     document = GPX.CreateGPXFile(predictPoints == true ? PredictedPoints : correlatedEntries, inputGpx);
                 }
@@ -505,7 +506,7 @@ class GPX
 
             // Set the description of the point 
             XmlElement description = document.CreateElement("desc");
-            description.InnerText = Options.GpxDescription(song, point.Time.Offset);
+            description.InnerText = Options.GpxDescription(song, point.Time.Offset, point.Predicted == true ? "Point Predicted" : null);
             waypoint.AppendChild(description);
             pointCount++;
         }
@@ -528,22 +529,37 @@ class GPX
         {
             // For every duplicate cluster:
 
-            // Parse each duplicated song/point to a list
-            List<(SpotifyEntry, GPXPoint, int)> duplicateSongs = group.ToList();
-
-            if (duplicateSongs.Count < 2)
+            if (group.ToList().Count < 2)
             {
                 // Skip this group if it does not constitute a duplicate of two or more songs
                 continue;
             }
 
-            // Sort the duplicate songs by GPS timestamp
-            duplicateSongs.Sort((a, b) => a.Item1.Time_End.CompareTo(b.Item1.Time_End));
+            Console.WriteLine($"[DUPE] {string.Join(", ", group.Select(s => $"{s.Item1.Song_Name} ({s.Item3})"))}");
 
-            (double, double) startPoint = (duplicateSongs[0].Item2.Latitude, duplicateSongs[0].Item2.Longitude);
-            (double, double) endPoint = (indexedPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Latitude, indexedPoints[duplicateSongs[duplicateSongs.Count - 1].Item3 + 1].Item2.Longitude);
+        }
 
-            List<GPXPoint> intermediates = GenerateIntermediatePoints(startPoint, endPoint, duplicateSongs.Count)
+        int startIndex = 0;
+        int endIndex = 0;
+
+        try
+        {
+            Console.Write("Index of the Start of your dupe: ");
+            startIndex = int.Parse(Console.ReadLine());
+            Console.Write("Index of the End of your dupe: ");
+            endIndex = int.Parse(Console.ReadLine());
+        }
+        catch(FormatException)
+        {
+            throw new FormatException($"You must enter a number!");
+        }
+
+        (double, double) startPoint = (indexedPoints[startIndex].Item2.Latitude, indexedPoints[startIndex].Item2.Longitude);
+        (double, double) endPoint = (indexedPoints[endIndex].Item2.Latitude, indexedPoints[endIndex].Item2.Longitude);
+        int dupes = endIndex - startIndex;
+
+
+        List<GPXPoint> intermediates = GenerateIntermediatePoints(startPoint, endPoint, dupes)
             .Select(point => new GPXPoint
             {
                 Latitude = point.Item1,
@@ -551,24 +567,25 @@ class GPX
             })
             .ToList();
 
-            for (int index = 0; index < intermediates.Count; index++)
+        for (int index = 0; index < dupes; index++)
+        {
+            int layer = startIndex + index;
+            var (song, point, _) = indexedPoints[layer];
+
+            // Create a new GPXPoint with updated latitude and longitude
+            GPXPoint updatedPoint = new()
             {
-                int layer = duplicateSongs[0].Item3 + index;
-                var (song, point, _) = indexedPoints[layer];
+                Predicted = true,
+                Latitude = intermediates[index].Latitude,
+                Longitude = intermediates[index].Longitude
+            };
 
-                // Create a new GPXPoint with updated latitude and longitude
-                GPXPoint updatedPoint = new()
-                {
-                    Latitude = intermediates[index].Latitude,
-                    Longitude = intermediates[index].Longitude
-                };
+            // Update the indexedPoints list with the new GPXPoint
+            indexedPoints[layer] = (song, updatedPoint, layer);
 
-                // Update the indexedPoints list with the new GPXPoint
-                indexedPoints[layer] = (song, updatedPoint, layer);
-
-                Console.WriteLine($"[DUPE] [{layer}] {(updatedPoint.Latitude, updatedPoint.Longitude)} {song.Song_Name}");
-            }
+            Console.WriteLine($"[DUPE] [{layer}] {(updatedPoint.Latitude, updatedPoint.Longitude)} {song.Song_Name}");
         }
+
 
         return indexedPoints;
     }
