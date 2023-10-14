@@ -85,17 +85,15 @@ class Program
             {
                 XmlDocument document;
 
-                List<(SpotifyEntry, GPXPoint, int)> PredictedPoints = null;
-
                 try
                 {
                     if (predictPoints == true)
                     {
-                        PredictedPoints = GPX.CompleteGPX(correlatedEntries);
+                        correlatedEntries = GPX.PredictPoints(correlatedEntries);
                     }
 
                     // Create a GPX document based on the list of songs and points
-                    document = GPX.CreateGPXFile(predictPoints == true ? PredictedPoints : correlatedEntries, inputGpx);
+                    document = GPX.CreateGPXFile(correlatedEntries, inputGpx);
                 }
                 catch (Exception ex)
                 {
@@ -516,37 +514,39 @@ class GPX
         return document;
     }
 
-    public static List<(SpotifyEntry, GPXPoint, int)> CompleteGPX(List<(SpotifyEntry, GPXPoint, int)> finalPoints)
+    public static List<(SpotifyEntry, GPXPoint, int)> PredictPoints(List<(SpotifyEntry, GPXPoint, int)> finalPoints)
     {
-        List<(SpotifyEntry, GPXPoint, int)> indexedPoints = finalPoints
-        .Select((item) => (item.Item1, item.Item2, item.Item3))
-        .ToList();
-
-        var groupedDuplicates = indexedPoints
+        // Create list of grouped duplicate Lat/Lon values from final points list
+        var groupedDuplicates = finalPoints
         .GroupBy(p => (p.Item2.Latitude, p.Item2.Longitude));
 
         foreach (var group in groupedDuplicates)
         {
-            // For every duplicate cluster:
+            // For every set of duplicates
 
+            // Ensure the group constsitutes a duplicate
             if (group.ToList().Count < 2)
             {
-                // Skip this group if it does not constitute a duplicate of two or more songs
+                // Skip this group if it does not include two or more songs
                 continue;
             }
 
+            // Print the songs implicated and their indexes to the console
             Console.WriteLine($"[DUPE] {string.Join(", ", group.Select(s => $"{s.Item1.Song_Name} ({s.Item3})"))}");
 
         }
 
+        // Create variables to hold the index of the beginning and end of the dupe sequence
         int startIndex = 0;
         int endIndex = 0;
 
+        // Attempt to retrieve user input about duplicates
         try
         {
-            Console.Write("Index of the Start of your dupe: ");
+            // Ask the user where the targeted dupe starts and ends
+            Console.Write("[USER] Index of the Start of your dupe: ");
             startIndex = int.Parse(Console.ReadLine());
-            Console.Write("Index of the End of your dupe: ");
+            Console.Write("[USER] Index of the End of your dupe: ");
             endIndex = int.Parse(Console.ReadLine());
         }
         catch(FormatException)
@@ -554,43 +554,52 @@ class GPX
             throw new FormatException($"You must enter a number!");
         }
 
-        (double, double) startPoint = (indexedPoints[startIndex].Item2.Latitude, indexedPoints[startIndex].Item2.Longitude);
-        (double, double) endPoint = (indexedPoints[endIndex].Item2.Latitude, indexedPoints[endIndex].Item2.Longitude);
+        // Generate start and end point coordinate doubles of the specified start and end duplicates
+        (double, double) startPoint = (finalPoints[startIndex].Item2.Latitude, finalPoints[startIndex].Item2.Longitude);
+        (double, double) endPoint = (finalPoints[endIndex].Item2.Latitude, finalPoints[endIndex].Item2.Longitude);
+        
+        // Calculate the number of dupes based on the difference between the start and end values
         int dupes = endIndex - startIndex;
 
+        // Generate a list of intermediate points based on the start, end, and number of points
+        List<GPXPoint> intermediates = GenerateIntermediates(startPoint, endPoint, dupes)
+        .Select(point => new GPXPoint
+        {
+            Latitude = point.Item1,
+            Longitude = point.Item2
+        })
+        .ToList();
 
-        List<GPXPoint> intermediates = GenerateIntermediatePoints(startPoint, endPoint, dupes)
-            .Select(point => new GPXPoint
-            {
-                Latitude = point.Item1,
-                Longitude = point.Item2
-            })
-            .ToList();
-
+        // Iterate through the songs inplicated in this dupe cluster
         for (int index = 0; index < dupes; index++)
         {
-            int layer = startIndex + index;
-            var (song, point, _) = indexedPoints[layer];
+            // For every duped song in the cluster:
 
-            // Create a new GPXPoint with updated latitude and longitude
+            // Calculate this dupe's index based on the start index and this iteration number
+            int layer = startIndex + index;
+
+            // Create a variable storing the original entry from finalPoints
+            var (song, point, _) = finalPoints[layer];
+
+            // Create a new GPXPoint with updated latitude and longitude (from intermediate calculation
             GPXPoint updatedPoint = new()
             {
-                Predicted = true,
+                Predicted = true, // Inform description writer this is a predicted entry
                 Latitude = intermediates[index].Latitude,
                 Longitude = intermediates[index].Longitude
             };
 
-            // Update the indexedPoints list with the new GPXPoint
-            indexedPoints[layer] = (song, updatedPoint, layer);
+            // Replaced indexedPoints index with the updated point
+            finalPoints[layer] = (song, updatedPoint, layer);
 
             Console.WriteLine($"[DUPE] [{layer}] {(updatedPoint.Latitude, updatedPoint.Longitude)} {song.Song_Name}");
         }
 
-
-        return indexedPoints;
+        // Return the updated points list
+        return finalPoints;
     }
 
-    public static (double, double)[] GenerateIntermediatePoints((double, double) start, (double, double) end, int n)
+    public static (double, double)[] GenerateIntermediates((double, double) start, (double, double) end, int n)
     {
         if (n < 2)
         {
