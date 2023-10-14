@@ -543,35 +543,34 @@ class GPX
 
 
             List<GPXPoint> intermediates = GenerateIntermediatePoints(startPoint, endPoint, duplicateSongs.Count)
-                .Select((result, index) => 
-                {
-                    
-                    int layer = duplicateSongs[0].Item3 + index;
-
-
-
-                    indexedPoints[layer].Item2.Latitude = result.Item1;
-                    indexedPoints[layer].Item2.Longitude = result.Item2;
-
-                    Console.WriteLine($"[{layer}] {indexedPoints[layer].Item1.Song_Name} - {(indexedPoints[layer].Item2.Latitude, (indexedPoints[layer].Item2.Longitude))}");
-
-                    return new GPXPoint
-                    {
-                        Latitude = result.Item1,
-                        Longitude = result.Item2
-                    };
-                })
-                .ToList();
-
-            for (int i = 0; i < duplicateSongs.Count; i++)
+            .Select(point => new GPXPoint
             {
-                //Console.WriteLine($"Point {i + 1}: Latitude {intermediates[i].Latitude}, Longitude {intermediates[i].Longitude}");
+                Latitude = point.Item1,
+                Longitude = point.Item2
+            })
+            .ToList();
 
-                //duplicateSongs[i].Item2.Latitude = intermediates[i].Latitude;
+            Console.WriteLine(startPoint);
 
+            for (int index = 0; index < intermediates.Count; index++)
+            {
+                int layer = duplicateSongs[0].Item3 + index;
+                var (song, point, _) = indexedPoints[layer];
+
+                // Create a new GPXPoint with updated latitude and longitude
+                GPXPoint updatedPoint = new GPXPoint
+                {
+                    Latitude = intermediates[index].Latitude,
+                    Longitude = intermediates[index].Longitude
+                };
+
+                // Update the indexedPoints list with the new GPXPoint
+                indexedPoints[layer] = (song, updatedPoint, layer);
+
+                Console.WriteLine($"[{layer}] {song.Song_Name} - ({(updatedPoint.Latitude, updatedPoint.Longitude)})");
             }
 
-            // replace old point in finalPoints before the next group is looped through to ensure tunneled paths are not resetting to actual point
+            Console.WriteLine(endPoint);
         }
 
         return;
