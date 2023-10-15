@@ -108,7 +108,7 @@ namespace SpotifyGPX
 
     public struct GPXPoint
     {
-        public bool Predicted { get; set; }
+        public bool? Predicted { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public DateTimeOffset Time { get; set; }

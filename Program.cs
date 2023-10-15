@@ -68,7 +68,7 @@ class Program
                 filteredEntries = JSON.FilterSpotifyJson(spotifyEntries, gpxPoints);
 
                 // Step 4: Create list of songs and points paired as close as possible to one another
-                correlatedEntries = GPX.CorrelateGpxPoints(filteredEntries, gpxPoints);
+                correlatedEntries = GPX.CorrelatePoints(filteredEntries, gpxPoints);
             }
             catch (Exception ex)
             {
@@ -193,7 +193,7 @@ class Program
         return;
     }
 
-    static string GenerateOutputPath(string inputFile, string format)
+    private static string GenerateOutputPath(string inputFile, string format)
     {
         // Set up the output file path
         string outputFile = Path.Combine(Directory.GetParent(inputFile).ToString(), $"{Path.GetFileNameWithoutExtension(inputFile)}_Spotify.{format}");
@@ -403,9 +403,9 @@ class GPX
             gpxPoints = document.Descendants(ns + "trkpt")
             .Select(trkpt => new GPXPoint
             {
-                Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, Options.gpxPointTimeInp, null),
                 Latitude = double.Parse(trkpt.Attribute("lat").Value),
-                Longitude = double.Parse(trkpt.Attribute("lon").Value)
+                Longitude = double.Parse(trkpt.Attribute("lon").Value),
+                Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, Options.gpxPointTimeInp, null)
             })
             .ToList();
         }
@@ -418,7 +418,7 @@ class GPX
         return gpxPoints;
     }
 
-    public static List<(SpotifyEntry, GPXPoint, int)> CorrelateGpxPoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
+    public static List<(SpotifyEntry, GPXPoint, int)> CorrelatePoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
     {
         // Correlate Spotify entries with the nearest GPX points
         List<(SpotifyEntry, GPXPoint, int)> correlatedEntries = new();
@@ -522,6 +522,8 @@ class PointPredict
 {
     public static List<(SpotifyEntry, GPXPoint, int)> PredictPoints(List<(SpotifyEntry, GPXPoint, int)> finalPoints, string? kmlFile)
     {
+        Console.WriteLine("[INFO] Scanning for duplicate entries:");
+        
         // Create list of grouped duplicate coordinate values from final points list
         var groupedDuplicates = finalPoints
         .GroupBy(p => (p.Item2.Latitude, p.Item2.Longitude));
@@ -538,7 +540,7 @@ class PointPredict
             }
 
             // Print the songs implicated and their indexes to the console
-            Console.WriteLine($"[DUPE] {string.Join(", ", group.Select(s => $"{s.Item1.Song_Name} ({s.Item3})"))}");
+            Console.WriteLine($"       {string.Join(", ", group.Select(s => $"{s.Item1.Song_Name} ({s.Item3})"))}");
 
         }
 
@@ -563,7 +565,7 @@ class PointPredict
         // Generate start and end point coordinate doubles of the specified start and end duplicates
         (double, double) startPoint = (finalPoints[startIndex].Item2.Latitude, finalPoints[startIndex].Item2.Longitude);
         (double, double) endPoint = (finalPoints[endIndex].Item2.Latitude, finalPoints[endIndex].Item2.Longitude);
-
+        
         // Calculate the number of dupes based on the difference between the start and end values
         int dupes = endIndex - startIndex;
 
@@ -573,7 +575,7 @@ class PointPredict
         }
 
         // Generate a list of intermediate points based on the start, end, and number of points
-        List<GPXPoint> intermediates = (kmlFile != null ? KMLIntermediatePoints(kmlFile, dupes) : GenerateIntermediates(startPoint, endPoint, dupes))
+        List<GPXPoint> intermediates = (kmlFile != null ? CalculateKmlIntermediates(kmlFile, dupes, startPoint, endPoint) : GenerateIntermediates(startPoint, endPoint, dupes))
         .Select(point => new GPXPoint
         {
             Latitude = point.Item1,
@@ -611,7 +613,32 @@ class PointPredict
         return finalPoints;
     }
 
-    private static (double, double)[] KMLIntermediatePoints(string kmlFile, int dupes)
+    private static (double, double)[] GenerateIntermediates((double, double) start, (double, double) end, int dupes)
+    {
+        // Parse start coordinate and end coordinate to lat and lon doubles
+        (double startLat, double startLon) = start;
+        (double endLat, double endLon) = end;
+
+        // For each dupe, determine its equidistant point
+        var intermediatePoints = new (double, double)[dupes];
+        for (int iteration = 0; iteration < dupes; iteration++)
+        {
+            // Determine the average for this iteration based on the number of dupes between the start and end points
+            double average = (double)iteration / (dupes - 1);
+
+            // Determine the intermediate lat/lon based on the start/end point average
+            double intermediateLat = startLat + average * (endLat - startLat);
+            double intermediateLng = startLon + average * (endLon - startLon);
+
+            // Replace the list entry with the intermediate point
+            intermediatePoints[iteration] = (intermediateLat, intermediateLng);
+        }
+
+        // Return the updated point list
+        return intermediatePoints;
+    }
+
+    private static List<(double, double)> ParseKmlFile(string kmlFile)
     {
         // Create a new XML document
         XmlDocument doc = new();
@@ -659,16 +686,47 @@ class PointPredict
             throw new Exception($"Error parsing {Path.GetExtension(kmlFile)} file: {ex.Message}");
         }
 
+        List<GPXPoint> kmlPoints = coordinates
+        .Select(point => new GPXPoint
+        {
+            Latitude = point.Item1,
+            Longitude = point.Item2
+        })
+        .ToList();
+
+        return coordinates;
+    }
+
+    private static (double, double)[] CalculateKmlIntermediates(string kmlFile, int dupes, (double, double) startPoint, (double, double) endPoint)
+    {
+        List<(double, double)> kmlPoints = ParseKmlFile(kmlFile);
+
+        (double, double) firstPoint = kmlPoints
+        .OrderBy(coord => CalculateDistance(startPoint, coord))
+        .First();
+
+        (double, double) lastPoint = kmlPoints
+        .OrderBy(coord => CalculateDistance(endPoint, coord))
+        .First();
+
+        List<(double, double)> between = kmlPoints
+        .OrderBy(point => CalculateDistance((firstPoint.Item1, firstPoint.Item2), point))
+        .TakeWhile(point => point != lastPoint || point == firstPoint)
+        .ToList();
+
+        Console.WriteLine($"[KML] Start of dupe area: {(firstPoint.Item1, firstPoint.Item2)}");
+        Console.WriteLine($"[KML] End of dupe area: {(lastPoint.Item1, lastPoint.Item2)}");
+
         // For each dupe, calculate its corresponding KML point
         var intermediatePoints = new (double, double)[dupes];
         for (int iteration = 0; iteration < dupes; iteration++)
         {
             // Determine the KML point to retrieve based on the number of coordinates in the KML, divided by the number of dupes, times the current iteration
-            int index = coordinates.Count / dupes * iteration;
+            int index = between.Count / dupes * iteration;
 
             // Determine the intermediate lat/lon based on the KML coordinate average index
-            double intermediateLat = coordinates[index].Item1;
-            double intermediateLng = coordinates[index].Item2;
+            double intermediateLat = between[index].Item1;
+            double intermediateLng = between[index].Item2;
 
             // Replace the list entry with the intermediate point
             intermediatePoints[iteration] = (intermediateLat, intermediateLng);
@@ -678,29 +736,19 @@ class PointPredict
         return intermediatePoints;
     }
 
-    private static (double, double)[] GenerateIntermediates((double, double) start, (double, double) end, int dupes)
+    private static double CalculateDistance((double, double) coord1, (double, double) coord2)
     {
-        // Parse start coordinate and end coordinate to lat and lon doubles
-        (double startLat, double startLon) = start;
-        (double endLat, double endLon) = end;
+        double lat1 = coord1.Item1;
+        double lon1 = coord1.Item2;
+        double lat2 = coord2.Item1;
+        double lon2 = coord2.Item2;
 
-        // For each dupe, determine its equidistant point
-        var intermediatePoints = new (double, double)[dupes];
-        for (int iteration = 0; iteration < dupes; iteration++)
-        {
-            // Determine the average for this iteration based on the number of dupes between the start and end points
-            double average = (double)iteration / (dupes - 1);
+        double latDiff = lat2 - lat1;
+        double lonDiff = lon2 - lon1;
 
-            // Determine the intermediate lat/lon based on the start/end point average
-            double intermediateLat = startLat + average * (endLat - startLat);
-            double intermediateLng = startLon + average * (endLon - startLon);
+        double distance = Math.Sqrt(latDiff * latDiff + lonDiff * lonDiff);
 
-            // Replace the list entry with the intermediate point
-            intermediatePoints[iteration] = (intermediateLat, intermediateLng);
-        }
-
-        // Return the updated point list
-        return intermediatePoints;
+        return distance;
     }
 }
 
