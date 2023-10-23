@@ -83,6 +83,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SpotifyGPX.Clipboard\SpotifyGPX.Clipboard.csproj">
+      <Project>{25475a20-ddf6-41f6-b84c-2a3324ca820b}</Project>
+      <Name>SpotifyGPX.Clipboard</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SpotifyGPX.Gpx\SpotifyGPX.Gpx.csproj">
       <Project>{c978495c-b1b8-4039-ac82-b5258cf6b8a9}</Project>
       <Name>SpotifyGPX.Gpx</Name>
