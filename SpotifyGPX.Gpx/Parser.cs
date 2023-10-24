@@ -48,7 +48,7 @@ namespace SpotifyGPX.Gpx
                 {
                     Latitude = double.Parse(trkpt.Attribute("lat").Value),
                     Longitude = double.Parse(trkpt.Attribute("lon").Value),
-                    Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, Formats.gpxPointTimeInp, null)
+                    Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, Point.gpxPointTimeInp, null)
                 })
                 .ToList();
             }

@@ -37,7 +37,7 @@ namespace SpotifyGPX.Gpx
                 // Add both the current Spotify entry and calculated nearest point to the correlated entries list
                 correlatedEntries.Add((spotifyEntry, nearestPoint.Point, count));
 
-                Console.WriteLine($"[SONG] [{count}] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Formats.consoleReadoutFormat)} ~ {nearestPoint.Point.Time.ToUniversalTime().ToString(Formats.consoleReadoutFormat)}] [~{Math.Round(nearestPoint.Accuracy)}s] {Point.GpxTitle(spotifyEntry)}");
+                Console.WriteLine($"[SONG] [{count}] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Point.consoleReadoutFormat)} ~ {nearestPoint.Point.Time.ToUniversalTime().ToString(Point.consoleReadoutFormat)}] [~{Math.Round(nearestPoint.Accuracy)}s] {Point.GpxTitle(spotifyEntry)}");
 
                 count++;
             }

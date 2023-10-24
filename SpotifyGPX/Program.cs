@@ -19,8 +19,37 @@ class Program
     [STAThread]
     static void Main(string[] args)
     {
-        if (args.Length >= 2 && ".json" == Path.GetExtension(args[0]) && ".gpx" == Path.GetExtension(args[1]))
+        if (args.Length == 1)
         {
+            if (args[0] == "-n")
+            {
+                Console.WriteLine("[HELP] Pass -n to complete a song-point pairing without sending the pairs to a GPX file");
+                return;
+            }
+            else if (args[0] == "-j")
+            {
+                Console.WriteLine("[HELP] Pass -j to export a JSON of the songs covering your journey");
+                return;
+            }
+            else if (args[0] == "-p")
+            {
+                Console.WriteLine("[HELP] Pass -p to export a XSPF playlist of the songs covering your journey");
+                return;
+            }
+            else if (args[0] == "-s")
+            {
+                Console.WriteLine("[HELP] Pass -s to export and copy to clipboard a TXT list of Spotify tracks you can paste into a playlist on Spotify");
+                return;
+            }
+            else if (args[0] == "-g")
+            {
+                Console.WriteLine("[HELP] Pass -g to enable coordinate-absence song placement in the resulting GPX (cannot use -g with -n)");
+                return;
+            }
+        }
+
+        if (args.Length >= 2 && ".json" == Path.GetExtension(args[0]) && ".gpx" == Path.GetExtension(args[1]))
+        {           
             string inputJson = args[0];
             string inputGpx = args[1];
             bool noGpxExport = args.Length >= 3 && args.Contains("-n");
@@ -185,7 +214,7 @@ class Program
         {
             // None of these
 
-            Console.WriteLine("[ERROR] Usage: SpotifyGPX <json> <gpx> [-j] [-p] [-n] [-s]");
+            Console.WriteLine("[ERROR] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-g]");
             return;
         }
 
@@ -201,4 +230,3 @@ class Program
         return outputFile;
     }
 }
-

@@ -49,22 +49,22 @@ namespace SpotifyGPX.Playlist
 
                 // Set the creator of the track to the song artist
                 XmlElement artist = document.CreateElement("creator");
-                artist.InnerText = entry.Song_Artist;
+                artist.InnerText = Options.Playlist.Tag(entry, 1);
                 track.AppendChild(artist);
 
                 // Set the title of the track to the song name
                 XmlElement title = document.CreateElement("title");
-                title.InnerText = entry.Song_Name;
+                title.InnerText = Options.Playlist.Tag(entry, 2);
                 track.AppendChild(title);
 
                 // Set the annotation of the song to the end time
                 XmlElement annotation = document.CreateElement("annotation");
-                annotation.InnerText = entry.Time_End.ToString(Formats.gpxPointTimeInp);
+                annotation.InnerText = Options.Playlist.Tag(entry, 3);
                 track.AppendChild(annotation);
 
                 // Set the duration of the song to the amount of time it was listened to
                 XmlElement duration = document.CreateElement("duration");
-                duration.InnerText = entry.Time_Played;
+                duration.InnerText = Options.Playlist.Tag(entry, 4);
                 track.AppendChild(duration);
             }
 

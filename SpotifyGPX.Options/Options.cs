@@ -6,7 +6,7 @@ using System;
 
 namespace SpotifyGPX.Options
 {
-    public class Formats
+    public class Point
     {
         // Time format as read from the input GPX file:
         public static readonly string gpxPointTimeInp = "yyyy-MM-ddTHH:mm:ss.fffzzz"; // time format used to interpret GPX track <time> tags
@@ -16,10 +16,7 @@ namespace SpotifyGPX.Options
 
         // Time format for console readout of point-song time comparison:
         public static readonly string consoleReadoutFormat = "HH:mm:ss";
-    }
 
-    public class Point
-    {
         public static string GpxTitle(SpotifyEntry song)
         {
             // ============== \\
@@ -70,7 +67,7 @@ namespace SpotifyGPX.Options
 
             string description = "";
 
-            description += $"{(song.Time_End != null ? $"Ended here, at {EndedAt.ToString(Formats.gpxPointDescription)}" : null)}";
+            description += $"{(song.Time_End != null ? $"Ended here, at {EndedAt.ToString(gpxPointDescription)}" : null)}";
             description += $"{(song.Song_Shuffle != null ? $"\nShuffle: {(Shuffled == true ? "On" : "Off")}" : null)}";
             description += $"{(song.Song_Skipped != null ? $"\nSkipped: {(Skipped == true ? "Yes" : "No")}" : null)}";
             description += $"{(song.Spotify_Offline != null ? $"\nOffline: {(Offline == true ? "Yes" : "No")}" : null)}";
@@ -81,6 +78,28 @@ namespace SpotifyGPX.Options
             returnString += description;
 
             return returnString;
+        }
+    }
+
+    public class Playlist
+    {
+        // Time format used for the XSPF time ended
+        public static readonly string xspfTime = Point.gpxPointTimeInp;
+        
+        public static string? Tag(SpotifyEntry song, int tag)
+        {
+            string Creator = song.Song_Artist;
+            string Title = song.Song_Name;
+            string Annotation = song.Time_End.ToString(xspfTime);
+            string Duration = song.Time_Played;
+            
+            if (tag == 1) { return Creator; }
+            if (tag == 2) { return Title; }
+            if (tag == 3) { return Annotation; }
+            if (tag == 4) { return Duration; }
+
+            // No applicable return string
+            throw new Exception("Could not retrieve tag format from options");
         }
     }
 }
