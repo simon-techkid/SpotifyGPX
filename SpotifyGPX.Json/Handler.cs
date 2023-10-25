@@ -7,7 +7,7 @@ using SpotifyGPX.Options;
 
 namespace SpotifyGPX.Json
 {
-    public class Json
+    public partial class Json
     {
         public static List<SpotifyEntry> FilterSpotifyJson(List<SpotifyEntry> spotifyEntries, List<GPXPoint> gpxPoints)
         {

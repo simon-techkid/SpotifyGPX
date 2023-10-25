@@ -7,7 +7,7 @@ using SpotifyGPX.Options;
 
 namespace SpotifyGPX.Gpx
 {
-    public class GPX
+    public partial class GPX
     {
         public static List<(SpotifyEntry, GPXPoint, int)> CorrelatePoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
         {

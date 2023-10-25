@@ -88,7 +88,7 @@ class Program
             try
             {
                 // Step 1: Create list of songs contained in the JSON file, and get the JSON format
-                spotifyEntries = Serializer.ParseSpotifyJson(inputJson);
+                spotifyEntries = Json.ParseSpotifyJson(inputJson);
 
                 // Step 2: Create list of GPX points from the GPX file
                 gpxPoints = Parser.ParseGPXFile(inputGpx);
@@ -147,7 +147,7 @@ class Program
                 try
                 {
                     // Write the contents of the JSON
-                    File.WriteAllText(outputJson, Serializer.ExportSpotifyJson(filteredEntries));
+                    File.WriteAllText(outputJson, Json.ExportSpotifyJson(filteredEntries));
                 }
                 catch (Exception ex)
                 {

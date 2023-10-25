@@ -13,7 +13,7 @@ using SpotifyGPX.Options;
 
 namespace SpotifyGPX.Json
 {
-    public class Serializer
+    public partial class Json
     {
         public static List<SpotifyEntry> ParseSpotifyJson(string jsonFile)
         {

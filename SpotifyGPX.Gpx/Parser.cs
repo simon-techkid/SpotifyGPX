@@ -10,7 +10,7 @@ using SpotifyGPX.Options;
 
 namespace SpotifyGPX.Gpx
 {
-    public class Parser
+    public partial class Parser
     {
         public static List<GPXPoint> ParseGPXFile(string gpxFile)
         {
