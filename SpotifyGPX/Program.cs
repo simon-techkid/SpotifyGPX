@@ -106,8 +106,8 @@ class Program
                 return;
             }
 
-            Console.WriteLine($"[INFO] {filteredEntries.Count} Spotify entries filtered from {spotifyEntries.Count} total");
-            Console.WriteLine($"[INFO] {correlatedEntries.Count} Spotify entries matched to set of {filteredEntries.Count}");
+            Console.WriteLine($"[SPOT] {filteredEntries.Count} Spotify entries filtered from {spotifyEntries.Count} total");
+            Console.WriteLine($"[SPOT] {correlatedEntries.Count} Spotify entries matched to set of {filteredEntries.Count}");
 
             if (noGpxExport == false)
             {
@@ -118,7 +118,9 @@ class Program
                     if (predictPoints == true)
                     {
                         string kmlFile = GenerateOutputPath(inputGpx, "kml");
-                        
+
+                        Console.WriteLine($"[PRED] '{Path.GetFileName(kmlFile)}' {(File.Exists(kmlFile) ? "exists, will be used for prediction" : "does not exist, using equidistant placement mode")}");
+
                         correlatedEntries = PointPredict.PredictPoints(correlatedEntries, File.Exists(kmlFile) ? kmlFile : null);
                     }
 
@@ -134,7 +136,7 @@ class Program
                 // Write the contents of the GPX
                 document.Save(outputGpx);
 
-                Console.WriteLine($"[INFO] {Path.GetExtension(outputGpx)} file, '{Path.GetFileName(outputGpx)}', generated successfully!");
+                Console.WriteLine($"[GPX] {Path.GetExtension(outputGpx)} file, '{Path.GetFileName(outputGpx)}', generated successfully!");
             }
 
             if (exportJson == true)
@@ -153,7 +155,7 @@ class Program
                     return;
                 }
 
-                Console.WriteLine($"[INFO] {Path.GetExtension(outputJson)} file, '{Path.GetFileName(outputJson)}', generated successfully!");
+                Console.WriteLine($"[JSON] {Path.GetExtension(outputJson)} file, '{Path.GetFileName(outputJson)}', generated successfully!");
             }
 
             if (exportPlist == true)
@@ -177,7 +179,7 @@ class Program
                 // Write the contents of the XSPF
                 playlist.Save(outputPlist);
 
-                Console.WriteLine($"[INFO] {Path.GetExtension(outputPlist)} file, {Path.GetFileName(outputPlist)}', generated successfully!");
+                Console.WriteLine($"[XSPF] {Path.GetExtension(outputPlist)} file, {Path.GetFileName(outputPlist)}', generated successfully!");
             }
 
             if (exportSpotifyURI == true)
@@ -205,9 +207,9 @@ class Program
                 // Write the contents of the URI list
                 File.WriteAllText(outputTxt, clipboard);
 
-                Console.WriteLine($"[INFO] {Path.GetExtension(outputTxt)} file, '{Path.GetFileName(outputTxt)}', generated successfully!");
+                Console.WriteLine($"[URI] {Path.GetExtension(outputTxt)} file, '{Path.GetFileName(outputTxt)}', generated successfully!");
 
-                Console.WriteLine("[INFO] Spotify URIs copied to clipboard, ready to paste into a Spotify playlist!");
+                Console.WriteLine("[URI] Spotify URIs copied to clipboard, ready to paste into a Spotify playlist!");
             }
         }
         else

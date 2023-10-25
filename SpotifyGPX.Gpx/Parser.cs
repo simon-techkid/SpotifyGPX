@@ -115,7 +115,7 @@ namespace SpotifyGPX.Gpx
                 pointCount++;
             }
 
-            Console.WriteLine($"[INFO] {pointCount} points found in '{Path.GetFileNameWithoutExtension(gpxFile)}' added to GPX");
+            Console.WriteLine($"[GPX] {pointCount} points found in '{Path.GetFileNameWithoutExtension(gpxFile)}' added to GPX");
 
             return document;
         }

@@ -88,10 +88,10 @@ namespace SpotifyGPX.Options
         
         public static string? Tag(SpotifyEntry song, int tag)
         {
-            string Creator = song.Song_Artist;
-            string Title = song.Song_Name;
-            string Annotation = song.Time_End.ToString(xspfTime);
-            string Duration = song.Time_Played;
+            string? Creator = song.Song_Artist;
+            string? Title = song.Song_Name;
+            string? Annotation = song.Time_End.ToString(xspfTime);
+            string? Duration = song.Time_Played;
             
             if (tag == 1) { return Creator; }
             if (tag == 2) { return Title; }

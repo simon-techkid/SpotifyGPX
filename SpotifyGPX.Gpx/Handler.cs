@@ -17,8 +17,6 @@ namespace SpotifyGPX.Gpx
             // Create a list of correlation accuracies, one for each song
             List<double> correlationAccuracy = new();
 
-            int count = 0;
-
             foreach (SpotifyEntry spotifyEntry in filteredEntries)
             {
                 // Create variable to hold the calculated nearest GPX point and its accuracy (absolute value in comparison to each song)
@@ -35,15 +33,13 @@ namespace SpotifyGPX.Gpx
                 correlationAccuracy.Add(nearestPoint.Accuracy);
 
                 // Add both the current Spotify entry and calculated nearest point to the correlated entries list
-                correlatedEntries.Add((spotifyEntry, nearestPoint.Point, count));
+                correlatedEntries.Add((spotifyEntry, nearestPoint.Point, correlatedEntries.Count));
 
-                Console.WriteLine($"[SONG] [{count}] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Point.consoleReadoutFormat)} ~ {nearestPoint.Point.Time.ToUniversalTime().ToString(Point.consoleReadoutFormat)}] [~{Math.Round(nearestPoint.Accuracy)}s] {Point.GpxTitle(spotifyEntry)}");
-
-                count++;
+                Console.WriteLine($"[CORR] [{correlatedEntries.Count}] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Point.consoleReadoutFormat)} ~ {nearestPoint.Point.Time.ToUniversalTime().ToString(Point.consoleReadoutFormat)}] [~{Math.Round(nearestPoint.Accuracy)}s] {Point.GpxTitle(spotifyEntry)}");
             }
 
             // Calculate and print the average correlation accuracy in seconds
-            Console.WriteLine($"[INFO] Song-Point Correlation Accuracy (avg sec): {Math.Round(Queryable.Average(correlationAccuracy.AsQueryable()))}");
+            Console.WriteLine($"[CORR] Song-Point Correlation Accuracy (avg sec): {Math.Round(Queryable.Average(correlationAccuracy.AsQueryable()))}");
 
             // Return the correlated entries list (including each Spotify song and its corresponding point), and the list of accuracies
             return correlatedEntries;

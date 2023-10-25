@@ -15,7 +15,7 @@ namespace SpotifyGPX.PointPredict
     {
         public static List<(SpotifyEntry, GPXPoint, int)> PredictPoints(List<(SpotifyEntry, GPXPoint, int)> finalPoints, string? kmlFile)
         {
-            Console.WriteLine("[INFO] Scanning for duplicate entries:");
+            Console.WriteLine("[PRED] Scanning for duplicate entries:");
 
             // Create list of grouped duplicate coordinate values from final points list
             var groupedDuplicates = finalPoints
@@ -33,7 +33,7 @@ namespace SpotifyGPX.PointPredict
                 }
 
                 // Print the songs implicated and their indexes to the console
-                Console.WriteLine($"       {string.Join(", ", group.Select(s => $"{s.Item1.Song_Name} ({s.Item3})"))}");
+                Console.WriteLine($"     - {string.Join(", ", group.Select(s => $"{s.Item1.Song_Name} ({s.Item3})"))}");
 
             }
 
@@ -45,9 +45,9 @@ namespace SpotifyGPX.PointPredict
             try
             {
                 // Ask the user where the targeted dupe starts and ends
-                Console.Write("[USER] Index of the Start of your dupe: ");
+                Console.Write("[PRED] Index of the Start of your dupe: ");
                 startIndex = int.Parse(Console.ReadLine());
-                Console.Write("[USER] Index of the End of your dupe: ");
+                Console.Write("[PRED] Index of the End of your dupe: ");
                 endIndex = int.Parse(Console.ReadLine());
             }
             catch (FormatException)
