@@ -5,44 +5,43 @@ using System.Collections.Generic;
 using System.Linq;
 using SpotifyGPX.Options;
 
-namespace SpotifyGPX.Gpx
+namespace SpotifyGPX.Gpx;
+
+public partial class GPX
 {
-    public partial class GPX
+    public static List<(SpotifyEntry, GPXPoint, int)> CorrelatePoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
     {
-        public static List<(SpotifyEntry, GPXPoint, int)> CorrelatePoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
+        // Correlate Spotify entries with the nearest GPX points
+        List<(SpotifyEntry, GPXPoint, int)> correlatedEntries = new();
+
+        // Create a list of correlation accuracies, one for each song
+        List<double> correlationAccuracy = new();
+
+        foreach (SpotifyEntry spotifyEntry in filteredEntries)
         {
-            // Correlate Spotify entries with the nearest GPX points
-            List<(SpotifyEntry, GPXPoint, int)> correlatedEntries = new();
-
-            // Create a list of correlation accuracies, one for each song
-            List<double> correlationAccuracy = new();
-
-            foreach (SpotifyEntry spotifyEntry in filteredEntries)
+            // Create variable to hold the calculated nearest GPX point and its accuracy (absolute value in comparison to each song)
+            var nearestPoint = gpxPoints
+            .Select(point => new
             {
-                // Create variable to hold the calculated nearest GPX point and its accuracy (absolute value in comparison to each song)
-                var nearestPoint = gpxPoints
-                .Select(point => new
-                {
-                    Point = point,
-                    Accuracy = Math.Abs((point.Time - spotifyEntry.Time_End).TotalSeconds)
-                })
-                .OrderBy(item => item.Accuracy)
-                .First();
+                Point = point,
+                Accuracy = Math.Abs((point.Time - spotifyEntry.Time_End).TotalSeconds)
+            })
+            .OrderBy(item => item.Accuracy)
+            .First();
 
-                // Add correlation accuracy (seconds) to the correlation accuracies list
-                correlationAccuracy.Add(nearestPoint.Accuracy);
+            // Add correlation accuracy (seconds) to the correlation accuracies list
+            correlationAccuracy.Add(nearestPoint.Accuracy);
 
-                // Add both the current Spotify entry and calculated nearest point to the correlated entries list
-                correlatedEntries.Add((spotifyEntry, nearestPoint.Point, correlatedEntries.Count));
+            // Add both the current Spotify entry and calculated nearest point to the correlated entries list
+            correlatedEntries.Add((spotifyEntry, nearestPoint.Point, correlatedEntries.Count));
 
-                Console.WriteLine($"[CORR] [{correlatedEntries.Count}] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Point.consoleReadoutFormat)} ~ {nearestPoint.Point.Time.ToUniversalTime().ToString(Point.consoleReadoutFormat)}] [~{Math.Round(nearestPoint.Accuracy)}s] {Point.GpxTitle(spotifyEntry)}");
-            }
-
-            // Calculate and print the average correlation accuracy in seconds
-            Console.WriteLine($"[CORR] Song-Point Correlation Accuracy (avg sec): {Math.Round(Queryable.Average(correlationAccuracy.AsQueryable()))}");
-
-            // Return the correlated entries list (including each Spotify song and its corresponding point), and the list of accuracies
-            return correlatedEntries;
+            Console.WriteLine($"[CORR] [{correlatedEntries.Count}] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Point.consoleReadoutFormat)} ~ {nearestPoint.Point.Time.ToUniversalTime().ToString(Point.consoleReadoutFormat)}] [~{Math.Round(nearestPoint.Accuracy)}s] {Point.GpxTitle(spotifyEntry)}");
         }
+
+        // Calculate and print the average correlation accuracy in seconds
+        Console.WriteLine($"[CORR] Song-Point Correlation Accuracy (avg sec): {Math.Round(Queryable.Average(correlationAccuracy.AsQueryable()))}");
+
+        // Return the correlated entries list (including each Spotify song and its corresponding point), and the list of accuracies
+        return correlatedEntries;
     }
 }

@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>SpotifyGPX</RootNamespace>
     <AssemblyName>SpotifyGPX</AssemblyName>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>11.0</LangVersion>
     <Nullable>enable</Nullable>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

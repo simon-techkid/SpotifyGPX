@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SpotifyGPX.Json</RootNamespace>
     <AssemblyName>SpotifyGPX.Json</AssemblyName>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>11.0</LangVersion>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
