@@ -9,6 +9,7 @@ namespace SpotifyGPX.Json;
 
 public partial class Json
 {
+    // move to SpotifyGpx.Clipboard
     public static string GenerateClipboardData(List<SpotifyEntry> tracks)
     {
         // Create string for final clipboard contents

@@ -18,16 +18,17 @@ public partial class Json
     public static List<SpotifyEntry> ParseSpotifyJson(string jsonFile)
     {
         // Create list of JSON objects
-        List<JObject>? sourceJson;
+        List<JObject>? sourceJson; // combine export with parse using this list at parsetime
 
         try
         {
-            // Attempt to deserialize JSON file to list
-            sourceJson = JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFile));
             if (sourceJson == null)
             {
                 throw new Exception("Deserializing results in null return! Check your JSON!");
             }
+            
+            // Attempt to deserialize JSON file to list
+            sourceJson = JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFile));
         }
         catch (Exception ex)
         {
