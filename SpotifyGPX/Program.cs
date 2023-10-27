@@ -91,7 +91,7 @@ class Program
                 spotifyEntries = Json.ParseSpotifyJson(inputJson);
 
                 // Step 2: Create list of GPX points from the GPX file
-                gpxPoints = Parser.ParseGPXFile(inputGpx);
+                gpxPoints = GPX.ParseGPXFile(inputGpx);
 
                 // Step 3: Create list of songs played during the GPX tracking timeframe
                 filteredEntries = Json.FilterSpotifyJson(spotifyEntries, gpxPoints);
@@ -125,7 +125,7 @@ class Program
                     }
 
                     // Create a GPX document based on the list of songs and points
-                    document = Parser.CreateGPXFile(correlatedEntries, inputGpx);
+                    document = GPX.CreateGPXFile(correlatedEntries, inputGpx);
                 }
                 catch (Exception ex)
                 {

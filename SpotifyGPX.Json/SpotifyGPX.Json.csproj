@@ -46,18 +46,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Handler.cs" />
-    <Compile Include="Serializer.cs" />
+    <Compile Include="Json_Cdata.cs" />
+    <Compile Include="Json_Filter.cs" />
+    <Compile Include="Json_Export.cs" />
+    <Compile Include="Json_Parse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpotifyGPX.Options\SpotifyGPX.Options.csproj">
       <Project>{29a1df58-5bf5-4e0a-a531-5c6ff50f6bff}</Project>
       <Name>SpotifyGPX.Options</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
