@@ -18,7 +18,7 @@ public partial class Json
     public static List<SpotifyEntry> ParseSpotifyJson(string jsonFile)
     {
         // Create list of JSON objects
-        List<JObject>? sourceJson; // combine export with parse using this list at parsetime
+        List<JObject>? sourceJson = new(); // combine export with parse using this list at parsetime
 
         try
         {
