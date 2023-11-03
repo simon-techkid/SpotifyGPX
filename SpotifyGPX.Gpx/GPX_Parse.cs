@@ -11,17 +11,12 @@ namespace SpotifyGPX.Gpx;
 
 public partial class GPX
 {
+    private static XDocument document = new();
+    private static List<GPXPoint> Points { get; set; }
+    private static readonly XNamespace Namespace = "http://www.topografix.com/GPX/1/0";
+
     public static List<GPXPoint> ParseGPXFile(string gpxFile)
     {
-        // Create a new XML document
-        XDocument document = new();
-
-        // Use the GPX namespace
-        XNamespace ns = "http://www.topografix.com/GPX/1/0";
-
-        // Create a list of interpreted GPX points
-        List<GPXPoint> gpxPoints = new();
-
         try
         {
             // Attempt to load the contents of the specified file into the XML
@@ -33,30 +28,35 @@ public partial class GPX
             throw new Exception($"The defined {Path.GetExtension(gpxFile)} file is incorrectly formatted: {ex.Message}");
         }
 
-        if (!document.Descendants(ns + "trkpt").Any())
+        if (!document.Descendants(Namespace + "trk").Any())
+        {
+            throw new Exception($"No track elements found in '{Path.GetFileName(gpxFile)}'!");
+        }
+
+        if (!document.Descendants(Namespace + "trkpt").Any())
         {
             // If there are no <trkpt> point elements in the GPX, throw an error
             throw new Exception($"No points found in '{Path.GetFileName(gpxFile)}'!");
         }
+                
+        XElement selectedTrack = TrackManager();
 
-        try
-        {
-            // Attempt to add all GPX <trkpt> latitudes, longitudes, and times to the gpxPoints list
-            gpxPoints = document.Descendants(ns + "trkpt")
-            .Select(trkpt => new GPXPoint
-            {
-                Latitude = double.Parse(trkpt.Attribute("lat").Value),
-                Longitude = double.Parse(trkpt.Attribute("lon").Value),
-                Time = DateTimeOffset.ParseExact(trkpt.Element(ns + "time").Value, Point.gpxPointTimeInp, null)
-            })
-            .ToList();
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"The GPX parameter cannot be parsed:\n{ex.Message}");
-        }
-
+        ParseTrack(selectedTrack);
+        
         // Return the list of points from the GPX
-        return gpxPoints;
+        return Points;
+    }
+
+    private static void ParseTrack(XElement track)
+    {
+        // Attempt to add all GPX <trkpt> latitudes, longitudes, and times to the gpxPoints list
+        Points = track.Descendants(Namespace + "trkpt")
+        .Select(trkpt => new GPXPoint
+        {
+            Latitude = double.Parse(trkpt.Attribute("lat").Value),
+            Longitude = double.Parse(trkpt.Attribute("lon").Value),
+            Time = DateTimeOffset.ParseExact(trkpt.Element(Namespace + "time").Value, Point.gpxPointTimeInp, null)
+        })
+        .ToList();
     }
 }

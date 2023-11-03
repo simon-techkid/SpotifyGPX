@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GPX_Create.cs" />
+    <Compile Include="GPX_TrackSelect.cs" />
     <Compile Include="Points_Correlate.cs" />
     <Compile Include="GPX_Parse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
