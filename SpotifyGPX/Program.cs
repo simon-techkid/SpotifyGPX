@@ -5,12 +5,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
-using SpotifyGPX.Options;
-using SpotifyGPX.Json;
-using SpotifyGPX.Gpx;
-using SpotifyGPX.PointPredict;
-using SpotifyGPX.Playlist;
 using SpotifyGPX.Clipboard;
+using SpotifyGPX.Correlator;
+using SpotifyGPX.Gpx;
+using SpotifyGPX.Json;
+using SpotifyGPX.Options;
+using SpotifyGPX.Playlist;
+using SpotifyGPX.PointPredict;
 
 #nullable enable
 
@@ -97,7 +98,7 @@ class Program
                 filteredEntries = Json.FilterSpotifyJson(spotifyEntries, gpxPoints);
 
                 // Step 4: Create list of songs and points paired as close as possible to one another
-                correlatedEntries = GPX.CorrelatePoints(filteredEntries, gpxPoints);
+                correlatedEntries = Correlate.CorrelatePoints(filteredEntries, gpxPoints);
             }
             catch (Exception ex)
             {
@@ -124,8 +125,10 @@ class Program
                         correlatedEntries = PointPredict.PredictPoints(correlatedEntries, File.Exists(kmlFile) ? kmlFile : null);
                     }
 
+                    string desc = $"Arguments: {string.Join(", ", args)}";
+
                     // Create a GPX document based on the list of songs and points
-                    document = GPX.CreateGPXFile(correlatedEntries, inputGpx);
+                    document = GPX.CreateGPXFile(correlatedEntries, inputGpx, desc);
                 }
                 catch (Exception ex)
                 {

@@ -10,7 +10,7 @@ namespace SpotifyGPX.Gpx;
 
 public partial class GPX
 {
-    public static XmlDocument CreateGPXFile(List<SongPoint> finalPoints, string gpxFile)
+    public static XmlDocument CreateGPXFile(List<SongPoint> finalPoints, string gpxFile, string desc)
     {
         // Create a new XML document
         XmlDocument document = new();
@@ -31,9 +31,24 @@ public partial class GPX
         GPX.SetAttribute("xsi:schemaLocation", "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd");
 
         // Add name of GPX file, based on input GPX name
-        XmlElement gpxname = document.CreateElement("name");
-        gpxname.InnerText = Path.GetFileName(gpxFile);
-        GPX.AppendChild(gpxname);
+        XmlElement gpxName = document.CreateElement("name");
+        gpxName.InnerText = Path.GetFileNameWithoutExtension(gpxFile);
+        GPX.AppendChild(gpxName);
+
+        // Add description of GPX file, based on file's creation
+        XmlElement gpxDesc = document.CreateElement("desc");
+        gpxDesc.InnerText = desc;
+        GPX.AppendChild(gpxDesc);
+
+        // Add description of GPX file, based on file's creation
+        XmlElement gpxAuthor = document.CreateElement("author");
+        gpxAuthor.InnerText = "SpotifyGPX";
+        GPX.AppendChild(gpxAuthor);
+
+        // Add time of GPX file, based on file's creation time
+        XmlElement gpxTime = document.CreateElement("time");
+        gpxTime.InnerText = DateTime.Now.ToUniversalTime().ToString(Point.gpxTimeOut);
+        GPX.AppendChild(gpxTime);
 
         double pointCount = 0;
 
@@ -54,13 +69,14 @@ public partial class GPX
 
             // Set the time of the GPX point to the original time
             XmlElement time = document.CreateElement("time");
-            time.InnerText = pair.Point.Time.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+            time.InnerText = pair.Point.Time.ToUniversalTime().ToString(Point.gpxTimeOut);
             waypoint.AppendChild(time);
 
             // Set the description of the point 
             XmlElement description = document.CreateElement("desc");
             description.InnerText = Point.GpxDescription(pair);
             waypoint.AppendChild(description);
+
             pointCount++;
         }
 
