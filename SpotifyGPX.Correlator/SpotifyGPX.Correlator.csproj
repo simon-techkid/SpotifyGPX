@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9FA37CFF-4168-47FF-8A47-4363D5C3ED77}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>SpotifyGPX</RootNamespace>
-    <AssemblyName>SpotifyGPX</AssemblyName>
+    <ProjectGuid>{9DBE6C20-92F7-44F2-B97E-1762EA80A820}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>SpotifyGPX.Correlator</RootNamespace>
+    <AssemblyName>SpotifyGPX.Correlator</AssemblyName>
     <LangVersion>11.0</LangVersion>
     <Nullable>enable</Nullable>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -51,7 +51,8 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Program</StartupObject>
+    <StartupObject>
+    </StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -64,7 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Points_Correlate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -83,10 +84,6 @@
     <ProjectReference Include="..\SpotifyGPX.Clipboard\SpotifyGPX.Clipboard.csproj">
       <Project>{25475a20-ddf6-41f6-b84c-2a3324ca820b}</Project>
       <Name>SpotifyGPX.Clipboard</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SpotifyGPX.Correlator\SpotifyGPX.Correlator.csproj">
-      <Project>{9dbe6c20-92f7-44f2-b97e-1762ea80a820}</Project>
-      <Name>SpotifyGPX.Correlator</Name>
     </ProjectReference>
     <ProjectReference Include="..\SpotifyGPX.Gpx\SpotifyGPX.Gpx.csproj">
       <Project>{c978495c-b1b8-4039-ac82-b5258cf6b8a9}</Project>

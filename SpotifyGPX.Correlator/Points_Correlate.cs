@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using SpotifyGPX.Options;
 
-namespace SpotifyGPX.Gpx;
+namespace SpotifyGPX.Correlator;
 
-public partial class GPX
+public partial class Correlate
 {
     public static List<SongPoint> CorrelatePoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
     {

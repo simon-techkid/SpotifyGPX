@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SpotifyGPX": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\Simon\\Downloads\\gpx\\StreamingHistory2.json C:\\Users\\Simon\\Downloads\\gpx\\20230709.gpx -n"
+    }
+  }
+}

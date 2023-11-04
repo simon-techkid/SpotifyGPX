@@ -14,6 +14,9 @@ public class Point
     // Time format of the Spotify track portrayed in the GPX point description:
     public static readonly string gpxPointDescription = "yyyy-MM-dd HH:mm:ss zzz"; // time format used in the <desc> field a GPX song point (your choice)
 
+    // Time format used when writing to the GPX in fields that require ISO 8601:
+    public static readonly string gpxTimeOut = "yyyy-MM-ddTHH:mm:ss.fffZ";
+
     // Time format for console readout of point-song time comparison:
     public static readonly string consoleReadoutFormat = "HH:mm:ss";
 
@@ -68,7 +71,7 @@ public class Point
         string description = "";
 
         description += $"{(pair.Song.Time_End != null ? $"Ended here, at {EndedAt.ToString(gpxPointDescription)}" : null)}";
-        description += $"\nSong is {Math.Abs(pair.Accuracy)} seconds {(pair.Accuracy < 0 ? "behind the" : "ahead of")} point";
+        description += $"\nSong is {Math.Abs(pair.Accuracy)} seconds {(pair.Accuracy < 0 ? "behind the" : "ahead of the")} point";
         description += $"{(pair.Song.Song_Shuffle != null ? $"\nShuffle: {(Shuffled == true ? "On" : "Off")}" : null)}";
         description += $"{(pair.Song.Song_Skipped != null ? $"\nSkipped: {(Skipped == true ? "Yes" : "No")}" : null)}";
         description += $"{(pair.Song.Spotify_Offline != null ? $"\nOffline: {(Offline == true ? "Yes" : "No")}" : null)}";
