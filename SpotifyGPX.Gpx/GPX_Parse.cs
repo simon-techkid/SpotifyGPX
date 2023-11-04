@@ -39,10 +39,8 @@ public partial class GPX
             throw new Exception($"No points found in '{Path.GetFileName(gpxFile)}'!");
         }
                 
-        XElement selectedTrack = TrackManager();
+        TrackManager();
 
-        ParseTrack(selectedTrack);
-        
         // Return the list of points from the GPX
         return Points;
     }
@@ -58,5 +56,72 @@ public partial class GPX
             Time = DateTimeOffset.ParseExact(trkpt.Element(Namespace + "time").Value, Point.gpxPointTimeInp, null)
         })
         .ToList();
+
+        Console.WriteLine(Points.Count);
+
+        return;
+    }
+
+    private static void ParseAll(List<XElement> tracks)
+    {
+        // Define a dictionary to map <trk> elements to integers.
+        Dictionary<XElement, int> trkToIntegerMap = new();
+
+        int trkInteger = 0;
+
+        Points = tracks
+        .SelectMany(trk =>
+        {
+            trkToIntegerMap[trk] = trkInteger;
+            
+            List<GPXPoint> trkPoints = trk.Descendants(Namespace + "trkpt")
+                .Select(trkpt => new GPXPoint
+                {
+                    Latitude = double.Parse(trkpt.Attribute("lat").Value),
+                    Longitude = double.Parse(trkpt.Attribute("lon").Value),
+                    Time = DateTimeOffset.ParseExact(trkpt.Element(Namespace + "time").Value, Point.gpxPointTimeInp, null),
+                    TrackMember = trkToIntegerMap[trk] // Use the retrieved trkInteger
+                })
+                .ToList();
+
+            trkToIntegerMap[trk] = trkInteger; // Update the dictionary for the next <trk>
+            trkInteger++;
+
+            return trkPoints;       
+        })
+        .ToList();
+
+        return;
+
+
+
+
+        /*
+        // Iterate over each <trk> element in the list.
+        foreach (XElement trk in tracks)
+        {
+            trkToIntegerMap[trk] = trkInteger;
+            trkInteger++;
+
+
+
+            // Iterate over each <trkpt> element within the current <trk>.
+            foreach (XElement trkpt in trk.Descendants(Namespace + "trkpt"))
+            {
+                // Assign the integer from the map to the current <trkpt>.
+                int pointInteger = trkToIntegerMap[trk];
+
+                Points = trk.Descendants(Namespace + "trkpt")
+                .Select(trkpt => new GPXPoint
+                {
+                    Latitude = double.Parse(trkpt.Attribute("lat").Value),
+                    Longitude = double.Parse(trkpt.Attribute("lon").Value),
+                    Time = DateTimeOffset.ParseExact(trkpt.Element(Namespace + "time").Value, Point.gpxPointTimeInp, null),
+                    TrackMember = trkToIntegerMap[trk]
+                })
+                .ToList();
+            }
+        }
+        */
     }
 }

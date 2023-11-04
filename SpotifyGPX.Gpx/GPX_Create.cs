@@ -10,7 +10,7 @@ namespace SpotifyGPX.Gpx;
 
 public partial class GPX
 {
-    public static XmlDocument CreateGPXFile(List<(SpotifyEntry, GPXPoint, int)> finalPoints, string gpxFile)
+    public static XmlDocument CreateGPXFile(List<SongPoint> finalPoints, string gpxFile)
     {
         // Create a new XML document
         XmlDocument document = new();
@@ -37,8 +37,10 @@ public partial class GPX
 
         double pointCount = 0;
 
-        foreach ((SpotifyEntry song, GPXPoint point, _) in finalPoints)
+        foreach (SongPoint pair in finalPoints)
         {
+            (SpotifyEntry song, GPXPoint point) = SongPoint.ReleasePair(pair);
+            
             // Create waypoint for each song
             XmlElement waypoint = document.CreateElement("wpt");
             GPX.AppendChild(waypoint);

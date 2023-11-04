@@ -9,10 +9,10 @@ namespace SpotifyGPX.Gpx;
 
 public partial class GPX
 {
-    public static List<(SpotifyEntry, GPXPoint, int)> CorrelatePoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
+    public static List<SongPoint> CorrelatePoints(List<SpotifyEntry> filteredEntries, List<GPXPoint> gpxPoints)
     {
         // Correlate Spotify entries with the nearest GPX points
-        List<(SpotifyEntry, GPXPoint, int)> correlatedEntries = new();
+        List<SongPoint> correlatedEntries = new();
 
         // Create a list of correlation accuracies, one for each song
         List<double> correlationAccuracy = new();
@@ -32,10 +32,16 @@ public partial class GPX
             // Add correlation accuracy (seconds) to the correlation accuracies list
             correlationAccuracy.Add(nearestPoint.Accuracy);
 
-            // Add both the current Spotify entry and calculated nearest point to the correlated entries list
-            correlatedEntries.Add((spotifyEntry, nearestPoint.Point, correlatedEntries.Count));
+            SongPoint correlatedPair = new()
+            {
+                Song = spotifyEntry,
+                Point = nearestPoint.Point
+            };
 
-            Console.WriteLine($"[CORR] [{correlatedEntries.Count}] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Point.consoleReadoutFormat)} ~ {nearestPoint.Point.Time.ToUniversalTime().ToString(Point.consoleReadoutFormat)}] [~{Math.Round(nearestPoint.Accuracy)}s] {Point.GpxTitle(spotifyEntry)}");
+            // Add both the current Spotify entry and calculated nearest point to the correlated entries list
+            correlatedEntries.Add(correlatedPair);
+
+            Console.WriteLine($"[CORR] [{nearestPoint.Point.TrackMember}] [{correlatedEntries.Count}] [{spotifyEntry.Time_End.ToUniversalTime().ToString(Point.consoleReadoutFormat)} ~ {nearestPoint.Point.Time.ToUniversalTime().ToString(Point.consoleReadoutFormat)}] [~{Math.Round(nearestPoint.Accuracy)}s] {Point.GpxTitle(spotifyEntry)}");
         }
 
         // Calculate and print the average correlation accuracy in seconds

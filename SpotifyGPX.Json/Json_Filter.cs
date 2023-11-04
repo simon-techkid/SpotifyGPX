@@ -23,6 +23,11 @@ public partial class Json
             // Attempt to filter Spotify entries within the GPX timeframe
             spotifyEntryCandidates = spotifyEntries
             .Where(entry => entry.Time_End >= gpxStartTime && entry.Time_End <= gpxEndTime)
+            .Select((item, index) =>
+            {
+                item.Index = index;
+                return item;
+            })
             .ToList();
         }
         catch (Exception ex)

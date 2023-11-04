@@ -83,7 +83,7 @@ class Program
             List<SpotifyEntry> filteredEntries;
 
             // Step 4: Create a list of paired songs and points based on the closest time between each song and each GPX point
-            List<(SpotifyEntry, GPXPoint, int)> correlatedEntries;
+            List<SongPoint> correlatedEntries;
 
             try
             {

@@ -8,6 +8,7 @@ namespace SpotifyGPX.Options;
 
 public struct SpotifyEntry
 {
+    public int Index { get; set; }
     public DateTimeOffset Time_End { get; set; }
     public string? Song_Artist { get; set; }
     public string? Song_Name { get; set; }
@@ -37,4 +38,25 @@ public struct GPXPoint
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public DateTimeOffset Time { get; set; }
+    public int? TrackMember { get; set; }
+}
+
+public struct SongPoint
+{
+    public SpotifyEntry Song { get; set; }
+    public GPXPoint Point { get; set; }
+
+    public static SongPoint CreatePair(SpotifyEntry givenSong, GPXPoint givenPoint)
+    {
+        return new SongPoint
+        {
+            Song = givenSong,
+            Point = givenPoint
+        };
+    }
+
+    public static (SpotifyEntry, GPXPoint) ReleasePair(SongPoint givenPair)
+    {
+        return (givenPair.Song, givenPair.Point);
+    }
 }

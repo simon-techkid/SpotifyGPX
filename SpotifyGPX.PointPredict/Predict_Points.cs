@@ -11,13 +11,13 @@ namespace SpotifyGPX.PointPredict;
 
 public partial class PointPredict
 {
-    public static List<(SpotifyEntry, GPXPoint, int)> PredictPoints(List<(SpotifyEntry, GPXPoint, int)> finalPoints, string? kmlFile)
+    public static List<SongPoint> PredictPoints(List<SongPoint> finalPoints, string? kmlFile)
     {
         Console.WriteLine("[PRED] Scanning for duplicate entries:");
 
         // Create list of grouped duplicate coordinate values from final points list
         var groupedDuplicates = finalPoints
-        .GroupBy(p => (p.Item2.Latitude, p.Item2.Longitude));
+        .GroupBy(p => (p.Point.Latitude, p.Point.Longitude));
 
         foreach (var group in groupedDuplicates)
         {
@@ -31,7 +31,7 @@ public partial class PointPredict
             }
 
             // Print the songs implicated and their indexes to the console
-            Console.WriteLine($"     - {string.Join(", ", group.Select(s => $"{s.Item1.Song_Name} ({s.Item3})"))}");
+            Console.WriteLine($"     - {string.Join(", ", group.Select(s => $"{s.Song.Song_Name} ({s.Song.Index})"))}");
 
         }
 
@@ -54,8 +54,8 @@ public partial class PointPredict
         }
 
         // Generate start and end point coordinate doubles of the specified start and end duplicates
-        (double, double) startPoint = (finalPoints[startIndex].Item2.Latitude, finalPoints[startIndex].Item2.Longitude);
-        (double, double) endPoint = (finalPoints[endIndex].Item2.Latitude, finalPoints[endIndex].Item2.Longitude);
+        (double, double) startPoint = (finalPoints[startIndex].Point.Latitude, finalPoints[startIndex].Point.Longitude);
+        (double, double) endPoint = (finalPoints[endIndex].Point.Latitude, finalPoints[endIndex].Point.Longitude);
 
         // Calculate the number of dupes based on the difference between the start and end values
         int dupes = endIndex - startIndex;
@@ -83,21 +83,21 @@ public partial class PointPredict
             int layer = startIndex + index;
 
             // Create a variable storing the original entry from finalPoints
-            var (song, point, _) = finalPoints[layer];
+            SongPoint originalPoint = finalPoints[layer];
 
             // Create a new GPXPoint with updated latitude and longitude (from intermediate calculation
             GPXPoint updatedPoint = new()
             {
                 Predicted = true, // Inform description this is a predicted entry
-                Time = finalPoints[layer].Item1.Time_End, // get time from song end time
+                Time = finalPoints[layer].Song.Time_End, // get time from song end time
                 Latitude = intermediates[index].Latitude,
                 Longitude = intermediates[index].Longitude
             };
 
             // Replaced indexedPoints index with the updated point
-            finalPoints[layer] = (song, updatedPoint, layer);
+            finalPoints[layer] = SongPoint.CreatePair(originalPoint.Song, updatedPoint);
 
-            Console.WriteLine($"[DUPE] [{layer}] {(updatedPoint.Latitude, updatedPoint.Longitude)} {song.Song_Name}");
+            Console.WriteLine($"[DUPE] [{layer}] {(updatedPoint.Latitude, updatedPoint.Longitude)} {originalPoint.Song.Song_Name}");
         }
 
         // Return the updated points list
