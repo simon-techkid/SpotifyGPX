@@ -29,6 +29,7 @@ public partial class Correlate
             return new SongPoint
             {
                 Accuracy = (spotifyEntry.Time_End - nearestPoint.Point.Time).TotalSeconds,
+                AbsAccuracy = nearestPoint.Accuracy,
                 Song = spotifyEntry,
                 Point = nearestPoint.Point
             };
@@ -36,7 +37,7 @@ public partial class Correlate
         .ToList();
 
         // Calculate and print the average correlation accuracy in seconds
-        Console.WriteLine($"[CORR] Song-Point Correlation Accuracy (avg sec): {Math.Round(correlatedEntries.Average(correlatedPair => correlatedPair.Accuracy))}");
+        Console.WriteLine($"[CORR] Song-Point Correlation Accuracy (avg sec): {Math.Round(correlatedEntries.Average(correlatedPair => correlatedPair.AbsAccuracy))}");
 
         // Return the correlated entries list (including each Spotify song and its corresponding point), and the list of accuracies
         return correlatedEntries;

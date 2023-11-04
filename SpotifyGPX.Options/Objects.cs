@@ -38,12 +38,13 @@ public struct GPXPoint
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public DateTimeOffset Time { get; set; }
-    public int? TrackMember { get; set; }
+    public int TrackMember { get; set; }
 }
 
 public struct SongPoint
 {
     public double Accuracy { get; set; }
+    public double AbsAccuracy { get; set; }
     public SpotifyEntry Song { get; set; }
     public GPXPoint Point { get; set; }
 
