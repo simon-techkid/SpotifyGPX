@@ -47,13 +47,4 @@ public struct SongPoint
     public double AbsAccuracy { get; set; }
     public SpotifyEntry Song { get; set; }
     public GPXPoint Point { get; set; }
-
-    public static SongPoint CreatePair(SpotifyEntry givenSong, GPXPoint givenPoint)
-    {
-        return new SongPoint
-        {
-            Song = givenSong,
-            Point = givenPoint
-        };
-    }
 }

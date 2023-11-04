@@ -45,7 +45,7 @@ public partial class GPX
         return Points;
     }
 
-    private static void ParseAll(List<XElement> tracks)
+    private static void ParseTracks(List<XElement> tracks)
     {
         // Define a dictionary to map <trk> elements to integers.
         Dictionary<XElement, int> trkToIntegerMap = new();

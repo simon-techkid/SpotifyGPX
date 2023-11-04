@@ -24,31 +24,36 @@ public partial class GPX
                 Console.WriteLine($"[TRAK] [{i + 1}] {tracks[i].Element(Namespace + "name")?.Value ?? $"Track {i}"}");
             }
 
-            Console.WriteLine("[TRAK] [A] All Tracks");
+            Console.WriteLine("[TRAK] [A] All Tracks (Only include songs played during tracks)");
+            Console.WriteLine("[TRAK] [B] All Tracks (Include songs played in gaps between tracks)");
 
             Console.Write("[TRAK] Please choose the track you want to use: ");
 
-            int selectedTrackIndex;
             while (true)
             {
                 string input = Console.ReadLine();
-                if (int.TryParse(input, out selectedTrackIndex) && selectedTrackIndex >= 1 && selectedTrackIndex <= tracks.Count)
+                if (int.TryParse(input, out int selectedTrackIndex) && selectedTrackIndex >= 1 && selectedTrackIndex <= tracks.Count)
                 {
+                    // Select the user-chosen <trk> element
+                    selectedTrack = tracks[selectedTrackIndex - 1];
+
                     break;
                 }
                 else if (input == "A")
                 {
-                    ParseAll(tracks);
-                    return;                   
+                    ParseTracks(tracks);
+                    return;
+                }
+                else if (input == "B")
+                {
+                    selectedTrack = new XElement("combined", tracks);
+                    break;
                 }
                 else
                 {
                     Console.WriteLine("Invalid input. Please enter a valid track number.");
                 }
             }
-
-            // Select the user-chosen <trk> element
-            selectedTrack = tracks[selectedTrackIndex - 1];
         }
         else
         {
@@ -60,7 +65,7 @@ public partial class GPX
             selectedTrack
         };
 
-        ParseAll(finalSelect);
+        ParseTracks(finalSelect);
 
         return;
     }

@@ -94,8 +94,14 @@ public partial class PointPredict
                 Longitude = intermediates[index].Longitude
             };
 
+            SongPoint updatedPair = new()
+            {
+                Song = originalPoint.Song,
+                Point = updatedPoint
+            };
+
             // Replaced indexedPoints index with the updated point
-            finalPoints[layer] = SongPoint.CreatePair(originalPoint.Song, updatedPoint);
+            finalPoints[layer] = updatedPair;
 
             Console.WriteLine($"[DUPE] [{layer}] {(updatedPoint.Latitude, updatedPoint.Longitude)} {originalPoint.Song.Song_Name}");
         }
