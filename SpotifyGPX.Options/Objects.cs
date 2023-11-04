@@ -43,6 +43,7 @@ public struct GPXPoint
 
 public struct SongPoint
 {
+    public double Accuracy { get; set; }
     public SpotifyEntry Song { get; set; }
     public GPXPoint Point { get; set; }
 
@@ -53,10 +54,5 @@ public struct SongPoint
             Song = givenSong,
             Point = givenPoint
         };
-    }
-
-    public static (SpotifyEntry, GPXPoint) ReleasePair(SongPoint givenPair)
-    {
-        return (givenPair.Song, givenPair.Point);
     }
 }

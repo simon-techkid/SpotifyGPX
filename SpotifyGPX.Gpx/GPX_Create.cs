@@ -38,30 +38,28 @@ public partial class GPX
         double pointCount = 0;
 
         foreach (SongPoint pair in finalPoints)
-        {
-            (SpotifyEntry song, GPXPoint point) = SongPoint.ReleasePair(pair);
-            
+        {            
             // Create waypoint for each song
             XmlElement waypoint = document.CreateElement("wpt");
             GPX.AppendChild(waypoint);
 
             // Set the lat and lon of the waypoing to the original point
-            waypoint.SetAttribute("lat", point.Latitude.ToString());
-            waypoint.SetAttribute("lon", point.Longitude.ToString());
+            waypoint.SetAttribute("lat", pair.Point.Latitude.ToString());
+            waypoint.SetAttribute("lon", pair.Point.Longitude.ToString());
 
             // Set the name of the GPX point to the name of the song
             XmlElement name = document.CreateElement("name");
-            name.InnerText = Point.GpxTitle(song);
+            name.InnerText = Point.GpxTitle(pair.Song);
             waypoint.AppendChild(name);
 
             // Set the time of the GPX point to the original time
             XmlElement time = document.CreateElement("time");
-            time.InnerText = point.Time.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+            time.InnerText = pair.Point.Time.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
             waypoint.AppendChild(time);
 
             // Set the description of the point 
             XmlElement description = document.CreateElement("desc");
-            description.InnerText = Point.GpxDescription(song, point.Time.Offset, point.Predicted == true ? "Point Predicted" : null);
+            description.InnerText = Point.GpxDescription(pair);
             waypoint.AppendChild(description);
             pointCount++;
         }
