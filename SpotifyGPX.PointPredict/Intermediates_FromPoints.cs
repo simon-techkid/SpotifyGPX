@@ -1,15 +1,8 @@
 ﻿// SpotifyGPX by Simon Field
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using SpotifyGPX.Options;
-
-# nullable enable
-
 namespace SpotifyGPX.PointPredict;
 
-public partial class PointPredict
+partial class PointPredict
 {
     private static (double, double)[] GenerateEquidistantIntermediates((double, double) start, (double, double) end, int dupes)
     {

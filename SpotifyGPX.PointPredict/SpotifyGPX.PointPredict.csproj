@@ -43,11 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Kml_DistCalc.cs" />
-    <Compile Include="Kml_Parse.cs" />
-    <Compile Include="Kml_Intermediates.cs" />
-    <Compile Include="Predict_Points.cs" />
-    <Compile Include="Predict_Intermediates.cs" />
+    <Compile Include="Point_AutoPredict.cs" />
+    <Compile Include="Intermediates_FromKml.cs" />
+    <Compile Include="Intermediates_FromPoints.cs" />
+    <Compile Include="Point_Predict.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

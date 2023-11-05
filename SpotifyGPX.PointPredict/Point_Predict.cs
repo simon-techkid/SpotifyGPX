@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SpotifyGPX.Options;
 
-# nullable enable
+#nullable enable
 
 namespace SpotifyGPX.PointPredict;
 
