@@ -36,8 +36,12 @@ public partial class Correlate
         })
         .ToList();
 
-        // Calculate and print the average correlation accuracy in seconds
-        Console.WriteLine($"[CORR] Song-Point Correlation Accuracy (avg sec): {Math.Round(correlatedEntries.Average(correlatedPair => correlatedPair.AbsAccuracy))}");
+        
+        if (correlatedEntries.Count > 0)
+        {
+            // Calculate and print the average correlation accuracy in seconds
+            Console.WriteLine($"[CORR] Song-Point Correlation Accuracy (avg sec): {Math.Round(correlatedEntries.Average(correlatedPair => correlatedPair.AbsAccuracy))}");
+        }
 
         // Return the correlated entries list (including each Spotify song and its corresponding point), and the list of accuracies
         return correlatedEntries;
