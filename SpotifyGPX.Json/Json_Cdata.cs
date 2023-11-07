@@ -1,8 +1,8 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Options;
 using System;
 using System.Collections.Generic;
-using SpotifyGPX.Options;
 
 namespace SpotifyGPX.Json;
 

@@ -1,10 +1,5 @@
 ﻿// SpotifyGPX by Simon Field
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Xml;
 using SpotifyGPX.Clipboard;
 using SpotifyGPX.Correlator;
 using SpotifyGPX.Gpx;
@@ -12,6 +7,11 @@ using SpotifyGPX.Json;
 using SpotifyGPX.Options;
 using SpotifyGPX.Playlist;
 using SpotifyGPX.PointPredict;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Xml;
 
 #nullable enable
 
@@ -50,7 +50,7 @@ class Program
         }
 
         if (args.Length >= 2 && ".json" == Path.GetExtension(args[0]) && ".gpx" == Path.GetExtension(args[1]))
-        {           
+        {
             string inputJson = args[0];
             string inputGpx = args[1];
             bool noGpxExport = args.Length >= 3 && args.Contains("-n");

@@ -1,11 +1,11 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
-using SpotifyGPX.Options;
 
 namespace SpotifyGPX.PointPredict;
 

@@ -1,10 +1,9 @@
 ﻿// SpotifyGPX by Simon Field
 
-using System;
-using System.Collections.Generic;
-using System.Xml;
-using System.IO;
 using SpotifyGPX.Options;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml;
 
 namespace SpotifyGPX.Playlist;
 

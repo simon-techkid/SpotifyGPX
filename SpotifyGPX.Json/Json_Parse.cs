@@ -1,13 +1,13 @@
 ﻿// SpotifyGPX by Simon Field
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SpotifyGPX.Options;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.IO;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using SpotifyGPX.Options;
+using System.Linq;
 
 #nullable enable
 
@@ -26,7 +26,7 @@ public partial class Json
             {
                 throw new Exception("Deserializing results in null return! Check your JSON!");
             }
-            
+
             // Attempt to deserialize JSON file to list
             sourceJson = JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFile));
         }

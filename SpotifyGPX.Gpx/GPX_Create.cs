@@ -1,10 +1,10 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-using SpotifyGPX.Options;
 
 namespace SpotifyGPX.Gpx;
 
@@ -53,7 +53,7 @@ public partial class GPX
         double pointCount = 0;
 
         foreach (SongPoint pair in finalPoints)
-        {            
+        {
             // Create waypoint for each song
             XmlElement waypoint = document.CreateElement("wpt");
             GPX.AppendChild(waypoint);

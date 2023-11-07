@@ -1,11 +1,11 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using SpotifyGPX.Options;
 
 namespace SpotifyGPX.Gpx;
 
@@ -38,7 +38,7 @@ public partial class GPX
             // If there are no <trkpt> point elements in the GPX, throw an error
             throw new Exception($"No points found in '{Path.GetFileName(gpxFile)}'!");
         }
-                
+
         TrackManager();
 
         // Return the list of points from the GPX
@@ -51,12 +51,12 @@ public partial class GPX
         Dictionary<XElement, int> trkToIntegerMap = new();
 
         int trkInteger = 0;
-                
+
         Points = tracks
         .SelectMany(trk =>
         {
             trkToIntegerMap[trk] = trkInteger;
-            
+
             List<GPXPoint> trkPoints = trk.Descendants(Namespace + "trkpt")
             .Select(trkpt => new GPXPoint
             {
@@ -70,7 +70,7 @@ public partial class GPX
             trkToIntegerMap[trk] = trkInteger; // Update the dictionary for the next <trk>
             trkInteger++;
 
-            return trkPoints;       
+            return trkPoints;
         })
         .ToList();
 

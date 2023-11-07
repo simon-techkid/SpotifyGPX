@@ -1,11 +1,11 @@
 ﻿// SpotifyGPX by Simon Field
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SpotifyGPX.Options;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using SpotifyGPX.Options;
 
 #nullable enable
 

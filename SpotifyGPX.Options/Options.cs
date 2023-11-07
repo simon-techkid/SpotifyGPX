@@ -89,14 +89,14 @@ public class Playlist
 {
     // Time format used for the XSPF time ended
     public static readonly string xspfTime = Point.gpxPointTimeInp;
-    
+
     public static string? Tag(SpotifyEntry song, int tag)
     {
         string? Creator = song.Song_Artist;
         string? Title = song.Song_Name;
         string? Annotation = song.Time_End.ToString(xspfTime);
         string? Duration = song.Time_Played;
-        
+
         if (tag == 1) { return Creator; }
         if (tag == 2) { return Title; }
         if (tag == 3) { return Annotation; }
