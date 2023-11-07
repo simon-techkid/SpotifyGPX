@@ -36,7 +36,7 @@ public partial class Correlate
         })
         .ToList();
 
-        
+
         if (correlatedEntries.Count > 0)
         {
             // Calculate and print the average correlation accuracy in seconds
