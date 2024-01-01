@@ -1,6 +1,5 @@
 ﻿// SpotifyGPX by Simon Field
 
-using SpotifyGPX.Clipboard;
 using SpotifyGPX.Correlator;
 using SpotifyGPX.Gpx;
 using SpotifyGPX.Json;
@@ -204,15 +203,10 @@ class Program
                     return;
                 }
 
-                // Set the clipboard contents to the string
-                Clipboard.SetClipboard(clipboard);
-
                 // Write the contents of the URI list
                 File.WriteAllText(outputTxt, clipboard);
 
                 Console.WriteLine($"[URI] {Path.GetExtension(outputTxt)} file, '{Path.GetFileName(outputTxt)}', generated successfully!");
-
-                Console.WriteLine("[URI] Spotify URIs copied to clipboard, ready to paste into a Spotify playlist!");
             }
         }
         else
