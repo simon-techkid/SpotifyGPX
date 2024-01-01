@@ -1,11 +1,9 @@
 ﻿// SpotifyGPX by Simon Field
 
-using SpotifyGPX.Correlator;
 using SpotifyGPX.Gpx;
 using SpotifyGPX.Json;
 using SpotifyGPX.Options;
-using SpotifyGPX.Playlist;
-using SpotifyGPX.PointPredict;
+using SpotifyGPX.Pairings;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -72,31 +70,25 @@ class Program
 
             string outputGpx = GenerateOutputPath(inputGpx, "gpx");
 
-            // Step 1: Create a list of all Spotify songs in the given JSON file
-            List<SpotifyEntry> spotifyEntries;
-
-            // Step 2: Create a list of all GPX points in the given GPX file
+            // Step 1: Create a list of all GPX points in the given GPX file
             List<GPXPoint> gpxPoints;
 
-            // Step 3: Create a list of songs within the timeframe between the first and last GPX point
+            // Step 2: Create a list of songs within the timeframe between the first and last GPX point
             List<SpotifyEntry> filteredEntries;
 
-            // Step 4: Create a list of paired songs and points based on the closest time between each song and each GPX point
-            List<SongPoint> correlatedEntries;
+            // Step 3: Create a list of paired songs and points based on the closest time between each song and each GPX point
+            Pairings pairedEntries;
 
             try
             {
-                // Step 1: Create list of songs contained in the JSON file, and get the JSON format
-                spotifyEntries = Json.ParseSpotifyJson(inputJson);
+                // Step 1: Create list of GPX points from the GPX file
+                gpxPoints = new GpxFile(inputGpx).Points;
 
-                // Step 2: Create list of GPX points from the GPX file
-                gpxPoints = GPX.ParseGPXFile(inputGpx);
+                // Step 2: Create list of songs played, and filter it to songs played during the GPX tracking timeframe
+                filteredEntries = new JsonFile(inputJson).FilterSpotifyJson(gpxPoints);
 
-                // Step 3: Create list of songs played during the GPX tracking timeframe
-                filteredEntries = Json.FilterSpotifyJson(spotifyEntries, gpxPoints);
-
-                // Step 4: Create list of songs and points paired as close as possible to one another
-                correlatedEntries = Correlate.CorrelatePoints(filteredEntries, gpxPoints);
+                // Step 3: Create list of songs and points paired as close as possible to one another
+                pairedEntries = new Pairings(filteredEntries, gpxPoints);
             }
             catch (Exception ex)
             {
@@ -104,9 +96,6 @@ class Program
                 Console.WriteLine(ex);
                 return;
             }
-
-            Console.WriteLine($"[SPOT] {filteredEntries.Count} Spotify entries filtered from {spotifyEntries.Count} total");
-            Console.WriteLine($"[SPOT] {correlatedEntries.Count} Spotify entries matched to set of {filteredEntries.Count}");
 
             if (noGpxExport == false)
             {
@@ -120,13 +109,13 @@ class Program
 
                         Console.WriteLine($"[PRED] '{Path.GetFileName(kmlFile)}' {(File.Exists(kmlFile) ? "exists, will be used for prediction" : "does not exist, using equidistant placement mode")}");
 
-                        correlatedEntries = PointPredict.PredictPoints(correlatedEntries, File.Exists(kmlFile) ? kmlFile : null);
+                        pairedEntries.PredictPoints(File.Exists(kmlFile) ? kmlFile : null);
                     }
 
                     string desc = $"Arguments: {string.Join(", ", args)}";
 
                     // Create a GPX document based on the list of songs and points
-                    document = GPX.CreateGPXFile(correlatedEntries, inputGpx, desc);
+                    document = pairedEntries.CreateGPX(inputGpx, desc);
                 }
                 catch (Exception ex)
                 {
@@ -148,7 +137,7 @@ class Program
                 try
                 {
                     // Write the contents of the JSON
-                    File.WriteAllText(outputJson, Json.ExportSpotifyJson(filteredEntries));
+                    File.WriteAllText(outputJson, JsonFile.ExportSpotifyJson());
                 }
                 catch (Exception ex)
                 {
@@ -169,7 +158,7 @@ class Program
                 try
                 {
                     // Create an XML document for the playlist
-                    playlist = XSPF.CreatePlist(filteredEntries, outputPlist);
+                    playlist = JsonFile.CreatePlist(filteredEntries, outputPlist);
                 }
                 catch (Exception ex)
                 {
@@ -193,7 +182,7 @@ class Program
                 try
                 {
                     // Get the list of Spotify URIs as a string
-                    clipboard = Json.GenerateClipboardData(filteredEntries);
+                    clipboard = JsonFile.GenerateClipboardData();
                 }
                 catch (Exception ex)
                 {

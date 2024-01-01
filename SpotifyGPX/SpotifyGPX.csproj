@@ -22,12 +22,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SpotifyGPX.Correlator\SpotifyGPX.Correlator.csproj" />
+    <ProjectReference Include="..\SpotifyGPX.Correlator\SpotifyGPX.Pairings.csproj" />
     <ProjectReference Include="..\SpotifyGPX.Gpx\SpotifyGPX.Gpx.csproj" />
     <ProjectReference Include="..\SpotifyGPX.Json\SpotifyGPX.Json.csproj" />
     <ProjectReference Include="..\SpotifyGPX.Options\SpotifyGPX.Options.csproj" />
-    <ProjectReference Include="..\SpotifyGPX.Playlist\SpotifyGPX.Playlist.csproj" />
-    <ProjectReference Include="..\SpotifyGPX.PointPredict\SpotifyGPX.PointPredict.csproj" />
   </ItemGroup>
   
 </Project>

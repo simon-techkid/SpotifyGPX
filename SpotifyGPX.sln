@@ -7,15 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyGPX", "SpotifyGPX\Sp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyGPX.Options", "SpotifyGPX.Options\SpotifyGPX.Options.csproj", "{29A1DF58-5BF5-4E0A-A531-5C6FF50F6BFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyGPX.PointPredict", "SpotifyGPX.PointPredict\SpotifyGPX.PointPredict.csproj", "{99A08E3D-D665-407F-A97D-F65C270891C6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyGPX.Json", "SpotifyGPX.Json\SpotifyGPX.Json.csproj", "{20DFB7F3-C268-4B4A-858E-F94750F3DC46}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyGPX.Gpx", "SpotifyGPX.Gpx\SpotifyGPX.Gpx.csproj", "{C978495C-B1B8-4039-AC82-B5258CF6B8A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyGPX.Playlist", "SpotifyGPX.Playlist\SpotifyGPX.Playlist.csproj", "{75096431-9590-41F8-86E0-FD4E67921CFE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyGPX.Correlator", "SpotifyGPX.Correlator\SpotifyGPX.Correlator.csproj", "{9DBE6C20-92F7-44F2-B97E-1762EA80A820}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyGPX.Pairings", "SpotifyGPX.Correlator\SpotifyGPX.Pairings.csproj", "{9DBE6C20-92F7-44F2-B97E-1762EA80A820}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,10 +26,6 @@ Global
 		{29A1DF58-5BF5-4E0A-A531-5C6FF50F6BFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{29A1DF58-5BF5-4E0A-A531-5C6FF50F6BFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29A1DF58-5BF5-4E0A-A531-5C6FF50F6BFF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{99A08E3D-D665-407F-A97D-F65C270891C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{99A08E3D-D665-407F-A97D-F65C270891C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{99A08E3D-D665-407F-A97D-F65C270891C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{99A08E3D-D665-407F-A97D-F65C270891C6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{20DFB7F3-C268-4B4A-858E-F94750F3DC46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{20DFB7F3-C268-4B4A-858E-F94750F3DC46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20DFB7F3-C268-4B4A-858E-F94750F3DC46}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -42,10 +34,6 @@ Global
 		{C978495C-B1B8-4039-AC82-B5258CF6B8A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C978495C-B1B8-4039-AC82-B5258CF6B8A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C978495C-B1B8-4039-AC82-B5258CF6B8A9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{75096431-9590-41F8-86E0-FD4E67921CFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{75096431-9590-41F8-86E0-FD4E67921CFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{75096431-9590-41F8-86E0-FD4E67921CFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{75096431-9590-41F8-86E0-FD4E67921CFE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9DBE6C20-92F7-44F2-B97E-1762EA80A820}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9DBE6C20-92F7-44F2-B97E-1762EA80A820}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DBE6C20-92F7-44F2-B97E-1762EA80A820}.Release|Any CPU.ActiveCfg = Release|Any CPU
