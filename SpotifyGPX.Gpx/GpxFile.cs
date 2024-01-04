@@ -123,10 +123,11 @@ public readonly struct GpxFile
                     ),
                     Time = trkpt.Element(Namespace + "time").Value
                 })
-                .Select(pointData => new GPXPoint(
+                .Select((pointData, index) => new GPXPoint(
                     pointData.Coordinate, // Longitude
                     pointData.Time,       // Time
-                    trkToIntegerMap[trk] // Track Member
+                    trkToIntegerMap[trk], // Track Member
+                    index
                 ))
                 .ToList();
 

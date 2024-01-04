@@ -117,11 +117,12 @@ public struct SpotifyEntry
 
 public struct GPXPoint
 {
-    public GPXPoint(Coordinate point, string time, int trackmem)
+    public GPXPoint(Coordinate point, string time, int trackmem, int index)
     {
         Location = point;
         TimeStr = time;
         TrackMember = trackmem;
+        Index = index;
     }
 
     public GPXPoint(Coordinate point)
@@ -137,6 +138,7 @@ public struct GPXPoint
         return this;
     }
     
+    public int Index { get; }
     public bool Predicted { get; private set; }
     public Coordinate Location { get; private set; }
     public DateTimeOffset Time { get; private set; }
@@ -229,12 +231,14 @@ public readonly struct SongPoint
         return builder.ToString();
     }
 
-    public SongPoint(SpotifyEntry song, GPXPoint point)
+    public SongPoint(SpotifyEntry song, GPXPoint point, int index)
     {
         Song = song;
         Point = point;
+        Index = index;
     }
 
+    public readonly int Index { get; } // Unique identifier of this SongPoint in a list
     public readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds;
     public readonly double AbsAccuracy => Math.Abs((Point.Time - Song.Time).TotalSeconds);
     public SpotifyEntry Song { get; }
@@ -242,6 +246,6 @@ public readonly struct SongPoint
 
     public override string ToString()
     {
-        return $"[CORR] [{Point.TrackMember}] [{Song.Index}] [{Song.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat)} ~ {Point.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat)}] [~{Math.Round(Accuracy)}s] {GpxTitle()}";
+        return $"[CORR] [{Point.TrackMember}] [{Index}] [{Song.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat)} ~ {Point.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat)}] [~{Math.Round(Accuracy)}s] {GpxTitle()}";
     }
 }

@@ -22,13 +22,13 @@ public readonly struct Pairings
     {
         // Correlate Spotify entries with the nearest GPX points
         List<SongPoint> correlatedEntries = songs
-        .Select(spotifyEntry =>
+        .Select((spotifyEntry, index) =>
         {
             GPXPoint nearestPoint = points
             .OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time).TotalSeconds))
             .First();
 
-            SongPoint pair = new(spotifyEntry, nearestPoint);
+            SongPoint pair = new(spotifyEntry, nearestPoint, index);
             Console.WriteLine(pair.ToString());
 
             return pair;
