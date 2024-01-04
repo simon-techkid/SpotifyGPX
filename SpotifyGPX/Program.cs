@@ -103,15 +103,6 @@ class Program
 
                 try
                 {
-                    if (predictPoints == true)
-                    {
-                        string kmlFile = GenerateOutputPath(inputGpx, "kml");
-
-                        Console.WriteLine($"[PRED] '{Path.GetFileName(kmlFile)}' {(File.Exists(kmlFile) ? "exists, will be used for prediction" : "does not exist, using equidistant placement mode")}");
-
-                        pairedEntries.PredictPoints(File.Exists(kmlFile) ? kmlFile : null);
-                    }
-
                     string desc = $"Arguments: {string.Join(", ", args)}";
 
                     // Create a GPX document based on the list of songs and points

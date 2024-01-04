@@ -117,16 +117,83 @@ public struct SpotifyEntry
 
 public struct GPXPoint
 {
-    public bool Predicted { get; set; }
-    public double Latitude { get; set; }
-    public double Longitude { get; set; }
-    public DateTimeOffset Time { get; set; }
+    public GPXPoint(Coordinate point, string time, int trackmem)
+    {
+        Location = point;
+        TimeStr = time;
+        TrackMember = trackmem;
+    }
+
+    public GPXPoint(Coordinate point)
+    {
+        Location = point;
+    }
+
+    public GPXPoint PPModify(Coordinate point)
+    {
+        Location = point;
+        Predicted = true;
+
+        return this;
+    }
+    
+    public bool Predicted { get; private set; }
+    public Coordinate Location { get; private set; }
+    public DateTimeOffset Time { get; private set; }
     public string TimeStr
     {
         readonly get => Time.ToString(Point.gpxTimeOut);
-        set => Time = DateTimeOffset.ParseExact(value, Point.gpxTimeInp, null);
+        private set => Time = DateTimeOffset.ParseExact(value, Point.gpxTimeInp, null);
     }
-    public int TrackMember { get; set; }
+    public int TrackMember { get; }
+}
+
+public readonly struct Coordinate
+{
+    public Coordinate(double lat, double lon)
+    {
+        Latitude = lat;
+        Longitude = lon;
+    }
+
+    public readonly double Latitude;
+    public readonly double Longitude;
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is Coordinate other)
+        {
+            return this.Latitude == other.Latitude && this.Longitude == other.Longitude;
+        }
+        return false;
+    }
+
+    public static double operator -(Coordinate coord1, Coordinate coord2)
+    {
+        // Calculate distance between coord1 and coord2
+        
+        double lat1 = coord1.Latitude;
+        double lon1 = coord1.Longitude;
+        double lat2 = coord2.Latitude;
+        double lon2 = coord2.Longitude;
+
+        double latDiff = lat2 - lat1;
+        double lonDiff = lon2 - lon1;
+
+        double distance = Math.Sqrt(latDiff * latDiff + lonDiff * lonDiff);
+
+        return distance;
+    }
+
+    public override int GetHashCode() => HashCode.Combine(Latitude, Longitude);
+
+    public static bool operator ==(Coordinate a, Coordinate b) => a.Equals(b);
+
+    public static bool operator !=(Coordinate a, Coordinate b) => !a.Equals(b);
+
+    public override string ToString() => $"{(Latitude, Longitude)}";
+
+    public (double, double) ToTuple() => (Latitude, Longitude);
 }
 
 public readonly struct SongPoint

@@ -115,13 +115,19 @@ public readonly struct GpxFile
                 trkToIntegerMap[trk] = trkInteger;
 
                 List<GPXPoint> trkPoints = trk.Descendants(Namespace + "trkpt")
-                .Select(trkpt => new GPXPoint
+                .Select(trkpt => new
                 {
-                    Latitude = double.Parse(trkpt.Attribute("lat").Value),
-                    Longitude = double.Parse(trkpt.Attribute("lon").Value),
-                    TimeStr = trkpt.Element(Namespace + "time").Value,
-                    TrackMember = trkToIntegerMap[trk] // Use the retrieved trkInteger
+                    Coordinate = new Coordinate(
+                        double.Parse(trkpt.Attribute("lat").Value),
+                        double.Parse(trkpt.Attribute("lon").Value)
+                    ),
+                    Time = trkpt.Element(Namespace + "time").Value
                 })
+                .Select(pointData => new GPXPoint(
+                    pointData.Coordinate, // Longitude
+                    pointData.Time,       // Time
+                    trkToIntegerMap[trk] // Track Member
+                ))
                 .ToList();
 
                 trkToIntegerMap[trk] = trkInteger; // Update the dictionary for the next <trk>
