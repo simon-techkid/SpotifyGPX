@@ -100,43 +100,40 @@ public readonly struct GpxFile
         }
     }
 
-    public List<GPXPoint> Points
+    public readonly List<GPXPoint> ParseGpxPoints()
     {
-        get
+        // Define a dictionary to map <trk> elements to integers.
+        Dictionary<XElement, int> trkToIntegerMap = new();
+
+        int trkInteger = 0;
+
+        return Tracks
+        .SelectMany(trk =>
         {
-            // Define a dictionary to map <trk> elements to integers.
-            Dictionary<XElement, int> trkToIntegerMap = new();
+            trkToIntegerMap[trk] = trkInteger;
 
-            int trkInteger = 0;
-
-            return Tracks
-            .SelectMany(trk =>
+            List<GPXPoint> trkPoints = trk.Descendants(Namespace + "trkpt")
+            .Select(trkpt => new
             {
-                trkToIntegerMap[trk] = trkInteger;
-
-                List<GPXPoint> trkPoints = trk.Descendants(Namespace + "trkpt")
-                .Select(trkpt => new
-                {
-                    Coordinate = new Coordinate(
-                        double.Parse(trkpt.Attribute("lat").Value),
-                        double.Parse(trkpt.Attribute("lon").Value)
-                    ),
-                    Time = trkpt.Element(Namespace + "time").Value
-                })
-                .Select((pointData, index) => new GPXPoint(
-                    pointData.Coordinate, // Longitude
-                    pointData.Time,       // Time
-                    trkToIntegerMap[trk], // Track Member
-                    index                 // Index
-                ))
-                .ToList();
-
-                trkToIntegerMap[trk] = trkInteger; // Update the dictionary for the next <trk>
-                trkInteger++;
-
-                return trkPoints;
+                Coordinate = new Coordinate(
+                    double.Parse(trkpt.Attribute("lat").Value),
+                    double.Parse(trkpt.Attribute("lon").Value)
+                ),
+                Time = trkpt.Element(Namespace + "time").Value
             })
+            .Select((pointData, index) => new GPXPoint(
+                pointData.Coordinate, // Longitude
+                pointData.Time,       // Time
+                trkToIntegerMap[trk], // Track Member
+                index                 // Index
+            ))
             .ToList();
-        }
+
+            trkToIntegerMap[trk] = trkInteger; // Update the dictionary for the next <trk>
+            trkInteger++;
+
+            return trkPoints;
+        })
+        .ToList();
     }
 }

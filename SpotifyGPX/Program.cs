@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 
 #nullable enable
 
@@ -70,22 +69,16 @@ class Program
 
             string outputGpx = GenerateOutputPath(inputGpx, "gpx");
 
-            // Step 1: Create a list of all GPX points in the given GPX file
-            List<GPXPoint> gpxPoints;
-
-            // Step 2: Create a list of songs within the timeframe between the first and last GPX point
-            List<SpotifyEntry> filteredEntries;
-
-            // Step 3: Create a list of paired songs and points based on the closest time between each song and each GPX point
+            // Create a list of paired songs and points
             Pairings pairedEntries;
 
             try
             {
                 // Step 1: Create list of GPX points from the GPX file
-                gpxPoints = new GpxFile(inputGpx).Points;
+                List<GPXPoint> gpxPoints = new GpxFile(inputGpx).ParseGpxPoints();
 
                 // Step 2: Create list of songs played, and filter it to songs played during the GPX tracking timeframe
-                filteredEntries = new JsonFile(inputJson).FilterSpotifyJson(gpxPoints);
+                List<SpotifyEntry> filteredEntries = new JsonFile(inputJson).FilterSpotifyJson(gpxPoints);
 
                 // Step 3: Create list of songs and points paired as close as possible to one another
                 pairedEntries = new Pairings(filteredEntries, gpxPoints);
@@ -97,46 +90,36 @@ class Program
                 return;
             }
 
+            if (predictPoints == true)
+            {
+                string kmlFile = GenerateOutputPath(inputGpx, "kml");
+
+                pairedEntries = new(pairedEntries, kmlFile);
+            }
+
             if (noGpxExport == false)
             {
-                XmlDocument document;
+                string desc = $"Arguments: {string.Join(", ", args)}";
 
-                try
+                // Create a GPX document based on the list of songs and points
+                if (pairedEntries.CreateGPX(outputGpx, desc))
                 {
-                    string desc = $"Arguments: {string.Join(", ", args)}";
-
-                    // Create a GPX document based on the list of songs and points
-                    document = pairedEntries.CreateGPX(inputGpx, desc);
+                    Console.WriteLine($"[GPX] GPX file, '{Path.GetFileName(outputGpx)}', generated successfully");
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"Error creating GPX: {ex.Message}");
-                    return;
+                    Console.WriteLine($"[ERROR] Error saving paired points to GPX at '{Path.GetFileName(outputGpx)}'");
                 }
-
-                // Write the contents of the GPX
-                document.Save(outputGpx);
-
-                Console.WriteLine($"[GPX] {Path.GetExtension(outputGpx)} file, '{Path.GetFileName(outputGpx)}', generated successfully!");
             }
 
             if (exportJson == true)
             {
                 // Stage output path of output JSON
                 string outputJson = GenerateOutputPath(inputGpx, "json");
+                
+                pairedEntries.JsonToFile(outputJson);
 
-                try
-                {
-                    // Write the contents of the JSON
-                    File.WriteAllText(outputJson, pairedEntries.ExportSpotifyJson());
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error creating JSON: {ex.Message}");
-                    return;
-                }
-
-                Console.WriteLine($"[JSON] {Path.GetExtension(outputJson)} file, '{Path.GetFileName(outputJson)}', generated successfully!");
+                Console.WriteLine($"[JSON] JSON file, '{Path.GetFileName(outputJson)}', generated successfully");
             }
 
             if (exportPlist == true)
@@ -144,48 +127,19 @@ class Program
                 // Stage output path of output XSPF
                 string outputPlist = GenerateOutputPath(inputGpx, "xspf");
 
-                XmlDocument playlist;
+                pairedEntries.PlaylistToFile(outputPlist);
 
-                try
-                {
-                    // Create an XML document for the playlist
-                    playlist = pairedEntries.CreatePlist(outputPlist);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error creating playlist: {ex.Message}");
-                    return;
-                }
-
-                // Write the contents of the XSPF
-                playlist.Save(outputPlist);
-
-                Console.WriteLine($"[XSPF] {Path.GetExtension(outputPlist)} file, {Path.GetFileName(outputPlist)}', generated successfully!");
+                Console.WriteLine($"[XSPF] XSPF file, {Path.GetFileName(outputPlist)}', generated successfully");
             }
 
             if (exportSpotifyURI == true)
             {
                 // Stage output path of output URI list
                 string outputTxt = GenerateOutputPath(inputGpx, "txt");
-                string clipboard;
 
-                // Attempt to parse SpotifyEntries for URI
-                try
-                {
-                    // Get the list of Spotify URIs as a string
-                    clipboard = pairedEntries.GenerateClipboardData();
-                }
-                catch (Exception ex)
-                {
-                    // URI found to be null
-                    Console.WriteLine($"Error generating clipboard data: {ex.Message}");
-                    return;
-                }
+                pairedEntries.JsonUriToFile(outputTxt);
 
-                // Write the contents of the URI list
-                File.WriteAllText(outputTxt, clipboard);
-
-                Console.WriteLine($"[URI] {Path.GetExtension(outputTxt)} file, '{Path.GetFileName(outputTxt)}', generated successfully!");
+                Console.WriteLine($"[TXT] TXT file, '{Path.GetFileName(outputTxt)}', generated successfully");
             }
         }
         else

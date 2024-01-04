@@ -15,6 +15,8 @@ public readonly struct Pairings
 {
     public Pairings(List<SpotifyEntry> s, List<GPXPoint> p) => PairedPoints = PairPoints(s, p);
 
+    public Pairings(Pairings organic, string? kmlFile) => PairedPoints = new Prediction(organic.PairedPoints, kmlFile).Predicted;
+    
     private readonly List<SongPoint> PairedPoints;
 
     private readonly List<SpotifyEntry> Songs => PairedPoints.Select(pair => pair.Song).ToList();
@@ -48,8 +50,10 @@ public readonly struct Pairings
         return correlatedEntries;
     }
 
-    public readonly XmlDocument CreateGPX(string gpxFile, string desc)
+    public readonly bool CreateGPX(string path, string desc)
     {
+        File.Delete(path);
+        
         // Create a new XML document
         XmlDocument document = new();
 
@@ -70,7 +74,7 @@ public readonly struct Pairings
 
         // Add name of GPX file, based on input GPX name
         XmlElement gpxName = document.CreateElement("name");
-        gpxName.InnerText = Path.GetFileNameWithoutExtension(gpxFile);
+        gpxName.InnerText = Path.GetFileNameWithoutExtension(path);
         GPX.AppendChild(gpxName);
 
         // Add description of GPX file, based on file's creation
@@ -118,13 +122,16 @@ public readonly struct Pairings
             pointCount++;
         }
 
-        Console.WriteLine($"[GPX] {pointCount} points found in '{Path.GetFileNameWithoutExtension(gpxFile)}' added to GPX");
+        Console.WriteLine($"[GPX] {pointCount} points found in '{Path.GetFileNameWithoutExtension(path)}' added to GPX");
 
-        return document;
+        document.Save(path);
+        return File.Exists(path);
     }
 
-    public string ExportSpotifyJson()
+    public readonly bool JsonToFile(string path)
     {
+        File.Delete(path);
+        
         // Create a list of JSON objects
         List<JObject> json = new();
 
@@ -171,11 +178,14 @@ public readonly struct Pairings
         // Create a JSON document based on the list of songs within range
         string document = JsonConvert.SerializeObject(json, Newtonsoft.Json.Formatting.Indented);
 
-        return document;
+        File.WriteAllText(path, document);
+        return File.Exists(path);
     }
 
-    public string GenerateClipboardData()
+    public readonly bool JsonUriToFile(string path)
     {
+        File.Delete(path);
+        
         // Create string for final clipboard contents
         string clipboard = "";
 
@@ -193,12 +203,14 @@ public readonly struct Pairings
             }
         }
 
-        // Return final clipboard contents
-        return clipboard;
+        File.WriteAllText(path, clipboard);
+        return File.Exists(path);
     }
 
-    public XmlDocument CreatePlist(string plistFile)
+    public readonly bool PlaylistToFile(string path)
     {
+        File.Delete(path);
+        
         // Create a new XML document
         XmlDocument document = new();
 
@@ -216,7 +228,7 @@ public readonly struct Pairings
 
         // Set the name of the XSPF playlist to the name of the file
         XmlElement name = document.CreateElement("name");
-        name.InnerText = Path.GetFileNameWithoutExtension(plistFile);
+        name.InnerText = Path.GetFileNameWithoutExtension(path);
         XSPF.AppendChild(name);
 
         // Set the title of the XSPF playlist to the name of the file
@@ -255,6 +267,7 @@ public readonly struct Pairings
             track.AppendChild(duration);
         }
 
-        return document;
+        document.Save(path);
+        return File.Exists(path);
     }
 }
