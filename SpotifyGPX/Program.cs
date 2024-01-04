@@ -128,7 +128,7 @@ class Program
                 try
                 {
                     // Write the contents of the JSON
-                    File.WriteAllText(outputJson, JsonFile.ExportSpotifyJson());
+                    File.WriteAllText(outputJson, pairedEntries.ExportSpotifyJson());
                 }
                 catch (Exception ex)
                 {
@@ -149,7 +149,7 @@ class Program
                 try
                 {
                     // Create an XML document for the playlist
-                    playlist = JsonFile.CreatePlist(filteredEntries, outputPlist);
+                    playlist = pairedEntries.CreatePlist(outputPlist);
                 }
                 catch (Exception ex)
                 {
@@ -173,7 +173,7 @@ class Program
                 try
                 {
                     // Get the list of Spotify URIs as a string
-                    clipboard = JsonFile.GenerateClipboardData();
+                    clipboard = pairedEntries.GenerateClipboardData();
                 }
                 catch (Exception ex)
                 {

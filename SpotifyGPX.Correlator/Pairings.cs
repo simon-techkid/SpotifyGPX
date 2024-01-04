@@ -1,5 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using SpotifyGPX.Options;
 using System;
 using System.Collections.Generic;
@@ -11,12 +13,13 @@ namespace SpotifyGPX.Pairings;
 
 public readonly struct Pairings
 {
-    public Pairings(List<SpotifyEntry> s, List<GPXPoint> p)
-    {
-        PairedPoints = PairPoints(s, p);
-    }
+    public Pairings(List<SpotifyEntry> s, List<GPXPoint> p) => PairedPoints = PairPoints(s, p);
 
     private readonly List<SongPoint> PairedPoints;
+
+    private readonly List<SpotifyEntry> Songs => PairedPoints.Select(pair => pair.Song).ToList();
+
+    private readonly List<GPXPoint> Points => PairedPoints.Select(pair => pair.Point).ToList();
 
     private static List<SongPoint> PairPoints(List<SpotifyEntry> songs, List<GPXPoint> points)
     {
@@ -116,6 +119,141 @@ public readonly struct Pairings
         }
 
         Console.WriteLine($"[GPX] {pointCount} points found in '{Path.GetFileNameWithoutExtension(gpxFile)}' added to GPX");
+
+        return document;
+    }
+
+    public string ExportSpotifyJson()
+    {
+        // Create a list of JSON objects
+        List<JObject> json = new();
+
+        foreach (SpotifyEntry song in Songs)
+        {
+            // Attempt to parse each SpotifyEntry to a JSON object
+            try
+            {
+                // Create a JSON object containing each element of a SpotifyEntry
+                JObject songEntry = new()
+                {
+                    ["ts"] = song.TimeStr,
+                    ["username"] = song.Spotify_Username,
+                    ["platform"] = song.Spotify_Platform,
+                    ["ms_played"] = song.Time_Played,
+                    ["conn_country"] = song.Spotify_Country,
+                    ["ip_addr_decrypted"] = song.Spotify_IP,
+                    ["user_agent_decrypted"] = song.Spotify_UA,
+                    ["master_metadata_track_name"] = song.Song_Name,
+                    ["master_metadata_album_artist_name"] = song.Song_Artist,
+                    ["master_metadata_album_album_name"] = song.Song_Album,
+                    ["spotify_track_uri"] = song.Song_URI,
+                    ["episode_name"] = song.Episode_Name,
+                    ["episode_show_name"] = song.Episode_Show,
+                    ["spotify_episode_uri"] = song.Episode_URI,
+                    ["reason_start"] = song.Song_StartReason,
+                    ["reason_end"] = song.Song_EndReason,
+                    ["shuffle"] = song.Song_Shuffle,
+                    ["skipped"] = song.Song_Skipped,
+                    ["offline"] = song.Spotify_Offline,
+                    ["offline_timestamp"] = song.Spotify_OfflineTS,
+                    ["incognito"] = song.Spotify_Incognito
+                };
+
+                // Add the SpotifyEntry JObject to the list
+                json.Add(songEntry);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error sending track, '{song.Song_Name}', to JSON: {ex.Message}");
+            }
+        }
+
+        // Create a JSON document based on the list of songs within range
+        string document = JsonConvert.SerializeObject(json, Newtonsoft.Json.Formatting.Indented);
+
+        return document;
+    }
+
+    public string GenerateClipboardData()
+    {
+        // Create string for final clipboard contents
+        string clipboard = "";
+
+        foreach (SpotifyEntry song in Songs)
+        {
+            // Ensures no null values return
+            if (song.Song_URI != null)
+            {
+                clipboard += $"{song.Song_URI}\n";
+            }
+            else
+            {
+                // If null URI, throw exception
+                throw new Exception($"URI null for track '{song.Song_Name}'");
+            }
+        }
+
+        // Return final clipboard contents
+        return clipboard;
+    }
+
+    public XmlDocument CreatePlist(string plistFile)
+    {
+        // Create a new XML document
+        XmlDocument document = new();
+
+        // Create the XML header
+        XmlNode header = document.CreateXmlDeclaration("1.0", "utf-8", null);
+        document.AppendChild(header);
+
+        // Create the XSPF header
+        XmlElement XSPF = document.CreateElement("playlist");
+        document.AppendChild(XSPF);
+
+        // Add XSPF header attributes
+        XSPF.SetAttribute("version", "1.0");
+        XSPF.SetAttribute("xmlns", "http://xspf.org/ns/0/");
+
+        // Set the name of the XSPF playlist to the name of the file
+        XmlElement name = document.CreateElement("name");
+        name.InnerText = Path.GetFileNameWithoutExtension(plistFile);
+        XSPF.AppendChild(name);
+
+        // Set the title of the XSPF playlist to the name of the file
+        XmlElement creator = document.CreateElement("creator");
+        creator.InnerText = "SpotifyGPX";
+        XSPF.AppendChild(creator);
+
+        // Create the trackList header
+        XmlElement trackList = document.CreateElement("trackList");
+        XSPF.AppendChild(trackList);
+
+        foreach (SpotifyEntry song in Songs)
+        {
+            // Create track for each song
+            XmlElement track = document.CreateElement("track");
+            trackList.AppendChild(track);
+
+            // Set the creator of the track to the song artist
+            XmlElement artist = document.CreateElement("creator");
+            artist.InnerText = song.Tag(SpotifyEntry.ReturnTag.Creator);
+            track.AppendChild(artist);
+
+            // Set the title of the track to the song name
+            XmlElement title = document.CreateElement("title");
+            title.InnerText = song.Tag(SpotifyEntry.ReturnTag.Title);
+            track.AppendChild(title);
+
+            // Set the annotation of the song to the end time
+            XmlElement annotation = document.CreateElement("annotation");
+            annotation.InnerText = song.Tag(SpotifyEntry.ReturnTag.Annotation);
+            track.AppendChild(annotation);
+
+            // Set the duration of the song to the amount of time it was listened to
+            XmlElement duration = document.CreateElement("duration");
+            duration.InnerText = song.Tag(SpotifyEntry.ReturnTag.Duration);
+            track.AppendChild(duration);
+        }
 
         return document;
     }

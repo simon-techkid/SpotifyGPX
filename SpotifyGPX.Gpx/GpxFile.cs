@@ -127,7 +127,7 @@ public readonly struct GpxFile
                     pointData.Coordinate, // Longitude
                     pointData.Time,       // Time
                     trkToIntegerMap[trk], // Track Member
-                    index
+                    index                 // Index
                 ))
                 .ToList();
 

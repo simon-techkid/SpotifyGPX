@@ -137,7 +137,7 @@ public struct GPXPoint
 
         return this;
     }
-    
+
     public int Index { get; }
     public bool Predicted { get; private set; }
     public Coordinate Location { get; private set; }
@@ -173,7 +173,7 @@ public readonly struct Coordinate
     public static double operator -(Coordinate coord1, Coordinate coord2)
     {
         // Calculate distance between coord1 and coord2
-        
+
         double lat1 = coord1.Latitude;
         double lon1 = coord1.Longitude;
         double lat2 = coord2.Latitude;
