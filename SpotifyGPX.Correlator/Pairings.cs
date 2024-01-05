@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using System.Text;
 
 namespace SpotifyGPX.Pairings;
 
@@ -94,6 +95,7 @@ public readonly struct Pairings
 
         double pointCount = 0;
 
+        // implement here a means to create multiple trks based on TrackMember of points
         foreach (SongPoint pair in PairedPoints)
         {
             // Create waypoint for each song
@@ -185,25 +187,22 @@ public readonly struct Pairings
     public readonly bool JsonUriToFile(string path)
     {
         File.Delete(path);
-        
-        // Create string for final clipboard contents
-        string clipboard = "";
 
-        foreach (SpotifyEntry song in Songs)
+        var uris = Songs
+        .Where(song => song.Song_URI != null)
+        .Select(song =>
         {
-            // Ensures no null values return
-            if (song.Song_URI != null)
+            if (song.Song_URI == null)
             {
-                clipboard += $"{song.Song_URI}\n";
-            }
-            else
-            {
-                // If null URI, throw exception
                 throw new Exception($"URI null for track '{song.Song_Name}'");
             }
-        }
+            return $"{song.Song_URI}\n";
+        });
 
-        File.WriteAllText(path, clipboard);
+        StringBuilder builder = new();
+        builder.Append(string.Concat(uris));
+
+        File.WriteAllText(path, builder.ToString());
         return File.Exists(path);
     }
 

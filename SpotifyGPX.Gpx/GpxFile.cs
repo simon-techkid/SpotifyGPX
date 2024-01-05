@@ -47,6 +47,7 @@ public readonly struct GpxFile
 
             XElement selectedTrack;
 
+            // If more than one track in the GPX:
             if (tracks.Count > 1)
             {
                 // If there are multiple <trk> elements, prompt the user to select one

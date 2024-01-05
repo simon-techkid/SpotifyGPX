@@ -11,10 +11,11 @@ namespace SpotifyGPX.Options;
 
 public struct SpotifyEntry
 {
-    public SpotifyEntry(JObject track)
+    public SpotifyEntry(JObject track, int index)
     {
         try
         {
+            Index = index;
             TimeStr = (string?)track["endTime"] ?? (string?)track["ts"];
             Spotify_Username = (string?)track["username"];
             Spotify_Platform = (string?)track["platform"];
@@ -39,17 +40,17 @@ public struct SpotifyEntry
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error parsing contents of JSON tag:\n{track} to a valid song entry:\n{ex.Message}");
+            throw new Exception($"Error parsing contents of JSON tag:\n{track} to a valid song entry:\n{ex}");
         }
     }
 
-    public int Index { get; set; }
+    public int Index { get; }
     public DateTimeOffset Time { get; private set; }
     public string TimeStr
     {
         readonly get
         {
-            return Time.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture);
+            return Time.ToString(Point.outJsonFormat, CultureInfo.InvariantCulture);
         }
         set
         {
@@ -226,7 +227,7 @@ public readonly struct SongPoint
         builder.AppendLine($"{(Song.Spotify_Offline != null ? $"Offline: {(Song.Spotify_Offline == true ? "Yes" : "No")}" : null)}");
         builder.AppendLine($"{(Song.Spotify_IP != null ? $"IP Address: {Song.Spotify_IP}" : null)}");
         builder.AppendLine($"{(Song.Spotify_Country != null ? $"Country: {Song.Spotify_Country}" : null)}");
-        builder.AppendLine($"{(Point.Predicted == true ? $"Point Predicted" : null)}");
+        builder.Append($"{(Point.Predicted == true ? $"Point Predicted" : null)}");
 
         return builder.ToString();
     }
@@ -246,6 +247,10 @@ public readonly struct SongPoint
 
     public override string ToString()
     {
-        return $"[CORR] [{Point.TrackMember}] [{Index}] [{Song.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat)} ~ {Point.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat)}] [~{Math.Round(Accuracy)}s] {GpxTitle()}";
+        string songTime = Song.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat);
+        string pointTime = Point.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat);
+
+
+        return $"[CORR] [T{Point.TrackMember}] [{Index}] [{songTime} ~ {pointTime}] [{Math.Round(Accuracy)}s] {GpxTitle()}";
     }
 }

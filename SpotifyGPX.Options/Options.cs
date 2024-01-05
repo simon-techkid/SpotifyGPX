@@ -26,6 +26,11 @@ public class Point
     public static readonly string fullSpotFormat = "MM/dd/yyyy HH:mm:ss"; // 30 day (full acc data) dump
     public static readonly string miniSpotFormat = "yyyy-MM-dd HH:mm"; // 5 day (past year) dump
 
+    // =================== //
+    // JSON EXPORT FORMATS //
+    // =================== //
+    public static readonly string outJsonFormat = "yyyy-MM-ddTHH:mm:ssZ";
+
 
     // =========================== //
     // GPX PAIRINGS EXPORT FORMATS //

@@ -19,7 +19,7 @@ public readonly struct JsonFile
 
     public JsonFile(string path) => jsonFilePath = path;
 
-    private readonly List<SpotifyEntry> SpotifyEntries => JsonContents.Select(track => new SpotifyEntry(track)).ToList();
+    private readonly List<SpotifyEntry> SpotifyEntries => JsonContents.Select((track, index) => new SpotifyEntry(track, index)).ToList();
 
     public readonly List<SpotifyEntry> FilterSpotifyJson(List<GPXPoint> gpxPoints)
     {
@@ -28,60 +28,31 @@ public readonly struct JsonFile
 
         try
         {
-            // Create a dictionary to store the start and end times for each track
-            Dictionary<int, (DateTimeOffset, DateTimeOffset)> trackStartEndTimes = new();
-
-            // Calculate start and end times for each track based on GPX points
-            foreach (GPXPoint point in gpxPoints)
-            {
-                int trackIndex = point.TrackMember;
-
-                if (!trackStartEndTimes.ContainsKey(trackIndex))
-                {
-                    // Initialize start and end times for the track
-                    trackStartEndTimes[trackIndex] = (point.Time, point.Time);
-                }
-                else
-                {
-                    // Update start and end times as needed
-                    if (point.Time < trackStartEndTimes[trackIndex].Item1)
-                    {
-                        trackStartEndTimes[trackIndex] = (point.Time, trackStartEndTimes[trackIndex].Item2);
-                    }
-                    if (point.Time > trackStartEndTimes[trackIndex].Item2)
-                    {
-                        trackStartEndTimes[trackIndex] = (trackStartEndTimes[trackIndex].Item1, point.Time);
-                    }
-                }
-            }
+            // Create a dictionary to store the start and end times for each track            
+            var trackStartEndTimes = gpxPoints
+            .GroupBy(point => point.TrackMember)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Aggregate(
+                    (startTime: group.First().Time, endTime: group.First().Time),
+                    (acc, point) => (
+                        startTime: point.Time < acc.startTime ? point.Time : acc.startTime,
+                        endTime: point.Time > acc.endTime ? point.Time : acc.endTime
+                    )
+                )
+            );
 
             // Filter Spotify entries based on track-specific start and end times
-
             return SpotifyEntries
-            .Where(entry =>
+            .Where(entry => // For every song in the entire JSON:
             {
-                // Determine the associated track for each Spotify entry based on its timestamp
-                int associatedTrack = -1; // Default value indicating no associated track
-                DateTimeOffset entryTime = entry.Time;
+                DateTimeOffset entryTime = entry.Time; // get its time
 
-                foreach (var trackTimes in trackStartEndTimes)
-                {
-                    if (entryTime >= trackTimes.Value.Item1 && entryTime <= trackTimes.Value.Item2)
-                    {
-                        associatedTrack = trackTimes.Key;
-                        break; // Exit the loop as soon as an associated track is found
-                    }
-                }
-
-                // Filter entries associated with a track
-                return associatedTrack != -1;
+                return trackStartEndTimes.Any(trackTimes => // Check if the song falls within the GPX tracking time
+                    entryTime >= trackTimes.Value.startTime && entryTime <= trackTimes.Value.endTime);
             })
-            .Select((song, index) =>
-            {
-                song.Index = index;
-                return song;
-            })
-            .ToList();
+            .ToList(); // Send all the relevant songs to a list!
+            
         }
         catch (Exception ex)
         {
