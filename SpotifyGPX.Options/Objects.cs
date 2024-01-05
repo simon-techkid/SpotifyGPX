@@ -229,7 +229,6 @@ public readonly struct SongPoint
         string songTime = Song.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat);
         string pointTime = Point.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat);
 
-
         return $"[CORR] [T{Point.TrackMember}] [{Index}] [{songTime} ~ {pointTime}] [{Math.Round(Accuracy)}s] {GpxTitle()}";
     }
 }

@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using System.Xml.Linq;
 
 namespace SpotifyGPX.Pairings;
 
@@ -18,7 +17,7 @@ public readonly struct Pairings
     public Pairings(List<SpotifyEntry> s, List<GPXPoint> p) => PairedPoints = PairPoints(s, p);
 
     public Pairings(Pairings organic, string? kmlFile) => PairedPoints = new Prediction(organic.PairedPoints, kmlFile).Predicted;
-    
+
     private readonly List<SongPoint> PairedPoints;
 
     private readonly List<SpotifyEntry> Songs => PairedPoints.Select(pair => pair.Song).ToList();
