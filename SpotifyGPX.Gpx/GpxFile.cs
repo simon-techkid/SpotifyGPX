@@ -45,9 +45,6 @@ public readonly struct GpxFile
         {
             List<XElement> tracks = document.Descendants(Namespace + "trk").ToList();
 
-            XElement selectedTrack;
-
-            // If more than one track in the GPX:
             if (tracks.Count > 1)
             {
                 // If there are multiple <trk> elements, prompt the user to select one
@@ -61,80 +58,75 @@ public readonly struct GpxFile
                 Console.WriteLine("[TRAK] [B] All Tracks (Include songs played in gaps between tracks)");
 
                 Console.Write("[TRAK] Please choose the track you want to use: ");
+            }
 
-                while (true)
+            List<XElement> selected = new();
+
+            while (true)
+            {
+                string input = Console.ReadLine();
+                if (int.TryParse(input, out int selectedTrackIndex) && selectedTrackIndex >= 1 && selectedTrackIndex <= tracks.Count)
                 {
-                    string input = Console.ReadLine();
-                    if (int.TryParse(input, out int selectedTrackIndex) && selectedTrackIndex >= 1 && selectedTrackIndex <= tracks.Count)
-                    {
-                        // Select the user-chosen <trk> element
-                        selectedTrack = tracks[selectedTrackIndex - 1];
+                    // Select the user-chosen <trk> element
+                    selected.Add(tracks[selectedTrackIndex - 1]);
 
-                        break;
-                    }
-                    else if (input == "A")
-                    {
-                        return tracks;
-                    }
-                    else if (input == "B")
-                    {
-                        selectedTrack = new XElement("combined", tracks);
-                        break;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid input. Please enter a valid track number.");
-                    }
+                    break;
+                }
+                else if (input == "A")
+                {
+                    return selected = tracks;
+                }
+                else if (input == "B")
+                {
+                    selected.Add(new XElement("combined", tracks));
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid input. Please enter a valid track number.");
                 }
             }
-            else
-            {
-                selectedTrack = tracks[0];
-            }
 
-            List<XElement> finalSelect = new()
-            {
-                selectedTrack
-            };
-
-            return finalSelect;
+            return selected;
         }
     }
 
     public readonly List<GPXPoint> ParseGpxPoints()
     {
-        // Define a dictionary to map <trk> elements to integers.
-        Dictionary<XElement, int> trkToIntegerMap = new();
+        // Use GroupBy to group <trkpt> elements by their parent <trk> elements.
+        var groupedTracks = Tracks
+            .SelectMany(trk => trk.Descendants(Namespace + "trkpt")
+                .Select(trkpt => new
+                {
+                    TrackElement = trk,
+                    Coordinate = new Coordinate(
+                        double.Parse(trkpt.Attribute("lat").Value),
+                        double.Parse(trkpt.Attribute("lon").Value)
+                    ),
+                    Time = trkpt.Element(Namespace + "time").Value
+                }))
+            .GroupBy(data => data.TrackElement);
 
         int trkInteger = 0;
 
-        return Tracks
-        .SelectMany(trk =>
-        {
-            trkToIntegerMap[trk] = trkInteger;
-
-            List<GPXPoint> trkPoints = trk.Descendants(Namespace + "trkpt")
-            .Select(trkpt => new
+        return groupedTracks
+            .SelectMany(group =>
             {
-                Coordinate = new Coordinate(
-                    double.Parse(trkpt.Attribute("lat").Value),
-                    double.Parse(trkpt.Attribute("lon").Value)
-                ),
-                Time = trkpt.Element(Namespace + "time").Value
+                XElement trk = group.Key;
+                List<GPXPoint> trkPoints = group
+                    .Select((pointData, index) => new GPXPoint(
+                        pointData.Coordinate, // Lat/Lon
+                        pointData.Time,       // Time
+                        trkInteger,           // Track Member
+                        index                 // Index
+                    ))
+                    .ToList();
+
+                trkInteger++;
+
+                return trkPoints;
             })
-            .Select((pointData, index) => new GPXPoint(
-                pointData.Coordinate, // Longitude
-                pointData.Time,       // Time
-                trkToIntegerMap[trk], // Track Member
-                index                 // Index
-            ))
             .ToList();
-
-            trkToIntegerMap[trk] = trkInteger; // Update the dictionary for the next <trk>
-            trkInteger++;
-
-            return trkPoints;
-        })
-        .ToList();
     }
+
 }
