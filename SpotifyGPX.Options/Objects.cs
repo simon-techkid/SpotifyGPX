@@ -94,26 +94,26 @@ public struct SpotifyEntry
         }
     }
 
-    public string? Song_Artist { get; private set; }
-    public string? Song_Name { get; private set; }
-    public string? Time_Played { get; private set; }
-    public string? Spotify_Username { get; private set; }
-    public string? Spotify_Platform { get; private set; }
-    public string? Spotify_Country { get; private set; }
-    public string? Spotify_IP { get; private set; }
-    public string? Spotify_UA { get; private set; }
-    public string? Song_Album { get; private set; }
-    public string? Song_URI { get; private set; }
-    public string? Episode_Name { get; private set; }
-    public string? Episode_Show { get; private set; }
-    public string? Episode_URI { get; private set; }
-    public string? Song_StartReason { get; private set; }
-    public string? Song_EndReason { get; private set; }
-    public bool? Song_Shuffle { get; private set; }
-    public bool? Song_Skipped { get; private set; }
-    public bool? Spotify_Offline { get; private set; }
-    public string? Spotify_OfflineTS { get; private set; }
-    public bool? Spotify_Incognito { get; private set; }
+    public string? Song_Artist { get; }
+    public string? Song_Name { get; }
+    public string? Time_Played { get; }
+    public string? Spotify_Username { get; }
+    public string? Spotify_Platform { get; }
+    public string? Spotify_Country { get; }
+    public string? Spotify_IP { get; }
+    public string? Spotify_UA { get; }
+    public string? Song_Album { get; }
+    public string? Song_URI { get; }
+    public string? Episode_Name { get; }
+    public string? Episode_Show { get; }
+    public string? Episode_URI { get; }
+    public string? Song_StartReason { get; }
+    public string? Song_EndReason { get; }
+    public bool? Song_Shuffle { get; }
+    public bool? Song_Skipped { get; }
+    public bool? Spotify_Offline { get; }
+    public string? Spotify_OfflineTS { get; }
+    public bool? Spotify_Incognito { get; }
 }
 
 public struct GPXPoint

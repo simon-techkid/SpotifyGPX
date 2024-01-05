@@ -52,7 +52,7 @@ public readonly struct JsonFile
                     entryTime >= trackTimes.Value.startTime && entryTime <= trackTimes.Value.endTime);
             })
             .ToList(); // Send all the relevant songs to a list!
-            
+
         }
         catch (Exception ex)
         {

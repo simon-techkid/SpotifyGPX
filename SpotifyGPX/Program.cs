@@ -116,7 +116,7 @@ class Program
             {
                 // Stage output path of output JSON
                 string outputJson = GenerateOutputPath(inputGpx, "json");
-                
+
                 pairedEntries.JsonToFile(outputJson);
 
                 Console.WriteLine($"[JSON] JSON file, '{Path.GetFileName(outputJson)}', generated successfully");

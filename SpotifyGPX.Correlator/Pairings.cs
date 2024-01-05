@@ -1,14 +1,14 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SpotifyGPX.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using System.Text;
+using System.Xml;
 
 namespace SpotifyGPX.Pairings;
 
@@ -54,7 +54,7 @@ public readonly struct Pairings
     public readonly bool CreateGPX(string path, string desc)
     {
         File.Delete(path);
-        
+
         // Create a new XML document
         XmlDocument document = new();
 
@@ -133,7 +133,7 @@ public readonly struct Pairings
     public readonly bool JsonToFile(string path)
     {
         File.Delete(path);
-        
+
         // Create a list of JSON objects
         List<JObject> json = new();
 
@@ -209,7 +209,7 @@ public readonly struct Pairings
     public readonly bool PlaylistToFile(string path)
     {
         File.Delete(path);
-        
+
         // Create a new XML document
         XmlDocument document = new();
 
