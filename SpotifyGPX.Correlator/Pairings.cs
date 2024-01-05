@@ -36,7 +36,7 @@ public readonly struct Pairings
             .First();
 
             SongPoint pair = new(spotifyEntry, nearestPoint, index);
-            Console.WriteLine(pair.ToString());
+            Console.WriteLine(pair);
 
             return pair;
         })
@@ -146,7 +146,7 @@ public readonly struct Pairings
                 // Create a JSON object containing each element of a SpotifyEntry
                 JObject songEntry = new()
                 {
-                    ["ts"] = song.TimeStr,
+                    ["ts"] = song.Time.ToString(Point.outJsonFormat),
                     ["username"] = song.Spotify_Username,
                     ["platform"] = song.Spotify_Platform,
                     ["ms_played"] = song.Time_Played,

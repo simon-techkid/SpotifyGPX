@@ -23,9 +23,6 @@ public readonly struct JsonFile
 
     public readonly List<SpotifyEntry> FilterSpotifyJson(List<GPXPoint> gpxPoints)
     {
-        // Create list of Spotify songs covering the tracked GPX path timeframe
-        List<SpotifyEntry> spotifyEntryCandidates = new();
-
         try
         {
             // Create a dictionary to store the start and end times for each track            

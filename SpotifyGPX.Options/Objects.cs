@@ -9,34 +9,14 @@ using System.Text;
 
 namespace SpotifyGPX.Options;
 
-public struct SpotifyEntry
+public readonly struct SpotifyEntry
 {
-    public SpotifyEntry(JObject track, int index)
+    public SpotifyEntry(JObject json, int index)
     {
         try
         {
             Index = index;
-            TimeStr = (string?)track["endTime"] ?? (string?)track["ts"];
-            Spotify_Username = (string?)track["username"];
-            Spotify_Platform = (string?)track["platform"];
-            Time_Played = (string?)track["msPlayed"] ?? (string?)track["ms_played"];
-            Spotify_Country = (string?)track["conn_country"];
-            Spotify_IP = (string?)track["ip_addr_decrypted"];
-            Spotify_UA = (string?)track["user_agent_decrypted"];
-            Song_Name = (string?)track["trackName"] ?? (string?)track["master_metadata_track_name"];
-            Song_Artist = (string?)track["artistName"] ?? (string?)track["master_metadata_album_artist_name"];
-            Song_Album = (string?)track["master_metadata_album_album_name"];
-            Song_URI = (string?)track["spotify_track_uri"];
-            Episode_Name = (string?)track["episode_name"];
-            Episode_Show = (string?)track["episode_show_name"];
-            Episode_URI = (string?)track["spotify_episode_uri"];
-            Song_StartReason = (string?)track["reason_start"];
-            Song_EndReason = (string?)track["reason_end"];
-            Song_Shuffle = (bool?)track["shuffle"];
-            Song_Skipped = (bool?)track["skipped"];
-            Spotify_Offline = (bool?)track["offline"];
-            Spotify_OfflineTS = (string?)track["offline_timestamp"];
-            Spotify_Incognito = (bool?)track["incognito"];
+            track = json;
         }
         catch (Exception ex)
         {
@@ -44,23 +24,22 @@ public struct SpotifyEntry
         }
     }
 
+    private readonly JObject track;
+
     public int Index { get; }
-    public DateTimeOffset Time { get; private set; }
-    public string TimeStr
+    public readonly DateTimeOffset Time
     {
-        readonly get
+        get
         {
-            return Time.ToString(Point.outJsonFormat, CultureInfo.InvariantCulture);
-        }
-        set
-        {
-            if (DateTimeOffset.TryParseExact(value, Point.miniSpotFormat, null, DateTimeStyles.AssumeUniversal, out var result))
+            string time = (string?)track["endTime"] ?? (string?)track["ts"];
+
+            if (DateTimeOffset.TryParseExact(time, Point.miniSpotFormat, null, DateTimeStyles.AssumeUniversal, out var result))
             {
-                Time = result;
+                return result;
             }
-            else if (DateTimeOffset.TryParseExact(value, Point.fullSpotFormat, null, DateTimeStyles.AssumeUniversal, out result))
+            else if (DateTimeOffset.TryParseExact(time, Point.fullSpotFormat, null, DateTimeStyles.AssumeUniversal, out result))
             {
-                Time = result;
+                return result;
             }
             else
             {
@@ -94,26 +73,26 @@ public struct SpotifyEntry
         }
     }
 
-    public string? Song_Artist { get; }
-    public string? Song_Name { get; }
-    public string? Time_Played { get; }
-    public string? Spotify_Username { get; }
-    public string? Spotify_Platform { get; }
-    public string? Spotify_Country { get; }
-    public string? Spotify_IP { get; }
-    public string? Spotify_UA { get; }
-    public string? Song_Album { get; }
-    public string? Song_URI { get; }
-    public string? Episode_Name { get; }
-    public string? Episode_Show { get; }
-    public string? Episode_URI { get; }
-    public string? Song_StartReason { get; }
-    public string? Song_EndReason { get; }
-    public bool? Song_Shuffle { get; }
-    public bool? Song_Skipped { get; }
-    public bool? Spotify_Offline { get; }
-    public string? Spotify_OfflineTS { get; }
-    public bool? Spotify_Incognito { get; }
+    public readonly string? Song_Artist => (string?)track["artistName"] ?? (string?)track["master_metadata_album_artist_name"];
+    public readonly string? Song_Name => (string?)track["trackName"] ?? (string?)track["master_metadata_track_name"];
+    public readonly string? Time_Played => (string?)track["msPlayed"] ?? (string?)track["ms_played"];
+    public readonly string? Spotify_Username => (string?)track["username"];
+    public readonly string? Spotify_Platform => (string?)track["platform"];
+    public readonly string? Spotify_Country => (string?)track["conn_country"];
+    public readonly string? Spotify_IP => (string?)track["ip_addr_decrypted"];
+    public readonly string? Spotify_UA => (string?)track["user_agent_decrypted"];
+    public readonly string? Song_Album => (string?)track["master_metadata_album_album_name"];
+    public readonly string? Song_URI => (string?)track["spotify_track_uri"];
+    public readonly string? Episode_Name => (string?)track["episode_name"];
+    public readonly string? Episode_Show => (string?)track["episode_show_name"];
+    public readonly string? Episode_URI => (string?)track["spotify_episode_uri"];
+    public readonly string? Song_StartReason => (string?)track["reason_start"];
+    public readonly string? Song_EndReason => (string?)track["reason_end"];
+    public readonly bool? Song_Shuffle => (bool?)track["shuffle"];
+    public readonly bool? Song_Skipped => (bool?)track["skipped"];
+    public readonly bool? Spotify_Offline => (bool?)track["offline"];
+    public readonly string? Spotify_OfflineTS => (string?)track["offline_timestamp"];
+    public readonly bool? Spotify_Incognito => (bool?)track["incognito"];
 }
 
 public struct GPXPoint

@@ -44,6 +44,8 @@ public readonly struct GpxFile
         get
         {
             List<XElement> tracks = document.Descendants(Namespace + "trk").ToList();
+            
+            List<XElement> selected = new();
 
             if (tracks.Count > 1)
             {
@@ -58,34 +60,36 @@ public readonly struct GpxFile
                 Console.WriteLine("[TRAK] [B] All Tracks (Include songs played in gaps between tracks)");
 
                 Console.Write("[TRAK] Please choose the track you want to use: ");
+
+                while (true)
+                {
+                    string input = Console.ReadLine();
+                    if (int.TryParse(input, out int selectedTrackIndex) && selectedTrackIndex >= 1 && selectedTrackIndex <= tracks.Count)
+                    {
+                        // Select the user-chosen <trk> element
+                        selected.Add(tracks[selectedTrackIndex - 1]);
+
+                        break;
+                    }
+                    else if (input == "A")
+                    {
+                        return tracks;
+                    }
+                    else if (input == "B")
+                    {
+                        selected.Add(new XElement("combined", tracks));
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid input. Please enter a valid track number.");
+                    }
+                }
             }
-
-            List<XElement> selected = new();
-
-            while (true)
+            else
             {
-                string input = Console.ReadLine();
-                if (int.TryParse(input, out int selectedTrackIndex) && selectedTrackIndex >= 1 && selectedTrackIndex <= tracks.Count)
-                {
-                    // Select the user-chosen <trk> element
-                    selected.Add(tracks[selectedTrackIndex - 1]);
-
-                    break;
-                }
-                else if (input == "A")
-                {
-                    return selected = tracks;
-                }
-                else if (input == "B")
-                {
-                    selected.Add(new XElement("combined", tracks));
-                    break;
-                }
-                else
-                {
-                    Console.WriteLine("Invalid input. Please enter a valid track number.");
-                }
-            }
+                selected = tracks;
+            }            
 
             return selected;
         }
@@ -128,5 +132,4 @@ public readonly struct GpxFile
             })
             .ToList();
     }
-
 }
