@@ -70,7 +70,7 @@ public readonly struct GpxFile
                 // Forever, until the user provides valid input:
                 while (true)
                 {
-                    string input = Console.ReadLine(); // Read user input
+                    string? input = Console.ReadLine(); // Read user input
 
                     // Pair only songs included in the track the user selects:
                     if (int.TryParse(input, out int selectedTrackIndex) && selectedTrackIndex >= 1 && selectedTrackIndex <= tracks.Count)

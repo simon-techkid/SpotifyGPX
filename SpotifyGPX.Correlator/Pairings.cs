@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace SpotifyGPX.Pairings;
 
@@ -16,7 +17,7 @@ public readonly struct Pairings
 {
     public Pairings(List<SpotifyEntry> s, List<GPXPoint> p) => PairedPoints = PairPoints(s, p);
 
-    public Pairings(Pairings organic, string? kmlFile) => PairedPoints = new Prediction(organic.PairedPoints, kmlFile).Predicted;
+    //public Pairings(Pairings organic, string? kmlFile) => PairedPoints = new Prediction(organic.PairedPoints, kmlFile).Predicted;
 
     private readonly List<SongPoint> PairedPoints;
 
@@ -35,6 +36,7 @@ public readonly struct Pairings
             .First();
 
             SongPoint pair = new(spotifyEntry, nearestPoint, index);
+
             Console.WriteLine(pair);
 
             return pair;
@@ -135,15 +137,11 @@ public readonly struct Pairings
         File.Delete(path);
 
         // Create a list of JSON objects
-        List<JObject> json = new();
-
-        foreach (SpotifyEntry song in Songs)
+        List<JObject> json = Songs.Select(song =>
         {
-            // Attempt to parse each SpotifyEntry to a JSON object
             try
             {
-                // Create a JSON object containing each element of a SpotifyEntry
-                JObject songEntry = new()
+                return new JObject
                 {
                     ["ts"] = song.Time.ToString(Point.outJsonFormat),
                     ["username"] = song.Spotify_Username,
@@ -167,15 +165,13 @@ public readonly struct Pairings
                     ["offline_timestamp"] = song.Spotify_OfflineTS,
                     ["incognito"] = song.Spotify_Incognito
                 };
-
-                // Add the SpotifyEntry JObject to the list
-                json.Add(songEntry);
             }
             catch (Exception ex)
             {
                 throw new Exception($"Error sending track, '{song.Song_Name}', to JSON: {ex.Message}");
             }
-        }
+        }).ToList();
+
 
         // Create a JSON document based on the list of songs within range
         string document = JsonConvert.SerializeObject(json, Newtonsoft.Json.Formatting.Indented);
@@ -247,22 +243,22 @@ public readonly struct Pairings
 
             // Set the creator of the track to the song artist
             XmlElement artist = document.CreateElement("creator");
-            artist.InnerText = song.Tag(SpotifyEntry.ReturnTag.Creator);
+            artist.InnerText = song.Song_Artist;
             track.AppendChild(artist);
 
             // Set the title of the track to the song name
             XmlElement title = document.CreateElement("title");
-            title.InnerText = song.Tag(SpotifyEntry.ReturnTag.Title);
+            title.InnerText = song.Song_Name;
             track.AppendChild(title);
 
             // Set the annotation of the song to the end time
             XmlElement annotation = document.CreateElement("annotation");
-            annotation.InnerText = song.Tag(SpotifyEntry.ReturnTag.Annotation);
+            annotation.InnerText = song.Time.ToString(Point.gpxTimeOut); ;
             track.AppendChild(annotation);
 
             // Set the duration of the song to the amount of time it was listened to
             XmlElement duration = document.CreateElement("duration");
-            duration.InnerText = song.Tag(SpotifyEntry.ReturnTag.Duration);
+            duration.InnerText = song.Time_Played;
             track.AppendChild(duration);
         }
 

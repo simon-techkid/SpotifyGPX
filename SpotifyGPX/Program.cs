@@ -45,9 +45,10 @@ class Program
                         Console.WriteLine("[HELP] Pass -g to enable coordinate-absence song placement in the resulting GPX (cannot use -g with -n)");
                         break;
                     default:
+                        Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-g]");
                         break;
                 }
-                break;
+                return;
             case >= 2:
                 inputJson = args[0];
                 inputGpx = args[1];
@@ -66,13 +67,13 @@ class Program
         if (Path.GetExtension(inputJson) != ".json")
         {
             // Ensure it has a JSON extension
-            Console.WriteLine($"[ERROR] Provided file, '{Path.GetFileName(inputJson)}', is not a JSON file!");
+            Console.WriteLine($"[ERROR] Provided file, '{inputJson}', is not a JSON file!");
             return;
         }
         else if (!File.Exists(inputJson))
         {
             // Ensure it exists
-            Console.WriteLine($"[ERROR] Provided file, '{Path.GetFileName(inputJson)}', does not exist!");
+            Console.WriteLine($"[ERROR] Provided file, '{inputJson}', does not exist!");
             return;
         }
 
@@ -80,13 +81,13 @@ class Program
         if (Path.GetExtension(inputGpx) != ".gpx")
         {
             // Ensure it has a GPX extension
-            Console.WriteLine($"[ERROR] Provided file, '{Path.GetFileName(inputGpx)}', is not a GPX file!");
+            Console.WriteLine($"[ERROR] Provided file, '{inputGpx}', is not a GPX file!");
             return;
         }
         else if (!File.Exists(inputGpx))
         {
             // Ensure it exists
-            Console.WriteLine($"[ERROR] Provided file, '{Path.GetFileName(inputGpx)}', does not exist!");
+            Console.WriteLine($"[ERROR] Provided file, '{inputGpx}', does not exist!");
             return;
         }
 
@@ -117,7 +118,7 @@ class Program
             string kmlFile = GenerateOutputPath(inputGpx, "kml");
 
             // Set paired entries to old paired entries, with points predicted
-            pairedEntries = new(pairedEntries, File.Exists(kmlFile) ? kmlFile : null);
+            //pairedEntries = new(pairedEntries, File.Exists(kmlFile) ? kmlFile : null);
         }
 
         if (noGpxExport == false)
@@ -164,7 +165,7 @@ class Program
             // Check that the file was saved successfully
             if (pairedEntries.PlaylistToFile(outputPlist))
             {
-                Console.WriteLine($"[FILE] XSPF file, {Path.GetFileName(outputPlist)}', generated successfully");
+                Console.WriteLine($"[FILE] XSPF file, '{Path.GetFileName(outputPlist)}', generated successfully");
             }
             else
             {

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 #nullable enable
 
@@ -15,7 +16,14 @@ namespace SpotifyGPX.Json;
 public readonly struct JsonFile
 {
     private readonly string jsonFilePath;
-    private readonly List<JObject> JsonContents => JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFilePath));
+
+    private readonly List<JObject> JsonContents => ReadJsonContentsAsync(jsonFilePath).Result;
+
+    private static async Task<List<JObject>> ReadJsonContentsAsync(string jsonFilePath)
+    {
+        string json = await Task.Run(() => File.ReadAllTextAsync(jsonFilePath));
+        return await Task.Run(() => JsonConvert.DeserializeObject<List<JObject>>(json));
+    }
 
     public JsonFile(string path) => jsonFilePath = path;
 
@@ -39,23 +47,10 @@ public readonly struct JsonFile
                 )
             );
 
-            /* TODO:
-             * Widen the search range of songs by subtracting msPlayed (first song) from gpxStartTime 
-             * This will allow songs that started playing before the GPX started, be included
-             * Don't necessarily need to implement in Release, but would be a good test
-             * Check its accuracy before deciding permanence
-            */
-
             // Filter Spotify entries based on track-specific start and end times
             return SpotifyEntries
-            .Where(entry => // For every song in the entire JSON:
-            {
-                DateTimeOffset entryTime = entry.Time; // get the song's played time
-
-                // Return true if the song falls inside the GPX track
-                return trackStartEndTimes.Any(trackTimes =>
-                    entryTime >= trackTimes.Value.startTime && entryTime <= trackTimes.Value.endTime); // Song played between start & end of the GPX
-            })
+            .Where(entry => trackStartEndTimes.Any(trackTimes => // Return true if the song falls inside the GPX track
+                entry.Time >= trackTimes.Value.startTime && entry.Time <= trackTimes.Value.endTime)) // Song played between start & end of the GPX
             .ToList(); // Send all the relevant songs to a list!
 
         }
