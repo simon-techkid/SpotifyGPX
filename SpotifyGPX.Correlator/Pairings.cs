@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Xml;
 using System.Xml.Linq;
 
 namespace SpotifyGPX.Pairings;
@@ -46,93 +44,75 @@ public readonly struct Pairings
         if (correlatedEntries.Count > 0)
         {
             // Calculate and print the average correlation accuracy in seconds
-            Console.WriteLine($"[CORR] Song-Point Correlation Accuracy (avg sec): {Math.Round(correlatedEntries.Average(correlatedPair => correlatedPair.AbsAccuracy))}");
+            Console.WriteLine($"[PAIR] Song-Point Correlation Accuracy (avg sec): {Math.Round(correlatedEntries.Average(correlatedPair => correlatedPair.AbsAccuracy))}");
         }
 
         // Return the correlated entries list (including each Spotify song and its corresponding point), and the list of accuracies
         return correlatedEntries;
     }
 
-    public readonly bool CreateGPX(string path, string desc)
+    public XDocument GetGpxx(string name, string desc, XNamespace ns)
     {
-        File.Delete(path);
-
-        // Create a new XML document
-        XmlDocument document = new();
-
-        // Create the XML header
-        XmlNode header = document.CreateXmlDeclaration("1.0", "utf-8", null);
-        document.AppendChild(header);
-
-        // Create the GPX header
-        XmlElement GPX = document.CreateElement("gpx");
-        document.AppendChild(GPX);
-
-        // Add GPX header attributes
-        GPX.SetAttribute("version", "1.0");
-        GPX.SetAttribute("creator", "SpotifyGPX");
-        GPX.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        GPX.SetAttribute("xmlns", "http://www.topografix.com/GPX/1/0");
-        GPX.SetAttribute("xsi:schemaLocation", "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd");
-
-        // Add name of GPX file, based on input GPX name
-        XmlElement gpxName = document.CreateElement("name");
-        gpxName.InnerText = Path.GetFileNameWithoutExtension(path);
-        GPX.AppendChild(gpxName);
-
-        // Add description of GPX file, based on file's creation
-        XmlElement gpxDesc = document.CreateElement("desc");
-        gpxDesc.InnerText = desc;
-        GPX.AppendChild(gpxDesc);
-
-        // Add description of GPX file, based on file's creation
-        XmlElement gpxAuthor = document.CreateElement("author");
-        gpxAuthor.InnerText = "SpotifyGPX";
-        GPX.AppendChild(gpxAuthor);
-
-        // Add time of GPX file, based on file's creation time
-        XmlElement gpxTime = document.CreateElement("time");
-        gpxTime.InnerText = DateTime.Now.ToUniversalTime().ToString(Point.gpxTimeOut);
-        GPX.AppendChild(gpxTime);
-
-        double pointCount = 0;
-
-        // implement here a means to create multiple trks based on TrackMember of points
-        foreach (SongPoint pair in PairedPoints)
-        {
-            // Create waypoint for each song
-            XmlElement waypoint = document.CreateElement("wpt");
-            GPX.AppendChild(waypoint);
-
-            // Set the lat and lon of the waypoing to the original point
-            waypoint.SetAttribute("lat", pair.Point.Location.Latitude.ToString());
-            waypoint.SetAttribute("lon", pair.Point.Location.Longitude.ToString());
-
-            // Set the name of the GPX point to the name of the song
-            XmlElement name = document.CreateElement("name");
-            name.InnerText = pair.GpxTitle();
-            waypoint.AppendChild(name);
-
-            // Set the time of the GPX point to the original time
-            XmlElement time = document.CreateElement("time");
-            time.InnerText = pair.Point.Time.ToUniversalTime().ToString(Point.gpxTimeOut);
-            waypoint.AppendChild(time);
-
-            // Set the description of the point 
-            XmlElement description = document.CreateElement("desc");
-            description.InnerText = pair.GpxDescription();
-            waypoint.AppendChild(description);
-
-            pointCount++;
-        }
-
-        Console.WriteLine($"[GPX] {pointCount} points found in '{Path.GetFileNameWithoutExtension(path)}' added to GPX");
-
-        document.Save(path);
-        return File.Exists(path);
+        return new XDocument(
+            new XDeclaration("1.0", "utf-8", null),
+            new XElement(ns + "gpx",
+                new XAttribute("version", "1.1"),
+                new XAttribute("xmlns", ns),
+                new XElement(ns + "name", name),
+                new XElement(ns + "desc", desc),
+                PairedPoints.GroupBy(pair => pair.Point.TrackMember).Select(track =>
+                    new XElement(ns + "trk",
+                        new XElement(ns + "name", $"Track {track.Key}"),
+                        new XElement(ns + "trkseg",
+                            track.Select(pair =>
+                                new XElement(ns + "trkpt",
+                                    new XAttribute("lat", pair.Point.Location.Latitude),
+                                    new XAttribute("lon", pair.Point.Location.Longitude),
+                                    new XElement(ns + "name", pair.Song),
+                                    new XElement(ns + "time", pair.Point.Time.ToUniversalTime().ToString(Point.gpxTimeOut)),
+                                    new XElement(ns + "desc", pair.GpxDescription())
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        );
     }
 
-    public readonly bool JsonToFile(string path)
+    public void PrintTracks()
+    {
+        List<int> trackinfo = PairedPoints
+            .GroupBy(pair => pair.Point.TrackMember)
+            .Select(track => track.Count()).ToList();
+
+        trackinfo.ForEach(track => Console.WriteLine(track));
+    }
+
+    public XDocument GetGpx(string name, string desc, XNamespace ns)
+    {
+        return new XDocument(
+            new XDeclaration("1.0", "utf-8", null),
+            new XElement(ns + "gpx",
+                new XAttribute("version", "1.1"),
+                new XAttribute("xmlns", ns),
+                new XElement(ns + "name", name),
+                new XElement(ns + "time", DateTime.Now.ToUniversalTime().ToString(Point.gpxTimeOut)),
+                new XElement(ns + "desc", desc),
+                PairedPoints.Select(pair =>
+                    new XElement(ns + "wpt",
+                        new XAttribute("lat", pair.Point.Location.Latitude),
+                        new XAttribute("lon", pair.Point.Location.Longitude),
+                        new XElement(ns + "name", pair.Song),
+                        new XElement(ns + "time", pair.Point.Time.ToUniversalTime().ToString(Point.gpxTimeOut)),
+                        new XElement(ns + "desc", pair.GpxDescription())
+                    )
+                )
+            )
+        );
+    }
+
+    public readonly bool GetJson(string path)
     {
         File.Delete(path);
 
@@ -172,97 +152,35 @@ public readonly struct Pairings
             }
         }).ToList();
 
-
-        // Create a JSON document based on the list of songs within range
-        string document = JsonConvert.SerializeObject(json, Newtonsoft.Json.Formatting.Indented);
+        // Create a JSON document based on the list of songs
+        string document = JsonConvert.SerializeObject(json, Formatting.Indented);
 
         File.WriteAllText(path, document);
         return File.Exists(path);
     }
 
-    public readonly bool JsonUriToFile(string path)
+    public readonly string?[] GetUriList() => Songs.Where(song => song.Song_URI != null).Select(song => song.Song_URI).ToArray();
+
+    public XDocument GetPlaylist(string name, XNamespace ns)
     {
-        File.Delete(path);
-
-        var uris = Songs
-        .Where(song => song.Song_URI != null)
-        .Select(song =>
-        {
-            if (song.Song_URI == null)
-            {
-                throw new Exception($"URI null for track '{song.Song_Name}'");
-            }
-            return $"{song.Song_URI}\n";
-        });
-
-        StringBuilder builder = new();
-        builder.Append(string.Concat(uris));
-
-        File.WriteAllText(path, builder.ToString());
-        return File.Exists(path);
-    }
-
-    public readonly bool PlaylistToFile(string path)
-    {
-        File.Delete(path);
-
-        // Create a new XML document
-        XmlDocument document = new();
-
-        // Create the XML header
-        XmlNode header = document.CreateXmlDeclaration("1.0", "utf-8", null);
-        document.AppendChild(header);
-
-        // Create the XSPF header
-        XmlElement XSPF = document.CreateElement("playlist");
-        document.AppendChild(XSPF);
-
-        // Add XSPF header attributes
-        XSPF.SetAttribute("version", "1.0");
-        XSPF.SetAttribute("xmlns", "http://xspf.org/ns/0/");
-
-        // Set the name of the XSPF playlist to the name of the file
-        XmlElement name = document.CreateElement("name");
-        name.InnerText = Path.GetFileNameWithoutExtension(path);
-        XSPF.AppendChild(name);
-
-        // Set the title of the XSPF playlist to the name of the file
-        XmlElement creator = document.CreateElement("creator");
-        creator.InnerText = "SpotifyGPX";
-        XSPF.AppendChild(creator);
-
-        // Create the trackList header
-        XmlElement trackList = document.CreateElement("trackList");
-        XSPF.AppendChild(trackList);
-
-        foreach (SpotifyEntry song in Songs)
-        {
-            // Create track for each song
-            XmlElement track = document.CreateElement("track");
-            trackList.AppendChild(track);
-
-            // Set the creator of the track to the song artist
-            XmlElement artist = document.CreateElement("creator");
-            artist.InnerText = song.Song_Artist;
-            track.AppendChild(artist);
-
-            // Set the title of the track to the song name
-            XmlElement title = document.CreateElement("title");
-            title.InnerText = song.Song_Name;
-            track.AppendChild(title);
-
-            // Set the annotation of the song to the end time
-            XmlElement annotation = document.CreateElement("annotation");
-            annotation.InnerText = song.Time.ToString(Point.gpxTimeOut); ;
-            track.AppendChild(annotation);
-
-            // Set the duration of the song to the amount of time it was listened to
-            XmlElement duration = document.CreateElement("duration");
-            duration.InnerText = song.Time_Played;
-            track.AppendChild(duration);
-        }
-
-        document.Save(path);
-        return File.Exists(path);
+        return new XDocument(
+            new XDeclaration("1.0", "utf-8", null),
+            new XElement(ns + "playlist",
+                new XAttribute("version", "1.0"),
+                new XAttribute("xmlns", ns),
+                new XElement(ns + "name", name),
+                new XElement(ns + "creator", "SpotifyGPX"),
+                new XElement(ns + "trackList",
+                    Songs.Select(song =>
+                        new XElement(ns + "track",
+                            new XElement(ns + "creator", song.Song_Artist),
+                            new XElement(ns + "title", song.Song_Name),
+                            new XElement(ns + "annotation", song.Time.ToString(Point.gpxTimeOut)),
+                            new XElement(ns + "duration", song.Time_Played)
+                        )
+                    )
+                )
+            )
+        );
     }
 }

@@ -24,7 +24,7 @@ public readonly struct GpxFile
         catch (Exception ex)
         {
             // If the specified XML is invalid, throw an error
-            throw new Exception($"The defined {Path.GetExtension(path)} file is incorrectly formatted: {ex.Message}");
+            throw new Exception($"The GPX file is incorrectly formatted: {ex.Message}");
         }
 
         if (!document.Descendants(Namespace + "trk").Any())
@@ -59,11 +59,11 @@ public readonly struct GpxFile
                 for (int i = 0; i < tracks.Count; i++)
                 {
                     // Print out all the tracks' name values, if they have a name) or an ascending numeric name
-                    Console.WriteLine($"[TRAK] [{i + 1}] {tracks[i].Element(Namespace + "name")?.Value ?? $"Track {i}"}");
+                    Console.WriteLine($"[TRAK] [{i}] {tracks[i].Element(Namespace + "name")?.Value ?? $"Track {i}"}");
                 }
 
-                Console.WriteLine("[TRAK] [A] All Tracks (Only include songs played during tracks)");
-                Console.WriteLine("[TRAK] [B] All Tracks (Include songs played in gaps between tracks)");
+                Console.WriteLine("[TRAK] [A] All Tracks (Only include songs played during GPX tracking)");
+                Console.WriteLine("[TRAK] [B] All Tracks (Include songs played both during & between GPX tracks)");
 
                 Console.Write("[TRAK] Please choose the track you want to use: ");
 
@@ -73,10 +73,10 @@ public readonly struct GpxFile
                     string? input = Console.ReadLine(); // Read user input
 
                     // Pair only songs included in the track the user selects:
-                    if (int.TryParse(input, out int selectedTrackIndex) && selectedTrackIndex >= 1 && selectedTrackIndex <= tracks.Count)
+                    if (int.TryParse(input, out int selectedTrackIndex) && selectedTrackIndex >= 0 && selectedTrackIndex <= tracks.Count)
                     {
                         // Select the user-chosen <trk> element
-                        selected.Add(tracks[selectedTrackIndex - 1]);
+                        selected.Add(tracks[selectedTrackIndex]);
 
                         break;
                     }
@@ -121,10 +121,10 @@ public readonly struct GpxFile
                 {
                     TrackElement = trk, // Set integer based on the parent track
                     Coordinate = new Coordinate( // Create its coordinate
-                        double.Parse(trkpt.Attribute("lat").Value), // Lat
-                        double.Parse(trkpt.Attribute("lon").Value) // Lon
+                        double.Parse(trkpt.Attribute("lat")?.Value ?? throw new Exception($"GPX 'lat' cannot be null, check your GPX")), // Lat
+                        double.Parse(trkpt.Attribute("lon")?.Value ?? throw new Exception($"GPX 'lon' cannot be null, check your GPX")) // Lon
                     ),
-                    Time = trkpt.Element(Namespace + "time").Value // Create its time
+                    Time = trkpt.Element(Namespace + "time")?.Value ?? throw new Exception($"GPX 'time' cannot be null, check your GPX") // Create its time
                 }))
             .GroupBy(data => data.TrackElement); // Return grouped tracks containing parsed points
 

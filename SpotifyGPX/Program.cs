@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 #nullable enable
 
@@ -104,6 +105,8 @@ class Program
 
             // Step 3: Create list of songs and points paired as close as possible to one another
             pairedEntries = new Pairings(filteredEntries, gpxPoints);
+
+            pairedEntries.PrintTracks();
         }
         catch (Exception ex)
         {
@@ -126,17 +129,20 @@ class Program
             // Stage path of output GPX
             string outputGpx = GenerateOutputPath(inputGpx, "gpx");
 
-            // Store running arguments
+            // Store creation options
             string desc = $"Arguments: {string.Join(", ", args)}";
+            string name = Path.GetFileNameWithoutExtension(outputGpx);
 
-            // Check that the file was saved successfully
-            if (pairedEntries.CreateGPX(outputGpx, desc))
+            XNamespace ns = "http://www.topografix.com/GPX/1/1";
+            XDocument document = pairedEntries.GetGpx(name, desc, ns);
+
+            // Check that there are points
+            //if (document.Descendants(ns + "trkpt").Any())
+            if (document.Descendants(ns + "wpt").Any())
             {
-                Console.WriteLine($"[FILE] GPX file, '{Path.GetFileName(outputGpx)}', generated successfully");
-            }
-            else
-            {
-                Console.WriteLine($"[ERROR] Error saving GPX file to: '{Path.GetFileName(outputGpx)}'");
+                document.Save(outputGpx);
+                //Console.WriteLine($"[FILE] {document.Descendants(ns + "trkpt").Count()} song/point pairs added to '{Path.GetFileName(outputGpx)}'");
+                Console.WriteLine($"[FILE] {document.Descendants(ns + "wpt").Count()} song/point pairs added to '{Path.GetFileName(outputGpx)}'");
             }
         }
 
@@ -146,14 +152,9 @@ class Program
             string outputJson = GenerateOutputPath(inputGpx, "json");
 
             // Check that the file was saved successfully
-            if (pairedEntries.JsonToFile(outputJson))
+            if (pairedEntries.GetJson(outputJson))
             {
                 Console.WriteLine($"[FILE] JSON file, '{Path.GetFileName(outputJson)}', generated successfully");
-            }
-            else
-            {
-                Console.WriteLine($"[ERROR] Error saving JSON file to: '{Path.GetFileName(outputJson)}'");
-
             }
         }
 
@@ -162,14 +163,17 @@ class Program
             // Stage path of output XSPF
             string outputPlist = GenerateOutputPath(inputGpx, "xspf");
 
-            // Check that the file was saved successfully
-            if (pairedEntries.PlaylistToFile(outputPlist))
+            // Store creation options
+            string name = Path.GetFileNameWithoutExtension(outputPlist);
+
+            XNamespace ns = "http://xspf.org/ns/0/";
+            XDocument document = pairedEntries.GetPlaylist(name, ns);
+
+            // Check that there are tracks
+            if (document.Descendants(ns + "track").Any())
             {
-                Console.WriteLine($"[FILE] XSPF file, '{Path.GetFileName(outputPlist)}', generated successfully");
-            }
-            else
-            {
-                Console.WriteLine($"[ERROR] Error saving XSPF file to: '{Path.GetFileName(outputPlist)}'");
+                document.Save(outputPlist);
+                Console.WriteLine($"[FILE] {document.Descendants(ns + "track").Count()} song/point pairs added to '{Path.GetFileName(outputPlist)}'");
             }
         }
 
@@ -178,14 +182,13 @@ class Program
             // Stage path of output URI list
             string outputTxt = GenerateOutputPath(inputGpx, "txt");
 
-            // Check that the file was saved successfully
-            if (pairedEntries.JsonUriToFile(outputTxt))
+            string?[] document = pairedEntries.GetUriList();
+
+            // Check that there are URIs
+            if (document.Length > 0 && !document.Any(s => s == null))
             {
-                Console.WriteLine($"[FILE] TXT file, '{Path.GetFileName(outputTxt)}', generated successfully");
-            }
-            else
-            {
-                Console.WriteLine($"[ERROR] Error saving TXT file to: '{Path.GetFileName(outputTxt)}'");
+                File.WriteAllLines(outputTxt, document);
+                Console.WriteLine($"[FILE] {document.Length} song URIs added to '{Path.GetFileName(outputTxt)}'");
             }
         }
 
