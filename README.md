@@ -13,7 +13,7 @@ Here is an example render using [kepler.gl](https://github.com/keplergl/kepler.g
 You must have the following:
 
 ### for SpotifyGPX:
- - .NET 6.0 installed
+ - .NET 8.0 installed
  - the `Newtonsoft.Json` library in the running directory
  - a GPX file of a tracked journey with timings
  - listened to Spotify during the GPX journey
