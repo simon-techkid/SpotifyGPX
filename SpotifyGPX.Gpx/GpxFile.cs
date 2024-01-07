@@ -16,106 +16,109 @@ public readonly struct GpxFile
 
     public GpxFile(string path)
     {
-        try
-        {
-            // Attempt to load the contents of the specified file into the XML
-            document = XDocument.Load(path);
-        }
-        catch (Exception ex)
-        {
-            // If the specified XML is invalid, throw an error
-            throw new Exception($"The GPX file is incorrectly formatted: {ex.Message}");
-        }
+        document = LoadDocument(path);
 
-        if (!document.Descendants(Namespace + "trk").Any())
+        if (!TracksExist)
         {
             // If there are no <trk> tracks in the GPX, throw error
             throw new Exception($"No track elements found in '{Path.GetFileName(path)}'!");
         }
 
-        if (!document.Descendants(Namespace + "trkpt").Any())
+        if (!PointsExist)
         {
-            // If there are no <trkpt> points the GPX, throw an error
+            // If there are no <trkpt> points the GPX, throw error
             throw new Exception($"No points found in '{Path.GetFileName(path)}'!");
         }
     }
 
-    private readonly List<XElement> Tracks
+    private static XDocument LoadDocument(string path)
     {
-        get
+        try
         {
-            // List all the tracks in the document
-            List<XElement> tracks = document.Descendants(Namespace + "trk").ToList();
+            return XDocument.Load(path);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"The GPX file is incorrectly formatted: {ex.Message}");
+        }
+    }
 
-            // Create track list for user-selected tracks (if the doc contains multiple)
-            List<XElement> selected = new();
+    private readonly bool TracksExist => document.Descendants(Namespace + "trk").Any();
 
+    private readonly bool PointsExist => document.Descendants(Namespace + "trkpt").Any();
+
+    private List<XElement> GetTracks()
+    {
+        // List all the tracks in the document
+        List<XElement> allTracks = document.Descendants(Namespace + "trk").ToList();
+
+        // Handle multiple tracks if there are more than one
+        if (allTracks.Count > 1)
+        {
             // If there are multiple tracks, ask the user which track to use
-            if (tracks.Count > 1)
+            return HandleMultipleTracks(allTracks);
+        }
+
+        // If there is one track, return the original list
+        return allTracks;
+    }
+
+    private static List<XElement> HandleMultipleTracks(List<XElement> allTracks)
+    {
+        // If there are multiple <trk> elements, prompt the user to select one
+        Console.WriteLine("[TRAK] Multiple GPX tracks found:");
+        for (int i = 0; i < allTracks.Count; i++)
+        {
+            // Print out all the tracks' name values, if they have a name) or an ascending numeric name
+            Console.WriteLine($"[TRAK] [{i}] {allTracks[i].Element(Namespace + "name")?.Value ?? $"Track {i}"}");
+        }
+
+        Console.WriteLine("[TRAK] [A] All Tracks (Only include songs played during GPX tracking)");
+        Console.WriteLine("[TRAK] [B] All Tracks (Include songs played both during & between GPX tracks)");
+
+        Console.Write("[TRAK] Please choose the track you want to use: ");
+
+        // Create a list for the user selected track(s)
+        List<XElement> selectedTracks = new();
+
+        // Forever, until the user provides valid input:
+        while (true)
+        {
+            string? input = Console.ReadLine(); // Read user input
+
+            // Pair only songs included in the track the user selects:
+            if (int.TryParse(input, out int selectedTrackIndex) && selectedTrackIndex >= 0 && selectedTrackIndex <= allTracks.Count)
             {
-                // If there are multiple <trk> elements, prompt the user to select one
-
-                Console.WriteLine("[TRAK] Multiple GPX tracks found:");
-                for (int i = 0; i < tracks.Count; i++)
-                {
-                    // Print out all the tracks' name values, if they have a name) or an ascending numeric name
-                    Console.WriteLine($"[TRAK] [{i}] {tracks[i].Element(Namespace + "name")?.Value ?? $"Track {i}"}");
-                }
-
-                Console.WriteLine("[TRAK] [A] All Tracks (Only include songs played during GPX tracking)");
-                Console.WriteLine("[TRAK] [B] All Tracks (Include songs played both during & between GPX tracks)");
-
-                Console.Write("[TRAK] Please choose the track you want to use: ");
-
-                // Forever, until the user provides valid input:
-                while (true)
-                {
-                    string? input = Console.ReadLine(); // Read user input
-
-                    // Pair only songs included in the track the user selects:
-                    if (int.TryParse(input, out int selectedTrackIndex) && selectedTrackIndex >= 0 && selectedTrackIndex <= tracks.Count)
-                    {
-                        // Select the user-chosen <trk> element
-                        selected.Add(tracks[selectedTrackIndex]);
-
-                        break;
-                    }
-                    // Pair all songs in the GPX regardless of track:
-                    else if (input == "A")
-                    {
-                        // Return a list of each track separately (they will be discriminable):
-                        return tracks;
-                    }
-                    // Pair all songs in the GPX regardless or track, and regardless of whether they were listened to during GPX journey:
-                    else if (input == "B")
-                    {
-                        // Aggregate all the tracks of the GPX into a single track (they will be cohesive):
-                        selected.Add(new XElement("combined", tracks));
-                        break;
-                    }
-                    // User did not provide valid input:
-                    else
-                    {
-                        // Go back to the beginning of the prompt and ask the user again
-                        Console.WriteLine("Invalid input. Please enter a valid track number.");
-                    }
-                }
+                selectedTracks.Add(allTracks[selectedTrackIndex]); // Select the user-chosen <trk> element
+                break; // Exit the prompt loop
             }
-            // If there is only one track, return the original list (containing one track)
+            // Pair all songs in the GPX regardless of track:
+            else if (input == "A")
+            {
+                // Return the original list of distinguished tracks
+                return allTracks;
+            }
+            // Pair all songs in the GPX regardless or track, and regardless of whether they were listened to during GPX journey:
+            else if (input == "B")
+            {
+                // Aggregate all the tracks of the GPX into a single track (they will be cohesive):
+                return new List<XElement> { new("combined", allTracks) };
+            }
+            // User did not provide valid input:
             else
             {
-                selected = tracks;
+                // Go back to the beginning of the prompt and ask the user again
+                Console.WriteLine("Invalid input. Please enter a valid track number.");
             }
-
-            // Return track(s) in accordance with user selection (if there are multiple) or return the original (if there is one)
-            return selected;
         }
+
+        return selectedTracks;
     }
 
     public readonly List<GPXPoint> ParseGpxPoints()
     {
         // Use GroupBy to group <trkpt> elements by their parent <trk> elements.
-        var groupedTracks = Tracks
+        var groupedTracks = GetTracks()
             .SelectMany(trk => trk.Descendants(Namespace + "trkpt") // For each track in the GPX:
                 .Select(trkpt => new // For each point in the track:
                 {

@@ -24,19 +24,7 @@ public readonly struct JsonFile
 
     public readonly List<SpotifyEntry> FilterSpotifyJson(List<GPXPoint> gpxPoints)
     {
-        // Get start and end times for each GPX track
-        Dictionary<int, (DateTimeOffset startTime, DateTimeOffset endTime)> trackRange = gpxPoints // Returns track number, start time of the track, and end time of the track
-        .GroupBy(point => point.TrackMember) // Distinguish which track each point came from
-        .ToDictionary(
-            group => group.Key, // Dictionary key is the track member
-            group => group.Aggregate(
-                (startTime: group.First().Time, endTime: group.First().Time),
-                (earliest, point) => (
-                    startTime: point.Time < earliest.startTime ? point.Time : earliest.startTime,
-                    endTime: point.Time > earliest.endTime ? point.Time : earliest.endTime
-                )
-            )
-        );
+        Dictionary<int, (DateTimeOffset startTime, DateTimeOffset endTime)> trackRange = TrackRanges(gpxPoints);
 
         foreach (var entry in trackRange)
         {
@@ -48,5 +36,22 @@ public readonly struct JsonFile
         .Where(entry => trackRange.Any(trackTimes => // Return true if the song falls inside the GPX track
             (entry.Time >= trackTimes.Value.startTime) && (entry.Time <= trackTimes.Value.endTime))) // Song played between start & end of the GPX
         .ToList(); // Send all the relevant songs to a list!
+    }
+
+    public readonly Dictionary<int, (DateTimeOffset startTime, DateTimeOffset endTime)> TrackRanges(List<GPXPoint> gpxPoints)
+    {
+        // Get start and end times for each GPX track
+        return gpxPoints // Returns track number, start time of the track, and end time of the track
+        .GroupBy(point => point.TrackMember) // Distinguish which track each point came from
+        .ToDictionary(
+            group => group.Key, // Dictionary key is the track member
+            group => group.Aggregate(
+                (startTime: group.First().Time, endTime: group.First().Time),
+                (earliest, point) => (
+                    startTime: point.Time < earliest.startTime ? point.Time : earliest.startTime,
+                    endTime: point.Time > earliest.endTime ? point.Time : earliest.endTime
+                )
+            )
+        );
     }
 }
