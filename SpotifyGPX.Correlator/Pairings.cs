@@ -51,7 +51,7 @@ public readonly struct Pairings
         return correlatedEntries;
     }
 
-    public XDocument GetGpxx(string name, string desc, XNamespace ns)
+    public readonly XDocument GetGpxx(string name, string desc, XNamespace ns)
     {
         return new XDocument(
             new XDeclaration("1.0", "utf-8", null),
@@ -80,7 +80,7 @@ public readonly struct Pairings
         );
     }
 
-    public void PrintTracks()
+    public readonly void PrintTracks()
     {
         List<int> trackinfo = PairedPoints
             .GroupBy(pair => pair.Point.TrackMember)
@@ -89,7 +89,7 @@ public readonly struct Pairings
         trackinfo.ForEach(Console.WriteLine);
     }
 
-    public XDocument GetGpx(string name, string desc, XNamespace ns)
+    public readonly XDocument GetGpx(string name, string desc, XNamespace ns)
     {
         return new XDocument(
             new XDeclaration("1.0", "utf-8", null),
@@ -112,12 +112,10 @@ public readonly struct Pairings
         );
     }
 
-    public readonly bool GetJson(string path)
+    public readonly List<JObject> GetJson()
     {
-        File.Delete(path);
-
         // Create a list of JSON objects
-        List<JObject> json = Songs.Select(song =>
+        return Songs.Select(song =>
         {
             try
             {
@@ -151,17 +149,11 @@ public readonly struct Pairings
                 throw new Exception($"Error sending track, '{song.Song_Name}', to JSON: {ex.Message}");
             }
         }).ToList();
-
-        // Create a JSON document based on the list of songs
-        string document = JsonConvert.SerializeObject(json, Formatting.Indented);
-
-        File.WriteAllText(path, document);
-        return File.Exists(path);
     }
 
     public readonly string?[] GetUriList() => Songs.Where(song => song.Song_URI != null).Select(song => song.Song_URI).ToArray();
 
-    public XDocument GetPlaylist(string name, XNamespace ns)
+    public readonly XDocument GetPlaylist(string name, XNamespace ns)
     {
         return new XDocument(
             new XDeclaration("1.0", "utf-8", null),

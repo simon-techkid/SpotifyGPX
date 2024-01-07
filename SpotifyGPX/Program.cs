@@ -1,5 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SpotifyGPX.Gpx;
 using SpotifyGPX.Json;
 using SpotifyGPX.Options;
@@ -98,13 +100,13 @@ class Program
         try
         {
             // Step 1: Create list of GPX points from the GPX file
-            List<GPXPoint> gpxPoints = new GpxFile(inputGpx).ParseGpxPoints();
+            List<GPXTrack> tracks = new GpxFile(inputGpx).ParseGpxTracks();
 
             // Step 2: Create list of songs played, and filter it to songs played during the GPX tracking timeframe
-            List<SpotifyEntry> filteredEntries = new JsonFile(inputJson).FilterSpotifyJson(gpxPoints);
+            List<SpotifyEntry> filteredEntries = new JsonFile(inputJson).FilterSpotifyJson(tracks);
 
             // Step 3: Create list of songs and points paired as close as possible to one another
-            pairedEntries = new Pairings(filteredEntries, gpxPoints);
+            pairedEntries = new Pairings(filteredEntries, tracks.SelectMany(track => track.Points).ToList());
 
             pairedEntries.PrintTracks();
         }
@@ -151,10 +153,13 @@ class Program
             // Stage path of output JSON
             string outputJson = GenerateOutputPath(inputGpx, "json");
 
-            // Check that the file was saved successfully
-            if (pairedEntries.GetJson(outputJson))
+            List<JObject> entries = pairedEntries.GetJson();
+
+            if (entries.Count > 0)
             {
-                Console.WriteLine($"[FILE] JSON file, '{Path.GetFileName(outputJson)}', generated successfully");
+                string document = JsonConvert.SerializeObject(entries, Formatting.Indented);
+                File.WriteAllText(outputJson, document);
+                Console.WriteLine($"[FILE] {entries.Count} song entries added to '{Path.GetFileName(outputJson)}'");
             }
         }
 

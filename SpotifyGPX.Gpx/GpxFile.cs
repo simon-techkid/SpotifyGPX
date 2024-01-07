@@ -115,7 +115,7 @@ public readonly struct GpxFile
         return selectedTracks;
     }
 
-    public readonly List<GPXPoint> ParseGpxPoints()
+    public readonly List<GPXTrack> ParseGpxTracks()
     {
         // Use GroupBy to group <trkpt> elements by their parent <trk> elements.
         var groupedTracks = GetTracks()
@@ -136,7 +136,7 @@ public readonly struct GpxFile
 
         // Parse GPXPoint from each point
         return groupedTracks
-            .SelectMany(group => // For each track
+            .Select(group => // For each track
             {
                 XElement trk = group.Key; // Get the track's original XElement
                 List<GPXPoint> trkPoints = group // Create List<GPXPoint> of the track's points
@@ -148,11 +148,13 @@ public readonly struct GpxFile
                     ))
                     .ToList(); // Export the List<GPXPoint> of points contained in this track
 
+                GPXTrack track = new(trkPoints, trkInteger);
+
                 // After this track is completely parsed, add one to the identifier so that the next track's points is distinguishable
                 trkInteger++;
 
                 // Return this track's points
-                return trkPoints;
+                return track;
             })
             .ToList(); // Return List<GPXPoint> containing all the parsed points
     }

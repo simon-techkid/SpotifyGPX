@@ -2,7 +2,9 @@
 
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 #nullable enable
@@ -69,6 +71,25 @@ public readonly struct SpotifyEntry
     public readonly string? Spotify_OfflineTS => (string?)track["offline_timestamp"];
     public readonly bool? Spotify_Incognito => (bool?)track["incognito"];
     public override string ToString() => $"{Song_Artist} - {Song_Name}";
+}
+
+public readonly struct GPXTrack
+{
+    public GPXTrack(List<GPXPoint> points, int index)
+    {
+        Points = points;
+        Index = index;
+    }
+
+    public int Index { get; }
+
+    public List<GPXPoint> Points { get; }
+
+    public readonly DateTimeOffset Start => Points.Select(point => point.Time).Min();
+
+    public readonly DateTimeOffset End => Points.Select(point => point.Time).Max();
+
+    public override string ToString() => $"[T{Index}] ({Points.Count} points) Starts: {Start}, Ends: {End}";
 }
 
 public readonly struct GPXPoint
