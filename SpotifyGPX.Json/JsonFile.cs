@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SpotifyGPX.Options;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,7 +26,8 @@ public readonly struct JsonFile
     {
         List<SpotifyEntry> allSongs = JsonContents.Select((track, index) => new SpotifyEntry(track, index)).ToList();
 
-        List<SpotifyEntry> filteredSongs = new();
+        // Use ConcurrentDictionary to store songs for each track index
+        ConcurrentDictionary<int, List<SpotifyEntry>> songsByTrackIndex = new();
 
         Parallel.ForEach(tracks, track =>
         {
@@ -36,11 +38,20 @@ public readonly struct JsonFile
                 .Where(entry => (entry.Time >= track.Start) && (entry.Time <= track.End))
                 .ToList();
 
-            lock (allSongs)
+            int trackIndex = tracks.IndexOf(track);
+
+            // Add songs to ConcurrentDictionary with the track index
+            songsByTrackIndex.AddOrUpdate(trackIndex, songsInRange, (_, existingSongs) =>
             {
-                filteredSongs.AddRange(songsInRange);
-            }
+                existingSongs.AddRange(songsInRange);
+                return existingSongs;
+            });
         });
+
+        // Extract and sort songs based on the original track index order
+        List<SpotifyEntry> filteredSongs = Enumerable.Range(0, tracks.Count)
+            .SelectMany(index => songsByTrackIndex.ContainsKey(index) ? songsByTrackIndex[index] : new List<SpotifyEntry>())
+            .ToList();
 
         return filteredSongs;
     }
