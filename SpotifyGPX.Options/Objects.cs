@@ -146,15 +146,15 @@ public readonly struct SongPoint
         // accuracy == 0 means song ends in the same place as the point
         // accuracy > 0 means song ends after the point
         string seconds = AbsRoundAccuracy == 1 ? "second" : "seconds";
-        string ppexpl = $"{(RoundAccuracy < 0 ? $"{AbsRoundAccuracy} {seconds} before, at" : Accuracy == 0 ? "at the same time," : $"{AbsRoundAccuracy} {seconds} after, at")}";
+        string ppexpl = $"{(RoundAccuracy < 0 ? $"{AbsRoundAccuracy} {seconds} before, at" : RoundAccuracy == 0 ? "at the same time," : $"{AbsRoundAccuracy} {seconds} after, at")}";
 
         builder.AppendLine($"At this location at {Point.Time.ToString(Options.Point.gpxPointDescription)}");
         builder.AppendLine($"Song ended {ppexpl} {EndedAt.ToString(Options.Point.gpxPointDescription)}");
-        builder.AppendLine($"{(Song.Song_Shuffle != null ? $"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}" : null)}");
-        builder.AppendLine($"{(Song.Song_Skipped != null ? $"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}" : null)}");
-        builder.AppendLine($"{(Song.Spotify_Offline != null ? $"Offline: {(Song.Spotify_Offline == true ? "Yes" : "No")}" : null)}");
-        builder.AppendLine($"{(Song.Spotify_IP != null ? $"IP Address: {Song.Spotify_IP}" : null)}");
-        builder.AppendLine($"{(Song.Spotify_Country != null ? $"Country: {Song.Spotify_Country}" : null)}");
+        builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}");
+        builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}");
+        builder.AppendLine($"Offline: {(Song.Spotify_Offline == true ? "Yes" : "No")}");
+        builder.AppendLine($"IP Address: {Song.Spotify_IP}");
+        builder.AppendLine($"Country: {Song.Spotify_Country}");
         builder.Append($"{(Point.Predicted == true ? $"Point Predicted" : null)}");
 
         return builder.ToString();
