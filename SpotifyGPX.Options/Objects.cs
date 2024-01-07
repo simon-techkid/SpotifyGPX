@@ -26,12 +26,12 @@ public readonly struct SpotifyEntry
 
     private readonly JObject track;
 
-    public int Index { get; }
+    public int Index { get; } // Unique identifier of this song in a list
     public readonly DateTimeOffset Time
     {
         get
         {
-            string time = (string?)track["endTime"] ?? (string?)track["ts"] ?? throw new Exception($"JSON 'ts' or 'endTime' cannot be null, check your JSON");
+            string time = ((string?)track["endTime"] ?? (string?)track["ts"]) ?? throw new Exception($"JSON 'ts' or 'endTime' cannot be null, check your JSON");
 
             if (DateTimeOffset.TryParseExact(time, Point.miniSpotFormat, null, DateTimeStyles.AssumeUniversal, out var result))
             {
@@ -81,7 +81,7 @@ public readonly struct GPXPoint
         Index = index;
     }
 
-    public int Index { get; }
+    public int Index { get; } // Unique identifier of this point in a list
     public bool Predicted { get; }
     public Coordinate Location { get; }
     public DateTimeOffset Time { get; }
@@ -138,12 +138,18 @@ public readonly struct SongPoint
         // GPX POINT DESCRIPTION \\
         // ===================== \\
 
-        DateTimeOffset EndedAt = new(Song.Time.Ticks + Point.Time.Offset.Ticks, Point.Time.Offset);
+        DateTimeOffset EndedAt = Song.Time.ToOffset(Point.Time.Offset);
 
         StringBuilder builder = new();
 
-        builder.AppendLine($"Ended here, at {EndedAt.ToString(Options.Point.gpxPointDescription)}");
-        builder.AppendLine($"Song ends {AbsAccuracy} seconds {(Accuracy < 0 ? "behind the" : "ahead of the")} point");
+        // accuracy < 0 means song ends before the point
+        // accuracy == 0 means song ends in the same place as the point
+        // accuracy > 0 means song ends after the point
+        string seconds = AbsRoundAccuracy == 1 ? "second" : "seconds";
+        string ppexpl = $"{(RoundAccuracy < 0 ? $"{AbsRoundAccuracy} {seconds} before, at" : Accuracy == 0 ? "at the same time," : $"{AbsRoundAccuracy} {seconds} after, at")}";
+
+        builder.AppendLine($"At this location at {Point.Time.ToString(Options.Point.gpxPointDescription)}");
+        builder.AppendLine($"Song ended {ppexpl} {EndedAt.ToString(Options.Point.gpxPointDescription)}");
         builder.AppendLine($"{(Song.Song_Shuffle != null ? $"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}" : null)}");
         builder.AppendLine($"{(Song.Song_Skipped != null ? $"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}" : null)}");
         builder.AppendLine($"{(Song.Spotify_Offline != null ? $"Offline: {(Song.Spotify_Offline == true ? "Yes" : "No")}" : null)}");
@@ -162,9 +168,10 @@ public readonly struct SongPoint
     }
 
     public readonly int Index { get; } // Unique identifier of this SongPoint in a list
-    public readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds;
+    private readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds;
     public readonly double AbsAccuracy => Math.Abs(Accuracy);
     private readonly double RoundAccuracy => Math.Round(Accuracy);
+    private readonly double AbsRoundAccuracy => Math.Abs(RoundAccuracy);
     public SpotifyEntry Song { get; }
     public GPXPoint Point { get; }
 
@@ -173,6 +180,6 @@ public readonly struct SongPoint
         string songTime = Song.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat);
         string pointTime = Point.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat);
 
-        return $"[PAIR] [T{Point.TrackMember}] [#{Index + 1}] [{songTime}({Song.Index}) ~ {pointTime}({Point.Index})] [{RoundAccuracy}s] {Song}";
+        return $"[T{Point.TrackMember}#{Point.Index} ==> {Index}] [{songTime} ~ {pointTime}] [{RoundAccuracy}s] {Song}";
     }
 }

@@ -86,7 +86,7 @@ public readonly struct Pairings
             .GroupBy(pair => pair.Point.TrackMember)
             .Select(track => track.Count()).ToList();
 
-        trackinfo.ForEach(track => Console.WriteLine(track));
+        trackinfo.ForEach(Console.WriteLine);
     }
 
     public XDocument GetGpx(string name, string desc, XNamespace ns)

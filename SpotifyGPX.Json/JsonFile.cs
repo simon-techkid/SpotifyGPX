@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SpotifyGPX.Options;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,7 +25,7 @@ public readonly struct JsonFile
     public readonly List<SpotifyEntry> FilterSpotifyJson(List<GPXPoint> gpxPoints)
     {
         // Get start and end times for each GPX track
-        var trackStartEndTimes = gpxPoints // Returns track number, start time of the track, and end time of the track
+        Dictionary<int, (DateTimeOffset startTime, DateTimeOffset endTime)> trackRange = gpxPoints // Returns track number, start time of the track, and end time of the track
         .GroupBy(point => point.TrackMember) // Distinguish which track each point came from
         .ToDictionary(
             group => group.Key, // Dictionary key is the track member
@@ -37,9 +38,14 @@ public readonly struct JsonFile
             )
         );
 
+        foreach (var entry in trackRange)
+        {
+            Console.WriteLine($"[T{entry.Key}] startTime: {entry.Value.startTime}, endTime: {entry.Value.endTime}");
+        }
+
         // Filter Spotify entries based on track-specific start and end times
         return SpotifyEntries
-        .Where(entry => trackStartEndTimes.Any(trackTimes => // Return true if the song falls inside the GPX track
+        .Where(entry => trackRange.Any(trackTimes => // Return true if the song falls inside the GPX track
             (entry.Time >= trackTimes.Value.startTime) && (entry.Time <= trackTimes.Value.endTime))) // Song played between start & end of the GPX
         .ToList(); // Send all the relevant songs to a list!
     }
