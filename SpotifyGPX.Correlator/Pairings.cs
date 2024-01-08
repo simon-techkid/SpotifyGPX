@@ -1,11 +1,9 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SpotifyGPX.Options;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -13,7 +11,7 @@ namespace SpotifyGPX.Pairings;
 
 public readonly struct Pairings
 {
-    public Pairings(List<SpotifyEntry> s, List<GPXPoint> p) => PairedPoints = PairPoints(s, p);
+    public Pairings(List<SpotifyEntry> s, List<GPXTrack> t) => PairedPoints = PairPoints(s, t);
 
     //public Pairings(Pairings organic, string? kmlFile) => PairedPoints = new Prediction(organic.PairedPoints, kmlFile).Predicted;
 
@@ -23,22 +21,27 @@ public readonly struct Pairings
 
     private readonly List<GPXPoint> Points => PairedPoints.Select(pair => pair.Point).ToList();
 
-    private static List<SongPoint> PairPoints(List<SpotifyEntry> songs, List<GPXPoint> points)
+    private static List<SongPoint> PairPoints(List<SpotifyEntry> songs, List<GPXTrack> tracks)
     {
         // Correlate Spotify entries with the nearest GPX points
-        List<SongPoint> correlatedEntries = songs
-        .Select((spotifyEntry, index) =>
-        {
-            GPXPoint nearestPoint = points
-            .OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time).TotalSeconds))
-            .First();
 
-            SongPoint pair = new(spotifyEntry, nearestPoint, index);
+        List<SongPoint> correlatedEntries = tracks
+        .SelectMany((track, trackIndex) =>
+            songs.Where(spotifyEntry =>
+                    (spotifyEntry.Time >= track.Start) && (spotifyEntry.Time <= track.End))
+                .Select((spotifyEntry, index) =>
+                {
+                    GPXPoint nearestPoint = track.Points
+                        .OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time).TotalSeconds))
+                        .First();
 
-            Console.WriteLine(pair);
+                    SongPoint pair = new(spotifyEntry, nearestPoint, index, trackIndex);
 
-            return pair;
-        })
+                    Console.WriteLine(pair);
+
+                    return pair;
+                })
+        )
         .ToList();
 
         if (correlatedEntries.Count > 0)
@@ -60,7 +63,7 @@ public readonly struct Pairings
                 new XAttribute("xmlns", ns),
                 new XElement(ns + "name", name),
                 new XElement(ns + "desc", desc),
-                PairedPoints.GroupBy(pair => pair.Point.TrackMember).Select(track =>
+                PairedPoints.GroupBy(pair => pair.TrackMember).Select(track =>
                     new XElement(ns + "trk",
                         new XElement(ns + "name", $"Track {track.Key}"),
                         new XElement(ns + "trkseg",
@@ -83,7 +86,7 @@ public readonly struct Pairings
     public readonly void PrintTracks()
     {
         List<int> trackinfo = PairedPoints
-            .GroupBy(pair => pair.Point.TrackMember)
+            .GroupBy(pair => pair.TrackMember)
             .Select(track => track.Count()).ToList();
 
         trackinfo.ForEach(Console.WriteLine);

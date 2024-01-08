@@ -94,11 +94,10 @@ public readonly struct GPXTrack
 
 public readonly struct GPXPoint
 {
-    public GPXPoint(Coordinate point, string time, int trackmem, int index)
+    public GPXPoint(Coordinate point, string time, int index)
     {
         Location = point;
         Time = DateTimeOffset.ParseExact(time, Point.gpxTimeInp, null);
-        TrackMember = trackmem;
         Index = index;
     }
 
@@ -106,7 +105,6 @@ public readonly struct GPXPoint
     public bool Predicted { get; }
     public Coordinate Location { get; }
     public DateTimeOffset Time { get; }
-    public int TrackMember { get; }
 }
 
 public readonly struct Coordinate
@@ -115,6 +113,12 @@ public readonly struct Coordinate
     {
         Latitude = lat;
         Longitude = lon;
+    }
+
+    public Coordinate(string lat, string lon)
+    {
+        Latitude = double.Parse(lon);
+        Longitude = double.Parse(lat);
     }
 
     public readonly double Latitude;
@@ -181,14 +185,16 @@ public readonly struct SongPoint
         return builder.ToString();
     }
 
-    public SongPoint(SpotifyEntry song, GPXPoint point, int index)
+    public SongPoint(SpotifyEntry song, GPXPoint point, int index, int trackmem)
     {
         Song = song;
         Point = point;
         Index = index;
+        TrackMember = trackmem;
     }
 
     public readonly int Index { get; } // Unique identifier of this SongPoint in a list
+    public readonly int TrackMember { get; } // Track from which the pairing originates
     private readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds;
     public readonly double AbsAccuracy => Math.Abs(Accuracy);
     private readonly double RoundAccuracy => Math.Round(Accuracy);
@@ -201,6 +207,6 @@ public readonly struct SongPoint
         string songTime = Song.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat);
         string pointTime = Point.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat);
 
-        return $"[T{Point.TrackMember}#{Point.Index} ==> {Index}] [{songTime} ~ {pointTime}] [{RoundAccuracy}s] {Song}";
+        return $"[T{TrackMember}#{Point.Index} ==> {Index}] [{songTime} ~ {pointTime}] [{RoundAccuracy}s] {Song}";
     }
 }

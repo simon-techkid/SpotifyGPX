@@ -106,7 +106,7 @@ class Program
             List<SpotifyEntry> filteredEntries = new JsonFile(inputJson).FilterSpotifyJson(tracks);
 
             // Step 3: Create list of songs and points paired as close as possible to one another
-            pairedEntries = new Pairings(filteredEntries, tracks.SelectMany(track => track.Points).ToList());
+            pairedEntries = new Pairings(filteredEntries, tracks);
 
             pairedEntries.PrintTracks();
         }

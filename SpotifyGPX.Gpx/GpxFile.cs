@@ -123,38 +123,28 @@ public readonly struct GpxFile
                 .Select(trkpt => new // For each point in the track:
                 {
                     TrackElement = trk, // Set integer based on the parent track
-                    Coordinate = new Coordinate( // Create its coordinate
-                        double.Parse(trkpt.Attribute("lat")?.Value ?? throw new Exception($"GPX 'lat' cannot be null, check your GPX")), // Lat
-                        double.Parse(trkpt.Attribute("lon")?.Value ?? throw new Exception($"GPX 'lon' cannot be null, check your GPX")) // Lon
-                    ),
+                    Coordinate = new Coordinate(
+                        trkpt.Attribute("lat")?.Value ?? throw new Exception("GPX point 'lat' cannot be null, check your GPX"),
+                        trkpt.Attribute("lat")?.Value ?? throw new Exception("GPX point 'lon' cannot be null, check your GPX")
+                        ),
                     Time = trkpt.Element(Namespace + "time")?.Value ?? throw new Exception($"GPX 'time' cannot be null, check your GPX") // Create its time
                 }))
             .GroupBy(data => data.TrackElement); // Return grouped tracks containing parsed points
 
-        // Start at track zero
-        int trkInteger = 0;
-
-        // Parse GPXPoint from each point
+        // Parse GPXTrack from each set of points
         return groupedTracks
-            .Select(group => // For each track
+            .Select((track, index) => // For each track
             {
-                XElement trk = group.Key; // Get the track's original XElement
-                List<GPXPoint> trkPoints = group // Create List<GPXPoint> of the track's points
+                List<GPXPoint> trkPoints = track // Create List<GPXPoint> of the track's points
                     .Select((pointData, index) => new GPXPoint( // For each point in the track, parse:
                         pointData.Coordinate, // Lat/Lon
                         pointData.Time,       // Time
-                        trkInteger,           // Track Member
                         index                 // Index
                     ))
                     .ToList(); // Export the List<GPXPoint> of points contained in this track
 
-                GPXTrack track = new(trkPoints, trkInteger);
-
-                // After this track is completely parsed, add one to the identifier so that the next track's points is distinguishable
-                trkInteger++;
-
                 // Return this track's points
-                return track;
+                return new GPXTrack(trkPoints, index);
             })
             .ToList(); // Return List<GPXPoint> containing all the parsed points
     }
