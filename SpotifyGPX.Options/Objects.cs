@@ -79,15 +79,17 @@ public readonly struct GPXTrack
     {
         Points = points;
         Index = index;
+        Start = Points.Select(point => point.Time).Min();
+        End = Points.Select(point => point.Time).Max();
     }
 
     public int Index { get; }
 
     public List<GPXPoint> Points { get; }
 
-    public readonly DateTimeOffset Start => Points.Select(point => point.Time).Min();
+    public readonly DateTimeOffset Start { get; }
 
-    public readonly DateTimeOffset End => Points.Select(point => point.Time).Max();
+    public readonly DateTimeOffset End { get; }
 
     public override string ToString() => $"[T{Index}] ({Points.Count} points) Starts: {Start}, Ends: {End}";
 }
