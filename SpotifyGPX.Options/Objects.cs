@@ -119,8 +119,8 @@ public readonly struct Coordinate
 
     public Coordinate(string lat, string lon)
     {
-        Latitude = double.Parse(lon);
-        Longitude = double.Parse(lat);
+        Latitude = double.Parse(lat);
+        Longitude = double.Parse(lon);
     }
 
     public readonly double Latitude;

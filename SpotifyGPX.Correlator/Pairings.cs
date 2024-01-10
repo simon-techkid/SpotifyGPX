@@ -54,6 +54,13 @@ public readonly struct Pairings
         return correlatedEntries;
     }
 
+    public readonly void PrintTracks()
+    {
+        string countsJoined = string.Join(", ", PairedPoints.GroupBy(pair => pair.TrackMember).Select((track, index) => $"{track.Count()} (T{index})"));
+
+        Console.WriteLine($"[PAIR] Paired: {countsJoined}");
+    }
+
     public readonly XDocument GetGpxx(string name, string desc, XNamespace ns)
     {
         return new XDocument(
@@ -61,6 +68,7 @@ public readonly struct Pairings
             new XElement(ns + "gpx",
                 new XAttribute("version", "1.1"),
                 new XAttribute("xmlns", ns),
+                new XAttribute("creator", "SpotifyGPX"),
                 new XElement(ns + "name", name),
                 new XElement(ns + "desc", desc),
                 PairedPoints.GroupBy(pair => pair.TrackMember).Select(track =>
@@ -83,15 +91,6 @@ public readonly struct Pairings
         );
     }
 
-    public readonly void PrintTracks()
-    {
-        List<int> trackinfo = PairedPoints
-            .GroupBy(pair => pair.TrackMember)
-            .Select(track => track.Count()).ToList();
-
-        trackinfo.ForEach(Console.WriteLine);
-    }
-
     public readonly XDocument GetGpx(string name, string desc, XNamespace ns)
     {
         return new XDocument(
@@ -99,6 +98,7 @@ public readonly struct Pairings
             new XElement(ns + "gpx",
                 new XAttribute("version", "1.1"),
                 new XAttribute("xmlns", ns),
+                new XAttribute("creator", "SpotifyGPX"),
                 new XElement(ns + "name", name),
                 new XElement(ns + "time", DateTime.Now.ToUniversalTime().ToString(Point.gpxTimeOut)),
                 new XElement(ns + "desc", desc),
