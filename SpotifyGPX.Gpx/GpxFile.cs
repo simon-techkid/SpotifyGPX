@@ -117,35 +117,31 @@ public readonly struct GpxFile
 
     public readonly List<GPXTrack> ParseGpxTracks()
     {
-        // Use GroupBy to group <trkpt> elements by their parent <trk> elements.
-        var groupedTracks = GetTracks()
-            .SelectMany(trk => trk.Descendants(Namespace + "trkpt") // For each track in the GPX:
-                .Select(trkpt => new // For each point in the track:
-                {
-                    TrackElement = trk, // Set integer based on the parent track
-                    Coordinate = new Coordinate(
-                        trkpt.Attribute("lat")?.Value ?? throw new Exception("GPX point 'lat' cannot be null, check your GPX"),
-                        trkpt.Attribute("lat")?.Value ?? throw new Exception("GPX point 'lon' cannot be null, check your GPX")
-                        ),
-                    Time = trkpt.Element(Namespace + "time")?.Value ?? throw new Exception($"GPX 'time' cannot be null, check your GPX") // Create its time
-                }))
-            .GroupBy(data => data.TrackElement); // Return grouped tracks containing parsed points
-
-        // Parse GPXTrack from each set of points
-        return groupedTracks
-            .Select((track, index) => // For each track
+        return GetTracks()
+        .SelectMany(trk => trk.Descendants(Namespace + "trkpt")
+            .Select(trkpt => new
             {
-                List<GPXPoint> trkPoints = track // Create List<GPXPoint> of the track's points
-                    .Select((pointData, index) => new GPXPoint( // For each point in the track, parse:
-                        pointData.Coordinate, // Lat/Lon
-                        pointData.Time,       // Time
-                        index                 // Index
-                    ))
-                    .ToList(); // Export the List<GPXPoint> of points contained in this track
+                TrackElement = trk,
+                Coordinate = new Coordinate(
+                            trkpt.Attribute("lat")?.Value ?? throw new Exception("GPX point 'lat' cannot be null, check your GPX"),
+                            trkpt.Attribute("lon")?.Value ?? throw new Exception("GPX point 'lon' cannot be null, check your GPX")
+                        ),
+                Time = trkpt.Element(Namespace + "time")?.Value ?? throw new Exception($"GPX 'time' cannot be null, check your GPX"),
+            }))
+            .GroupBy(data => data.TrackElement)
+                .Select((track, index) =>
+                {
+                    List<GPXPoint> trkPoints = track
+                        .Select((pointData, pointIndex) => new GPXPoint(
+                            pointData.Coordinate,
+                            pointData.Time,
+                            pointIndex
+                        ))
+                        .ToList();
 
-                // Return this track's points
-                return new GPXTrack(trkPoints, index);
-            })
-            .ToList(); // Return List<GPXPoint> containing all the parsed points
+                    return new GPXTrack(trkPoints, index);
+                })
+                .ToList();
     }
+
 }
