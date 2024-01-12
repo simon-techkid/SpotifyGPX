@@ -176,9 +176,9 @@ public readonly struct SongPoint
         string seconds = AbsRoundAccuracy == 1 ? "second" : "seconds";
         string ppexpl = $"{(RoundAccuracy < 0 ? $"{AbsRoundAccuracy} {seconds} before, at" : RoundAccuracy == 0 ? "at the same time," : $"{AbsRoundAccuracy} {seconds} after, at")}";
 
-        builder.AppendLine($"At this location at {Point.Time.ToString(Options.Point.gpxPointDescription)}");
-        builder.AppendLine($"Song ended {ppexpl} {EndedAt.ToString(Options.Point.gpxPointDescription)}");
-        builder.AppendLine($"Song played for {Song.TimePlayed}");
+        builder.AppendLine($"At this location at {Point.Time.ToString(Options.Point.gpxDescriptionPlayedAt)}");
+        builder.AppendLine($"Song ended {ppexpl} {EndedAt.ToString(Options.Point.gpxDescriptionPlayedAt)}");
+        builder.AppendLine($"Song played for {Song.TimePlayed.ToString(Options.Point.gpxDescriptionTimePlayed)}");
         builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}");
         builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}");
         builder.AppendLine($"Offline: {(Song.Spotify_Offline == true ? "Yes" : "No")}");
