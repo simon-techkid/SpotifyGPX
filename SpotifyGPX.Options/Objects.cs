@@ -53,6 +53,7 @@ public readonly struct SpotifyEntry
     public readonly string? Song_Artist => (string?)track["artistName"] ?? (string?)track["master_metadata_album_artist_name"];
     public readonly string? Song_Name => (string?)track["trackName"] ?? (string?)track["master_metadata_track_name"];
     public readonly string? Time_Played => (string?)track["msPlayed"] ?? (string?)track["ms_played"];
+    public readonly TimeSpan TimePlayed => TimeSpan.FromMilliseconds(double.Parse(Time_Played));
     public readonly string? Spotify_Username => (string?)track["username"];
     public readonly string? Spotify_Platform => (string?)track["platform"];
     public readonly string? Spotify_Country => (string?)track["conn_country"];
@@ -177,8 +178,9 @@ public readonly struct SongPoint
 
         builder.AppendLine($"At this location at {Point.Time.ToString(Options.Point.gpxPointDescription)}");
         builder.AppendLine($"Song ended {ppexpl} {EndedAt.ToString(Options.Point.gpxPointDescription)}");
-        builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}");
+        builder.AppendLine($"Song played for {Song.TimePlayed}");
         builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}");
+        builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}");
         builder.AppendLine($"Offline: {(Song.Spotify_Offline == true ? "Yes" : "No")}");
         builder.AppendLine($"IP Address: {Song.Spotify_IP}");
         builder.AppendLine($"Country: {Song.Spotify_Country}");
