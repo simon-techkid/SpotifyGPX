@@ -50,7 +50,7 @@ public readonly struct JsonFile
 
         // Extract and sort songs based on the original track index order
         List<SpotifyEntry> filteredSongs = Enumerable.Range(0, tracks.Count)
-            .SelectMany(index => songsByTrackIndex.ContainsKey(index) ? songsByTrackIndex[index] : new List<SpotifyEntry>())
+            .SelectMany(index => songsByTrackIndex.TryGetValue(index, out List<SpotifyEntry>? value) ? value : new List<SpotifyEntry>())
             .ToList();
 
         return filteredSongs;
