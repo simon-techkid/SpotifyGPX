@@ -2,12 +2,9 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace SpotifyGPX;
 
@@ -19,37 +16,17 @@ public readonly struct JsonFile
 
     public JsonFile(string path) => jsonFilePath = path;
 
-    public readonly List<SpotifyEntry> FilterSpotifyJson(List<GPXTrack> tracks)
+    public readonly List<SpotifyEntry> FilterSpotifyJson(List<GPXTrack> gpxPoints)
     {
-        List<SpotifyEntry> allSongs = JsonContents.Select((track, index) => new SpotifyEntry(track, index)).ToList();
+        List<SpotifyEntry> allSongs = JsonContents.Select((json, index) => new SpotifyEntry(index, json)).ToList();
 
-        // Use ConcurrentDictionary to store songs for each track index
-        ConcurrentDictionary<int, List<SpotifyEntry>> songsByTrackIndex = new();
-
-        Parallel.ForEach(tracks, track =>
+        return gpxPoints.SelectMany(track =>
         {
-            Console.WriteLine(track);
-
-            // Collect songs using parallel processing
-            List<SpotifyEntry> songsInRange = allSongs
-                .Where(entry => (entry.Time >= track.Start) && (entry.Time <= track.End))
-                .ToList();
-
-            int trackIndex = tracks.IndexOf(track);
-
-            // Add songs to ConcurrentDictionary with the track index
-            songsByTrackIndex.AddOrUpdate(trackIndex, songsInRange, (_, existingSongs) =>
-            {
-                existingSongs.AddRange(songsInRange);
-                return existingSongs;
-            });
-        });
-
-        // Extract and sort songs based on the original track index order
-        List<SpotifyEntry> filteredSongs = Enumerable.Range(0, tracks.Count)
-            .SelectMany(index => songsByTrackIndex.TryGetValue(index, out List<SpotifyEntry>? value) ? value : new List<SpotifyEntry>())
-            .ToList();
-
-        return filteredSongs;
+            // Filter Spotify entries based on track-specific start and end times
+            return allSongs
+            .Where(entry => (entry.Time >= track.Start) && (entry.Time <= track.End)) // Song played between start & end of the GPX
+            .ToList(); // Send all the relevant songs to a list!
+        })
+        .ToList();
     }
 }

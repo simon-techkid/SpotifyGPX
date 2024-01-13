@@ -12,8 +12,6 @@ public readonly struct Pairings
 {
     public Pairings(List<SpotifyEntry> s, List<GPXTrack> t) => PairedPoints = PairPoints(s, t);
 
-    //public Pairings(Pairings organic, string? kmlFile) => PairedPoints = new Prediction(organic.PairedPoints, kmlFile).Predicted;
-
     private readonly List<SongPoint> PairedPoints;
 
     private readonly List<SpotifyEntry> Songs => PairedPoints.Select(pair => pair.Song).ToList();
@@ -24,21 +22,17 @@ public readonly struct Pairings
     {
         // Correlate Spotify entries with the nearest GPX points
 
-        List<SongPoint> correlatedEntries = tracks
-        .SelectMany((track, trackIndex) =>
-            songs.Where(spotifyEntry =>
-                    (spotifyEntry.Time >= track.Start) && (spotifyEntry.Time <= track.End))
-                .Select((spotifyEntry, index) =>
+        List<SongPoint> correlatedEntries = tracks // For each GPX track
+        .SelectMany(track => // Select the track
+            songs.Where(spotifyEntry => // For all entries in SpotifyEntry
+                    (spotifyEntry.Time >= track.Start) && (spotifyEntry.Time <= track.End)) // If the Spotify entry falls within the boundaries of the track
+                .Select((spotifyEntry, index) => // Select the Spotify entry (and its index within the JSON) if it falls in range of the GPX track
                 {
-                    GPXPoint nearestPoint = track.Points
-                        .OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time).TotalSeconds))
+                    GPXPoint nearestPoint = track.Points // For all the points in the track
+                        .OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time).TotalSeconds)) // Find the nearest point to the current song
                         .First();
 
-                    SongPoint pair = new(spotifyEntry, nearestPoint, index, trackIndex);
-
-                    Console.WriteLine(pair);
-
-                    return pair;
+                    return new SongPoint(spotifyEntry, nearestPoint, index, new TrackInfo(track)); // Create a pairing
                 })
         )
         .ToList();
@@ -55,7 +49,7 @@ public readonly struct Pairings
 
     public readonly void PrintTracks()
     {
-        string countsJoined = string.Join(", ", PairedPoints.GroupBy(pair => pair.TrackMember).Select((track, index) => $"{track.Count()} (T{index})"));
+        string countsJoined = string.Join(", ", PairedPoints.GroupBy(pair => pair.Origin).Select(track => $"{track.Count()} ({track.Key.Name})"));
 
         Console.WriteLine($"[PAIR] Paired: {countsJoined}");
     }
@@ -70,9 +64,9 @@ public readonly struct Pairings
                 new XAttribute("creator", "SpotifyGPX"),
                 new XElement(ns + "name", name),
                 new XElement(ns + "desc", desc),
-                PairedPoints.GroupBy(pair => pair.TrackMember).Select(track =>
+                PairedPoints.GroupBy(pair => pair.Origin).Select(track =>
                     new XElement(ns + "trk",
-                        new XElement(ns + "name", $"Track {track.Key}"),
+                        new XElement(ns + "name", track.Key.Name),
                         new XElement(ns + "trkseg",
                             track.Select(pair =>
                                 new XElement(ns + "trkpt",
@@ -80,7 +74,7 @@ public readonly struct Pairings
                                     new XAttribute("lon", pair.Point.Location.Longitude),
                                     new XElement(ns + "name", pair.Song),
                                     new XElement(ns + "time", pair.Point.Time.ToUniversalTime().ToString(Formats.gpxTimeOut)),
-                                    new XElement(ns + "desc", pair.GpxDescription())
+                                    new XElement(ns + "desc", pair.Description)
                                 )
                             )
                         )
@@ -107,7 +101,7 @@ public readonly struct Pairings
                         new XAttribute("lon", pair.Point.Location.Longitude),
                         new XElement(ns + "name", pair.Song),
                         new XElement(ns + "time", pair.Point.Time.ToUniversalTime().ToString(Formats.gpxTimeOut)),
-                        new XElement(ns + "desc", pair.GpxDescription())
+                        new XElement(ns + "desc", pair.Description)
                     )
                 )
             )

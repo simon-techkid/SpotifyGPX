@@ -11,12 +11,12 @@ namespace SpotifyGPX;
 
 public readonly struct SpotifyEntry
 {
-    public SpotifyEntry(JObject json, int index)
+    public SpotifyEntry(int index, JObject json)
     {
         try
         {
             Index = index;
-            track = json;
+            Json = json;
         }
         catch (Exception ex)
         {
@@ -24,14 +24,14 @@ public readonly struct SpotifyEntry
         }
     }
 
-    private readonly JObject track;
+    private readonly JObject Json;
 
     public int Index { get; } // Unique identifier of this song in a list
     public readonly DateTimeOffset Time
     {
         get
         {
-            string time = ((string?)track["endTime"] ?? (string?)track["ts"]) ?? throw new Exception($"JSON 'ts' or 'endTime' cannot be null, check your JSON");
+            string time = ((string?)Json["endTime"] ?? (string?)Json["ts"]) ?? throw new Exception($"JSON 'ts' or 'endTime' cannot be null, check your JSON");
 
             if (DateTimeOffset.TryParseExact(time, Formats.miniSpotFormat, null, DateTimeStyles.AssumeUniversal, out var result))
             {
@@ -48,64 +48,90 @@ public readonly struct SpotifyEntry
         }
     }
 
-    public readonly string? Song_Artist => (string?)track["artistName"] ?? (string?)track["master_metadata_album_artist_name"];
-    public readonly string? Song_Name => (string?)track["trackName"] ?? (string?)track["master_metadata_track_name"];
-    public readonly string? Time_Played => (string?)track["msPlayed"] ?? (string?)track["ms_played"];
+    public readonly string? Song_Artist => (string?)Json["artistName"] ?? (string?)Json["master_metadata_album_artist_name"];
+    public readonly string? Song_Name => (string?)Json["trackName"] ?? (string?)Json["master_metadata_track_name"];
+    public readonly string? Time_Played => (string?)Json["msPlayed"] ?? (string?)Json["ms_played"];
     public readonly TimeSpan TimePlayed => TimeSpan.FromMilliseconds(double.Parse(Time_Played));
-    public readonly string? Spotify_Username => (string?)track["username"];
-    public readonly string? Spotify_Platform => (string?)track["platform"];
-    public readonly string? Spotify_Country => (string?)track["conn_country"];
-    public readonly string? Spotify_IP => (string?)track["ip_addr_decrypted"];
-    public readonly string? Spotify_UA => (string?)track["user_agent_decrypted"];
-    public readonly string? Song_Album => (string?)track["master_metadata_album_album_name"];
-    public readonly string? Song_URI => (string?)track["spotify_track_uri"];
-    public readonly string? Episode_Name => (string?)track["episode_name"];
-    public readonly string? Episode_Show => (string?)track["episode_show_name"];
-    public readonly string? Episode_URI => (string?)track["spotify_episode_uri"];
-    public readonly string? Song_StartReason => (string?)track["reason_start"];
-    public readonly string? Song_EndReason => (string?)track["reason_end"];
-    public readonly bool? Song_Shuffle => (bool?)track["shuffle"];
-    public readonly bool? Song_Skipped => (bool?)track["skipped"];
-    public readonly bool? Spotify_Offline => (bool?)track["offline"];
-    public readonly string? Spotify_OfflineTS => (string?)track["offline_timestamp"];
-    public readonly bool? Spotify_Incognito => (bool?)track["incognito"];
+    public readonly string? Spotify_Username => (string?)Json["username"];
+    public readonly string? Spotify_Platform => (string?)Json["platform"];
+    public readonly string? Spotify_Country => (string?)Json["conn_country"];
+    public readonly string? Spotify_IP => (string?)Json["ip_addr_decrypted"];
+    public readonly string? Spotify_UA => (string?)Json["user_agent_decrypted"];
+    public readonly string? Song_Album => (string?)Json["master_metadata_album_album_name"];
+    public readonly string? Song_URI => (string?)Json["spotify_track_uri"];
+    public readonly string? Episode_Name => (string?)Json["episode_name"];
+    public readonly string? Episode_Show => (string?)Json["episode_show_name"];
+    public readonly string? Episode_URI => (string?)Json["spotify_episode_uri"];
+    public readonly string? Song_StartReason => (string?)Json["reason_start"];
+    public readonly string? Song_EndReason => (string?)Json["reason_end"];
+    public readonly bool? Song_Shuffle => (bool?)Json["shuffle"];
+    public readonly bool? Song_Skipped => (bool?)Json["skipped"];
+    public readonly bool? Spotify_Offline => (bool?)Json["offline"];
+    public readonly string? Spotify_OfflineTS => (string?)Json["offline_timestamp"];
+    public readonly bool? Spotify_Incognito => (bool?)Json["incognito"];
     public override string ToString() => $"{Song_Artist} - {Song_Name}";
 }
 
 public readonly struct GPXTrack
 {
-    public GPXTrack(List<GPXPoint> points, int index)
+    public GPXTrack(int index, List<GPXPoint> points, string? name)
     {
-        Points = points;
         Index = index;
+        Points = points;
+        NameNode = name;
         Start = Points.Select(point => point.Time).Min();
         End = Points.Select(point => point.Time).Max();
+        Console.WriteLine(this);
+    }
+
+    public int Index { get; } // All GPXPoints of this track share this index as their TrackIndex
+    public List<GPXPoint> Points { get; }
+    private readonly string? NameNode;
+    public readonly string Name
+    {
+        get
+        {
+            if (NameNode == null)
+            {
+                return $"Track {Index}";
+            }
+            else
+            {
+                return NameNode;
+            }
+        }
+    }
+    public readonly DateTimeOffset Start { get; }
+    public readonly DateTimeOffset End { get; }
+    public override string ToString() => $"[{Name}] ({Points.Count} points) Starts: {Start}, Ends: {End}";
+}
+
+public readonly struct TrackInfo
+{
+    public TrackInfo(GPXTrack track)
+    {
+        Index = track.Index;
+        Name = track.Name;
     }
 
     public int Index { get; }
-
-    public List<GPXPoint> Points { get; }
-
-    public readonly DateTimeOffset Start { get; }
-
-    public readonly DateTimeOffset End { get; }
-
-    public override string ToString() => $"[T{Index}] ({Points.Count} points) Starts: {Start}, Ends: {End}";
+    public string Name { get; }
 }
 
 public readonly struct GPXPoint
 {
-    public GPXPoint(Coordinate point, string time, int index)
+    public GPXPoint(int trackInd, int index, Coordinate point, string time)
     {
+        TrackIndex = trackInd;
+        Index = index;
         Location = point;
         Time = DateTimeOffset.ParseExact(time, Formats.gpxTimeInp, null);
-        Index = index;
     }
 
     public int Index { get; } // Unique identifier of this point in a list
-    public bool Predicted { get; }
-    public Coordinate Location { get; }
-    public DateTimeOffset Time { get; }
+    public int TrackIndex { get; } // Index of the track this point belongs to
+    public Coordinate Location { get; } // Coordinate pair of its location
+    public DateTimeOffset Time { get; } // Time of the point
 }
 
 public readonly struct Coordinate
@@ -116,99 +142,73 @@ public readonly struct Coordinate
         Longitude = lon;
     }
 
-    public Coordinate(string lat, string lon)
-    {
-        Latitude = double.Parse(lat);
-        Longitude = double.Parse(lon);
-    }
-
     public readonly double Latitude;
     public readonly double Longitude;
 
-    public override bool Equals(object? obj)
-    {
-        if (obj is Coordinate other)
-        {
-            return this.Latitude == other.Latitude && this.Longitude == other.Longitude;
-        }
-        return false;
-    }
-
-    public static double operator -(Coordinate coord1, Coordinate coord2)
-    {
-        // Calculate distance between coord1 and coord2
-        double latDiff = coord2.Latitude - coord1.Latitude;
-        double lonDiff = coord2.Longitude - coord1.Longitude;
-
-        double distance = Math.Sqrt(latDiff * latDiff + lonDiff * lonDiff);
-
-        return distance;
-    }
-
-    public override int GetHashCode() => HashCode.Combine(Latitude, Longitude);
-
-    public static bool operator ==(Coordinate a, Coordinate b) => a.Equals(b);
-
-    public static bool operator !=(Coordinate a, Coordinate b) => !a.Equals(b);
-
     public override string ToString() => $"{(Latitude, Longitude)}";
-
-    public (double, double) ToTuple() => (Latitude, Longitude);
 }
 
 public readonly struct SongPoint
 {
-    public string GpxDescription()
+    public string Description
     {
-        // ===================== \\
-        // GPX POINT DESCRIPTION \\
-        // ===================== \\
+        get
+        {
+            // ===================== \\
+            // GPX POINT DESCRIPTION \\
+            // ===================== \\
 
-        DateTimeOffset EndedAt = Song.Time.ToOffset(Point.Time.Offset);
+            // Print the song time adjusted for the local time zone provided by the GPX point
+            DateTimeOffset EndedAt = Song.Time.ToOffset(EqualizedOffset);
 
-        StringBuilder builder = new();
+            StringBuilder builder = new();
 
-        // accuracy < 0 means song ends before the point
-        // accuracy == 0 means song ends in the same place as the point
-        // accuracy > 0 means song ends after the point
-        string seconds = AbsRoundAccuracy == 1 ? "second" : "seconds";
-        string ppexpl = $"{(RoundAccuracy < 0 ? $"{AbsRoundAccuracy} {seconds} before, at" : RoundAccuracy == 0 ? "at the same time," : $"{AbsRoundAccuracy} {seconds} after, at")}";
+            // accuracy < 0 means song ends before the point
+            // accuracy == 0 means song ends in the same place as the point
+            // accuracy > 0 means song ends after the point
+            string seconds = AbsRoundAccuracy == 1 ? "second" : "seconds";
+            string ppexpl = $"{(RoundAccuracy < 0 ? $"{AbsRoundAccuracy} {seconds} before, at" : RoundAccuracy == 0 ? "at the same time," : $"{AbsRoundAccuracy} {seconds} after, at")}";
 
-        builder.AppendLine($"At this location at {Point.Time.ToString(Formats.gpxDescriptionPlayedAt)}");
-        builder.AppendLine($"Song ended {ppexpl} {EndedAt.ToString(Formats.gpxDescriptionPlayedAt)}");
-        builder.AppendLine($"Song played for {Song.TimePlayed.ToString(Formats.gpxDescriptionTimePlayed)}");
-        builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}");
-        builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}");
-        builder.AppendLine($"Offline: {(Song.Spotify_Offline == true ? "Yes" : "No")}");
-        builder.AppendLine($"IP Address: {Song.Spotify_IP}");
-        builder.AppendLine($"Country: {Song.Spotify_Country}");
-        builder.Append($"{(Point.Predicted == true ? $"Point Predicted" : null)}");
+            // Begin line contents of the description
+            builder.AppendLine($"At this location at {Point.Time.ToString(Formats.gpxDescriptionPlayedAt)}");
+            builder.AppendLine($"Song ended {ppexpl} {EndedAt.ToString(Formats.gpxDescriptionPlayedAt)}");
+            builder.AppendLine($"Song played for {Song.TimePlayed.ToString(Formats.gpxDescriptionTimePlayed)}");
+            builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}");
+            builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}");
+            builder.AppendLine($"Offline: {(Song.Spotify_Offline == true ? "Yes" : "No")}");
+            builder.AppendLine($"IP Address: {Song.Spotify_IP}");
+            builder.AppendLine($"Country: {Song.Spotify_Country}");
 
-        return builder.ToString();
+            return builder.ToString();
+        }
     }
 
-    public SongPoint(SpotifyEntry song, GPXPoint point, int index, int trackmem)
+    public SongPoint(SpotifyEntry song, GPXPoint point, int index, TrackInfo origin)
     {
         Song = song;
         Point = point;
         Index = index;
-        TrackMember = trackmem;
+        Origin = origin;
+        Console.WriteLine(this);
     }
 
     public readonly int Index { get; } // Unique identifier of this SongPoint in a list
-    public readonly int TrackMember { get; } // Track from which the pairing originates
-    private readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds;
-    public readonly double AbsAccuracy => Math.Abs(Accuracy);
-    private readonly double RoundAccuracy => Math.Round(Accuracy);
-    private readonly double AbsRoundAccuracy => Math.Abs(RoundAccuracy);
-    public SpotifyEntry Song { get; }
-    public GPXPoint Point { get; }
+    public readonly TrackInfo Origin { get; } // Track from which the pairing originates
+    private readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds; // Raw accuracy
+    public readonly double AbsAccuracy => Math.Abs(Accuracy); // Absolute value of the accuracy
+    private readonly double RoundAccuracy => Math.Round(Accuracy); // Rounded accuracy
+    private readonly double AbsRoundAccuracy => Math.Abs(RoundAccuracy); // Absolute value of the rounded accuracy
+    public SpotifyEntry Song { get; } // Contents of the original song entry
+    public GPXPoint Point { get; } // Contents of the original GPX point
+    public readonly TimeSpan EqualizedOffset => Point.Time.Offset; // Offset is defined by the original GPX point offset
 
     public override string ToString()
     {
-        string songTime = Song.Time.ToUniversalTime().ToString(Formats.consoleReadoutFormat);
-        string pointTime = Point.Time.ToUniversalTime().ToString(Formats.consoleReadoutFormat);
+        // Set both the song and point times to the UTC offset provided by the original GPX point
+        string songTime = Song.Time.ToOffset(EqualizedOffset).ToString(Formats.consoleReadoutFormat);
+        string pointTime = Point.Time.ToOffset(EqualizedOffset).ToString(Formats.consoleReadoutFormat);
 
-        return $"[T{TrackMember}#{Point.Index} ==> {Index}] [{songTime} ~ {pointTime}] [{RoundAccuracy}s] {Song}";
+        // Print information about the pairing
+        return $"[{Origin.Name}#{Point.Index} ==> {Index}] [{songTime} ~ {pointTime}] [{RoundAccuracy}s] {Song}";
     }
 }
