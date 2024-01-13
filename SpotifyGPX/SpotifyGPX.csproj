@@ -10,7 +10,7 @@
     <LangVersion>11.0</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <StartupObject>Program</StartupObject>
+    <StartupObject>SpotifyGPX.Program</StartupObject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -22,10 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SpotifyGPX.Correlator\SpotifyGPX.Pairings.csproj" />
-    <ProjectReference Include="..\SpotifyGPX.Gpx\SpotifyGPX.Gpx.csproj" />
-    <ProjectReference Include="..\SpotifyGPX.Json\SpotifyGPX.Json.csproj" />
-    <ProjectReference Include="..\SpotifyGPX.Options\SpotifyGPX.Options.csproj" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   
 </Project>

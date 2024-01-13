@@ -2,7 +2,6 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SpotifyGPX.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,9 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-#nullable enable
-
-namespace SpotifyGPX.Json;
+namespace SpotifyGPX;
 
 public readonly struct JsonFile
 {

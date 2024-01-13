@@ -2,17 +2,13 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SpotifyGPX.Gpx;
-using SpotifyGPX.Json;
-using SpotifyGPX.Options;
-using SpotifyGPX.Pairings;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
-#nullable enable
+namespace SpotifyGPX;
 
 class Program
 {

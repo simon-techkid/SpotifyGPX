@@ -1,13 +1,12 @@
 ﻿// SpotifyGPX by Simon Field
 
-using SpotifyGPX.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace SpotifyGPX.Gpx;
+namespace SpotifyGPX;
 
 public readonly struct GpxFile
 {

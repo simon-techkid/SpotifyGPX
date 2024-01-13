@@ -7,9 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-#nullable enable
-
-namespace SpotifyGPX.Options;
+namespace SpotifyGPX;
 
 public readonly struct SpotifyEntry
 {
@@ -35,11 +33,11 @@ public readonly struct SpotifyEntry
         {
             string time = ((string?)track["endTime"] ?? (string?)track["ts"]) ?? throw new Exception($"JSON 'ts' or 'endTime' cannot be null, check your JSON");
 
-            if (DateTimeOffset.TryParseExact(time, Point.miniSpotFormat, null, DateTimeStyles.AssumeUniversal, out var result))
+            if (DateTimeOffset.TryParseExact(time, Formats.miniSpotFormat, null, DateTimeStyles.AssumeUniversal, out var result))
             {
                 return result;
             }
-            else if (DateTimeOffset.TryParseExact(time, Point.fullSpotFormat, null, DateTimeStyles.AssumeUniversal, out result))
+            else if (DateTimeOffset.TryParseExact(time, Formats.fullSpotFormat, null, DateTimeStyles.AssumeUniversal, out result))
             {
                 return result;
             }
@@ -100,7 +98,7 @@ public readonly struct GPXPoint
     public GPXPoint(Coordinate point, string time, int index)
     {
         Location = point;
-        Time = DateTimeOffset.ParseExact(time, Point.gpxTimeInp, null);
+        Time = DateTimeOffset.ParseExact(time, Formats.gpxTimeInp, null);
         Index = index;
     }
 
@@ -176,9 +174,9 @@ public readonly struct SongPoint
         string seconds = AbsRoundAccuracy == 1 ? "second" : "seconds";
         string ppexpl = $"{(RoundAccuracy < 0 ? $"{AbsRoundAccuracy} {seconds} before, at" : RoundAccuracy == 0 ? "at the same time," : $"{AbsRoundAccuracy} {seconds} after, at")}";
 
-        builder.AppendLine($"At this location at {Point.Time.ToString(Options.Point.gpxDescriptionPlayedAt)}");
-        builder.AppendLine($"Song ended {ppexpl} {EndedAt.ToString(Options.Point.gpxDescriptionPlayedAt)}");
-        builder.AppendLine($"Song played for {Song.TimePlayed.ToString(Options.Point.gpxDescriptionTimePlayed)}");
+        builder.AppendLine($"At this location at {Point.Time.ToString(Formats.gpxDescriptionPlayedAt)}");
+        builder.AppendLine($"Song ended {ppexpl} {EndedAt.ToString(Formats.gpxDescriptionPlayedAt)}");
+        builder.AppendLine($"Song played for {Song.TimePlayed.ToString(Formats.gpxDescriptionTimePlayed)}");
         builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}");
         builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}");
         builder.AppendLine($"Offline: {(Song.Spotify_Offline == true ? "Yes" : "No")}");
@@ -208,8 +206,8 @@ public readonly struct SongPoint
 
     public override string ToString()
     {
-        string songTime = Song.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat);
-        string pointTime = Point.Time.ToUniversalTime().ToString(Options.Point.consoleReadoutFormat);
+        string songTime = Song.Time.ToUniversalTime().ToString(Formats.consoleReadoutFormat);
+        string pointTime = Point.Time.ToUniversalTime().ToString(Formats.consoleReadoutFormat);
 
         return $"[T{TrackMember}#{Point.Index} ==> {Index}] [{songTime} ~ {pointTime}] [{RoundAccuracy}s] {Song}";
     }

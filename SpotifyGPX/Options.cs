@@ -1,10 +1,8 @@
 ﻿// SpotifyGPX by Simon Field
 
-#nullable enable
+namespace SpotifyGPX;
 
-namespace SpotifyGPX.Options;
-
-public class Point
+public struct Formats
 {
     // Time format for console printing of point-song time comparison:
     public static readonly string consoleReadoutFormat = @"HH\:mm\:ss";
