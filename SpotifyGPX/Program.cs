@@ -25,7 +25,6 @@ class Program
         bool exportJson = false;
         bool exportPlist = false;
         bool exportSpotifyURI = false;
-        bool predictPoints = false;
 
         switch (args.Length)
         {
@@ -44,9 +43,6 @@ class Program
                     case "-s":
                         Console.WriteLine("[HELP] Pass -s to export and copy to clipboard a TXT list of Spotify tracks you can paste into a playlist on Spotify");
                         break;
-                    case "-g":
-                        Console.WriteLine("[HELP] Pass -g to enable coordinate-absence song placement in the resulting GPX (cannot use -g with -n)");
-                        break;
                     default:
                         Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-g]");
                         break;
@@ -59,7 +55,6 @@ class Program
                 exportJson = args.Length >= 3 && args.Contains("-j");
                 exportPlist = args.Length >= 3 && args.Contains("-p");
                 exportSpotifyURI = args.Length >= 3 && args.Contains("-s");
-                predictPoints = args.Length >= 3 && args.Contains("-g");
                 break;
             default:
                 Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-g]");
@@ -115,15 +110,6 @@ class Program
             // Catch any errors found in the calculation process
             Console.WriteLine(ex);
             return;
-        }
-
-        if (predictPoints == true)
-        {
-            // Stage path of KML route for KML prediction
-            string kmlFile = GenerateOutputPath(inputGpx, "kml");
-
-            // Set paired entries to old paired entries, with points predicted
-            //pairedEntries = new(pairedEntries, File.Exists(kmlFile) ? kmlFile : null);
         }
 
         if (noGpxExport == false)
