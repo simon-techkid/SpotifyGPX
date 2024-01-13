@@ -2,11 +2,9 @@
 
 Create GPX waypoints based on timed GPX tracks and Spotify listening history. Great for road trips!
 
-## Example
+## Samples
 
-Here is an example render using [kepler.gl](https://github.com/keplergl/kepler.gl) with the original GPX track included:
-
-![image](Example.png)
+View SpotifyGPX sample data and screenshots [here](Samples/README.md)
 
 ## Requirements
 
@@ -88,7 +86,3 @@ Below are some differences between what each type of data Spotify offers has.
 | `offline` | This field indicates whether the track was played in offline mode (“True”) or not (“False”). |
 | `offline_timestamp` | This field is a timestamp of when offline mode was used, if used. |
 | `incognito` | This field indicates whether the track was played in incognito mode (“True”) or not (“False”). |
-
-## Console Example
-
-![image](Console.PNG)
