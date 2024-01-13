@@ -38,7 +38,6 @@ You must have the following:
  - *Optional:* `-j` - Save off the relevant part of the Spotify JSON
  - *Optional:* `-p` - Export a `xspf` playlist of the songs
  - *Optional:* `-s` - Export a `txt` list of Spotify URIs and copy it to clipboard (can be pasted into Spotify Desktop app playlists)
- - *Optional:* `-g` - Enable point prediction for this run. See below for guidance. **Cannot be used with `-n`**
 
 ## Obtaining Necessary Data
 
@@ -89,36 +88,6 @@ Below are some differences between what each type of data Spotify offers has.
 | `offline` | This field indicates whether the track was played in offline mode (“True”) or not (“False”). |
 | `offline_timestamp` | This field is a timestamp of when offline mode was used, if used. |
 | `incognito` | This field indicates whether the track was played in incognito mode (“True”) or not (“False”). |
-
-## Point Prediction
-
-### What is it?
-
-SpotifyGPX has a built-in point prediction class that allows multiple songs spanning the same point to be distributed along the route, as opposed to overlapping one another.
-
-### When should it be used?
-
-This is useful if there is a gap in GPS track data spanning longer than one song (ie. tunnel passage with no GPS reception but continued song playback) or GPS track points captured otherwise too infrequently.
-
-### How is it accomplished?
-
-By identifying the first point with a duplicate coordinate, and the last point of the same coordinate, and equally spacing out all implicated points between the beginning and end of the missing path.
-
-### Modes:
- 1. *Default* - No point prediction. Multiple songs spanning same point overlap first point
- 2. *Without KML* - Equidistant point prediction. Multiple songs spanning same point distributed equally until next unique coordinate
- 3. *With KML* - Provided KML of road path, multiple songs spanning same point placed on the coordinates of the road from the KML
-
-**Provide KML Path** for use with road path:
-
-Example: `route.gpx`
-KML path of road from [Google MyMaps](https://www.google.com/mymaps): `route_Spotify.kml`
-
-**Note:** If this file does not exist, and program is run with `-g`, equidistant placement will be used.
-
-### Example Comparison:
-
-![image](PointPrediction.png)
 
 ## Console Example
 
