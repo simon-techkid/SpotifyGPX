@@ -2,7 +2,6 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,27 +18,12 @@ public readonly struct JsonFile
 
     public readonly List<SpotifyEntry> FilterSpotifyJson(List<GPXTrack> tracks)
     {
-        Dictionary<int, (DateTimeOffset startTime, DateTimeOffset endTime)> trackRange = TrackRanges(tracks);
+        var trackRange = tracks.Select(track => (track.Start, track.End)).ToList(); // List all of the tracks' start and end times
         List<SpotifyEntry> allSongs = JsonContents.Select((json, index) => new SpotifyEntry(index, json)).ToList();
 
-        // Filter Spotify entries based on track-specific start and end times
-        return allSongs
-        .Where(entry => trackRange.Any(trackTimes => // Return true if the song falls inside the GPX track
-            (entry.Time >= trackTimes.Value.startTime) && (entry.Time <= trackTimes.Value.endTime))) // Song played between start & end of the GPX
-        .ToList(); // Send all the relevant songs to a list!
-    }
-
-    public static Dictionary<int, (DateTimeOffset startTime, DateTimeOffset endTime)> TrackRanges(List<GPXTrack> gpxTracks)
-    {
-        // Get start and end times for each GPX track grouped by (track.Index, track.Name)
-        return gpxTracks
-            .GroupBy(track => track.Track) // Group tracks by (track.Index, track.Name)
-            .ToDictionary(
-                group => group.First().Index, // Dictionary key is the track number (using the Index of the first track in the group)
-                group => (
-                    startTime: group.Select(track => track.Start).Min(),
-                    endTime: group.Select(track => track.End).Max()
-                    )
-                );
+        return allSongs.Where(spotifyEntry => // If the spotify entry
+            trackRange.Any(trackTimes => // Starts after the beginning of the GPX, and before the end of the GPX
+                spotifyEntry.Time >= trackTimes.Start && spotifyEntry.Time <= trackTimes.End))
+            .ToList(); // Send the songs that fall within GPX tracking period to a list
     }
 }
