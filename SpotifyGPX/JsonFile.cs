@@ -36,14 +36,10 @@ public readonly struct JsonFile
             .GroupBy(track => track.Track) // Group tracks by (track.Index, track.Name)
             .ToDictionary(
                 group => group.First().Index, // Dictionary key is the track number (using the Index of the first track in the group)
-                group => group.SelectMany(track => track.Points) // Flatten List<GPXPoint> within each group
-                    .Aggregate(
-                        (startTime: DateTimeOffset.MaxValue, endTime: DateTimeOffset.MinValue), // Initial values
-                        (earliest, point) => (
-                            startTime: point.Time < earliest.startTime ? point.Time : earliest.startTime,
-                            endTime: point.Time > earliest.endTime ? point.Time : earliest.endTime
-                        )
+                group => (
+                    startTime: group.Select(track => track.Start).Min(),
+                    endTime: group.Select(track => track.End).Max()
                     )
-            );
+                );
     }
 }
