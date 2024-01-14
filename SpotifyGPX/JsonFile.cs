@@ -29,22 +29,21 @@ public readonly struct JsonFile
         .ToList(); // Send all the relevant songs to a list!
     }
 
-    public readonly Dictionary<int, (DateTimeOffset startTime, DateTimeOffset endTime)> TrackRanges(List<GPXTrack> gpxTracks)
+    public static Dictionary<int, (DateTimeOffset startTime, DateTimeOffset endTime)> TrackRanges(List<GPXTrack> gpxTracks)
     {
-        // Get start and end times for each GPX track
-        return gpxTracks // Returns track number, start time of the track, and end time of the track
-            .SelectMany(track => track.Points) // Flatten List<GPXTrack> to List<GPXPoint>
-            .GroupBy(point => point.TrackIndex) // Distinguish which track each point came from
+        // Get start and end times for each GPX track grouped by (track.Index, track.Name)
+        return gpxTracks
+            .GroupBy(track => track.Track) // Group tracks by (track.Index, track.Name)
             .ToDictionary(
-                group => group.Key, // Dictionary key is the track member
-                group => group.Aggregate(
-                    (startTime: group.First().Time, endTime: group.First().Time),
-                    (earliest, point) => (
-                        startTime: point.Time < earliest.startTime ? point.Time : earliest.startTime,
-                        endTime: point.Time > earliest.endTime ? point.Time : earliest.endTime
+                group => group.First().Index, // Dictionary key is the track number (using the Index of the first track in the group)
+                group => group.SelectMany(track => track.Points) // Flatten List<GPXPoint> within each group
+                    .Aggregate(
+                        (startTime: DateTimeOffset.MaxValue, endTime: DateTimeOffset.MinValue), // Initial values
+                        (earliest, point) => (
+                            startTime: point.Time < earliest.startTime ? point.Time : earliest.startTime,
+                            endTime: point.Time > earliest.endTime ? point.Time : earliest.endTime
+                        )
                     )
-                )
             );
     }
-
 }

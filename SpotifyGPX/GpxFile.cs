@@ -57,7 +57,6 @@ public readonly struct GpxFile
                 Points = trk.Descendants(Namespace + "trkpt").Select((trkpt, pointIndex) =>
                 {
                     return new GPXPoint(
-                        index,
                         pointIndex,
                         new Coordinate(
                             double.Parse(trkpt.Attribute("lat")?.Value ?? throw new Exception($"GPX 'lat' cannot be null, check your GPX")),
@@ -69,8 +68,8 @@ public readonly struct GpxFile
             })
             .Select(track => new GPXTrack(
                 track.Index,
-                track.Points,
-                track.Name
+                track.Name,
+                track.Points
             ))
             .ToList();
 
@@ -86,14 +85,10 @@ public readonly struct GpxFile
     {
         Console.WriteLine("[TRAK] Multiple GPX tracks found:");
 
-        for (int i = 0; i < allTracks.Count; i++)
-        {
-            Console.WriteLine(GetTrackInfo(allTracks[i]));
-        }
+        allTracks.ForEach(track => Console.WriteLine($"[TRAK] {track}"));
 
-        Console.WriteLine("[TRAK] [A] All Tracks (Only songs played during GPX tracking, split by original track)");
-        Console.WriteLine("[TRAK] [B] All Tracks (Only songs played during GPX tracking, combined into one track)");
-        //Console.WriteLine("[TRAK] [B] All Tracks (Include songs played both during & between GPX tracks)");
+        Console.WriteLine("[TRAK] [A] All Tracks (Include songs played only during GPX tracking)");
+        Console.WriteLine("[TRAK] [B] All Tracks (Include songs played both during & between GPX tracks)");
         Console.Write("[TRAK] Please enter the index of the track you want to use: ");
 
         List<GPXTrack> selectedTracks = new();
@@ -114,7 +109,7 @@ public readonly struct GpxFile
             else if (input == "B")
             {
                 // Combine all tracks into a single track
-                return new List<GPXTrack> { new(-1, allTracks.SelectMany(track => track.Points).ToList(), "Combined") };
+                return new List<GPXTrack> { new(null, null, allTracks.SelectMany(track => track.Points).ToList()) };
             }
             else
             {
@@ -126,7 +121,4 @@ public readonly struct GpxFile
     }
 
     private static bool IsValidTrackIndex(int index, int trackCount) => (index >= 0) && (index < trackCount);
-
-    private static string GetTrackInfo(GPXTrack track) => $"[TRAK] [{track.Index}] {track.Name}";
-
 }

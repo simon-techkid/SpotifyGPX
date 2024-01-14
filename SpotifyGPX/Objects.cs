@@ -74,62 +74,73 @@ public readonly struct SpotifyEntry
 
 public readonly struct GPXTrack
 {
-    public GPXTrack(int index, List<GPXPoint> points, string? name)
+    public GPXTrack(int? index, string? name, List<GPXPoint> points)
     {
-        Index = index;
+        Track = new TrackInfo(index, name);
         Points = points;
-        NameNode = name;
         Start = Points.Select(point => point.Time).Min();
         End = Points.Select(point => point.Time).Max();
-        Console.WriteLine(this);
     }
 
-    public int Index { get; } // All GPXPoints of this track share this index as their TrackIndex
+    public TrackInfo Track { get; }
+    public int Index => Track.Index;
+    public string Name => Track.Name;
     public List<GPXPoint> Points { get; }
-    private readonly string? NameNode;
-    public readonly string Name
-    {
-        get
-        {
-            if (NameNode == null)
-            {
-                return $"Track {Index}";
-            }
-            else
-            {
-                return NameNode;
-            }
-        }
-    }
     public readonly DateTimeOffset Start { get; }
     public readonly DateTimeOffset End { get; }
-    public override string ToString() => $"[{Name}] ({Points.Count} points) Starts: {Start}, Ends: {End}";
+    public override string ToString() => $"[{Name}] Index: {Index}, Count: {Points.Count}, Starts: {Start}, Ends: {End}";
 }
 
 public readonly struct TrackInfo
 {
-    public TrackInfo(GPXTrack track)
+    public TrackInfo(int? index, string? name)
     {
-        Index = track.Index;
-        Name = track.Name;
+        Indexx = index;
+        NodeName = name;
     }
 
-    public int Index { get; }
-    public string Name { get; }
+    private readonly int? Indexx;
+    public int Index
+    {
+        get
+        {
+            if (Indexx == null)
+            {
+                return 0;
+            }
+            else
+            {
+                return (int)Indexx;
+            }
+        }
+    }
+    private readonly string? NodeName;
+    public string Name
+    {
+        get
+        {
+            if (NodeName == null)
+            {
+                return $"T{Index}";
+            }
+            else
+            {
+                return NodeName;
+            }
+        }
+    }
 }
 
 public readonly struct GPXPoint
 {
-    public GPXPoint(int trackInd, int index, Coordinate point, string time)
+    public GPXPoint(int index, Coordinate point, string time)
     {
-        TrackIndex = trackInd;
         Index = index;
         Location = point;
         Time = DateTimeOffset.ParseExact(time, Formats.GpxInput, null);
     }
 
     public int Index { get; } // Unique identifier of this point in a list
-    public int TrackIndex { get; } // Index of the track this point belongs to
     public Coordinate Location { get; } // Coordinate pair of its location
     public DateTimeOffset Time { get; } // Time of the point
 }
@@ -183,22 +194,22 @@ public readonly struct SongPoint
         }
     }
 
-    public SongPoint(SpotifyEntry song, GPXPoint point, int index, TrackInfo origin)
+    public SongPoint(int index, SpotifyEntry song, GPXPoint point, TrackInfo origin)
     {
+        Index = index;
         Song = song;
         Point = point;
-        Index = index;
         Origin = origin;
     }
 
     public readonly int Index { get; } // Unique identifier of this SongPoint in a list
+    public SpotifyEntry Song { get; } // Contents of the original song entry
+    public GPXPoint Point { get; } // Contents of the original GPX point
     public readonly TrackInfo Origin { get; } // Track from which the pairing originates
     private readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds; // Raw accuracy
     public readonly double AbsAccuracy => Math.Abs(Accuracy); // Absolute value of the accuracy
     private readonly double RoundAccuracy => Math.Round(Accuracy); // Rounded accuracy
     private readonly double AbsRoundAccuracy => Math.Abs(RoundAccuracy); // Absolute value of the rounded accuracy
-    public SpotifyEntry Song { get; } // Contents of the original song entry
-    public GPXPoint Point { get; } // Contents of the original GPX point
     public readonly TimeSpan EqualizedOffset => Point.Time.Offset; // Offset is defined by the original GPX point offset
 
     public override string ToString()
@@ -208,6 +219,6 @@ public readonly struct SongPoint
         string pointTime = Point.Time.ToOffset(EqualizedOffset).ToString(Formats.Console);
 
         // Print information about the pairing
-        return $"[{Origin.Name}#{Point.Index} ==> {Index}] [{songTime} ~ {pointTime}] [{RoundAccuracy}s] {Song}";
+        return $"[{Origin.Name}] [#{Point.Index} ==> {Index}] [{songTime} ~ {pointTime}] [{RoundAccuracy}s] {Song}";
     }
 }

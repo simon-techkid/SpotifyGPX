@@ -30,7 +30,7 @@ public readonly struct Pairings
                 {
                     SongPoint pair = track.Points.Select(point =>
                     {
-                        return new SongPoint(spotifyEntry, point, index, new TrackInfo(track));
+                        return new SongPoint(index, spotifyEntry, point, track.Track);
                     }).OrderBy(pair => pair.AbsAccuracy).First();
 
                     Console.WriteLine(pair);
@@ -54,7 +54,7 @@ public readonly struct Pairings
     {
         string countsJoined = string.Join(", ", PairedPoints.GroupBy(pair => pair.Origin).Select(track => $"{track.Count()} ({track.Key.Name})"));
 
-        Console.WriteLine($"[PAIR] Paired: {countsJoined}");
+        Console.WriteLine($"[PAIR] Paired {PairedPoints.Count} entries: {countsJoined}");
     }
 
     public readonly XDocument GetGpxx(string name, string desc, XNamespace ns)
