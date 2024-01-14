@@ -73,7 +73,7 @@ public readonly struct Pairings
                                     new XAttribute("lat", pair.Point.Location.Latitude),
                                     new XAttribute("lon", pair.Point.Location.Longitude),
                                     new XElement(ns + "name", pair.Song),
-                                    new XElement(ns + "time", pair.Point.Time.ToUniversalTime().ToString(Formats.gpxTimeOut)),
+                                    new XElement(ns + "time", pair.Point.Time.ToUniversalTime().ToString(Formats.GpxOutput)),
                                     new XElement(ns + "desc", pair.Description)
                                 )
                             )
@@ -93,14 +93,14 @@ public readonly struct Pairings
                 new XAttribute("xmlns", ns),
                 new XAttribute("creator", "SpotifyGPX"),
                 new XElement(ns + "name", name),
-                new XElement(ns + "time", DateTime.Now.ToUniversalTime().ToString(Formats.gpxTimeOut)),
+                new XElement(ns + "time", DateTime.Now.ToUniversalTime().ToString(Formats.GpxOutput)),
                 new XElement(ns + "desc", desc),
                 PairedPoints.Select(pair =>
                     new XElement(ns + "wpt",
                         new XAttribute("lat", pair.Point.Location.Latitude),
                         new XAttribute("lon", pair.Point.Location.Longitude),
                         new XElement(ns + "name", pair.Song),
-                        new XElement(ns + "time", pair.Point.Time.ToUniversalTime().ToString(Formats.gpxTimeOut)),
+                        new XElement(ns + "time", pair.Point.Time.ToUniversalTime().ToString(Formats.GpxOutput)),
                         new XElement(ns + "desc", pair.Description)
                     )
                 )
@@ -126,7 +126,7 @@ public readonly struct Pairings
                         new XElement(ns + "track",
                             new XElement(ns + "creator", song.Song_Artist),
                             new XElement(ns + "title", song.Song_Name),
-                            new XElement(ns + "annotation", song.Time.ToString(Formats.gpxTimeOut)),
+                            new XElement(ns + "annotation", song.Time.ToUniversalTime().ToString(Formats.GpxOutput)),
                             new XElement(ns + "duration", song.Time_Played)
                         )
                     )
