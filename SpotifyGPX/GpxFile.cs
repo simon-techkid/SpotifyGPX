@@ -46,67 +46,78 @@ public readonly struct GpxFile
 
     private readonly bool PointsExist => document.Descendants(Namespace + "trkpt").Any();
 
-    private List<XElement> GetTracks()
+    public List<GPXTrack> ParseGpxTracks()
     {
-        // List all the tracks in the document
-        List<XElement> allTracks = document.Descendants(Namespace + "trk").ToList();
+        List<GPXTrack> allTracks = document.Descendants(Namespace + "trk")
+            .Select((trk, index) => new
+            {
+                TrackElement = trk,
+                Index = index,
+                Name = trk.Element(Namespace + "name")?.Value,
+                Points = trk.Descendants(Namespace + "trkpt").Select((trkpt, pointIndex) =>
+                {
+                    return new GPXPoint(
+                        index,
+                        pointIndex,
+                        new Coordinate(
+                            double.Parse(trkpt.Attribute("lat")?.Value ?? throw new Exception($"GPX 'lat' cannot be null, check your GPX")),
+                            double.Parse(trkpt.Attribute("lon")?.Value ?? throw new Exception($"GPX 'lon' cannot be null, check your GPX"))
+                        ),
+                        trkpt.Element(Namespace + "time")?.Value ?? throw new Exception($"GPX 'time' cannot be null, check your GPX")
+                    );
+                }).ToList()
+            })
+            .Select(track => new GPXTrack(
+                track.Index,
+                track.Points,
+                track.Name
+            ))
+            .ToList();
 
-        // Handle multiple tracks if there are more than one
         if (allTracks.Count > 1)
         {
-            // If there are multiple tracks, ask the user which track to use
             return HandleMultipleTracks(allTracks);
         }
 
-        // If there is one track, return the original list
         return allTracks;
     }
 
-    private static List<XElement> HandleMultipleTracks(List<XElement> allTracks)
+    private static List<GPXTrack> HandleMultipleTracks(List<GPXTrack> allTracks)
     {
-        // If there are multiple <trk> elements, prompt the user to select one
         Console.WriteLine("[TRAK] Multiple GPX tracks found:");
+
         for (int i = 0; i < allTracks.Count; i++)
         {
-            // Print out all the tracks' name values, if they have a name) or an ascending numeric name
-            Console.WriteLine($"[TRAK] [{i}] {allTracks[i].Element(Namespace + "name")?.Value ?? $"Track {i}"}");
+            Console.WriteLine(GetTrackInfo(allTracks[i]));
         }
 
-        Console.WriteLine("[TRAK] [A] All Tracks (Only include songs played during GPX tracking)");
-        Console.WriteLine("[TRAK] [B] All Tracks (Include songs played both during & between GPX tracks)");
+        Console.WriteLine("[TRAK] [A] All Tracks (Only songs played during GPX tracking, split by original track)");
+        Console.WriteLine("[TRAK] [B] All Tracks (Only songs played during GPX tracking, combined into one track)");
+        //Console.WriteLine("[TRAK] [B] All Tracks (Include songs played both during & between GPX tracks)");
+        Console.Write("[TRAK] Please enter the index of the track you want to use: ");
 
-        Console.Write("[TRAK] Please choose the track you want to use: ");
+        List<GPXTrack> selectedTracks = new();
 
-        // Create a list for the user selected track(s)
-        List<XElement> selectedTracks = new();
-
-        // Forever, until the user provides valid input:
         while (true)
         {
-            string? input = Console.ReadLine(); // Read user input
+            string? input = Console.ReadLine();
 
-            // Pair only songs included in the track the user selects:
-            if (int.TryParse(input, out int selectedTrackIndex) && selectedTrackIndex >= 0 && selectedTrackIndex <= allTracks.Count)
+            if (int.TryParse(input, out int selectedTrackIndex) && IsValidTrackIndex(selectedTrackIndex, allTracks.Count))
             {
-                selectedTracks.Add(allTracks[selectedTrackIndex]); // Select the user-chosen <trk> element
-                break; // Exit the prompt loop
+                selectedTracks.Add(allTracks[selectedTrackIndex]);
+                break;
             }
-            // Pair all songs in the GPX regardless of track:
             else if (input == "A")
             {
-                // Return the original list of distinguished tracks
                 return allTracks;
             }
-            // Pair all songs in the GPX regardless or track, and regardless of whether they were listened to during GPX journey:
             else if (input == "B")
             {
-                // Aggregate all the tracks of the GPX into a single track (they will be cohesive):
-                return new List<XElement> { new("combined", allTracks) };
+                // Combine all tracks into a single track
+                return new List<GPXTrack> { new(-1, allTracks.SelectMany(track => track.Points).ToList(), "Combined") };
             }
-            // User did not provide valid input:
             else
             {
-                // Go back to the beginning of the prompt and ask the user again
                 Console.WriteLine("Invalid input. Please enter a valid track number.");
             }
         }
@@ -114,32 +125,8 @@ public readonly struct GpxFile
         return selectedTracks;
     }
 
-    public readonly List<GPXTrack> ParseGpxTracks()
-    {
-        return GetTracks() // Get the tracks based on user selection
-        .Select((trk, index) => new // For each track (there can be multiple):
-        {
-            TrackElement = trk,
-            Index = index,
-            Name = trk.Element(Namespace + "name")?.Value,
-            Points = trk.Descendants(Namespace + "trkpt") // Parse all the 'trkpt' points within the track
-                .Select((trkpt, pointIndex) => new GPXPoint(
-                    index, // Index of the track the point belongs to
-                    pointIndex, // Index of the point within the track
-                    new Coordinate( // Coordinate of the point
-                        double.Parse(trkpt.Attribute("lat")?.Value ?? throw new Exception($"GPX 'lat' cannot be null, check your GPX")),
-                        double.Parse(trkpt.Attribute("lon")?.Value ?? throw new Exception($"GPX 'lon' cannot be null, check your GPX"))
-                    ), // Time of the point:
-                    trkpt.Element(Namespace + "time")?.Value ?? throw new Exception($"GPX 'time' cannot be null, check your GPX")
-                ))
-                .ToList() // Send to a list of points (List<GPXPoint>) for this track
-        })
-        .Select(track => new GPXTrack( // For each parsed (above) track, create the GPXTrack object
-            track.Index, // Index of the track among the series of tracks
-            track.Points, // Points (parsed above) belonging to the track
-            track.Name // Name of the track according to the (possibly null) name node
-        ))
-        .ToList(); // Send to list of GPXTrack elements (for each fully parsed track)
-    }
+    private static bool IsValidTrackIndex(int index, int trackCount) => (index >= 0) && (index < trackCount);
+
+    private static string GetTrackInfo(GPXTrack track) => $"[TRAK] [{track.Index}] {track.Name}";
 
 }
