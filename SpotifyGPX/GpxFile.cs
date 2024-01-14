@@ -83,12 +83,15 @@ public readonly struct GpxFile
 
     private static List<GPXTrack> HandleMultipleTracks(List<GPXTrack> allTracks)
     {
+        int combinationIndex = allTracks.Count;
+
+        allTracks.Add(new(combinationIndex, "Combined", allTracks.SelectMany(track => track.Points).ToList()));
+
         Console.WriteLine("[TRAK] Multiple GPX tracks found:");
 
         allTracks.ForEach(track => Console.WriteLine($"[TRAK] {track}"));
-
-        Console.WriteLine("[TRAK] [A] All Tracks (Include songs played only during GPX tracking)");
-        Console.WriteLine("[TRAK] [B] All Tracks (Include songs played both during & between GPX tracks)");
+        Console.WriteLine("[TRAK] [A] All of the above (include only original tracks)");
+        Console.WriteLine("[TRAK] [B] All of the above (append combined track)");
         Console.Write("[TRAK] Please enter the index of the track you want to use: ");
 
         List<GPXTrack> selectedTracks = new();
@@ -104,12 +107,12 @@ public readonly struct GpxFile
             }
             else if (input == "A")
             {
+                allTracks.RemoveAt(combinationIndex);
                 return allTracks;
             }
             else if (input == "B")
             {
-                // Combine all tracks into a single track
-                return new List<GPXTrack> { new(null, null, allTracks.SelectMany(track => track.Points).ToList()) };
+                return allTracks;
             }
             else
             {

@@ -83,12 +83,10 @@ public readonly struct GPXTrack
     }
 
     public TrackInfo Track { get; }
-    public int Index => Track.Index;
-    public string Name => Track.Name;
     public List<GPXPoint> Points { get; }
     public readonly DateTimeOffset Start { get; }
     public readonly DateTimeOffset End { get; }
-    public override string ToString() => $"[{Name}] Index: {Index}, Count: {Points.Count}, Starts: {Start}, Ends: {End}";
+    public override string ToString() => $"[{Track.Index}] Name: {Track.Name}, Count: {Points.Count}, Starts: {Start}, Ends: {End}";
 }
 
 public readonly struct TrackInfo
