@@ -108,44 +108,7 @@ public readonly struct Pairings
         );
     }
 
-    public readonly List<JObject> GetJson()
-    {
-        // Create a list of JSON objects
-        return Songs.Select(song =>
-        {
-            try
-            {
-                return new JObject
-                {
-                    ["ts"] = song.Time.ToString(Formats.outJsonFormat),
-                    ["username"] = song.Spotify_Username,
-                    ["platform"] = song.Spotify_Platform,
-                    ["ms_played"] = song.Time_Played,
-                    ["conn_country"] = song.Spotify_Country,
-                    ["ip_addr_decrypted"] = song.Spotify_IP,
-                    ["user_agent_decrypted"] = song.Spotify_UA,
-                    ["master_metadata_track_name"] = song.Song_Name,
-                    ["master_metadata_album_artist_name"] = song.Song_Artist,
-                    ["master_metadata_album_album_name"] = song.Song_Album,
-                    ["spotify_track_uri"] = song.Song_URI,
-                    ["episode_name"] = song.Episode_Name,
-                    ["episode_show_name"] = song.Episode_Show,
-                    ["spotify_episode_uri"] = song.Episode_URI,
-                    ["reason_start"] = song.Song_StartReason,
-                    ["reason_end"] = song.Song_EndReason,
-                    ["shuffle"] = song.Song_Shuffle,
-                    ["skipped"] = song.Song_Skipped,
-                    ["offline"] = song.Spotify_Offline,
-                    ["offline_timestamp"] = song.Spotify_OfflineTS,
-                    ["incognito"] = song.Spotify_Incognito
-                };
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error sending track, '{song.Song_Name}', to JSON: {ex.Message}");
-            }
-        }).ToList();
-    }
+    public readonly List<JObject> GetJson() => Songs.Select(song => song.Json).ToList();
 
     public readonly string?[] GetUriList() => Songs.Where(song => song.Song_URI != null).Select(song => song.Song_URI).ToArray();
 

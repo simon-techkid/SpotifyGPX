@@ -24,7 +24,7 @@ public readonly struct SpotifyEntry
         }
     }
 
-    private readonly JObject Json;
+    public readonly JObject Json { get; }
 
     public int Index { get; } // Unique identifier of this song in a list
     public readonly DateTimeOffset Time
