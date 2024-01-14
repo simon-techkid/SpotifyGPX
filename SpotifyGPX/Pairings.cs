@@ -28,11 +28,14 @@ public readonly struct Pairings
                     (spotifyEntry.Time >= track.Start) && (spotifyEntry.Time <= track.End)) // If the Spotify entry falls within the boundaries of the track
                 .Select((spotifyEntry, index) => // Select the Spotify entry (and its index within the JSON) if it falls in range of the GPX track
                 {
-                    GPXPoint nearestPoint = track.Points // For all the points in the track
-                        .OrderBy(point => Math.Abs((point.Time - spotifyEntry.Time).TotalSeconds)) // Find the nearest point to the current song
-                        .First();
+                    SongPoint pair = track.Points.Select(point =>
+                    {
+                        return new SongPoint(spotifyEntry, point, index, new TrackInfo(track));
+                    }).OrderBy(pair => pair.AbsAccuracy).First();
 
-                    return new SongPoint(spotifyEntry, nearestPoint, index, new TrackInfo(track)); // Create a pairing
+                    Console.WriteLine(pair);
+
+                    return pair;
                 })
         )
         .ToList();

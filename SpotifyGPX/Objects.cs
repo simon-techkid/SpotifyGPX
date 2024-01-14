@@ -189,7 +189,6 @@ public readonly struct SongPoint
         Point = point;
         Index = index;
         Origin = origin;
-        Console.WriteLine(this);
     }
 
     public readonly int Index { get; } // Unique identifier of this SongPoint in a list
