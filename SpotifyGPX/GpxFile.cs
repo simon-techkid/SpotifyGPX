@@ -129,36 +129,28 @@ public readonly struct GpxFile
     private static List<GPXTrack> CalculateGaps(List<GPXTrack> allTracks, bool onlyGaps)
     {
         List<GPXTrack> gaps = new();
-        
-        for (int i = 0; i < allTracks.Count - 1; i++)
-        {
-            int indexPrevious = i;
-            int indexNext = i + 1;
 
-            GPXPoint end = allTracks[indexPrevious].Points.Last();
-            GPXPoint next = allTracks[indexNext].Points.First();
-
-            if (end.Time != next.Time)
+        var resultTracks = allTracks
+            .SelectMany((track, index) => // For each track and its index
             {
-                GPXTrack newTrack = new(i, $"{allTracks[i].Track}-{allTracks[i + 1].Track}", new List<GPXPoint> { end, next });
-
-                if (onlyGaps)
+                if (index < allTracks.Count - 1) 
                 {
-                    gaps.Add(newTrack);
-                }
-                else
-                {
-                    allTracks.Insert(i + 1, newTrack);
-                }
-            }
-        }
+                    GPXPoint end = track.Points.Last();
+                    GPXPoint next = allTracks[index + 1].Points.First();
 
-        if (onlyGaps)
-        {
-            return gaps;
-        }
+                    if (end.Time != next.Time)
+                    {
+                        GPXTrack newTrack = new(index, $"{track.Track}-{allTracks[index + 1].Track}", new List<GPXPoint> { end, next });
 
-        return allTracks;
+                        return onlyGaps ? new[] { newTrack } : new[] { track, newTrack };
+                    }
+                }
+
+                return onlyGaps ? Array.Empty<GPXTrack>() : new[] { track };
+            })
+            .ToList();
+
+        return onlyGaps ? resultTracks : resultTracks.OrderBy(track => track.Track.Index).ToList();
     }
 
     private static bool IsValidTrackIndex(int index, int totalTracks) => (index >= 0) && (index < totalTracks);
