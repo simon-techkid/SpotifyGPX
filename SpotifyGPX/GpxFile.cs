@@ -89,22 +89,30 @@ public readonly struct GpxFile
 
         List<GPXTrack> selectedTracks = new();
 
+        int selectedTrackIndex;
+
         while (true)
         {
-            string? input = Console.ReadLine();
-
-            if (int.TryParse(input, out int selectedTrackIndex) && IsValidTrackIndex(selectedTrackIndex, allTracks.Count))
+            string input = Console.ReadLine();
+            if (int.TryParse(input, out selectedTrackIndex) && IsValidTrackIndex(selectedTrackIndex, allTracks.Count))
             {
-                selectedTracks.Add(allTracks[selectedTrackIndex]);
                 break;
             }
-            else if (input == "A") return allTracks;
-            else if (input == "B") return CalculateGaps(allTracks, false); // Include both gaps between GPX tracks and original GPX tracks
-            else if (input == "C") return MergeTracks(allTracks);
-            else if (input == "D") return CalculateGaps(allTracks, true); // Only include gaps between GPX tracks
-            else Console.WriteLine("Invalid input. Please enter a valid track number.");
+            switch (input)
+            {
+                case "A":
+                    return allTracks;
+                case "B":
+                    return CalculateGaps(allTracks, false);
+                case "C":
+                    return MergeTracks(allTracks);
+                case "D":
+                    return CalculateGaps(allTracks, true);
+            }
+            Console.WriteLine("Invalid input. Please enter a valid track number.");
         }
 
+        selectedTracks.Add(allTracks[selectedTrackIndex]);
         return selectedTracks;
     }
 
