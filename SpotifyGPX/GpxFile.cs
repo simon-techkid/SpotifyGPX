@@ -133,7 +133,7 @@ public readonly struct GpxFile
         var resultTracks = allTracks
             .SelectMany((track, index) => // For each track and its index
             {
-                if (index < allTracks.Count - 1) 
+                if (index < allTracks.Count - 1)
                 {
                     GPXPoint end = track.Points.Last();
                     GPXPoint next = allTracks[index + 1].Points.First();

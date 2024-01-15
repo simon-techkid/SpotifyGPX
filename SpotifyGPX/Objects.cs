@@ -26,7 +26,7 @@ public readonly struct SpotifyEntry
 
     public readonly JObject Json { get; }
 
-    public int Index { get; } // Unique identifier of this song in a list
+    public readonly int Index { get; } // Unique identifier of this song in a list
     public readonly DateTimeOffset Time
     {
         get
@@ -43,7 +43,7 @@ public readonly struct SpotifyEntry
             }
             else
             {
-                throw new Exception(""); // provide later
+                throw new Exception("Couldn't find valid time formats, 'ts' or 'endTime' in JSON"); // provide later
             }
         }
     }
@@ -82,8 +82,8 @@ public readonly struct GPXTrack
         End = Points.Select(point => point.Time).Max();
     }
 
-    public TrackInfo Track { get; }
-    public List<GPXPoint> Points { get; }
+    public readonly TrackInfo Track { get; }
+    public readonly List<GPXPoint> Points { get; }
     public readonly DateTimeOffset Start { get; }
     public readonly DateTimeOffset End { get; }
     public override string ToString() => $"[{Track.Index}] Name: {Track.Name}, Count: {Points.Count}, Starts: {Start}, Ends: {End}";
@@ -98,7 +98,7 @@ public readonly struct TrackInfo
     }
 
     private readonly int? Indexx;
-    public int Index
+    public readonly int Index
     {
         get
         {
@@ -113,7 +113,7 @@ public readonly struct TrackInfo
         }
     }
     private readonly string? NodeName;
-    public string Name
+    public readonly string Name
     {
         get
         {
@@ -139,9 +139,9 @@ public readonly struct GPXPoint
         Time = DateTimeOffset.ParseExact(time, Formats.GpxInput, null);
     }
 
-    public int Index { get; } // Unique identifier of this point in a list
-    public Coordinate Location { get; } // Coordinate pair of its location
-    public DateTimeOffset Time { get; } // Time of the point
+    public readonly int Index { get; } // Unique identifier of this point in a list
+    public readonly Coordinate Location { get; } // Coordinate pair of its location
+    public readonly DateTimeOffset Time { get; } // Time of the point
 }
 
 public readonly struct Coordinate
@@ -160,7 +160,7 @@ public readonly struct Coordinate
 
 public readonly struct SongPoint
 {
-    public string Description
+    public readonly string Description
     {
         get
         {
@@ -202,8 +202,8 @@ public readonly struct SongPoint
     }
 
     public readonly int Index { get; } // Unique identifier of this SongPoint in a list
-    public SpotifyEntry Song { get; } // Contents of the original song entry
-    public GPXPoint Point { get; } // Contents of the original GPX point
+    public readonly SpotifyEntry Song { get; } // Contents of the original song entry
+    public readonly GPXPoint Point { get; } // Contents of the original GPX point
     public readonly TrackInfo Origin { get; } // Track from which the pairing originates
     private readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds; // Raw accuracy
     public readonly double AbsAccuracy => Math.Abs(Accuracy); // Absolute value of the accuracy
