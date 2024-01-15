@@ -127,6 +127,7 @@ public readonly struct TrackInfo
             }
         }
     }
+    public override string ToString() => Name;
 }
 
 public readonly struct GPXPoint

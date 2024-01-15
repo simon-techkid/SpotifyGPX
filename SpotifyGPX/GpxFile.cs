@@ -83,16 +83,9 @@ public readonly struct GpxFile
 
     private static List<GPXTrack> HandleMultipleTracks(List<GPXTrack> allTracks)
     {
-        int combinationIndex = allTracks.Count;
-
-        allTracks.Add(new(combinationIndex, "Combined", allTracks.SelectMany(track => track.Points).ToList()));
-
         Console.WriteLine("[TRAK] Multiple GPX tracks found:");
 
-        allTracks.ForEach(track => Console.WriteLine($"[TRAK] {track}"));
-        Console.WriteLine("[TRAK] [A] All of the above (include only original tracks)");
-        Console.WriteLine("[TRAK] [B] All of the above (append combined track)");
-        Console.Write("[TRAK] Please enter the index of the track you want to use: ");
+        DisplayTrackOptions(allTracks);
 
         List<GPXTrack> selectedTracks = new();
 
@@ -105,23 +98,68 @@ public readonly struct GpxFile
                 selectedTracks.Add(allTracks[selectedTrackIndex]);
                 break;
             }
-            else if (input == "A")
-            {
-                allTracks.RemoveAt(combinationIndex);
-                return allTracks;
-            }
-            else if (input == "B")
-            {
-                return allTracks;
-            }
-            else
-            {
-                Console.WriteLine("Invalid input. Please enter a valid track number.");
-            }
+            else if (input == "A") return allTracks;
+            else if (input == "B") return CalculateGaps(allTracks, false); // Include both gaps between GPX tracks and original GPX tracks
+            else if (input == "C") return MergeTracks(allTracks);
+            else if (input == "D") return CalculateGaps(allTracks, true); // Only include gaps between GPX tracks
+            else Console.WriteLine("Invalid input. Please enter a valid track number.");
         }
 
         return selectedTracks;
     }
 
-    private static bool IsValidTrackIndex(int index, int trackCount) => (index >= 0) && (index < trackCount);
+    private static void DisplayTrackOptions(List<GPXTrack> allTracks)
+    {
+        allTracks.ForEach(track => Console.WriteLine($"[TRAK] {track}"));
+        Console.WriteLine("[TRAK] [A] All tracks");
+        Console.WriteLine("[TRAK] [B] All tracks & gap tracks");
+        Console.WriteLine("[TRAK] [C] All tracks & gap tracks (flattened)");
+        Console.WriteLine("[TRAK] [D] Gap tracks");
+        Console.Write("[TRAK] Please enter the index of the track you want to use: ");
+    }
+
+    private static List<GPXTrack> MergeTracks(List<GPXTrack> allTracks)
+    {
+        return new List<GPXTrack>
+        {
+            new(allTracks.Count, "Flattened", allTracks.SelectMany(track => track.Points).ToList())
+        };
+    }
+
+    private static List<GPXTrack> CalculateGaps(List<GPXTrack> allTracks, bool onlyGaps)
+    {
+        List<GPXTrack> gaps = new();
+        
+        for (int i = 0; i < allTracks.Count - 1; i++)
+        {
+            int indexPrevious = i;
+            int indexNext = i + 1;
+
+            GPXPoint end = allTracks[indexPrevious].Points.Last();
+            GPXPoint next = allTracks[indexNext].Points.First();
+
+            if (end.Time != next.Time)
+            {
+                GPXTrack newTrack = new(i, $"{allTracks[i].Track}-{allTracks[i + 1].Track}", new List<GPXPoint> { end, next });
+
+                if (onlyGaps)
+                {
+                    gaps.Add(newTrack);
+                }
+                else
+                {
+                    allTracks.Insert(i + 1, newTrack);
+                }
+            }
+        }
+
+        if (onlyGaps)
+        {
+            return gaps;
+        }
+
+        return allTracks;
+    }
+
+    private static bool IsValidTrackIndex(int index, int totalTracks) => (index >= 0) && (index < totalTracks);
 }
