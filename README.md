@@ -35,7 +35,7 @@ You must have the following:
  - *Optional:* `-n` - Do not export a GPX from the calculated points
  - *Optional:* `-j` - Save off the relevant part of the Spotify JSON
  - *Optional:* `-p` - Export a `xspf` playlist of the songs
- - *Optional:* `-s` - Export a `txt` list of Spotify URIs and copy it to clipboard (can be pasted into Spotify Desktop app playlists)
+ - *Optional:* `-s` - Export a `txt` list of Spotify URIs (can be copied and pasted into Spotify Desktop app playlists)
 
 ## Obtaining Necessary Data
 
@@ -49,8 +49,8 @@ You must have the following:
 
 ## Types of Data from Spotify
 
-Below are some differences between what each type of data Spotify offers has.
-`Extended streaming history` data takes longer to get, but contains significantly more information than `Account data`
+The differences between the types of data Spotify provides are detailed below.
+`Extended streaming history` data takes longer to get, but contains significantly more information than `Account data`.
 
 ### Account data (5 days):
 
