@@ -20,13 +20,13 @@ public readonly struct SpotifyEntry
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error parsing contents of JSON tag:\n{json} to a valid song entry:\n{ex}");
+            throw new Exception($"Error parsing contents of JSON tag:\n{json}\nto a valid song entry:\n{ex}");
         }
     }
 
-    public readonly JObject Json { get; }
+    public readonly JObject Json { get; } // Original Json object for this song
 
-    public readonly int Index { get; } // Unique identifier of this song in a list
+    public readonly int Index { get; } // Unique identifier of this SpotifyEntry in a list
     public readonly DateTimeOffset Time
     {
         get
@@ -43,7 +43,7 @@ public readonly struct SpotifyEntry
             }
             else
             {
-                throw new Exception("Couldn't find valid time formats, 'ts' or 'endTime' in JSON"); // provide later
+                throw new Exception("Couldn't find valid time formats, 'ts' or 'endTime' in JSON");
             }
         }
     }
@@ -51,7 +51,7 @@ public readonly struct SpotifyEntry
     public readonly string? Song_Artist => (string?)Json["artistName"] ?? (string?)Json["master_metadata_album_artist_name"];
     public readonly string? Song_Name => (string?)Json["trackName"] ?? (string?)Json["master_metadata_track_name"];
     public readonly string? Time_Played => (string?)Json["msPlayed"] ?? (string?)Json["ms_played"];
-    public readonly TimeSpan TimePlayed => TimeSpan.FromMilliseconds(double.Parse(Time_Played));
+    public readonly TimeSpan TimePlayed => TimeSpan.FromMilliseconds(double.Parse(Time_Played)); // Parse string of milliseconds to TimeSpan
     public readonly string? Spotify_Username => (string?)Json["username"];
     public readonly string? Spotify_Platform => (string?)Json["platform"];
     public readonly string? Spotify_Country => (string?)Json["conn_country"];
@@ -69,7 +69,7 @@ public readonly struct SpotifyEntry
     public readonly bool? Spotify_Offline => (bool?)Json["offline"];
     public readonly string? Spotify_OfflineTS => (string?)Json["offline_timestamp"];
     public readonly bool? Spotify_Incognito => (bool?)Json["incognito"];
-    public override string ToString() => $"{Song_Artist} - {Song_Name}";
+    public override string ToString() => $"{Song_Artist} - {Song_Name}"; // Display format for this song
 }
 
 public readonly struct GPXTrack
@@ -82,11 +82,11 @@ public readonly struct GPXTrack
         End = Points.Select(point => point.Time).Max();
     }
 
-    public readonly TrackInfo Track { get; }
-    public readonly List<GPXPoint> Points { get; }
-    public readonly DateTimeOffset Start { get; }
-    public readonly DateTimeOffset End { get; }
-    public override string ToString() => $"[{Track.Index}] Name: {Track.Name}, Points: {Points.Count}, Starts: {Start}, Ends: {End}";
+    public readonly TrackInfo Track { get; } // Metadata for this track, including its name and index in a list
+    public readonly List<GPXPoint> Points { get; } // Where and when were all the points in this track taken?
+    public readonly DateTimeOffset Start { get; } // What time was the earliest point logged?
+    public readonly DateTimeOffset End { get; } // What time was the latest point logged?
+    public override string ToString() => $"[{Track.Index}] Name: {Track.Name}, Points: {Points.Count}, Starts: {Start}, Ends: {End}"; // Display format for this track
 }
 
 public readonly struct TrackInfo
@@ -128,7 +128,7 @@ public readonly struct TrackInfo
         }
     }
 
-    public override string ToString() => Name;
+    public override string ToString() => Name; // Display format for this TrackInfo
 }
 
 public readonly struct GPXPoint
@@ -140,9 +140,10 @@ public readonly struct GPXPoint
         Time = DateTimeOffset.ParseExact(time, Formats.GpxInput, null);
     }
 
-    public readonly int Index { get; } // Unique identifier of this point in a list
-    public readonly Coordinate Location { get; } // Coordinate pair of its location
-    public readonly DateTimeOffset Time { get; } // Time of the point
+    public readonly int Index { get; } // Unique identifier of this GPXPoint in a list
+    public readonly Coordinate Location { get; } // Where on Earth is this point?
+    public readonly DateTimeOffset Time { get; } // When was the user at this point?
+    // GPXPoint never printed so no need to provide display format
 }
 
 public readonly struct Coordinate
@@ -155,42 +156,48 @@ public readonly struct Coordinate
 
     public readonly double Latitude;
     public readonly double Longitude;
-
-    public override string ToString() => $"{(Latitude, Longitude)}";
+    public override string ToString() => $"{(Latitude, Longitude)}"; // Display format for this coordinate pair
 }
 
 public readonly struct SongPoint
 {
-    public readonly string Description
+    public readonly string Description // GPX point description in exported GPX
     {
         get
         {
-            // ===================== \\
-            // GPX POINT DESCRIPTION \\
-            // ===================== \\
-
-            // Print the song time adjusted for the local time zone provided by the GPX point
-            DateTimeOffset EndedAt = Song.Time.ToOffset(EqualizedOffset);
-
             StringBuilder builder = new();
 
-            // accuracy < 0 means song ends before the point
-            // accuracy == 0 means song ends in the same place as the point
-            // accuracy > 0 means song ends after the point
-            string seconds = AbsRoundAccuracy == 1 ? "second" : "seconds";
-            string ppexpl = $"{(RoundAccuracy < 0 ? $"{AbsRoundAccuracy} {seconds} before, at" : RoundAccuracy == 0 ? "at the same time," : $"{AbsRoundAccuracy} {seconds} after, at")}";
-
-            // Begin line contents of the description
-            builder.AppendLine($"At this location at {Point.Time.ToString(Formats.DescriptionPlayedAt)}");
-            builder.AppendLine($"Song ended {ppexpl} {EndedAt.ToString(Formats.DescriptionPlayedAt)}");
-            builder.AppendLine($"Song played for {Song.TimePlayed.ToString(Formats.DescriptionTimePlayed)}");
-            builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}");
-            builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}");
-            builder.AppendLine($"Offline: {(Song.Spotify_Offline == true ? "Yes" : "No")}");
-            builder.AppendLine($"IP Address: {Song.Spotify_IP}");
+            builder.AppendLine($"At this position at {PointTime.ToString(Formats.DescriptionPlayedAt)},");
+            builder.AppendLine($"the song {GetRelativeDescription()} {SongTime.ToString(Formats.DescriptionPlayedAt)},");
+            builder.AppendLine($"played for {Song.TimePlayed.ToString(Formats.DescriptionTimePlayed)}.");
+            builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")},");
+            builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")},");
+            builder.AppendLine($"Offline: {(Song.Spotify_Offline == true ? "Yes" : "No")},");
+            builder.AppendLine($"IP Address: {Song.Spotify_IP},");
             builder.AppendLine($"Country: {Song.Spotify_Country}");
 
             return builder.ToString();
+        }
+    }
+
+    private string GetRelativeDescription() // Used to describe the relation of the song to the point
+    {
+        string seconds = AbsRoundAccuracy == 1 ? "second" : "seconds";
+
+        // accuracy < 0 means song ends before the point
+        // accuracy == 0 means song ends in the same place as the point
+        // accuracy > 0 means song ends after the point
+        if (RoundAccuracy < 0)
+        {
+            return $"ended {AbsRoundAccuracy} {seconds} before, at";
+        }
+        else if (RoundAccuracy == 0)
+        {
+            return "ended at the same time, at";
+        }
+        else
+        {
+            return $"ended {AbsRoundAccuracy} {seconds} after, at";
         }
     }
 
@@ -210,13 +217,15 @@ public readonly struct SongPoint
     public readonly double AbsAccuracy => Math.Abs(Accuracy); // Absolute value of the accuracy
     private readonly double RoundAccuracy => Math.Round(Accuracy); // Rounded accuracy
     private readonly double AbsRoundAccuracy => Math.Abs(RoundAccuracy); // Absolute value of the rounded accuracy
-    public readonly TimeSpan EqualizedOffset => Point.Time.Offset; // Offset is defined by the original GPX point offset
+    private readonly TimeSpan NormalizedOffset => Point.Time.Offset; // Standard offset is defined by the original GPX point offset
+    private DateTimeOffset SongTime => Song.Time.ToOffset(NormalizedOffset); // Song end time, normalized to point time zone
+    private DateTimeOffset PointTime => Point.Time.ToOffset(NormalizedOffset); // Point end time, normalized to point time zone (redundant)
 
     public override string ToString()
     {
         // Set both the song and point times to the UTC offset provided by the original GPX point
-        string songTime = Song.Time.ToOffset(EqualizedOffset).ToString(Formats.Console);
-        string pointTime = Point.Time.ToOffset(EqualizedOffset).ToString(Formats.Console);
+        string songTime = SongTime.ToString(Formats.Console);
+        string pointTime = PointTime.ToString(Formats.Console);
 
         // Print information about the pairing
         return $"[{Origin}] [P{Point.Index}, S{Song.Index} ==> #{Index}] [{songTime}S ~ {pointTime}P] [{RoundAccuracy}s] {Song}";
