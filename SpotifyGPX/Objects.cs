@@ -86,7 +86,7 @@ public readonly struct GPXTrack
     public readonly List<GPXPoint> Points { get; }
     public readonly DateTimeOffset Start { get; }
     public readonly DateTimeOffset End { get; }
-    public override string ToString() => $"[{Track.Index}] Name: {Track.Name}, Count: {Points.Count}, Starts: {Start}, Ends: {End}";
+    public override string ToString() => $"[{Track.Index}] Name: {Track.Name}, Points: {Points.Count}, Starts: {Start}, Ends: {End}";
 }
 
 public readonly struct TrackInfo
@@ -127,6 +127,7 @@ public readonly struct TrackInfo
             }
         }
     }
+
     public override string ToString() => Name;
 }
 
@@ -218,6 +219,6 @@ public readonly struct SongPoint
         string pointTime = Point.Time.ToOffset(EqualizedOffset).ToString(Formats.Console);
 
         // Print information about the pairing
-        return $"[{Origin.Name}] [#{Point.Index} ==> {Index}] [{songTime} ~ {pointTime}] [{RoundAccuracy}s] {Song}";
+        return $"[{Origin}] [P{Point.Index}, S{Song.Index} ==> #{Index}] [{songTime}S ~ {pointTime}P] [{RoundAccuracy}s] {Song}";
     }
 }
