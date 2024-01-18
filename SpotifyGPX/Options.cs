@@ -6,6 +6,7 @@ public struct Formats
 {
     // Time format for console printing of point-song time comparison:
     public static string Console => @"HH\:mm\:ss";
+    public static string ConsoleTrack => @"yyyy-MM-dd HH\:mm\:ss zzz"; // when there are multiple tracks
 
     // ================== //
     // GPX IMPORT FORMATS //

@@ -86,7 +86,18 @@ public readonly struct GPXTrack
     public readonly List<GPXPoint> Points { get; } // Where and when were all the points in this track taken?
     public readonly DateTimeOffset Start { get; } // What time was the earliest point logged?
     public readonly DateTimeOffset End { get; } // What time was the latest point logged?
-    public override string ToString() => $"Name: {Track.Name}, Points: {Points.Count}, Starts: {Start}, Ends: {End}"; // Display format for this track
+    public override string ToString()
+    {
+        StringBuilder builder = new();
+
+        builder.Append($"\n   Name: {Track.Name}");
+        builder.Append($"\n   Points: {Points.Count}");
+        builder.Append($"\n   Starts: {Start.ToString(Formats.ConsoleTrack)}");
+        builder.Append($"\n   Ends: {End.ToString(Formats.ConsoleTrack)}");
+        if (Track.Gaps) { builder.Append($"\n   Gap track"); }
+
+        return builder.ToString();
+    }// Display format for this track
 }
 
 public readonly struct TrackInfo
@@ -105,13 +116,13 @@ public readonly struct TrackInfo
         {
             if (Indexx == null)
             {
-                if (Gaps == false)
+                if (Gaps)
                 {
-                    return 0;
+                    return 1;
                 }
                 else
                 {
-                    return 1;
+                    return 0;
                 }
             }
             else
@@ -127,14 +138,7 @@ public readonly struct TrackInfo
         {
             if (NodeName == null)
             {
-                if (Gaps)
-                {
-                    return $"T{Index}";
-                }
-                else
-                {
-                    return $"G{Index}";
-                }
+                return $"T{Index}";
             }
             else
             {

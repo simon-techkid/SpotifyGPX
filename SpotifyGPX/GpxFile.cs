@@ -75,42 +75,51 @@ public readonly struct GpxFile
 
     private static List<GPXTrack> HandleMultipleTracks(List<GPXTrack> allTracks)
     {
-        Console.WriteLine("[TRAK] Multiple GPX tracks found:");
+        // Set up the combined track
+        int combinedIndex = allTracks.Count;
+        allTracks.Add(new GPXTrack(combinedIndex, "Combined", false, allTracks.SelectMany(track => track.Points).ToList()));
 
+        // Display all the tracks to the user
         DisplayTrackOptions(allTracks);
 
-        List<GPXTrack> selectedTracks = new();
+        int selectedTrackIndex; // Holds the user track selection index
 
-        int selectedTrackIndex;
-
+        // Loop the user input request until a valid option is selected
         while (true)
         {
             string input = Console.ReadLine();
             if (int.TryParse(input, out selectedTrackIndex) && IsValidTrackIndex(selectedTrackIndex, allTracks.Count))
             {
-                break;
+                break; // Return this selection below
             }
             switch (input)
             {
                 case "A":
-                    return allTracks.Where(track => track.Track.Gaps == false).ToList();
+                    return allTracks.Where(track => track.Track.Gaps == false).ToList(); // return non-gaps only
                 case "B":
-                    return allTracks;
+                    allTracks.RemoveAt(combinedIndex); // Remove all-inclusive track
+                    return allTracks; // return gaps and non-gaps
                 case "C":
-                    return allTracks.Where(track => track.Track.Gaps == true).ToList();
+                    return allTracks.Where(track => track.Track.Gaps == true).ToList(); // return gaps only
             }
             Console.WriteLine("Invalid input. Please enter a valid track number.");
         }
 
-        selectedTracks.Add(allTracks[selectedTrackIndex]);
+        // If the user selected a specific track index, return that
+        List<GPXTrack> selectedTracks = new()
+        {
+            allTracks[selectedTrackIndex]
+        };
         return selectedTracks;
     }
 
     private static void DisplayTrackOptions(List<GPXTrack> allTracks)
     {
+        Console.WriteLine("[TRAK] Multiple GPX tracks found:");
+
         foreach (GPXTrack track in allTracks)
         {
-            Console.WriteLine($"[TRAK] [{allTracks.IndexOf(track)}] {track}");
+            Console.WriteLine($"[TRAK] Index: {allTracks.IndexOf(track)} {track}");
         }
 
         Console.WriteLine("[TRAK] [A] All tracks");
