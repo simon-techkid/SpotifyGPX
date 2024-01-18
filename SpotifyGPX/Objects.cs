@@ -74,9 +74,9 @@ public readonly struct SpotifyEntry
 
 public readonly struct GPXTrack
 {
-    public GPXTrack(int? index, string? name, List<GPXPoint> points)
+    public GPXTrack(int? index, string? name, bool gaps, List<GPXPoint> points)
     {
-        Track = new TrackInfo(index, name);
+        Track = new TrackInfo(index, name, gaps);
         Points = points;
         Start = Points.Select(point => point.Time).Min();
         End = Points.Select(point => point.Time).Max();
@@ -86,15 +86,16 @@ public readonly struct GPXTrack
     public readonly List<GPXPoint> Points { get; } // Where and when were all the points in this track taken?
     public readonly DateTimeOffset Start { get; } // What time was the earliest point logged?
     public readonly DateTimeOffset End { get; } // What time was the latest point logged?
-    public override string ToString() => $"[{Track.Index}] Name: {Track.Name}, Points: {Points.Count}, Starts: {Start}, Ends: {End}"; // Display format for this track
+    public override string ToString() => $"Name: {Track.Name}, Points: {Points.Count}, Starts: {Start}, Ends: {End}"; // Display format for this track
 }
 
 public readonly struct TrackInfo
 {
-    public TrackInfo(int? index, string? name)
+    public TrackInfo(int? index, string? name, bool gaps)
     {
         Indexx = index;
         NodeName = name;
+        Gaps = gaps;
     }
 
     private readonly int? Indexx;
@@ -104,7 +105,14 @@ public readonly struct TrackInfo
         {
             if (Indexx == null)
             {
-                return 0;
+                if (Gaps == false)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return 1;
+                }
             }
             else
             {
@@ -119,7 +127,14 @@ public readonly struct TrackInfo
         {
             if (NodeName == null)
             {
-                return $"T{Index}";
+                if (Gaps)
+                {
+                    return $"T{Index}";
+                }
+                else
+                {
+                    return $"G{Index}";
+                }
             }
             else
             {
@@ -127,8 +142,8 @@ public readonly struct TrackInfo
             }
         }
     }
-
-    public override string ToString() => Name; // Display format for this TrackInfo
+    public bool Gaps { get; }
+    public override string ToString() => Name;
 }
 
 public readonly struct GPXPoint
