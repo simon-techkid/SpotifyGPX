@@ -22,21 +22,24 @@ public readonly struct Pairings
     {
         // Correlate Spotify entries with the nearest GPX points
 
+        int index = 0; // Index of the pairing
+
         List<SongPoint> correlatedEntries = tracks // For each GPX track
-        .SelectMany(track => // Select the track
-            songs.Where(spotifyEntry => // For all entries in SpotifyEntry
-                    (spotifyEntry.Time >= track.Start) && (spotifyEntry.Time <= track.End)) // If the Spotify entry falls within the boundaries of the track
-                .Select((spotifyEntry, index) => // Select the Spotify entry (and its index within the JSON) if it falls in range of the GPX track
-                {
-                    SongPoint pair = track.Points.Select(point =>
-                    {
-                        return new SongPoint(index, spotifyEntry, point, track.Track);
-                    }).OrderBy(pair => pair.AbsAccuracy).First();
+        .SelectMany(track => songs // Get the list of SpotifyEntries
+        .Where(spotifyEntry => (spotifyEntry.Time >= track.Start) && (spotifyEntry.Time <= track.End)) // If the SpotifyEntry falls within the boundaries of the track
+        .Select(spotifyEntry => // Select the Spotify entry if it falls in range of the GPX track
+            {
+                SongPoint pair = track.Points
+                .Select(point => new SongPoint(index, spotifyEntry, point, track.Track)) // For each point in the track's point list,
+                .OrderBy(pair => pair.AbsAccuracy) // Order the points by proximity between point and song
+                .First(); // Closest accuracy wins
 
-                    Console.WriteLine(pair);
+                Console.WriteLine(pair);
 
-                    return pair;
-                })
+                index++; // Add to the index of all pairings regardless of track
+
+                return pair;
+            })
         )
         .ToList();
 
