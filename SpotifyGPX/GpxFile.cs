@@ -52,7 +52,7 @@ public readonly struct GpxFile
             .Select((trk, index) => new GPXTrack( // For each track and its index, create a new GPXTrack
                 index,
                 trk.Element(Namespace + "name")?.Value,
-                false,
+                TrackType.GPX,
                 trk.Descendants(Namespace + "trkpt")
                     .Select((trkpt, pointIndex) => new GPXPoint( // For each point and its index, create a new GPXPoint
                         pointIndex,
@@ -77,7 +77,7 @@ public readonly struct GpxFile
     {
         // Set up the combined track
         int combinedIndex = allTracks.Count;
-        allTracks.Add(new GPXTrack(combinedIndex, "Combined", false, allTracks.SelectMany(track => track.Points).ToList()));
+        allTracks.Add(new GPXTrack(combinedIndex, "Combined", TrackType.Combined, allTracks.SelectMany(track => track.Points).ToList()));
 
         // Display all the tracks to the user
         DisplayTrackOptions(allTracks);
@@ -95,12 +95,17 @@ public readonly struct GpxFile
             switch (input)
             {
                 case "A":
-                    return allTracks.Where(track => track.Track.Gaps == false).ToList(); // return non-gaps only
+                    return allTracks.Where(track => track.Track.Type == TrackType.GPX).ToList(); // Only GPX tracks
                 case "B":
-                    allTracks.RemoveAt(combinedIndex); // Remove all-inclusive track
-                    return allTracks; // return gaps and non-gaps
+                    return allTracks.Where(track => track.Track.Type != TrackType.Combined).ToList(); // GPX and gap tracks
                 case "C":
-                    return allTracks.Where(track => track.Track.Gaps == true).ToList(); // return gaps only
+                    return allTracks.Where(track => track.Track.Type == TrackType.Gap).ToList(); // Only gap tracks
+                case "D":
+                    return allTracks.Where(track => (track.Track.Type == TrackType.Combined) || (track.Track.Type == TrackType.GPX)).ToList(); // Combined and GPX
+                case "E":
+                    return allTracks.Where(track => (track.Track.Type == TrackType.Combined) || (track.Track.Type == TrackType.Gap)).ToList(); // Combined and gaps
+                case "F":
+                    return allTracks; // Combined, GPX, and gaps
             }
             Console.WriteLine("Invalid input. Please enter a valid track number.");
         }
@@ -122,9 +127,12 @@ public readonly struct GpxFile
             Console.WriteLine($"[TRAK] Index: {allTracks.IndexOf(track)} {track}");
         }
 
-        Console.WriteLine("[TRAK] [A] All tracks");
-        Console.WriteLine("[TRAK] [B] All tracks & gap tracks");
-        Console.WriteLine("[TRAK] [C] Gap tracks");
+        Console.WriteLine("[TRAK] [A] GPX tracks");
+        Console.WriteLine("[TRAK] [B] GPX tracks, and gaps between them");
+        Console.WriteLine("[TRAK] [C] Gaps between GPX tracks only");
+        Console.WriteLine("[TRAK] [D] GPX tracks and Combined track");
+        Console.WriteLine("[TRAK] [E] Gap tracks and Combined track");
+        Console.WriteLine("[TRAK] [F] GPX, Gap, and Combined tracks (everything)");
         Console.Write("[TRAK] Please enter the index of the track you want to use: ");
     }
 
@@ -141,7 +149,7 @@ public readonly struct GpxFile
 
                     if (end.Time != next.Time)
                     {
-                        GPXTrack gapTrack = new(index, gapName, true, new List<GPXPoint> { end, next });
+                        GPXTrack gapTrack = new(index, gapName, TrackType.Gap, new List<GPXPoint> { end, next });
 
                         return new[] { actualTrack, gapTrack };
                     }

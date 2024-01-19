@@ -74,9 +74,9 @@ public readonly struct SpotifyEntry
 
 public readonly struct GPXTrack
 {
-    public GPXTrack(int? index, string? name, bool gaps, List<GPXPoint> points)
+    public GPXTrack(int? index, string? name, TrackType type, List<GPXPoint> points)
     {
-        Track = new TrackInfo(index, name, gaps);
+        Track = new TrackInfo(index, name, type);
         Points = points;
         Start = Points.Select(point => point.Time).Min();
         End = Points.Select(point => point.Time).Max();
@@ -94,7 +94,7 @@ public readonly struct GPXTrack
         builder.Append($"\n   Points: {Points.Count}");
         builder.Append($"\n   Starts: {Start.ToString(Formats.ConsoleTrack)}");
         builder.Append($"\n   Ends: {End.ToString(Formats.ConsoleTrack)}");
-        if (Track.Gaps) { builder.Append($"\n   Gap track"); }
+        builder.Append($"\n   Type: {Track.Type}");
 
         return builder.ToString();
     }// Display format for this track
@@ -102,11 +102,11 @@ public readonly struct GPXTrack
 
 public readonly struct TrackInfo
 {
-    public TrackInfo(int? index, string? name, bool gaps)
+    public TrackInfo(int? index, string? name, TrackType type)
     {
         Indexx = index;
         NodeName = name;
-        Gaps = gaps;
+        Type = type;
     }
 
     private readonly int? Indexx;
@@ -116,14 +116,7 @@ public readonly struct TrackInfo
         {
             if (Indexx == null)
             {
-                if (Gaps)
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
+                return (int)Type;
             }
             else
             {
@@ -146,8 +139,15 @@ public readonly struct TrackInfo
             }
         }
     }
-    public bool Gaps { get; }
+    public TrackType Type { get; }
     public override string ToString() => Name;
+}
+
+public enum TrackType
+{
+    GPX = 0,
+    Gap = 1,
+    Combined = 2
 }
 
 public readonly struct GPXPoint
