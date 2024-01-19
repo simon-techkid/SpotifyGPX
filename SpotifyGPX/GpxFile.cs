@@ -11,7 +11,6 @@ namespace SpotifyGPX;
 public readonly struct GpxFile
 {
     private readonly XDocument document; // Store the document for on-demand reading
-    private static readonly XNamespace Namespace = "http://www.topografix.com/GPX/1/0"; // Default namespace
 
     public GpxFile(string path)
     {
@@ -42,25 +41,25 @@ public readonly struct GpxFile
         }
     }
 
-    private readonly bool TracksExist => document.Descendants(Namespace + "trk").Any();
+    private readonly bool TracksExist => document.Descendants(Formats.Namespace + "trk").Any();
 
-    private readonly bool PointsExist => document.Descendants(Namespace + "trkpt").Any();
+    private readonly bool PointsExist => document.Descendants(Formats.Namespace + "trkpt").Any();
 
     public List<GPXTrack> ParseGpxTracks()
     {
-        List<GPXTrack> allTracks = document.Descendants(Namespace + "trk")
+        List<GPXTrack> allTracks = document.Descendants(Formats.Namespace + "trk")
             .Select((trk, index) => new GPXTrack( // For each track and its index, create a new GPXTrack
                 index,
-                trk.Element(Namespace + "name")?.Value,
+                trk.Element(Formats.Namespace + "name")?.Value,
                 TrackType.GPX,
-                trk.Descendants(Namespace + "trkpt")
+                trk.Descendants(Formats.Namespace + "trkpt")
                     .Select((trkpt, pointIndex) => new GPXPoint( // For each point and its index, create a new GPXPoint
                         pointIndex,
                         new Coordinate( // Parse its coordinate
                             double.Parse(trkpt.Attribute("lat")?.Value ?? throw new Exception($"GPX 'lat' cannot be null, check your GPX")),
                             double.Parse(trkpt.Attribute("lon")?.Value ?? throw new Exception($"GPX 'lon' cannot be null, check your GPX"))
                         ),
-                        trkpt.Element(Namespace + "time")?.Value ?? throw new Exception($"GPX 'time' cannot be null, check your GPX")
+                        trkpt.Element(Formats.Namespace + "time")?.Value ?? throw new Exception($"GPX 'time' cannot be null, check your GPX")
                     )).ToList() // Send all points to List<GPXPoint>
             ))
             .ToList(); // Send all tracks to List<GPXTrack>

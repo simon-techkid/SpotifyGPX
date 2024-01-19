@@ -1,5 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
+using System.Xml.Linq;
+
 namespace SpotifyGPX;
 
 public struct Formats
@@ -14,6 +16,7 @@ public struct Formats
 
     // Time format used to interpret your GPX track <time> tags
     public static string GpxInput => @"yyyy-MM-ddTHH\:mm\:ss.fffzzz"; // Can be any UTC offset
+    public static XNamespace Namespace => "http://www.topografix.com/GPX/1/0"; // Namespace of the input GPX
 
     // =================== //
     // JSON IMPORT FORMATS //
