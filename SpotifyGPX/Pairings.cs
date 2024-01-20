@@ -60,27 +60,27 @@ public readonly struct Pairings
         Console.WriteLine($"[PAIR] Paired {PairedPoints.Count} entries: {countsJoined}");
     }
 
-    public readonly XDocument GetGpxx(string name, string desc, XNamespace ns)
+    public readonly XDocument GetGpxx(string name, string desc)
     {
         return new XDocument(
             new XDeclaration("1.0", "utf-8", null),
-            new XElement(ns + "gpx",
-                new XAttribute("version", "1.1"),
-                new XAttribute("xmlns", ns),
+            new XElement(Formats.OutputNs + "gpx",
+                new XAttribute("version", "1.0"),
+                new XAttribute("xmlns", Formats.OutputNs),
                 new XAttribute("creator", "SpotifyGPX"),
-                new XElement(ns + "name", name),
-                new XElement(ns + "desc", desc),
+                new XElement(Formats.OutputNs + "name", name),
+                new XElement(Formats.OutputNs + "desc", desc),
                 PairedPoints.GroupBy(pair => pair.Origin).Select(track =>
-                    new XElement(ns + "trk",
-                        new XElement(ns + "name", track.Key.Name),
-                        new XElement(ns + "trkseg",
+                    new XElement(Formats.OutputNs + "trk",
+                        new XElement(Formats.OutputNs + "name", track.Key.Name),
+                        new XElement(Formats.OutputNs + "trkseg",
                             track.Select(pair =>
-                                new XElement(ns + "trkpt",
+                                new XElement(Formats.OutputNs + "trkpt",
                                     new XAttribute("lat", pair.Point.Location.Latitude),
                                     new XAttribute("lon", pair.Point.Location.Longitude),
-                                    new XElement(ns + "name", pair.Song),
-                                    new XElement(ns + "time", pair.Point.Time.UtcDateTime.ToString(Formats.GpxOutput)),
-                                    new XElement(ns + "desc", pair.Description)
+                                    new XElement(Formats.OutputNs + "name", pair.Song),
+                                    new XElement(Formats.OutputNs + "time", pair.Point.Time.UtcDateTime.ToString(Formats.GpxOutput)),
+                                    new XElement(Formats.OutputNs + "desc", pair.Description)
                                 )
                             )
                         )
@@ -90,24 +90,24 @@ public readonly struct Pairings
         );
     }
 
-    public readonly XDocument GetGpx(string name, string desc, XNamespace ns)
+    public readonly XDocument GetGpx(string name, string desc)
     {
         return new XDocument(
             new XDeclaration("1.0", "utf-8", null),
-            new XElement(ns + "gpx",
-                new XAttribute("version", "1.1"),
-                new XAttribute("xmlns", ns),
+            new XElement(Formats.OutputNs + "gpx",
+                new XAttribute("version", "1.0"),
+                new XAttribute("xmlns", Formats.OutputNs),
                 new XAttribute("creator", "SpotifyGPX"),
-                new XElement(ns + "name", name),
-                new XElement(ns + "time", DateTime.Now.ToUniversalTime().ToString(Formats.GpxOutput)),
-                new XElement(ns + "desc", desc),
+                new XElement(Formats.OutputNs + "name", name),
+                new XElement(Formats.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Formats.GpxOutput)),
+                new XElement(Formats.OutputNs + "desc", desc),
                 PairedPoints.Select(pair =>
-                    new XElement(ns + "wpt",
+                    new XElement(Formats.OutputNs + "wpt",
                         new XAttribute("lat", pair.Point.Location.Latitude),
                         new XAttribute("lon", pair.Point.Location.Longitude),
-                        new XElement(ns + "name", pair.Song),
-                        new XElement(ns + "time", pair.Point.Time.UtcDateTime.ToString(Formats.GpxOutput)),
-                        new XElement(ns + "desc", pair.Description)
+                        new XElement(Formats.OutputNs + "name", pair.Song),
+                        new XElement(Formats.OutputNs + "time", pair.Point.Time.UtcDateTime.ToString(Formats.GpxOutput)),
+                        new XElement(Formats.OutputNs + "desc", pair.Description)
                     )
                 )
             )

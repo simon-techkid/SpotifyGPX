@@ -118,16 +118,14 @@ class Program
             string desc = $"Arguments: {string.Join(", ", args)}";
             string name = Path.GetFileNameWithoutExtension(outputGpx);
 
-            XNamespace ns = "http://www.topografix.com/GPX/1/1";
-            XDocument document = pairedEntries.GetGpx(name, desc, ns);
+            XDocument document = pairedEntries.GetGpxx(name, desc);
 
             // Check that there are points
-            //if (document.Descendants(ns + "trkpt").Any())
-            if (document.Descendants(ns + "wpt").Any())
+            if (document.Descendants(Formats.OutputNs + "wpt").Any() || document.Descendants(Formats.OutputNs + "trkpt").Any())
             {
                 document.Save(outputGpx);
                 //Console.WriteLine($"[FILE] {document.Descendants(ns + "trkpt").Count()} song/point pairs added to '{Path.GetFileName(outputGpx)}'");
-                Console.WriteLine($"[FILE] {document.Descendants(ns + "wpt").Count()} song/point pairs added to '{Path.GetFileName(outputGpx)}'");
+                Console.WriteLine($"[FILE] {document.Descendants(Formats.OutputNs + "wpt").Count()} song/point pairs added to '{Path.GetFileName(outputGpx)}'");
             }
         }
 

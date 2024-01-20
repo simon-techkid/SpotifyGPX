@@ -17,7 +17,7 @@ public struct Formats
 
     // Time format used to interpret your GPX track <time> tags
     public static string GpxInput => @"yyyy-MM-ddTHH\:mm\:ss.fffzzz"; // Can be any UTC offset
-    public static XNamespace Namespace => "http://www.topografix.com/GPX/1/0"; // Namespace of the input GPX
+    public static XNamespace InputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of the input GPX
 
     // =================== //
     // JSON IMPORT FORMATS //
@@ -38,4 +38,5 @@ public struct Formats
 
     // Time format used in the <time> field of GPX song point (requires ISO 8601):
     public static string GpxOutput => @"yyyy-MM-ddTHH\:mm\:ssZ"; // Must first be converted to UTC
+    public static XNamespace OutputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of the output GPX
 }
