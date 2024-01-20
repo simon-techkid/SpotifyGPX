@@ -66,7 +66,7 @@ public readonly struct GpxFile
 
         if (allTracks.Count > 1)
         {
-            return HandleMultipleTracks(CalculateGaps(allTracks));
+            return HandleMultipleTracks(CombineTracks(CalculateGaps(allTracks)));
         }
 
         return allTracks;
@@ -74,10 +74,6 @@ public readonly struct GpxFile
 
     private static List<GPXTrack> HandleMultipleTracks(List<GPXTrack> allTracks)
     {
-        // Set up the combined track
-        int combinedIndex = allTracks.Count;
-        allTracks.Add(new GPXTrack(combinedIndex, "Combined", TrackType.Combined, allTracks.SelectMany(track => track.Points).ToList()));
-
         // Display all the tracks to the user
         DisplayTrackOptions(allTracks);
 
@@ -133,6 +129,13 @@ public readonly struct GpxFile
         Console.WriteLine("[TRAK] [E] Gap tracks and Combined track");
         Console.WriteLine("[TRAK] [F] GPX, Gap, and Combined tracks (everything)");
         Console.Write("[TRAK] Please enter the index of the track you want to use: ");
+    }
+
+    private static List<GPXTrack> CombineTracks(List<GPXTrack> allTracks)
+    {
+        // Set up the combined track
+        allTracks.Add(new GPXTrack(allTracks.Count, "Combined", TrackType.Combined, allTracks.SelectMany(track => track.Points).ToList()));
+        return allTracks;
     }
 
     private static List<GPXTrack> CalculateGaps(List<GPXTrack> allTracks)
