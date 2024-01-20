@@ -134,7 +134,7 @@ public readonly struct GpxFile
     private static List<GPXTrack> CombineTracks(List<GPXTrack> allTracks)
     {
         // Set up the combined track
-        allTracks.Add(new GPXTrack(allTracks.Count, "Combined", TrackType.Combined, allTracks.SelectMany(track => track.Points).ToList()));
+        allTracks.Add(new GPXTrack(allTracks.Count, CombinedOrGapTrackName(allTracks.First().Track, allTracks.Last().Track), TrackType.Combined, allTracks.SelectMany(track => track.Points).ToList()));
         return allTracks;
     }
 
@@ -147,7 +147,7 @@ public readonly struct GpxFile
                 {
                     GPXPoint end = actualTrack.Points.Last();
                     GPXPoint next = allTracks[index + 1].Points.First();
-                    string gapName = $"{actualTrack.Track}-{allTracks[index + 1].Track}";
+                    string gapName = CombinedOrGapTrackName(actualTrack.Track, allTracks[index + 1].Track);
 
                     if (end.Time != next.Time)
                     {
@@ -162,6 +162,8 @@ public readonly struct GpxFile
             .OrderBy(track => track.Track.Index)
             .ToList();
     }
+
+    private static string CombinedOrGapTrackName(TrackInfo track1, TrackInfo track2) => $"{track1}-{track2}";
 
     private static bool IsValidTrackIndex(int index, int totalTracks) => (index >= 0) && (index < totalTracks);
 }
