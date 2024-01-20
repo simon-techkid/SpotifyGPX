@@ -79,7 +79,7 @@ public readonly struct Pairings
                                     new XAttribute("lat", pair.Point.Location.Latitude),
                                     new XAttribute("lon", pair.Point.Location.Longitude),
                                     new XElement(ns + "name", pair.Song),
-                                    new XElement(ns + "time", pair.Point.Time.ToUniversalTime().ToString(Formats.GpxOutput)),
+                                    new XElement(ns + "time", pair.Point.Time.UtcDateTime.ToString(Formats.GpxOutput)),
                                     new XElement(ns + "desc", pair.Description)
                                 )
                             )
@@ -106,7 +106,7 @@ public readonly struct Pairings
                         new XAttribute("lat", pair.Point.Location.Latitude),
                         new XAttribute("lon", pair.Point.Location.Longitude),
                         new XElement(ns + "name", pair.Song),
-                        new XElement(ns + "time", pair.Point.Time.ToUniversalTime().ToString(Formats.GpxOutput)),
+                        new XElement(ns + "time", pair.Point.Time.UtcDateTime.ToString(Formats.GpxOutput)),
                         new XElement(ns + "desc", pair.Description)
                     )
                 )
@@ -132,7 +132,7 @@ public readonly struct Pairings
                         new XElement(ns + "track",
                             new XElement(ns + "creator", song.Song_Artist),
                             new XElement(ns + "title", song.Song_Name),
-                            new XElement(ns + "annotation", song.Time.ToUniversalTime().ToString(Formats.GpxOutput)),
+                            new XElement(ns + "annotation", song.Time.UtcDateTime.ToString(Formats.GpxOutput)),
                             new XElement(ns + "duration", song.Time_Played)
                         )
                     )
