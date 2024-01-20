@@ -39,4 +39,6 @@ public struct Formats
     // Time format used in the <time> field of GPX song point (requires ISO 8601):
     public static string GpxOutput => @"yyyy-MM-ddTHH\:mm\:ssZ"; // Must first be converted to UTC
     public static XNamespace OutputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of the output GPX
+    public static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance";
+    public static string Schema => "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd";
 }

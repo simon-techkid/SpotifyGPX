@@ -60,15 +60,18 @@ public readonly struct Pairings
         Console.WriteLine($"[PAIR] Paired {PairedPoints.Count} entries: {countsJoined}");
     }
 
-    public readonly XDocument GetGpxx(string name, string desc)
+    public readonly XDocument GetGpx(string name, string desc)
     {
         return new XDocument(
             new XDeclaration("1.0", "utf-8", null),
             new XElement(Formats.OutputNs + "gpx",
                 new XAttribute("version", "1.0"),
-                new XAttribute("xmlns", Formats.OutputNs),
                 new XAttribute("creator", "SpotifyGPX"),
+                new XAttribute(XNamespace.Xmlns + "xsi", Formats.Xsi),
+                new XAttribute("xmlns", Formats.OutputNs),
+                new XAttribute(Formats.Xsi + "schemaLocation", Formats.Schema),
                 new XElement(Formats.OutputNs + "name", name),
+                new XElement(Formats.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Formats.GpxOutput)),
                 new XElement(Formats.OutputNs + "desc", desc),
                 PairedPoints.GroupBy(pair => pair.Origin).Select(track =>
                     new XElement(Formats.OutputNs + "trk",
@@ -90,14 +93,17 @@ public readonly struct Pairings
         );
     }
 
-    public readonly XDocument GetGpx(string name, string desc)
+    /*
+    public readonly XDocument GetGpxx(string name, string desc)
     {
         return new XDocument(
             new XDeclaration("1.0", "utf-8", null),
             new XElement(Formats.OutputNs + "gpx",
                 new XAttribute("version", "1.0"),
-                new XAttribute("xmlns", Formats.OutputNs),
                 new XAttribute("creator", "SpotifyGPX"),
+                new XAttribute(XNamespace.Xmlns + "xsi", Formats.Xsi),
+                new XAttribute("xmlns", Formats.OutputNs),
+                new XAttribute(Formats.Xsi + "schemaLocation", Formats.Schema),
                 new XElement(Formats.OutputNs + "name", name),
                 new XElement(Formats.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Formats.GpxOutput)),
                 new XElement(Formats.OutputNs + "desc", desc),
@@ -113,6 +119,7 @@ public readonly struct Pairings
             )
         );
     }
+    */
 
     public readonly List<JObject> GetJson() => Songs.Select(song => song.Json).ToList();
 
