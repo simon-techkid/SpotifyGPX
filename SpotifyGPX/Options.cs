@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using System.Globalization;
 using System.Xml.Linq;
 
 namespace SpotifyGPX;
@@ -25,6 +26,7 @@ public struct Formats
     // Time format used in Spotify-distributed JSONs
     public static string SpotifyFull => @"MM/dd/yyyy HH\:mm\:ss"; // 30 day (full acc data) dump
     public static string SpotifyMini => @"yyyy-MM-dd HH\:mm"; // 5 day (past year) dump
+    public static DateTimeStyles SpotifyTimeStyle => DateTimeStyles.AssumeUniversal; // Time zone interpretation
 
     // ================== //
     // GPX EXPORT FORMATS //

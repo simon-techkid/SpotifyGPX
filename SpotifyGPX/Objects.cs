@@ -3,7 +3,6 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -33,11 +32,11 @@ public readonly struct SpotifyEntry
         {
             string time = ((string?)Json["endTime"] ?? (string?)Json["ts"]) ?? throw new Exception($"JSON 'ts' or 'endTime' cannot be null, check your JSON");
 
-            if (DateTimeOffset.TryParseExact(time, Formats.SpotifyMini, null, DateTimeStyles.AssumeUniversal, out var result))
+            if (DateTimeOffset.TryParseExact(time, Formats.SpotifyMini, null, Formats.SpotifyTimeStyle, out var result))
             {
                 return result;
             }
-            else if (DateTimeOffset.TryParseExact(time, Formats.SpotifyFull, null, DateTimeStyles.AssumeUniversal, out result))
+            else if (DateTimeOffset.TryParseExact(time, Formats.SpotifyFull, null, Formats.SpotifyTimeStyle, out result))
             {
                 return result;
             }
@@ -78,15 +77,20 @@ public readonly struct GPXTrack
     {
         Track = new TrackInfo(index, name, type);
         Points = points;
-        Start = Points.Select(point => point.Time).Min();
-        End = Points.Select(point => point.Time).Max();
+        Start = Points.Select(point => point.Time).Min(); // Earliest point's time
+        End = Points.Select(point => point.Time).Max(); // Latest point's time
+
+        // either one of these works, your decision
+
+        // Start = Points.Select(point => point.Time).First(); // first point's time
+        // End = Points.Select(point => point.Time).Last(); // last point's time
     }
 
     public readonly TrackInfo Track { get; } // Metadata for this track, including its name and index in a list
     public readonly List<GPXPoint> Points { get; } // Where and when were all the points in this track taken?
     public readonly DateTimeOffset Start { get; } // What time was the earliest point logged?
     public readonly DateTimeOffset End { get; } // What time was the latest point logged?
-    public override string ToString()
+    public override string ToString() // Display format for this track
     {
         StringBuilder builder = new();
 
@@ -97,7 +101,7 @@ public readonly struct GPXTrack
         builder.Append($"\n   Type: {Track.Type}");
 
         return builder.ToString();
-    }// Display format for this track
+    }
 }
 
 public readonly struct TrackInfo

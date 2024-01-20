@@ -90,15 +90,15 @@ public readonly struct GpxFile
             switch (input)
             {
                 case "A":
-                    return allTracks.Where(track => track.Track.Type == TrackType.GPX).ToList(); // Only GPX tracks
+                    return allTracks.Where(track => track.Track.Type == TrackType.GPX).ToList(); // GPX only
                 case "B":
                     return allTracks.Where(track => track.Track.Type != TrackType.Combined).ToList(); // GPX and gap tracks
                 case "C":
-                    return allTracks.Where(track => track.Track.Type == TrackType.Gap).ToList(); // Only gap tracks
+                    return allTracks.Where(track => track.Track.Type == TrackType.Gap).ToList(); // Gaps only
                 case "D":
-                    return allTracks.Where(track => (track.Track.Type == TrackType.Combined) || (track.Track.Type == TrackType.GPX)).ToList(); // Combined and GPX
+                    return allTracks.Where(track => track.Track.Type != TrackType.Gap).ToList(); // GPX and combined
                 case "E":
-                    return allTracks.Where(track => (track.Track.Type == TrackType.Combined) || (track.Track.Type == TrackType.Gap)).ToList(); // Combined and gaps
+                    return allTracks.Where(track => track.Track.Type != TrackType.GPX).ToList(); // Gaps and combined
                 case "F":
                     return allTracks; // Combined, GPX, and gaps
             }
