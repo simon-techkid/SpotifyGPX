@@ -113,12 +113,8 @@ class Program
         {
             // Stage path of output GPX
             string outputGpx = GenerateOutputPath(inputGpx, "gpx");
-
-            // Store creation options
-            string desc = string.Join(", ", args);
             string name = Path.GetFileNameWithoutExtension(outputGpx);
-
-            XDocument document = pairedEntries.GetGpx(name, desc);
+            XDocument document = pairedEntries.GetGpx(name);
 
             // Check that there are points
             if (document.Descendants(Formats.OutputNs + "trkpt").Any())
