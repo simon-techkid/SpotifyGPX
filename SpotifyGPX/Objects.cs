@@ -190,37 +190,15 @@ public readonly struct SongPoint
         {
             StringBuilder builder = new();
 
-            builder.AppendLine($"At this position at {PointTime.ToString(Formats.DescriptionPlayedAt)},");
-            builder.AppendLine($"the song {GetRelativeDescription()} {SongTime.ToString(Formats.DescriptionPlayedAt)},");
-            builder.AppendLine($"played for {Song.TimePlayed.ToString(Formats.DescriptionTimePlayed)}.");
-            builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")},");
-            builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")},");
-            builder.AppendLine($"Offline: {(Song.Spotify_Offline == true ? "Yes" : "No")},");
-            builder.AppendLine($"IP Address: {Song.Spotify_IP},");
+            builder.AppendLine($"At this position: {PointTime.ToString(Formats.DescriptionPlayedAt)}");
+            builder.AppendLine($"Sond ended: {SongTime.ToString(Formats.DescriptionPlayedAt)}");
+            builder.AppendLine($"Played for {Song.TimePlayed.ToString(Formats.DescriptionTimePlayed)}");
+            builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}");
+            builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}");
+            builder.AppendLine($"IP Address: {Song.Spotify_IP}");
             builder.AppendLine($"Country: {Song.Spotify_Country}");
 
             return builder.ToString();
-        }
-    }
-
-    private string GetRelativeDescription() // Used to describe the relation of the song to the point
-    {
-        string seconds = AbsRoundAccuracy == 1 ? "second" : "seconds";
-
-        // accuracy < 0 means song ends before the point
-        // accuracy == 0 means song ends in the same place as the point
-        // accuracy > 0 means song ends after the point
-        if (RoundAccuracy < 0)
-        {
-            return $"ended {AbsRoundAccuracy} {seconds} before, at";
-        }
-        else if (RoundAccuracy == 0)
-        {
-            return "ended at the same time, at";
-        }
-        else
-        {
-            return $"ended {AbsRoundAccuracy} {seconds} after, at";
         }
     }
 
@@ -238,8 +216,7 @@ public readonly struct SongPoint
     public readonly TrackInfo Origin { get; } // Track from which the pairing originates
     private readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds; // Raw accuracy
     public readonly double AbsAccuracy => Math.Abs(Accuracy); // Absolute value of the accuracy
-    private readonly double RoundAccuracy => Math.Round(Accuracy); // Rounded accuracy
-    private readonly double AbsRoundAccuracy => Math.Abs(RoundAccuracy); // Absolute value of the rounded accuracy
+    private readonly double RoundAccuracy => Math.Round(Accuracy);
     private readonly TimeSpan NormalizedOffset => Point.Time.Offset; // Standard offset is defined by the original GPX point offset
     private DateTimeOffset SongTime => Song.Time.ToOffset(NormalizedOffset); // Song end time, normalized to point time zone
     private DateTimeOffset PointTime => Point.Time.ToOffset(NormalizedOffset); // Point end time, normalized to point time zone (redundant)
