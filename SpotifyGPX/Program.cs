@@ -148,14 +148,13 @@ class Program
             // Store creation options
             string name = Path.GetFileNameWithoutExtension(outputPlist);
 
-            XNamespace ns = "http://xspf.org/ns/0/";
-            XDocument document = pairedEntries.GetPlaylist(name, ns);
+            XDocument document = pairedEntries.GetPlaylist(name);
 
             // Check that there are tracks
-            if (document.Descendants(ns + "track").Any())
+            if (document.Descendants(Options.Xspf + "track").Any())
             {
                 document.Save(outputPlist);
-                Console.WriteLine($"[FILE] {document.Descendants(ns + "track").Count()} song/point pairs added to '{Path.GetFileName(outputPlist)}'");
+                Console.WriteLine($"[FILE] {document.Descendants(Options.Xspf + "track").Count()} song/point pairs added to '{Path.GetFileName(outputPlist)}'");
             }
         }
 

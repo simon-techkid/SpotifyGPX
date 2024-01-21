@@ -41,4 +41,10 @@ public struct Options
     public static XNamespace OutputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of the output GPX
     public static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance";
     public static string Schema => "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd";
+
+    // =================== //
+    // XSPF EXPORT OPTIONS //
+    // =================== //
+
+    public static XNamespace Xspf => "http://xspf.org/ns/0/";
 }

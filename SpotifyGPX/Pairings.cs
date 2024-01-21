@@ -123,22 +123,22 @@ public readonly struct Pairings
 
     public readonly string?[] GetUriList() => Songs.Where(song => song.Song_URI != null).Select(song => song.Song_URI).ToArray();
 
-    public readonly XDocument GetPlaylist(string name, XNamespace ns)
+    public readonly XDocument GetPlaylist(string name)
     {
         return new XDocument(
             new XDeclaration("1.0", "utf-8", null),
-            new XElement(ns + "playlist",
+            new XElement(Options.Xspf + "playlist",
                 new XAttribute("version", "1.0"),
-                new XAttribute("xmlns", ns),
-                new XElement(ns + "name", name),
-                new XElement(ns + "creator", "SpotifyGPX"),
-                new XElement(ns + "trackList",
+                new XAttribute("xmlns", Options.Xspf),
+                new XElement(Options.Xspf + "name", name),
+                new XElement(Options.Xspf + "creator", "SpotifyGPX"),
+                new XElement(Options.Xspf + "trackList",
                     Songs.Select(song =>
-                        new XElement(ns + "track",
-                            new XElement(ns + "creator", song.Song_Artist),
-                            new XElement(ns + "title", song.Song_Name),
-                            new XElement(ns + "annotation", song.Time.UtcDateTime.ToString(Options.GpxOutput)),
-                            new XElement(ns + "duration", song.Time_Played)
+                        new XElement(Options.Xspf + "track",
+                            new XElement(Options.Xspf + "creator", song.Song_Artist),
+                            new XElement(Options.Xspf + "title", song.Song_Name),
+                            new XElement(Options.Xspf + "annotation", song.Time.UtcDateTime.ToString(Options.GpxOutput)),
+                            new XElement(Options.Xspf + "duration", song.Time_Played)
                         )
                     )
                 )
