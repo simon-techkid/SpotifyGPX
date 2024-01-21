@@ -117,11 +117,11 @@ class Program
             XDocument document = pairedEntries.GetGpx(name);
 
             // Check that there are points
-            if (document.Descendants(Formats.OutputNs + "trkpt").Any())
+            if (document.Descendants(Options.OutputNs + "trkpt").Any())
             {
                 document.Save(outputGpx);
                 //Console.WriteLine($"[FILE] {document.Descendants(ns + "trkpt").Count()} song/point pairs added to '{Path.GetFileName(outputGpx)}'");
-                Console.WriteLine($"[FILE] {document.Descendants(Formats.OutputNs + "trkpt").Count()} song/point pairs added to '{Path.GetFileName(outputGpx)}'");
+                Console.WriteLine($"[FILE] {document.Descendants(Options.OutputNs + "trkpt").Count()} song/point pairs added to '{Path.GetFileName(outputGpx)}'");
             }
         }
 

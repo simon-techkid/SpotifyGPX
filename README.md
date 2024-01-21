@@ -1,6 +1,7 @@
 ﻿# SpotifyGPX
 
-Great for road trips: match GPS positions to played Spotify songs
+Great for road trips: match GPS positions to played Spotify songs.
+
 SpotifyGPX allows you to recount where you listened to each song of a set based on a tracked journey, placing points as close as possible to the location of each song.
 
 ## Use of data
@@ -59,7 +60,7 @@ To use SpotifyGPX to tie a song to a place, retrieve the data you tracked:
 
 ## SpotifyGPX Options
 
-### Format options
+### Constant values
 
 [Options.cs](SpotifyGPX/Options.cs) contains all formats used to interpret data:
 

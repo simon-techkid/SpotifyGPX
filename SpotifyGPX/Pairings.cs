@@ -64,25 +64,25 @@ public readonly struct Pairings
     {
         return new XDocument(
             new XDeclaration("1.0", "utf-8", null),
-            new XElement(Formats.OutputNs + "gpx",
+            new XElement(Options.OutputNs + "gpx",
                 new XAttribute("version", "1.0"),
                 new XAttribute("creator", "SpotifyGPX"),
-                new XAttribute(XNamespace.Xmlns + "xsi", Formats.Xsi),
-                new XAttribute("xmlns", Formats.OutputNs),
-                new XAttribute(Formats.Xsi + "schemaLocation", Formats.Schema),
-                new XElement(Formats.OutputNs + "name", name),
-                new XElement(Formats.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Formats.GpxOutput)),
+                new XAttribute(XNamespace.Xmlns + "xsi", Options.Xsi),
+                new XAttribute("xmlns", Options.OutputNs),
+                new XAttribute(Options.Xsi + "schemaLocation", Options.Schema),
+                new XElement(Options.OutputNs + "name", name),
+                new XElement(Options.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Options.GpxOutput)),
                 PairedPoints.GroupBy(pair => pair.Origin).Select(track =>
-                    new XElement(Formats.OutputNs + "trk",
-                        new XElement(Formats.OutputNs + "name", track.Key.Name),
-                        new XElement(Formats.OutputNs + "trkseg",
+                    new XElement(Options.OutputNs + "trk",
+                        new XElement(Options.OutputNs + "name", track.Key.Name),
+                        new XElement(Options.OutputNs + "trkseg",
                             track.Select(pair =>
-                                new XElement(Formats.OutputNs + "trkpt",
+                                new XElement(Options.OutputNs + "trkpt",
                                     new XAttribute("lat", pair.Point.Location.Latitude),
                                     new XAttribute("lon", pair.Point.Location.Longitude),
-                                    new XElement(Formats.OutputNs + "name", pair.Song),
-                                    new XElement(Formats.OutputNs + "time", pair.Point.Time.UtcDateTime.ToString(Formats.GpxOutput)),
-                                    new XElement(Formats.OutputNs + "desc", pair.Description)
+                                    new XElement(Options.OutputNs + "name", pair.Song),
+                                    new XElement(Options.OutputNs + "time", pair.Point.Time.UtcDateTime.ToString(Options.GpxOutput)),
+                                    new XElement(Options.OutputNs + "desc", pair.Description)
                                 )
                             )
                         )
@@ -97,21 +97,21 @@ public readonly struct Pairings
     {
         return new XDocument(
             new XDeclaration("1.0", "utf-8", null),
-            new XElement(Formats.OutputNs + "gpx",
+            new XElement(Options.OutputNs + "gpx",
                 new XAttribute("version", "1.0"),
                 new XAttribute("creator", "SpotifyGPX"),
-                new XAttribute(XNamespace.Xmlns + "xsi", Formats.Xsi),
-                new XAttribute("xmlns", Formats.OutputNs),
-                new XAttribute(Formats.Xsi + "schemaLocation", Formats.Schema),
-                new XElement(Formats.OutputNs + "name", name),
-                new XElement(Formats.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Formats.GpxOutput)),
+                new XAttribute(XNamespace.Xmlns + "xsi", Options.Xsi),
+                new XAttribute("xmlns", Options.OutputNs),
+                new XAttribute(Options.Xsi + "schemaLocation", Options.Schema),
+                new XElement(Options.OutputNs + "name", name),
+                new XElement(Options.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Options.GpxOutput)),
                 PairedPoints.Select(pair =>
-                    new XElement(Formats.OutputNs + "wpt",
+                    new XElement(Options.OutputNs + "wpt",
                         new XAttribute("lat", pair.Point.Location.Latitude),
                         new XAttribute("lon", pair.Point.Location.Longitude),
-                        new XElement(Formats.OutputNs + "name", pair.Song),
-                        new XElement(Formats.OutputNs + "time", pair.Point.Time.UtcDateTime.ToString(Formats.GpxOutput)),
-                        new XElement(Formats.OutputNs + "desc", pair.Description)
+                        new XElement(Options.OutputNs + "name", pair.Song),
+                        new XElement(Options.OutputNs + "time", pair.Point.Time.UtcDateTime.ToString(Options.GpxOutput)),
+                        new XElement(Options.OutputNs + "desc", pair.Description)
                     )
                 )
             )
@@ -137,7 +137,7 @@ public readonly struct Pairings
                         new XElement(ns + "track",
                             new XElement(ns + "creator", song.Song_Artist),
                             new XElement(ns + "title", song.Song_Name),
-                            new XElement(ns + "annotation", song.Time.UtcDateTime.ToString(Formats.GpxOutput)),
+                            new XElement(ns + "annotation", song.Time.UtcDateTime.ToString(Options.GpxOutput)),
                             new XElement(ns + "duration", song.Time_Played)
                         )
                     )

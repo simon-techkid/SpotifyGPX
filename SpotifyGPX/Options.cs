@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX;
 
-public struct Formats
+public struct Options
 {
     // Time format for console printing of point-song time comparison:
     public static string Console => @"HH\:mm\:ss";
