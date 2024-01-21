@@ -4,7 +4,25 @@ Great for road trips: match GPS positions to played Spotify songs.
 
 SpotifyGPX allows you to recount where you listened to each song of a set based on a tracked journey, placing points as close as possible to the location of each song.
 
-## Use of data
+## Use cases and functions
+
+SpotifyGPX allows you to create a map of the songs you listened to on Spotify during a journey. Imagine a map that shows not just where you went, but also the soundtrack of your trip! It does this by combining two kinds of data:
+ - Your Spotify listening history: It gets a list of the songs you played and when you played them from Spotify.
+ - A GPX file of your journey: A GPX file is like a digital map of your travels. It includes information about your location (latitude and longitude) at different points in time.
+
+Here's how it works:
+ 1. You provide SpotifyGPX with these two files: Your Spotify listening history JSON file and the GPX file of your trip.
+ 2. It matches up the songs with the locations: It looks at the timestamps in both files to figure out which songs you were listening to at each point along your journey.
+ 3. It creates a new GPX file: Each point in the GPX represents a song you listened to, and it's placed on the map at the location where you were when you listened to it.
+
+Cool things you can do with this:
+ - Visualize your musical journeys: You can use mapping tools ([kepler.gl](https://github.com/keplergl/kepler.gl) or [Google MyMaps](https://www.google.com/mymaps) to name a few) to see your route and the songs you listened to along the way, creating a visual memory of your trip.
+ - Share your musical adventures: You can share the GPX file (or Google MyMaps link) with friends or family so they can experience your trip through your music choices.
+ - Create playlists based on your travels: You can export a playlist of the songs you listened to during a particular journey, making it easy to relive those memories.
+
+Think of it like a musical scrapbook of your travels!
+
+## Privacy notice
 
 SpotifyGPX is not endorsed by Spotify Technology SA. It exists only as a third-party tool that you can opt to use with the data Spotify freely provides to you. SpotifyGPX does not interact with Spotify itself in any way. It relies on user-submitted data alone.
 
