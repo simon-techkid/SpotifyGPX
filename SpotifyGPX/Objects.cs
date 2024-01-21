@@ -160,7 +160,7 @@ public readonly struct GPXPoint
     {
         Index = index;
         Location = point;
-        Time = DateTimeOffset.ParseExact(time, Options.GpxInput, null);
+        Time = DateTimeOffset.ParseExact(time, Options.GpxInput, null, Options.GpxTimeStyle);
     }
 
     public readonly int Index { get; } // Unique identifier of this GPXPoint in a list

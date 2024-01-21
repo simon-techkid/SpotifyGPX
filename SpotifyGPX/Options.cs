@@ -7,44 +7,29 @@ namespace SpotifyGPX;
 
 public struct Options
 {
-    // Time format for console printing of point-song time comparison:
-    public static string Console => @"HH\:mm\:ss";
-    public static string ConsoleTrack => @"yyyy-MM-dd HH\:mm\:ss zzz"; // when there are multiple tracks
+    // Time Formats for Console Printing
+    public static string Console => @"HH\:mm\:ss"; // For each pairing printed to console (point & song time printed this way)
+    public static string ConsoleTrack => @"yyyy-MM-dd HH\:mm\:ss zzz"; // Each track's (if there are multiple) start and end time
 
-    // ================== //
-    // GPX IMPORT FORMATS //
-    // ================== //
+    // GPX Import Formats
+    public static string GpxInput => @"yyyy-MM-ddTHH\:mm\:ss.fffzzz"; // Time format of a <time> element of a <trkpt> within input GPX
+    public static DateTimeStyles GpxTimeStyle => DateTimeStyles.None; // Time zone interpretation of GPX points
+    public static XNamespace InputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of input GPX
 
-    // Time format used to interpret your GPX track <time> tags
-    public static string GpxInput => @"yyyy-MM-ddTHH\:mm\:ss.fffzzz"; // Can be any UTC offset
-    public static XNamespace InputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of the input GPX
-
-    // =================== //
-    // JSON IMPORT FORMATS //
-    // =================== //
-
-    // Time format used in Spotify-distributed JSONs
+    // JSON Import Formats
     public static string SpotifyFull => @"MM/dd/yyyy HH\:mm\:ss"; // 30 day (full acc data) dump
     public static string SpotifyMini => @"yyyy-MM-dd HH\:mm"; // 5 day (past year) dump
-    public static DateTimeStyles SpotifyTimeStyle => DateTimeStyles.AssumeUniversal; // Time zone interpretation
+    public static DateTimeStyles SpotifyTimeStyle => DateTimeStyles.AssumeUniversal; // Time zone interpretation of Spotify data
 
-    // ================== //
-    // GPX EXPORT FORMATS //
-    // ================== //
-
-    // Time format used in the <desc> field of GPX song point (your choice)
-    public static string DescriptionPlayedAt => @"yyyy-MM-dd HH\:mm\:ss zzz"; // Can be any UTC offset
-    public static string DescriptionTimePlayed => @"hh\:mm\:ss\.fff";
-
-    // Time format used in the <time> field of GPX song point (requires ISO 8601):
-    public static string GpxOutput => @"yyyy-MM-ddTHH\:mm\:ssZ"; // Must first be converted to UTC
+    // GPX Export Formats
+    public static string GpxOutput => @"yyyy-MM-ddTHH\:mm\:ssZ"; // Must first be converted to UTC (GPX spec requires ISO 8601)
+    public static string DescriptionPlayedAt => @"yyyy-MM-dd HH\:mm\:ss zzz"; // Time of a song and point printed in the <desc> field of exported GPX
+    public static string DescriptionTimePlayed => @"hh\:mm\:ss\.fff"; // Duration (msPlayed) of a song in the <desc> field of exported GPX
     public static XNamespace OutputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of the output GPX
-    public static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance";
-    public static string Schema => "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd";
+    public static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance"; // XML schema location of the output GPX
+    public static string Schema => "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd"; // GPX schema location(s) of the output GPX
 
-    // =================== //
-    // XSPF EXPORT OPTIONS //
-    // =================== //
-
+    // XSPF Export Options
     public static XNamespace Xspf => "http://xspf.org/ns/0/";
 }
+
