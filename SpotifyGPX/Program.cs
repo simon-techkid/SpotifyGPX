@@ -14,10 +14,10 @@ class Program
 {
     static void Main(string[] args)
     {
-
         string inputJson = string.Empty; // get JSON path
         string inputGpx = string.Empty; // get GPX path
         bool noGpxExport = false;
+        bool exportWaypoints = false;
         bool exportJson = false;
         bool exportPlist = false;
         bool exportSpotifyURI = false;
@@ -29,6 +29,9 @@ class Program
                 {
                     case "-n":
                         Console.WriteLine("[HELP] Pass -n to complete a song-point pairing without sending the pairs to a GPX file");
+                        break;
+                    case "-w":
+                        Console.WriteLine("[HELP] Pass -w to write a GPX of waypoints for each source track");
                         break;
                     case "-j":
                         Console.WriteLine("[HELP] Pass -j to export a JSON of the songs covering your journey");
@@ -48,6 +51,7 @@ class Program
                 inputJson = args[0];
                 inputGpx = args[1];
                 noGpxExport = args.Length >= 3 && args.Contains("-n");
+                exportWaypoints = args.Length >= 3 && args.Contains("-w");
                 exportJson = args.Length >= 3 && args.Contains("-j");
                 exportPlist = args.Length >= 3 && args.Contains("-p");
                 exportSpotifyURI = args.Length >= 3 && args.Contains("-s");
@@ -120,68 +124,79 @@ class Program
             if (document.Descendants(Options.OutputNs + "trkpt").Any())
             {
                 document.Save(outputGpx);
-                //Console.WriteLine($"[FILE] {document.Descendants(ns + "trkpt").Count()} song/point pairs added to '{Path.GetFileName(outputGpx)}'");
                 Console.WriteLine($"[FILE] {document.Descendants(Options.OutputNs + "trkpt").Count()} song/point pairs added to '{Path.GetFileName(outputGpx)}'");
+            }
+        }
+
+        if (exportWaypoints == true)
+        {
+            List<(TrackInfo, XDocument)> tracks = pairedEntries.GetGpxTracks();
+
+            foreach ((TrackInfo track, XDocument document) in tracks)
+            {
+                string outputGpx = GenerateOutputPath(track.ToString(), "gpx");
+
+                // Check that there are tracks
+                if (document.Descendants(Options.OutputNs + "wpt").Any())
+                {
+                    document.Save(outputGpx);
+                    Console.WriteLine($"[FILE] {document.Descendants(Options.OutputNs + "wpt").Count()} song/point pairs added to '{Path.GetFileName(outputGpx)}'");
+                }
             }
         }
 
         if (exportJson == true)
         {
-            // Stage path of output JSON
-            string outputJson = GenerateOutputPath(inputGpx, "json");
+            List<(TrackInfo, List<JObject>)> tracks = pairedEntries.GetJson();
 
-            List<JObject> entries = pairedEntries.GetJson();
-
-            if (entries.Count > 0)
+            foreach ((TrackInfo track, List<JObject> Json) in tracks)
             {
-                string document = JsonConvert.SerializeObject(entries, Formatting.Indented);
-                File.WriteAllText(outputJson, document);
-                Console.WriteLine($"[FILE] {entries.Count} song entries added to '{Path.GetFileName(outputJson)}'");
+                string outputJson = GenerateOutputPath(track.ToString(), "json");
+
+                if (Json.Count > 0)
+                {
+                    string document = JsonConvert.SerializeObject(Json, Formatting.Indented);
+                    File.WriteAllText(outputJson, document);
+                    Console.WriteLine($"[FILE] {Json.Count} song entries added to '{Path.GetFileName(outputJson)}'");
+                }
             }
         }
 
         if (exportPlist == true)
         {
-            // Stage path of output XSPF
-            string outputPlist = GenerateOutputPath(inputGpx, "xspf");
+            List<(TrackInfo, XDocument)> tracks = pairedEntries.GetPlaylist();
 
-            // Store creation options
-            string name = Path.GetFileNameWithoutExtension(outputPlist);
-
-            XDocument document = pairedEntries.GetPlaylist(name);
-
-            // Check that there are tracks
-            if (document.Descendants(Options.Xspf + "track").Any())
+            foreach ((TrackInfo track, XDocument document) in tracks)
             {
-                document.Save(outputPlist);
-                Console.WriteLine($"[FILE] {document.Descendants(Options.Xspf + "track").Count()} song/point pairs added to '{Path.GetFileName(outputPlist)}'");
+                string outputPlist = GenerateOutputPath(track.ToString(), "xspf");
+
+                // Check that there are tracks
+                if (document.Descendants(Options.Xspf + "track").Any())
+                {
+                    document.Save(outputPlist);
+                    Console.WriteLine($"[FILE] {document.Descendants(Options.Xspf + "track").Count()} song/point pairs added to '{Path.GetFileName(outputPlist)}'");
+                }
             }
         }
 
         if (exportSpotifyURI == true)
         {
-            // Stage path of output URI list
-            string outputTxt = GenerateOutputPath(inputGpx, "txt");
+            List<(TrackInfo, string?[])> tracks = pairedEntries.GetUriList();
 
-            string?[] document = pairedEntries.GetUriList();
-
-            // Check that there are URIs
-            if (document.Length > 0 && !document.Any(s => s == null))
+            foreach ((TrackInfo track, string?[] document) in tracks)
             {
-                File.WriteAllLines(outputTxt, document);
-                Console.WriteLine($"[FILE] {document.Length} song URIs added to '{Path.GetFileName(outputTxt)}'");
+                string outputTxt = GenerateOutputPath(track.ToString(), "txt");
+
+                if (!document.Any(s => s == null) && document.Length > 0)
+                {
+                    File.WriteAllLines(outputTxt, document);
+                    Console.WriteLine($"[FILE] {document.Length} song URIs added to '{Path.GetFileName(outputTxt)}'");
+                }
             }
         }
 
-        // Exit the program
-        return;
+        return; // Exit the program
     }
 
-    private static string GenerateOutputPath(string inputFile, string format)
-    {
-        // Set up the output file path
-        string outputFile = Path.Combine(Directory.GetParent(inputFile).ToString(), $"{Path.GetFileNameWithoutExtension(inputFile)}_Spotify.{format}");
-
-        return outputFile;
-    }
+    private static string GenerateOutputPath(string inputFile, string format) => Path.Combine(Directory.GetParent(inputFile).ToString(), $"{Path.GetFileNameWithoutExtension(inputFile)}_Spotify.{format}");
 }

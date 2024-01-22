@@ -14,10 +14,6 @@ public readonly struct Pairings
 
     private readonly List<SongPoint> PairedPoints;
 
-    private readonly List<SpotifyEntry> Songs => PairedPoints.Select(pair => pair.Song).ToList();
-
-    private readonly List<GPXPoint> Points => PairedPoints.Select(pair => pair.Point).ToList();
-
     private static List<SongPoint> PairPoints(List<SpotifyEntry> songs, List<GPXTrack> tracks)
     {
         // Correlate Spotify entries with the nearest GPX points
@@ -92,20 +88,23 @@ public readonly struct Pairings
         );
     }
 
-    /*
-    public readonly XDocument GetGpxx(string name)
+    public readonly List<(TrackInfo, XDocument)> GetGpxTracks()
     {
-        return new XDocument(
-            new XDeclaration("1.0", "utf-8", null),
-            new XElement(Options.OutputNs + "gpx",
+        return PairedPoints
+            .GroupBy(pair => pair.Origin)
+            .Select(group => (
+            group.Key,
+            new XDocument(
+                new XDeclaration("1.0", "utf-8", null),
+                new XElement(Options.OutputNs + "gpx",
                 new XAttribute("version", "1.0"),
                 new XAttribute("creator", "SpotifyGPX"),
                 new XAttribute(XNamespace.Xmlns + "xsi", Options.Xsi),
                 new XAttribute("xmlns", Options.OutputNs),
                 new XAttribute(Options.Xsi + "schemaLocation", Options.Schema),
-                new XElement(Options.OutputNs + "name", name),
+                new XElement(Options.OutputNs + "name", group.First().Origin),
                 new XElement(Options.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Options.GpxOutput)),
-                PairedPoints.Select(pair =>
+                group.Select(pair =>
                     new XElement(Options.OutputNs + "wpt",
                         new XAttribute("lat", pair.Point.Location.Latitude),
                         new XAttribute("lon", pair.Point.Location.Longitude),
@@ -115,34 +114,58 @@ public readonly struct Pairings
                     )
                 )
             )
-        );
+            ))).ToList();
     }
-    */
 
-    public readonly List<JObject> GetJson() => Songs.Select(song => song.Json).ToList();
 
-    public readonly string?[] GetUriList() => Songs.Where(song => song.Song_URI != null).Select(song => song.Song_URI).ToArray();
-
-    public readonly XDocument GetPlaylist(string name)
+    public readonly List<(TrackInfo, List<JObject>)> GetJson()
     {
-        return new XDocument(
-            new XDeclaration("1.0", "utf-8", null),
-            new XElement(Options.Xspf + "playlist",
-                new XAttribute("version", "1.0"),
-                new XAttribute("xmlns", Options.Xspf),
-                new XElement(Options.Xspf + "name", name),
-                new XElement(Options.Xspf + "creator", "SpotifyGPX"),
-                new XElement(Options.Xspf + "trackList",
-                    Songs.Select(song =>
+        return PairedPoints
+            .GroupBy(pair => pair.Origin)
+            .Select(group => (
+            group.Key,
+            group.Select(pair => pair.Song.Json).ToList()
+            ))
+            .ToList();
+    }
+
+    public readonly List<(TrackInfo, string?[])> GetUriList()
+    {
+        return PairedPoints
+            .GroupBy(pair => pair.Origin)
+            .Select(group => (
+            group.Key,
+            group.Select(pair => pair.Song.Song_URI).ToArray()
+            ))
+            .ToList();
+    }
+
+    public readonly List<(TrackInfo, XDocument)> GetPlaylist()
+    {
+        return PairedPoints
+            .GroupBy(pair => pair.Origin)
+            .Select(group => (
+            group.Key,
+            new XDocument(
+                new XDeclaration("1.0", "utf-8", null),
+                new XElement(Options.Xspf + "playlist",
+                    new XAttribute("version", "1.0"),
+                    new XAttribute("xmlns", Options.Xspf),
+                    new XElement(Options.Xspf + "name", group.First().Origin),
+                    new XElement(Options.Xspf + "creator", "SpotifyGPX"),
+                    new XElement(Options.Xspf + "trackList",
+                        group.Select(song =>
                         new XElement(Options.Xspf + "track",
-                            new XElement(Options.Xspf + "creator", song.Song_Artist),
-                            new XElement(Options.Xspf + "title", song.Song_Name),
-                            new XElement(Options.Xspf + "annotation", song.Time.UtcDateTime.ToString(Options.GpxOutput)),
-                            new XElement(Options.Xspf + "duration", song.Time_Played)
+                            new XElement(Options.Xspf + "creator", song.Song.Song_Artist),
+                            new XElement(Options.Xspf + "title", song.Song.Song_Name),
+                            new XElement(Options.Xspf + "annotation", song.Song.Time.UtcDateTime.ToString(Options.GpxOutput)),
+                            new XElement(Options.Xspf + "duration", song.Song.Time_Played)
+                            )
                         )
                     )
                 )
             )
-        );
+            ))
+        .ToList();
     }
 }
