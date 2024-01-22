@@ -64,16 +64,20 @@ View SpotifyGPX sample data and screenshots [here](Samples/README.md) to check t
 
 Ensure you take the below steps to prepare before setting off:
 
- 1. Listen to Spotify along the journey. Only songs played during the GPS tracking will be included in SpotifyGPX's pairing calculations
- 2. Use an app such as [GPSLogger](https://github.com/mendhak/gpslogger) to track your position
+ 1. Make sure you have access to Spotify along the journey.
+ 2. Use an app such as [GPSLogger](https://github.com/mendhak/gpslogger) to track your position along the route
  3. Ensure the logging app's GPS frequency setting is high, since a song is tied to a point (recommended: 1 point every 15-30 seconds)
+ 4. Make sure the GPS logging app provides each point a time, and make sure the time zone is either UTC, or has its UTC offset included
+ 5. Run a few test trips. These can be short, but make sure points are created by your tracker. Compare your data to the confirmed [sample data.](Samples/README.md)
+
+As long as there is song playback and GPS tracking running simultaneously, you will be able to create points from songs with SpotifyGPX.
 
 ## After your journey
 
 To use SpotifyGPX to tie a song to a place, retrieve the data you tracked:
 
  1. [Download](https://www.spotify.com/account/privacy/) your `Account data` or `Extended streaming history` data JSON (see below for a comparison between the two forms)
- 2. Copy the wanted GPX tracks from the device you used for tracking.
+ 2. Copy the corresponding GPX tracks from the device you used for tracking.
  3. When fed to SpotifyGPX, each of these GPX files' coordinates will be used to identify (with closest possible precision) a position for a song
 
 ## SpotifyGPX Options
