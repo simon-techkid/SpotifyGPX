@@ -30,6 +30,6 @@ public struct Options
     public static string Schema => "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd"; // GPX schema location(s) of the output GPX
 
     // XSPF Export Options
-    public static XNamespace Xspf => "http://xspf.org/ns/0/";
+    public static XNamespace Xspf => "http://xspf.org/ns/0/"; // Namespace of output XSPF
 }
 
