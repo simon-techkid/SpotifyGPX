@@ -94,7 +94,7 @@ public readonly struct GPXTrack
     {
         StringBuilder builder = new();
 
-        builder.Append($"\n   Name: {Track.Name}");
+        builder.Append($"\n   Name: {Track.ToString()}");
         builder.Append($"\n   Points: {Points.Count}");
         builder.Append($"\n   Starts: {Start.ToString(Options.ConsoleTrack)}");
         builder.Append($"\n   Ends: {End.ToString(Options.ConsoleTrack)}");
@@ -149,9 +149,9 @@ public readonly struct TrackInfo
 
 public enum TrackType
 {
-    GPX = 0,
-    Gap = 1,
-    Combined = 2
+    GPX = 0, // Created from a user provided GPX file track
+    Gap = 1, // Created from a gap between GPX tracks
+    Combined = 2 // Created from all GPX points combined (regardless of track)
 }
 
 public readonly struct GPXPoint
@@ -177,9 +177,9 @@ public readonly struct Coordinate
         Longitude = lon;
     }
 
-    public readonly double Latitude;
-    public readonly double Longitude;
-    public override string ToString() => $"{(Latitude, Longitude)}"; // Display format for this coordinate pair
+    public readonly double Latitude { get; }
+    public readonly double Longitude { get; }
+    // Coordinate never printed so no need to provide display format
 }
 
 public readonly struct SongPoint
@@ -228,6 +228,6 @@ public readonly struct SongPoint
         string pointTime = PointTime.ToString(Options.Console);
 
         // Print information about the pairing
-        return $"[{Origin}] [P{Point.Index}, S{Song.Index} ==> #{Index}] [{songTime}S ~ {pointTime}P] [{RoundAccuracy}s] {Song}";
+        return $"[{Origin.ToString()}] [P{Point.Index}, S{Song.Index} ==> #{Index}] [{songTime}S ~ {pointTime}P] [{RoundAccuracy}s] {Song.ToString()}";
     }
 }

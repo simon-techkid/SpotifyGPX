@@ -119,7 +119,7 @@ public readonly struct GpxFile
 
         foreach (GPXTrack track in allTracks)
         {
-            Console.WriteLine($"[TRAK] Index: {allTracks.IndexOf(track)} {track}");
+            Console.WriteLine($"[TRAK] Index: {allTracks.IndexOf(track)} {track.ToString()}");
         }
 
         Console.WriteLine("[TRAK] [A] GPX tracks");
@@ -163,7 +163,7 @@ public readonly struct GpxFile
             .ToList();
     }
 
-    private static string CombinedOrGapTrackName(TrackInfo track1, TrackInfo track2) => $"{track1}-{track2}";
+    private static string CombinedOrGapTrackName(TrackInfo track1, TrackInfo track2) => $"{track1.ToString()}-{track2.ToString()}";
 
     private static bool IsValidTrackIndex(int index, int totalTracks) => (index >= 0) && (index < totalTracks);
 }
