@@ -71,7 +71,7 @@ public readonly struct Pairings
                 new XElement(Options.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Options.GpxOutput)),
                 PairedPoints.GroupBy(pair => pair.Origin).Select(track =>
                     new XElement(Options.OutputNs + "trk",
-                        new XElement(Options.OutputNs + "name", track.Key.Name),
+                        new XElement(Options.OutputNs + "name", track.Key),
                         new XElement(Options.OutputNs + "trkseg",
                             track.Select(pair =>
                                 new XElement(Options.OutputNs + "trkpt",
@@ -107,7 +107,7 @@ public readonly struct Pairings
                         new XAttribute(XNamespace.Xmlns + "xsi", Options.Xsi),
                         new XAttribute("xmlns", Options.OutputNs),
                         new XAttribute(Options.Xsi + "schemaLocation", Options.Schema),
-                        new XElement(Options.OutputNs + "name", group.First().Origin),
+                        new XElement(Options.OutputNs + "name", group.Key),
                         new XElement(Options.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Options.GpxOutput)),
                         group.Select(pair =>
                             new XElement(Options.OutputNs + "wpt",
@@ -168,7 +168,7 @@ public readonly struct Pairings
                 new XElement(Options.Xspf + "playlist",
                     new XAttribute("version", "1.0"),
                     new XAttribute("xmlns", Options.Xspf),
-                    new XElement(Options.Xspf + "name", group.First().Origin),
+                    new XElement(Options.Xspf + "name", group.Key),
                     new XElement(Options.Xspf + "creator", "SpotifyGPX"),
                     new XElement(Options.Xspf + "trackList",
                         group.Select(song =>
