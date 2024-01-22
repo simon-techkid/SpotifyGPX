@@ -1,8 +1,10 @@
 ﻿// SpotifyGPX by Simon Field
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -56,9 +58,9 @@ public readonly struct Pairings
         Console.WriteLine($"[PAIR] Paired {PairedPoints.Count} entries: {countsJoined}");
     }
 
-    public readonly XDocument GetGpx(string name)
+    public readonly void SaveSingleGpx(string path)
     {
-        return new XDocument(
+        XDocument document = new(
             new XDeclaration("1.0", "utf-8", null),
             new XElement(Options.OutputNs + "gpx",
                 new XAttribute("version", "1.0"),
@@ -66,7 +68,6 @@ public readonly struct Pairings
                 new XAttribute(XNamespace.Xmlns + "xsi", Options.Xsi),
                 new XAttribute("xmlns", Options.OutputNs),
                 new XAttribute(Options.Xsi + "schemaLocation", Options.Schema),
-                new XElement(Options.OutputNs + "name", name),
                 new XElement(Options.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Options.GpxOutput)),
                 PairedPoints.GroupBy(pair => pair.Origin).Select(track =>
                     new XElement(Options.OutputNs + "trk",
@@ -86,67 +87,83 @@ public readonly struct Pairings
                 )
             )
         );
+
+        document.Save(path);
+        Console.WriteLine($"[FILE] '{Path.GetFileName(path)}' - {document.Descendants(Options.OutputNs + "trkpt").Count()}/{PairedPoints.Count()}");
     }
 
-    public readonly List<(TrackInfo, XDocument)> GetGpxTracks()
+    public readonly void SaveGpxWaypoints(string directory)
     {
-        return PairedPoints
+        PairedPoints
             .GroupBy(pair => pair.Origin)
-            .Select(group => (
-            group.Key,
-            new XDocument(
-                new XDeclaration("1.0", "utf-8", null),
-                new XElement(Options.OutputNs + "gpx",
-                new XAttribute("version", "1.0"),
-                new XAttribute("creator", "SpotifyGPX"),
-                new XAttribute(XNamespace.Xmlns + "xsi", Options.Xsi),
-                new XAttribute("xmlns", Options.OutputNs),
-                new XAttribute(Options.Xsi + "schemaLocation", Options.Schema),
-                new XElement(Options.OutputNs + "name", group.First().Origin),
-                new XElement(Options.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Options.GpxOutput)),
-                group.Select(pair =>
-                    new XElement(Options.OutputNs + "wpt",
-                        new XAttribute("lat", pair.Point.Location.Latitude),
-                        new XAttribute("lon", pair.Point.Location.Longitude),
-                        new XElement(Options.OutputNs + "name", pair.Song),
-                        new XElement(Options.OutputNs + "time", pair.Point.Time.UtcDateTime.ToString(Options.GpxOutput)),
-                        new XElement(Options.OutputNs + "desc", pair.Description)
+            .ToList()
+            .ForEach(group =>
+            {
+                XDocument document = new(
+                    new XDeclaration("1.0", "utf-8", null),
+                    new XElement(Options.OutputNs + "gpx",
+                        new XAttribute("version", "1.0"),
+                        new XAttribute("creator", "SpotifyGPX"),
+                        new XAttribute(XNamespace.Xmlns + "xsi", Options.Xsi),
+                        new XAttribute("xmlns", Options.OutputNs),
+                        new XAttribute(Options.Xsi + "schemaLocation", Options.Schema),
+                        new XElement(Options.OutputNs + "name", group.First().Origin),
+                        new XElement(Options.OutputNs + "time", DateTime.Now.ToUniversalTime().ToString(Options.GpxOutput)),
+                        group.Select(pair =>
+                            new XElement(Options.OutputNs + "wpt",
+                                new XAttribute("lat", pair.Point.Location.Latitude),
+                                new XAttribute("lon", pair.Point.Location.Longitude),
+                                new XElement(Options.OutputNs + "name", pair.Song),
+                                new XElement(Options.OutputNs + "time", pair.Point.Time.UtcDateTime.ToString(Options.GpxOutput)),
+                                new XElement(Options.OutputNs + "desc", pair.Description)
+                            )
+                        )
                     )
-                )
-            )
-            ))).ToList();
+                );
+
+                string filePath = Path.Combine(directory, $"{group.Key}.gpx");
+                document.Save(filePath);
+                Console.WriteLine($"[FILE] '{Path.GetFileName(filePath)}' - {document.Descendants(Options.OutputNs + "wpt").Count()}/{group.Count()}");
+            });
     }
 
-
-    public readonly List<(TrackInfo, List<JObject>)> GetJson()
+    public readonly void SaveJsonTracks(string directory)
     {
-        return PairedPoints
+        PairedPoints
             .GroupBy(pair => pair.Origin)
-            .Select(group => (
-            group.Key,
-            group.Select(pair => pair.Song.Json).ToList()
-            ))
-            .ToList();
+            .ToList()
+            .ForEach(group =>
+            {
+                List<JObject> Json = group.Select(pair => pair.Song.Json).ToList();
+                string document = JsonConvert.SerializeObject(Json, Formatting.Indented);
+                string filePath = Path.Combine(directory, $"{group.Key}.json");
+                File.WriteAllText(filePath, document);
+                Console.WriteLine($"[FILE] '{Path.GetFileName(filePath)}' - {Json.Count}/{group.Count()}");
+            });
     }
 
-    public readonly List<(TrackInfo, string?[])> GetUriList()
+    public readonly void SaveUriTracks(string directory)
     {
-        return PairedPoints
+        PairedPoints
             .GroupBy(pair => pair.Origin)
-            .Select(group => (
-            group.Key,
-            group.Select(pair => pair.Song.Song_URI).ToArray()
-            ))
-            .ToList();
+            .ToList()
+            .ForEach(group =>
+            {
+                string[] strings = group.Select(pair => pair.Song.Song_URI).Where(s => s != null).ToArray();
+                string filePath = Path.Combine(directory, $"{group.Key}.txt");
+                File.WriteAllLines(filePath, strings);
+                Console.WriteLine($"[FILE] '{Path.GetFileName(filePath)}' - {strings.Length}/{group.Count()}");
+            });
     }
 
-    public readonly List<(TrackInfo, XDocument)> GetPlaylist()
+    public readonly void SaveXspfTracks(string directory)
     {
-        return PairedPoints
+        PairedPoints
             .GroupBy(pair => pair.Origin)
-            .Select(group => (
-            group.Key,
-            new XDocument(
+            .ToList()
+            .ForEach(group =>
+            {
+                XDocument document = new(
                 new XDeclaration("1.0", "utf-8", null),
                 new XElement(Options.Xspf + "playlist",
                     new XAttribute("version", "1.0"),
@@ -164,8 +181,11 @@ public readonly struct Pairings
                         )
                     )
                 )
-            )
-            ))
-        .ToList();
+                );
+
+                string filePath = Path.Combine(directory, $"{group.Key}.xspf");
+                document.Save(filePath);
+                Console.WriteLine($"[FILE] '{Path.GetFileName(filePath)}' - {document.Descendants(Options.Xspf + "track").Count()}/{group.Count()}");
+            });
     }
 }
