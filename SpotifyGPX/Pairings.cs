@@ -203,7 +203,7 @@ public readonly struct Pairings
         Console.WriteLine(SaveFileString("XSPF", results));
     }
 
-    private static string TrackCountsString(int count, TrackInfo track) => $"{count} {track.ToString()}";
+    private static string TrackCountsString(int count, TrackInfo track) => $"{count} ({track.ToString()})";
 
     private readonly string SaveFileString(string filetype, List<string> payload) => $"[FILE] {PairedPoints.Count()} points ==> {payload.Count()} {filetype}s: {string.Join(", ", payload)}";
 }
