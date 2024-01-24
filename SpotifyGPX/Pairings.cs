@@ -55,7 +55,7 @@ public readonly struct Pairings
     {
         string countsJoined = string.Join(", ", PairedPoints.GroupBy(pair => pair.Origin).Select(track => $"{track.Count()} ({track.Key.ToString()})"));
 
-        Console.WriteLine($"[PAIR] Paired {PairedPoints.Count} entries: {countsJoined}");
+        Console.WriteLine($"[PAIR] Paired {PairedPoints.Count} entries from {PairedPoints.GroupBy(pair => pair.Origin).Count()} tracks: {countsJoined}");
     }
 
     public readonly void SaveSingleGpx(string path)
@@ -89,11 +89,13 @@ public readonly struct Pairings
         );
 
         document.Save(path);
-        Console.WriteLine($"[FILE] '{Path.GetFileName(path)}' - {document.Descendants(Options.OutputNs + "trkpt").Count()}/{PairedPoints.Count()}");
+        Console.WriteLine($"[FILE] {document.Descendants(Options.OutputNs + "trkpt").Count()} points ==> {path}");
     }
 
     public readonly void SaveGpxWaypoints(string directory)
     {
+        List<string> results = new();
+
         PairedPoints
             .GroupBy(pair => pair.Origin)
             .ToList()
@@ -121,14 +123,20 @@ public readonly struct Pairings
                     )
                 );
 
+                string countsJoined = $"{document.Descendants(Options.OutputNs + "wpt").Count()} ({group.Key.ToString()})";
+                results.Add(countsJoined);
+
                 string filePath = Path.Combine(directory, $"{group.Key.ToString()}.gpx");
                 document.Save(filePath);
-                Console.WriteLine($"[FILE] '{Path.GetFileName(filePath)}' - {document.Descendants(Options.OutputNs + "wpt").Count()}/{group.Count()}");
             });
+
+        Console.WriteLine($"[FILE] {PairedPoints.Count()} points ==> {results.Count()} GPXs: {string.Join(", ", results)}");
     }
 
     public readonly void SaveJsonTracks(string directory)
     {
+        List<string> results = new();
+
         PairedPoints
             .GroupBy(pair => pair.Origin)
             .ToList()
@@ -136,28 +144,42 @@ public readonly struct Pairings
             {
                 List<JObject> Json = group.Select(pair => pair.Song.Json).ToList();
                 string document = JsonConvert.SerializeObject(Json, Formatting.Indented);
+
+                string countsJoined = $"{Json.Count()} ({group.Key.ToString()})";
+                results.Add(countsJoined);
+
                 string filePath = Path.Combine(directory, $"{group.Key.ToString()}.json");
                 File.WriteAllText(filePath, document);
-                Console.WriteLine($"[FILE] '{Path.GetFileName(filePath)}' - {Json.Count}/{group.Count()}");
             });
+
+        Console.WriteLine($"[FILE] {PairedPoints.Count()} points ==> {results.Count()} JSONs: {string.Join(", ", results)}");
     }
 
     public readonly void SaveUriTracks(string directory)
     {
+        List<string> results = new();
+
         PairedPoints
             .GroupBy(pair => pair.Origin)
             .ToList()
             .ForEach(group =>
             {
                 string[] strings = group.Select(pair => pair.Song.Song_URI).Where(s => s != null).ToArray();
+
+                string countsJoined = $"{strings.Length} ({group.Key.ToString()})";
+                results.Add(countsJoined);
+
                 string filePath = Path.Combine(directory, $"{group.Key.ToString()}.txt");
                 File.WriteAllLines(filePath, strings);
-                Console.WriteLine($"[FILE] '{Path.GetFileName(filePath)}' - {strings.Length}/{group.Count()}");
             });
+
+        Console.WriteLine($"[FILE] {PairedPoints.Count()} points ==> {results.Count()} TXTs: {string.Join(", ", results)}");
     }
 
     public readonly void SaveXspfTracks(string directory)
     {
+        List<string> results = new();
+
         PairedPoints
             .GroupBy(pair => pair.Origin)
             .ToList()
@@ -183,9 +205,13 @@ public readonly struct Pairings
                 )
                 );
 
+                string countsJoined = $"{document.Descendants(Options.Xspf + "track").Count()} ({group.Key.ToString()})";
+                results.Add(countsJoined);
+
                 string filePath = Path.Combine(directory, $"{group.Key.ToString()}.xspf");
                 document.Save(filePath);
-                Console.WriteLine($"[FILE] '{Path.GetFileName(filePath)}' - {document.Descendants(Options.Xspf + "track").Count()}/{group.Count()}");
             });
+
+        Console.WriteLine($"[FILE] {PairedPoints.Count()} points ==> {results.Count()} XSPFs: {string.Join(", ", results)}");
     }
 }
