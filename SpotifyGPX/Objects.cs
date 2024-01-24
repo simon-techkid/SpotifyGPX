@@ -69,6 +69,7 @@ public readonly struct SpotifyEntry
     public readonly string? Spotify_OfflineTS => (string?)Json["offline_timestamp"];
     public readonly bool? Spotify_Incognito => (bool?)Json["incognito"];
     public override string ToString() => $"{Song_Artist} - {Song_Name}"; // Display format for this song
+    public bool WithinTimeFrame(DateTimeOffset Start, DateTimeOffset End) => (Time >= Start) && (Time <= End); // Return true if song within provided time range
 }
 
 public readonly struct GPXTrack

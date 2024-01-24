@@ -24,7 +24,7 @@ public readonly struct Pairings
 
         List<SongPoint> correlatedEntries = tracks // For each GPX track
         .SelectMany(track => songs // Get the list of SpotifyEntries
-        .Where(spotifyEntry => (spotifyEntry.Time >= track.Start) && (spotifyEntry.Time <= track.End)) // If the SpotifyEntry falls within the boundaries of the track
+        .Where(spotifyEntry => spotifyEntry.WithinTimeFrame(track.Start, track.End)) // If the SpotifyEntry falls within the boundaries of the track
         .Select(spotifyEntry => // Select the Spotify entry if it falls in range of the GPX track
             {
                 SongPoint pair = track.Points
