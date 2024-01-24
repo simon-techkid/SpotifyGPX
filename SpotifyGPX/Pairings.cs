@@ -137,7 +137,7 @@ public readonly struct Pairings
             .Select(group =>
             {
                 List<JObject> Json = group.Select(pair => pair.Song.Json).ToList();
-                string document = JsonConvert.SerializeObject(Json, Formatting.Indented);
+                string document = JsonConvert.SerializeObject(Json, Options.Json);
 
                 string filePath = Path.Combine(directory, $"{group.Key.ToString()}.json");
                 File.WriteAllText(filePath, document);

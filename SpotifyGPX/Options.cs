@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using Newtonsoft.Json;
 using System.Globalization;
 using System.Xml.Linq;
 
@@ -31,5 +32,8 @@ public struct Options
 
     // XSPF Export Options
     public static XNamespace Xspf => "http://xspf.org/ns/0/"; // Namespace of output XSPF
+
+    // JSON Export Options
+    public static Formatting Json => Formatting.Indented; // Formatting of exporting JSON
 }
 
