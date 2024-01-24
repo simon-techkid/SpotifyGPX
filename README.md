@@ -91,6 +91,7 @@ To use SpotifyGPX to tie a song to a place, retrieve the data you tracked:
 | `Console` | `string` | Each pairing's song and point time when printed to the console |
 | `ConsoleTrack` | `string` | A track's start and end times as presented to the user when there are multiple tracks  to choose from |
 | `GpxInput` | `string` | Each point in your tracked journey's GPX |
+| `GpxTimeStyle` | `DateTimeStyles` | Interpretation of time zone as written in GPX |
 | `InputNs` | `XNamespace` | The `xmlns` attribute of your tracked journey's `<gpx>` header |
 | `SpotifyFull` | `string` | `ts` objects' format within the Spotify data dump |
 | `SpotifyMini` | `string` | `endTime` objects' format within the Spotify data dump |
@@ -101,6 +102,8 @@ To use SpotifyGPX to tie a song to a place, retrieve the data you tracked:
 | `OutputNs` | `XNamespace` | XML namespace of exported GPX files |
 | `Xsi` | `XNamespace` | XML namespace for exported GPX files' schema |
 | `Schema` | `string` | Provide at least 2 schema locations, in accordance with [GPX](https://www.topografix.com/gpx_manual.asp) |
+| `Xspf` | `XNamespace` | XML namespace for exported XSPF files |
+| `Json` | `Formatting` | Json serialization formatting for exported JSON files |
 
 ### Multi-track selection prompt
 
