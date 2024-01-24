@@ -94,12 +94,9 @@ public readonly struct Pairings
 
     public readonly void SaveGpxWaypoints(string directory)
     {
-        List<string> results = new();
-
-        PairedPoints
+        List<string> results = PairedPoints
             .GroupBy(pair => pair.Origin)
-            .ToList()
-            .ForEach(group =>
+            .Select(group =>
             {
                 XDocument document = new(
                     new XDeclaration("1.0", "utf-8", null),
@@ -123,64 +120,58 @@ public readonly struct Pairings
                     )
                 );
 
-                results.Add(TrackCountsString(document.Descendants(Options.OutputNs + "wpt").Count(), group.Key));
-
                 string filePath = Path.Combine(directory, $"{group.Key.ToString()}.gpx");
                 document.Save(filePath);
-            });
+
+                return TrackCountsString(document.Descendants(Options.OutputNs + "wpt").Count(), group.Key);
+            })
+            .ToList();
 
         Console.WriteLine(SaveFileString("GPX", results));
     }
 
     public readonly void SaveJsonTracks(string directory)
     {
-        List<string> results = new();
-
-        PairedPoints
+        List<string> results = PairedPoints
             .GroupBy(pair => pair.Origin)
-            .ToList()
-            .ForEach(group =>
+            .Select(group =>
             {
                 List<JObject> Json = group.Select(pair => pair.Song.Json).ToList();
                 string document = JsonConvert.SerializeObject(Json, Formatting.Indented);
 
-                results.Add(TrackCountsString(Json.Count, group.Key));
-
                 string filePath = Path.Combine(directory, $"{group.Key.ToString()}.json");
                 File.WriteAllText(filePath, document);
-            });
+
+                return TrackCountsString(Json.Count, group.Key);
+            })
+            .ToList();
 
         Console.WriteLine(SaveFileString("JSON", results));
     }
 
     public readonly void SaveUriTracks(string directory)
     {
-        List<string> results = new();
-
-        PairedPoints
+        List<string> results = PairedPoints
             .GroupBy(pair => pair.Origin)
-            .ToList()
-            .ForEach(group =>
+            .Select(group =>
             {
                 string[] strings = group.Select(pair => pair.Song.Song_URI).Where(s => s != null).ToArray();
 
-                results.Add(TrackCountsString(strings.Length, group.Key));
-
                 string filePath = Path.Combine(directory, $"{group.Key.ToString()}.txt");
                 File.WriteAllLines(filePath, strings);
-            });
+
+                return TrackCountsString(strings.Length, group.Key);
+            })
+            .ToList();
 
         Console.WriteLine(SaveFileString("TXT", results));
     }
 
     public readonly void SaveXspfTracks(string directory)
     {
-        List<string> results = new();
-
-        PairedPoints
+        List<string> results = PairedPoints
             .GroupBy(pair => pair.Origin)
-            .ToList()
-            .ForEach(group =>
+            .Select(group =>
             {
                 XDocument document = new(
                 new XDeclaration("1.0", "utf-8", null),
@@ -202,11 +193,12 @@ public readonly struct Pairings
                 )
                 );
 
-                results.Add(TrackCountsString(document.Descendants(Options.Xspf + "track").Count(), group.Key));
-
                 string filePath = Path.Combine(directory, $"{group.Key.ToString()}.xspf");
                 document.Save(filePath);
-            });
+
+                return TrackCountsString(document.Descendants(Options.Xspf + "track").Count(), group.Key);
+            })
+            .ToList();
 
         Console.WriteLine(SaveFileString("XSPF", results));
     }
