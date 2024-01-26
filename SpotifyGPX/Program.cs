@@ -112,29 +112,29 @@ class Program
 
         if (noGpxExport == false)
         {
-            string path = Path.Combine(Directory.GetParent(inputGpx).ToString(), $"{Path.GetFileNameWithoutExtension(inputGpx)}_Spotify.gpx");
+            string path = Path.Combine(Directory.GetParent(inputGpx).ToString(), $"{Path.GetFileNameWithoutExtension(inputGpx)}_Tracks.gpx");
 
             pairedEntries.SaveSingleGpx(path);
         }
 
         if (exportWaypoints == true)
         {
-            pairedEntries.SaveGpxWaypoints(Directory.GetParent(inputGpx).ToString());
+            pairedEntries.SaveGpxWaypoints(Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), "Waypoints");
         }
 
         if (exportJson == true)
         {
-            pairedEntries.SaveJsonTracks(Directory.GetParent(inputGpx).ToString());
+            pairedEntries.SaveJsonTracks(Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
         }
 
         if (exportPlist == true)
         {
-            pairedEntries.SaveXspfTracks(Directory.GetParent(inputGpx).ToString());
+            pairedEntries.SaveXspfTracks(Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
         }
 
         if (exportSpotifyURI == true)
         {
-            pairedEntries.SaveUriTracks(Directory.GetParent(inputGpx).ToString());
+            pairedEntries.SaveUriTracks(Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
         }
 
         return; // Exit the program

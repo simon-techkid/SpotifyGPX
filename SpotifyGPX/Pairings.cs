@@ -92,7 +92,7 @@ public readonly struct Pairings
         Console.WriteLine($"[FILE] {document.Descendants(Options.OutputNs + "trkpt").Count()} points ==> {path}");
     }
 
-    public readonly void SaveGpxWaypoints(string directory)
+    public readonly void SaveGpxWaypoints(string prefix, string directory, string suffix)
     {
         List<string> results = Pairs
             .GroupBy(pair => pair.Origin)
@@ -120,7 +120,7 @@ public readonly struct Pairings
                     )
                 );
 
-                string filePath = Path.Combine(directory, $"{group.Key.ToString()}.gpx");
+                string filePath = Path.Combine(directory, $"{prefix}_{group.Key.ToString()}_{suffix}.gpx");
                 document.Save(filePath);
 
                 return TrackCountsString(document.Descendants(Options.OutputNs + "wpt").Count(), group.Key);
@@ -130,7 +130,7 @@ public readonly struct Pairings
         Console.WriteLine(SaveFileString("GPX", results));
     }
 
-    public readonly void SaveJsonTracks(string directory)
+    public readonly void SaveJsonTracks(string prefix, string directory)
     {
         List<string> results = Pairs
             .GroupBy(pair => pair.Origin)
@@ -139,7 +139,7 @@ public readonly struct Pairings
                 List<JObject> Json = group.Select(pair => pair.Song.Json).ToList();
                 string document = JsonConvert.SerializeObject(Json, Options.Json);
 
-                string filePath = Path.Combine(directory, $"{group.Key.ToString()}.json");
+                string filePath = Path.Combine(directory, $"{prefix}_{group.Key.ToString()}.json");
                 File.WriteAllText(filePath, document);
 
                 return TrackCountsString(Json.Count, group.Key);
@@ -149,7 +149,7 @@ public readonly struct Pairings
         Console.WriteLine(SaveFileString("JSON", results));
     }
 
-    public readonly void SaveUriTracks(string directory)
+    public readonly void SaveUriTracks(string prefix, string directory)
     {
         List<string> results = Pairs
             .GroupBy(pair => pair.Origin)
@@ -157,7 +157,7 @@ public readonly struct Pairings
             {
                 string[] strings = group.Select(pair => pair.Song.Song_URI).Where(s => s != null).ToArray();
 
-                string filePath = Path.Combine(directory, $"{group.Key.ToString()}.txt");
+                string filePath = Path.Combine(directory, $"{prefix}_{group.Key.ToString()}.txt");
                 File.WriteAllLines(filePath, strings);
 
                 return TrackCountsString(strings.Length, group.Key);
@@ -167,7 +167,7 @@ public readonly struct Pairings
         Console.WriteLine(SaveFileString("TXT", results));
     }
 
-    public readonly void SaveXspfTracks(string directory)
+    public readonly void SaveXspfTracks(string prefix, string directory)
     {
         List<string> results = Pairs
             .GroupBy(pair => pair.Origin)
@@ -193,7 +193,7 @@ public readonly struct Pairings
                 )
                 );
 
-                string filePath = Path.Combine(directory, $"{group.Key.ToString()}.xspf");
+                string filePath = Path.Combine(directory, $"{prefix}_{group.Key.ToString()}.xspf");
                 document.Save(filePath);
 
                 return TrackCountsString(document.Descendants(Options.Xspf + "track").Count(), group.Key);
