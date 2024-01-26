@@ -18,9 +18,9 @@ public readonly struct JsonFile
 
     private static List<JObject> DeserializeJson(string jsonFilePath) => JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFilePath)) ?? throw new System.Exception($"JSON deserialization results in null, check the JSON");
 
-    public readonly List<SpotifyEntry> FilterSpotifyJson(List<GPXTrack> tracks)
+    public readonly List<SpotifyEntry> FilterSpotifyJson(List<GPXTrack> gpxTracks)
     {
-        var trackRange = tracks.Select(track => (track.Start, track.End)).ToList(); // List all of the tracks' start and end times
+        var trackRange = gpxTracks.Select(track => (track.Start, track.End)).ToList(); // List all of the tracks' start and end times
 
         return AllSongs.Where(spotifyEntry => // If the spotify entry
             trackRange.Any(trackTimes => // Starts after the beginning of the GPX, and before the end of the GPX

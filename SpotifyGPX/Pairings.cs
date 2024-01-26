@@ -12,23 +12,23 @@ namespace SpotifyGPX;
 
 public readonly struct Pairings
 {
-    public Pairings(List<SpotifyEntry> s, List<GPXTrack> t) => PairedPoints = PairPoints(s, t);
+    public Pairings(List<SpotifyEntry> s, List<GPXTrack> t) => Pairs = PairPoints(s, t);
 
-    private readonly List<SongPoint> PairedPoints;
+    private readonly List<SongPoint> Pairs;
 
-    private static List<SongPoint> PairPoints(List<SpotifyEntry> songs, List<GPXTrack> tracks)
+    private static List<SongPoint> PairPoints(List<SpotifyEntry> songs, List<GPXTrack> gpxTracks)
     {
         // Correlate Spotify entries with the nearest GPX points
 
         int index = 0; // Index of the pairing
 
-        List<SongPoint> correlatedEntries = tracks // For each GPX track
-        .SelectMany(track => songs // Get the list of SpotifyEntries
-        .Where(spotifyEntry => spotifyEntry.WithinTimeFrame(track.Start, track.End)) // If the SpotifyEntry falls within the boundaries of the track
+        List<SongPoint> correlatedEntries = gpxTracks // For each GPX track
+        .SelectMany(gpxTrack => songs // Get the list of SpotifyEntries
+        .Where(spotifyEntry => spotifyEntry.WithinTimeFrame(gpxTrack.Start, gpxTrack.End)) // If the SpotifyEntry falls within the boundaries of the track
         .Select(spotifyEntry => // Select the Spotify entry if it falls in range of the GPX track
             {
-                SongPoint pair = track.Points
-                .Select(point => new SongPoint(index, spotifyEntry, point, track.Track)) // For each point in the track's point list,
+                SongPoint pair = gpxTrack.Points
+                .Select(point => new SongPoint(index, spotifyEntry, point, gpxTrack.Track)) // For each point in the track's point list,
                 .OrderBy(pair => pair.AbsAccuracy) // Order the points by proximity between point and song
                 .First(); // Closest accuracy wins
 
@@ -53,9 +53,9 @@ public readonly struct Pairings
 
     public readonly void PrintTracks()
     {
-        string countsJoined = string.Join(", ", PairedPoints.GroupBy(pair => pair.Origin).Select(track => $"{track.Count()} ({track.Key.ToString()})"));
+        string countsJoined = string.Join(", ", Pairs.GroupBy(pair => pair.Origin).Select(track => $"{track.Count()} ({track.Key.ToString()})"));
 
-        Console.WriteLine($"[PAIR] Paired {PairedPoints.Count} entries from {PairedPoints.GroupBy(pair => pair.Origin).Count()} tracks: {countsJoined}");
+        Console.WriteLine($"[PAIR] Paired {Pairs.Count} entries from {Pairs.GroupBy(pair => pair.Origin).Count()} tracks: {countsJoined}");
     }
 
     public readonly void SaveSingleGpx(string path)
@@ -69,7 +69,7 @@ public readonly struct Pairings
                 new XAttribute("xmlns", Options.OutputNs),
                 new XAttribute(Options.Xsi + "schemaLocation", Options.Schema),
                 new XElement(Options.OutputNs + "time", DateTimeOffset.Now.UtcDateTime.ToString(Options.GpxOutput)),
-                PairedPoints.GroupBy(pair => pair.Origin).Select(track =>
+                Pairs.GroupBy(pair => pair.Origin).Select(track =>
                     new XElement(Options.OutputNs + "trk",
                         new XElement(Options.OutputNs + "name", track.Key.ToString()),
                         new XElement(Options.OutputNs + "trkseg",
@@ -94,7 +94,7 @@ public readonly struct Pairings
 
     public readonly void SaveGpxWaypoints(string directory)
     {
-        List<string> results = PairedPoints
+        List<string> results = Pairs
             .GroupBy(pair => pair.Origin)
             .Select(group =>
             {
@@ -132,7 +132,7 @@ public readonly struct Pairings
 
     public readonly void SaveJsonTracks(string directory)
     {
-        List<string> results = PairedPoints
+        List<string> results = Pairs
             .GroupBy(pair => pair.Origin)
             .Select(group =>
             {
@@ -151,7 +151,7 @@ public readonly struct Pairings
 
     public readonly void SaveUriTracks(string directory)
     {
-        List<string> results = PairedPoints
+        List<string> results = Pairs
             .GroupBy(pair => pair.Origin)
             .Select(group =>
             {
@@ -169,7 +169,7 @@ public readonly struct Pairings
 
     public readonly void SaveXspfTracks(string directory)
     {
-        List<string> results = PairedPoints
+        List<string> results = Pairs
             .GroupBy(pair => pair.Origin)
             .Select(group =>
             {
@@ -205,5 +205,5 @@ public readonly struct Pairings
 
     private static string TrackCountsString(int count, TrackInfo track) => $"{count} ({track.ToString()})";
 
-    private readonly string SaveFileString(string filetype, List<string> payload) => $"[FILE] {PairedPoints.Count()} points ==> {payload.Count()} {filetype}s: {string.Join(", ", payload)}";
+    private readonly string SaveFileString(string filetype, List<string> payload) => $"[FILE] {Pairs.Count()} points ==> {payload.Count()} {filetype}s: {string.Join(", ", payload)}";
 }

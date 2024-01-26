@@ -34,11 +34,11 @@ public readonly struct SpotifyEntry
 
             if (DateTimeOffset.TryParseExact(time, Options.SpotifyMini, null, Options.SpotifyTimeStyle, out var result))
             {
-                return result;
+                return result; // return parsed "account data" format song end time
             }
             else if (DateTimeOffset.TryParseExact(time, Options.SpotifyFull, null, Options.SpotifyTimeStyle, out result))
             {
-                return result;
+                return result; // return parsed "extended streaming history" format song end time
             }
             else
             {
@@ -50,7 +50,7 @@ public readonly struct SpotifyEntry
     public readonly string? Song_Artist => (string?)Json["artistName"] ?? (string?)Json["master_metadata_album_artist_name"];
     public readonly string? Song_Name => (string?)Json["trackName"] ?? (string?)Json["master_metadata_track_name"];
     public readonly string? Time_Played => (string?)Json["msPlayed"] ?? (string?)Json["ms_played"];
-    public readonly TimeSpan TimePlayed => TimeSpan.FromMilliseconds(double.Parse(Time_Played)); // Parse string of milliseconds to TimeSpan
+    public readonly TimeSpan TimePlayed => Time_Played != null ? TimeSpan.FromMilliseconds(double.Parse(Time_Played)) : TimeSpan.Zero; // Parse string of milliseconds to TimeSpan
     public readonly string? Spotify_Username => (string?)Json["username"];
     public readonly string? Spotify_Platform => (string?)Json["platform"];
     public readonly string? Spotify_Country => (string?)Json["conn_country"];
@@ -78,13 +78,14 @@ public readonly struct GPXTrack
     {
         Track = new TrackInfo(index, name, type);
         Points = points;
+
         Start = Points.Select(point => point.Time).Min(); // Earliest point's time
         End = Points.Select(point => point.Time).Max(); // Latest point's time
 
-        // either one of these works, your decision
+        // Either above or below start/end parsing works, your choice
 
-        // Start = Points.Select(point => point.Time).First(); // first point's time
-        // End = Points.Select(point => point.Time).Last(); // last point's time
+        // Start = Points.Select(point => point.Time).First(); // First point's time
+        // End = Points.Select(point => point.Time).Last(); // Last point's time
     }
 
     public readonly TrackInfo Track { get; } // Metadata for this track, including its name and index in a list
@@ -193,11 +194,11 @@ public readonly struct SongPoint
 
             builder.AppendLine($"At this position: {PointTime.ToString(Options.DescriptionPlayedAt)}");
             builder.AppendLine($"Sond ended: {SongTime.ToString(Options.DescriptionPlayedAt)}");
-            builder.AppendLine($"Played for {Song.TimePlayed.ToString(Options.DescriptionTimePlayed)}");
-            builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}");
-            builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}");
-            builder.AppendLine($"IP Address: {Song.Spotify_IP}");
-            builder.AppendLine($"Country: {Song.Spotify_Country}");
+            if (Song.Time_Played != null) { builder.AppendLine($"Played for {Song.TimePlayed.ToString(Options.DescriptionTimePlayed)}"); }
+            if (Song.Song_Skipped != null) { builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}"); }
+            if (Song.Song_Shuffle != null) { builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}"); }
+            if (Song.Spotify_IP != null) { builder.AppendLine($"IP Address: {Song.Spotify_IP}"); }
+            if (Song.Spotify_Country != null) { builder.AppendLine($"Country: {Song.Spotify_Country}"); }
 
             return builder.ToString();
         }
@@ -214,7 +215,7 @@ public readonly struct SongPoint
     public readonly int Index { get; } // Unique identifier of this SongPoint in a list
     public readonly SpotifyEntry Song { get; } // Contents of the original song entry
     public readonly GPXPoint Point { get; } // Contents of the original GPX point
-    public readonly TrackInfo Origin { get; } // Track from which the pairing originates
+    public readonly TrackInfo Origin { get; } // Track from which the pairing was created
     private readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds; // Raw accuracy
     public readonly double AbsAccuracy => Math.Abs(Accuracy); // Absolute value of the accuracy
     private readonly double RoundAccuracy => Math.Round(Accuracy);
