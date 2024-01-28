@@ -39,6 +39,7 @@ public readonly struct Pairings
                 return pair;
             })
         )
+        .Where(pair => Options.MaximumAbsAccuracy == null || pair.AbsAccuracy <= Options.MaximumAbsAccuracy) // Only create pairings with accuracy equal to or below max allowed accuracy
         .ToList();
 
         if (correlatedEntries.Count > 0)

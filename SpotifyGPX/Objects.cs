@@ -218,7 +218,7 @@ public readonly struct SongPoint
     public readonly TrackInfo Origin { get; } // Track from which the pairing was created
     private readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds; // Raw accuracy
     public readonly double AbsAccuracy => Math.Abs(Accuracy); // Absolute value of the accuracy
-    private readonly double RoundAccuracy => Math.Round(Accuracy);
+    private readonly double RoundAccuracy => Math.Round(Accuracy); // Rounded accuracy
     private readonly TimeSpan NormalizedOffset => Point.Time.Offset; // Standard offset is defined by the original GPX point offset
     private DateTimeOffset SongTime => Song.Time.ToOffset(NormalizedOffset); // Song end time, normalized to point time zone
     private DateTimeOffset PointTime => Point.Time.ToOffset(NormalizedOffset); // Point end time, normalized to point time zone (redundant)
