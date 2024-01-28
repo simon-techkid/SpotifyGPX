@@ -24,7 +24,9 @@ public readonly struct JsonFile
 
         return AllSongs.Where(spotifyEntry => // If the spotify entry
             trackRange.Any(trackTimes => // Starts after the beginning of the GPX, and before the end of the GPX
-                spotifyEntry.WithinTimeFrame(trackTimes.Start, trackTimes.End)))
+                (spotifyEntry.WithinTimeFrame(trackTimes.Start, trackTimes.End)) && // Exclude song if played outside the time range of tracks
+                (spotifyEntry.TimePlayed != null ? spotifyEntry.TimePlayed >= Options.MinimumPlaytime : true) && // Exclude song if played for shorter time than options specifies
+                (spotifyEntry.Song_Skipped == true && Options.ExcludeSkipped ? false : true))) // Exclude song if skipped and if options specifies to exclude
             .ToList(); // Send the songs that fall within GPX tracking period to a list
     }
 }

@@ -50,7 +50,7 @@ public readonly struct SpotifyEntry
     public readonly string? Song_Artist => (string?)Json["artistName"] ?? (string?)Json["master_metadata_album_artist_name"];
     public readonly string? Song_Name => (string?)Json["trackName"] ?? (string?)Json["master_metadata_track_name"];
     public readonly string? Time_Played => (string?)Json["msPlayed"] ?? (string?)Json["ms_played"];
-    public readonly TimeSpan TimePlayed => Time_Played != null ? TimeSpan.FromMilliseconds(double.Parse(Time_Played)) : TimeSpan.Zero; // Parse string of milliseconds to TimeSpan
+    public readonly TimeSpan? TimePlayed => Time_Played != null ? TimeSpan.FromMilliseconds(double.Parse(Time_Played)) : null; // Parse string of milliseconds to TimeSpan
     public readonly string? Spotify_Username => (string?)Json["username"];
     public readonly string? Spotify_Platform => (string?)Json["platform"];
     public readonly string? Spotify_Country => (string?)Json["conn_country"];
@@ -194,7 +194,7 @@ public readonly struct SongPoint
 
             builder.AppendLine($"At this position: {PointTime.ToString(Options.DescriptionPlayedAt)}");
             builder.AppendLine($"Sond ended: {SongTime.ToString(Options.DescriptionPlayedAt)}");
-            if (Song.Time_Played != null) { builder.AppendLine($"Played for {Song.TimePlayed.ToString(Options.DescriptionTimePlayed)}"); }
+            if (Song.TimePlayed != null) { builder.AppendLine($"Played for {Song.TimePlayed?.ToString(Options.DescriptionTimePlayed)}"); }
             if (Song.Song_Skipped != null) { builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}"); }
             if (Song.Song_Shuffle != null) { builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}"); }
             if (Song.Spotify_IP != null) { builder.AppendLine($"IP Address: {Song.Spotify_IP}"); }
