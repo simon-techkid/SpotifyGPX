@@ -10,13 +10,33 @@ namespace SpotifyGPX;
 
 public class JsonFile
 {
+    public readonly List<SpotifyEntry> AllSongs;
+
     public JsonFile(string path) => AllSongs = JsonToSpotifyEntry(path);
 
-    public List<SpotifyEntry> AllSongs { get; }
+    private static List<SpotifyEntry> JsonToSpotifyEntry(string jsonFilePath)
+    {
+        var serializer = new JsonSerializer();
 
-    private static List<SpotifyEntry> JsonToSpotifyEntry(string jsonFilePath) => DeserializeJson(jsonFilePath).Select((json, index) => new SpotifyEntry(index, json)).ToList();
+        using var fileStream = File.OpenRead(jsonFilePath);
+        using var jsonReader = new JsonTextReader(new StreamReader(fileStream));
+        List<SpotifyEntry> spotifyEntries = new();
+        int index = 0;
 
-    private static List<JObject> DeserializeJson(string jsonFilePath) => JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFilePath)) ?? throw new System.Exception($"JSON deserialization results in null, check the JSON");
+        while (jsonReader.Read())
+        {
+            if (jsonReader.TokenType == JsonToken.StartObject)
+            {
+                var json = serializer.Deserialize<JObject>(jsonReader);
+                if (json != null)
+                {
+                    spotifyEntries.Add(new SpotifyEntry(index++, json));
+                }
+            }
+        }
+
+        return spotifyEntries;
+    }
 
     public List<SpotifyEntry> FilterSpotifyJson(List<GPXTrack> gpxTracks)
     {

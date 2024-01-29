@@ -12,9 +12,9 @@ namespace SpotifyGPX;
 
 public class Pairings
 {
-    public Pairings(List<SpotifyEntry> s, List<GPXTrack> t) => Pairs = PairPoints(s, t);
+    private readonly List<SongPoint> Pairs;
 
-    private List<SongPoint> Pairs { get; }
+    public Pairings(List<SpotifyEntry> s, List<GPXTrack> t) => Pairs = PairPoints(s, t);
 
     private static List<SongPoint> PairPoints(List<SpotifyEntry> songs, List<GPXTrack> gpxTracks)
     {

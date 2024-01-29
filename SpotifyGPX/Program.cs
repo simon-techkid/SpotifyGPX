@@ -95,7 +95,8 @@ class Program
             List<GPXTrack> tracks = new GpxFile(inputGpx).ParseGpxTracks();
 
             // Step 2: Create list of songs played, and filter it to songs played during the GPX tracking timeframe
-            List<SpotifyEntry> filteredEntries = new JsonFile(inputJson).FilterSpotifyJson(tracks); // filtering not strictly necessary, replace with below commented line for unfiltered run
+            List<SpotifyEntry> filteredEntries = new JsonFile(inputJson).FilterSpotifyJson(tracks);
+            // Use above to filter based on filtration options defined in SpotifyGPX.Options. To run unfiltered, use below
             //List<SpotifyEntry> filteredEntries = new JsonFile(inputJson).AllSongs;
 
             // Step 3: Create list of songs and points paired as close as possible to one another
