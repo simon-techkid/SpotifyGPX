@@ -192,15 +192,23 @@ public readonly struct SongPoint
         {
             StringBuilder builder = new();
 
-            builder.AppendLine($"At this position: {PointTime.ToString(Options.DescriptionPlayedAt)}");
-            builder.AppendLine($"Sond ended: {SongTime.ToString(Options.DescriptionPlayedAt)}");
-            if (Song.TimePlayed != null) { builder.AppendLine($"Played for {Song.TimePlayed?.ToString(Options.DescriptionTimePlayed)}"); }
-            if (Song.Song_Skipped != null) { builder.AppendLine($"Skipped: {(Song.Song_Skipped == true ? "Yes" : "No")}"); }
-            if (Song.Song_Shuffle != null) { builder.AppendLine($"Shuffle: {(Song.Song_Shuffle == true ? "On" : "Off")}"); }
-            if (Song.Spotify_IP != null) { builder.AppendLine($"IP Address: {Song.Spotify_IP}"); }
-            if (Song.Spotify_Country != null) { builder.AppendLine($"Country: {Song.Spotify_Country}"); }
+            Append(builder, "At this position: {0}", PointTime.ToString(Options.DescriptionPlayedAt));
+            Append(builder, "Song ended: {0}", SongTime.ToString(Options.DescriptionPlayedAt));
+            Append(builder, "Played for {0}", Song.TimePlayed);
+            Append(builder, "Skipped: {0}", Song.Song_Skipped);
+            Append(builder, "Shuffle: {0}", Song.Song_Shuffle);
+            Append(builder, "IP Address: {0}", Song.Spotify_IP);
+            Append(builder, "Country: {0}", Song.Spotify_Country);
 
             return builder.ToString();
+        }
+    }
+
+    private static void Append(StringBuilder builder, string format, object value)
+    {
+        if (value != null)
+        {
+            builder.AppendLine(string.Format(format, value));
         }
     }
 
