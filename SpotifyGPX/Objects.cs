@@ -4,7 +4,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace SpotifyGPX;
 
@@ -96,11 +95,11 @@ public readonly struct GPXTrack
     {
         StringBuilder builder = new();
 
-        builder.Append($"\n   Name: {Track.ToString()}");
-        builder.Append($"\n   Points: {Points.Count}");
-        builder.Append($"\n   Starts: {Start.ToString(Options.ConsoleTrack)}");
-        builder.Append($"\n   Ends: {End.ToString(Options.ConsoleTrack)}");
-        builder.Append($"\n   Type: {Track.Type}");
+        builder.Append("   Name: {0}", Track.ToString());
+        builder.Append("   Points: {0}", Points.Count);
+        builder.Append("   Starts: {0}", Start.ToString(Options.ConsoleTrack));
+        builder.Append("   Ends: {0}", End.ToString(Options.ConsoleTrack));
+        builder.Append("   Type: {0}", Track.Type);
 
         return builder.ToString();
     }
@@ -192,23 +191,15 @@ public readonly struct SongPoint
         {
             StringBuilder builder = new();
 
-            Append(builder, "At this position: {0}", PointTime.ToString(Options.DescriptionPlayedAt));
-            Append(builder, "Song ended: {0}", SongTime.ToString(Options.DescriptionPlayedAt));
-            Append(builder, "Played for {0}", Song.TimePlayed);
-            Append(builder, "Skipped: {0}", Song.Song_Skipped);
-            Append(builder, "Shuffle: {0}", Song.Song_Shuffle);
-            Append(builder, "IP Address: {0}", Song.Spotify_IP);
-            Append(builder, "Country: {0}", Song.Spotify_Country);
+            builder.Append("At this position: {0}", PointTime.ToString(Options.DescriptionPlayedAt));
+            builder.Append("Song ended: {0}", SongTime.ToString(Options.DescriptionPlayedAt));
+            builder.Append("Played for {0}", Song.TimePlayed);
+            builder.Append("Skipped: {0}", Song.Song_Skipped);
+            builder.Append("Shuffle: {0}", Song.Song_Shuffle);
+            builder.Append("IP Address: {0}", Song.Spotify_IP);
+            builder.Append("Country: {0}", Song.Spotify_Country);
 
             return builder.ToString();
-        }
-    }
-
-    private static void Append(StringBuilder builder, string format, object value)
-    {
-        if (value != null)
-        {
-            builder.AppendLine(string.Format(format, value));
         }
     }
 
@@ -240,4 +231,22 @@ public readonly struct SongPoint
         // Print information about the pairing
         return $"[{Origin.ToString()}] [P{Point.Index}, S{Song.Index} ==> #{Index}] [{songTime}S ~ {pointTime}P] [{RoundAccuracy}s] {Song.ToString()}";
     }
+}
+
+public class StringBuilder
+{
+    private readonly System.Text.StringBuilder builder;
+
+    public StringBuilder() => builder = new System.Text.StringBuilder();
+
+    public StringBuilder Append(string format, object value)
+    {
+        if (value != null)
+        {
+            builder.AppendLine(string.Format(format, value));
+        }
+        return this;
+    }
+
+    public override string ToString() => builder.ToString();
 }
