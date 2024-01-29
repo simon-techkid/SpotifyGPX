@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace SpotifyGPX;
 
-public readonly struct JsonFile
+public class JsonFile
 {
     public JsonFile(string path) => AllSongs = JsonToSpotifyEntry(path);
 
@@ -18,7 +18,7 @@ public readonly struct JsonFile
 
     private static List<JObject> DeserializeJson(string jsonFilePath) => JsonConvert.DeserializeObject<List<JObject>>(File.ReadAllText(jsonFilePath)) ?? throw new System.Exception($"JSON deserialization results in null, check the JSON");
 
-    public readonly List<SpotifyEntry> FilterSpotifyJson(List<GPXTrack> gpxTracks)
+    public List<SpotifyEntry> FilterSpotifyJson(List<GPXTrack> gpxTracks)
     {
         var trackRange = gpxTracks.Select(track => (track.Start, track.End)).ToList(); // List all of the tracks' start and end times
 

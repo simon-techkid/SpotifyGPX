@@ -8,7 +8,7 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX;
 
-public readonly struct GpxFile
+public class GpxFile
 {
     private readonly XDocument document; // Store the document for on-demand reading
 
@@ -41,9 +41,9 @@ public readonly struct GpxFile
         }
     }
 
-    private readonly bool TracksExist => document.Descendants(Options.InputNs + "trk").Any();
+    private bool TracksExist => document.Descendants(Options.InputNs + "trk").Any();
 
-    private readonly bool PointsExist => document.Descendants(Options.InputNs + "trkpt").Any();
+    private bool PointsExist => document.Descendants(Options.InputNs + "trkpt").Any();
 
     public List<GPXTrack> ParseGpxTracks()
     {

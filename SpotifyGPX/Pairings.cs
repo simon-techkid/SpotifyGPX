@@ -10,11 +10,11 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX;
 
-public readonly struct Pairings
+public class Pairings
 {
     public Pairings(List<SpotifyEntry> s, List<GPXTrack> t) => Pairs = PairPoints(s, t);
 
-    private readonly List<SongPoint> Pairs;
+    private List<SongPoint> Pairs { get; }
 
     private static List<SongPoint> PairPoints(List<SpotifyEntry> songs, List<GPXTrack> gpxTracks)
     {
@@ -52,14 +52,14 @@ public readonly struct Pairings
         return correlatedEntries;
     }
 
-    public readonly void PrintTracks()
+    public void PrintTracks()
     {
         string countsJoined = string.Join(", ", Pairs.GroupBy(pair => pair.Origin).Select(track => $"{track.Count()} ({track.Key.ToString()})"));
 
         Console.WriteLine($"[PAIR] Paired {Pairs.Count} entries from {Pairs.GroupBy(pair => pair.Origin).Count()} tracks: {countsJoined}");
     }
 
-    public readonly void SaveSingleGpx(string path)
+    public void SaveSingleGpx(string path)
     {
         XDocument document = new(
             new XDeclaration("1.0", "utf-8", null),
@@ -93,7 +93,7 @@ public readonly struct Pairings
         Console.WriteLine($"[FILE] {document.Descendants(Options.OutputNs + "trkpt").Count()} points ==> {path}");
     }
 
-    public readonly void SaveGpxWaypoints(string prefix, string directory, string suffix)
+    public void SaveGpxWaypoints(string prefix, string directory, string suffix)
     {
         List<string> results = Pairs
             .GroupBy(pair => pair.Origin)
@@ -131,7 +131,7 @@ public readonly struct Pairings
         Console.WriteLine(SaveFileString("GPX", results));
     }
 
-    public readonly void SaveJsonTracks(string prefix, string directory)
+    public void SaveJsonTracks(string prefix, string directory)
     {
         List<string> results = Pairs
             .GroupBy(pair => pair.Origin)
@@ -150,7 +150,7 @@ public readonly struct Pairings
         Console.WriteLine(SaveFileString("JSON", results));
     }
 
-    public readonly void SaveUriTracks(string prefix, string directory)
+    public void SaveUriTracks(string prefix, string directory)
     {
         List<string> results = Pairs
             .GroupBy(pair => pair.Origin)
@@ -168,7 +168,7 @@ public readonly struct Pairings
         Console.WriteLine(SaveFileString("TXT", results));
     }
 
-    public readonly void SaveXspfTracks(string prefix, string directory)
+    public void SaveXspfTracks(string prefix, string directory)
     {
         List<string> results = Pairs
             .GroupBy(pair => pair.Origin)
@@ -206,5 +206,5 @@ public readonly struct Pairings
 
     private static string TrackCountsString(int count, TrackInfo track) => $"{count} ({track.ToString()})";
 
-    private readonly string SaveFileString(string filetype, List<string> payload) => $"[FILE] {Pairs.Count()} points ==> {payload.Count()} {filetype}s: {string.Join(", ", payload)}";
+    private string SaveFileString(string filetype, List<string> payload) => $"[FILE] {Pairs.Count} points ==> {payload.Count} {filetype}s: {string.Join(", ", payload)}";
 }

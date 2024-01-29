@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX;
 
-public struct Options
+public class Options
 {
     // Time Formats for Console Printing
     public static string Console => @"HH\:mm\:ss"; // For each pairing printed to console (point & song time printed this way)
