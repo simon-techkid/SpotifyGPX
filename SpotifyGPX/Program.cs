@@ -102,7 +102,7 @@ class Program
             // Step 3: Create list of songs and points paired as close as possible to one another
             pairedEntries = new Pairings(filteredEntries, tracks);
 
-            pairedEntries.PrintTracks();
+            Console.WriteLine(pairedEntries.ToString());
         }
         catch (Exception ex)
         {
@@ -120,22 +120,22 @@ class Program
 
         if (exportWaypoints == true)
         {
-            pairedEntries.SaveGpxWaypoints(Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), "Waypoints");
+            pairedEntries.SaveTracks(Pairings.OutputFormat.GPX, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), "Waypoints");
         }
 
         if (exportJson == true)
         {
-            pairedEntries.SaveJsonTracks(Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
+            pairedEntries.SaveTracks(Pairings.OutputFormat.JSON, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
         }
 
         if (exportPlist == true)
         {
-            pairedEntries.SaveXspfTracks(Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
+            pairedEntries.SaveTracks(Pairings.OutputFormat.XSPF, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
         }
 
         if (exportSpotifyURI == true)
         {
-            pairedEntries.SaveUriTracks(Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
+            pairedEntries.SaveTracks(Pairings.OutputFormat.TXT, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
         }
 
         return; // Exit the program
