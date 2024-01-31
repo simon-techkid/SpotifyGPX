@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace SpotifyGPX;
 
@@ -96,7 +97,7 @@ public readonly struct SpotifyEntry
     public override string ToString() => $"{Song_Artist} - {Song_Name}"; // Display format for this song
     public bool WithinTimeFrame(DateTimeOffset Start, DateTimeOffset End) => (Time >= Start) && (Time <= End); // Return true if song within provided time range
 
-    public JObject ToJson()
+    public JObject ToJsonReport()
     {
         return new JObject(
             new JProperty("Original", Json),
@@ -104,6 +105,16 @@ public readonly struct SpotifyEntry
             new JProperty("Time", Time),
             new JProperty("TimePlayed", TimePlayed),
             new JProperty("OfflineTimestamp", OfflineTimestamp)
+        );
+    }
+
+    public XElement ToXspf()
+    {
+        return new XElement(Options.Xspf + "track",
+            new XElement(Options.Xspf + "creator", Song_Artist),
+            new XElement(Options.Xspf + "title", Song_Name),
+            new XElement(Options.Xspf + "annotation", Time.UtcDateTime.ToString(Options.GpxOutput)),
+            new XElement(Options.Xspf + "duration", Time_Played) // use TimeSpan instead of this later, add Options format
         );
     }
 }
@@ -180,7 +191,7 @@ public readonly struct GPXPoint
     public readonly DateTimeOffset Time { get; } // When was the user at this point?
     // GPXPoint never printed so no need to provide display format
 
-    public JObject ToJson()
+    public JObject ToJsonReport()
     {
         return new JObject(
             new JProperty("Index", Index),
@@ -253,17 +264,27 @@ public readonly struct SongPoint
         return $"[{Origin.ToString()}] [P{Point.Index}, S{Song.Index} ==> #{Index}] [{songTime}S ~ {pointTime}P] [{RoundAccuracy}s] {Song.ToString()}";
     }
 
-    public JObject ToJson()
+    public JObject CreateJsonReport()
     {
         return new JObject(
             new JProperty("Index", Index),
-            new JProperty("SpotifyEntry", Song.ToJson()),
-            new JProperty("GPXPoint", Point.ToJson()),
-            new JProperty("Origin", Origin.ToString()),
+            new JProperty("SpotifyEntry", Song.ToJsonReport()),
+            new JProperty("GPXPoint", Point.ToJsonReport()),
             new JProperty("Accuracy", Accuracy),
             new JProperty("NormalizedOffset", NormalizedOffset),
             new JProperty("SongTime", SongTime),
             new JProperty("PointTime", PointTime)
+        );
+    }
+
+    public XElement ToGPX(string type)
+    {
+        return new XElement(Options.OutputNs + type,
+            new XAttribute("lat", Point.Location.Latitude),
+            new XAttribute("lon", Point.Location.Longitude),
+            new XElement(Options.OutputNs + "name", Song.ToString()),
+            new XElement(Options.OutputNs + "time", Point.Time.UtcDateTime.ToString(Options.GpxOutput)),
+            new XElement(Options.OutputNs + "desc", Description)
         );
     }
 }

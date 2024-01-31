@@ -81,33 +81,19 @@ public class Pairings
 
     private XDocument GpxTracks()
     {
-        return new XDocument(
-            new XDeclaration("1.0", "utf-8", null),
-            new XElement(Options.OutputNs + "gpx",
-                new XAttribute("version", "1.0"),
-                new XAttribute("creator", "SpotifyGPX"),
-                new XAttribute(XNamespace.Xmlns + "xsi", Options.Xsi),
-                new XAttribute("xmlns", Options.OutputNs),
-                new XAttribute(Options.Xsi + "schemaLocation", Options.Schema),
-                new XElement(Options.OutputNs + "time", DateTimeOffset.Now.UtcDateTime.ToString(Options.GpxOutput)),
-                Pairs.GroupBy(pair => pair.Origin).Select(track =>
-                    new XElement(Options.OutputNs + "trk",
-                        new XElement(Options.OutputNs + "name", track.Key.ToString()),
-                        new XElement(Options.OutputNs + "trkseg",
-                            track.Select(pair =>
-                                new XElement(Options.OutputNs + "trkpt",
-                                    new XAttribute("lat", pair.Point.Location.Latitude),
-                                    new XAttribute("lon", pair.Point.Location.Longitude),
-                                    new XElement(Options.OutputNs + "name", pair.Song.ToString()),
-                                    new XElement(Options.OutputNs + "time", pair.Point.Time.UtcDateTime.ToString(Options.GpxOutput)),
-                                    new XElement(Options.OutputNs + "desc", pair.Description)
-                                )
-                            )
-                        )
+        IEnumerable<XElement> ele = Pairs
+            .GroupBy(pair => pair.Origin)
+            .Select(track =>
+            {
+                return new XElement(Options.OutputNs + "trk",
+                    new XElement(Options.OutputNs + "name", track.Key.ToString()),
+                    new XElement(Options.OutputNs + "trkseg",
+                        track.Select(pair => pair.ToGPX("trkpt"))
                     )
-                )
-            )
-        );
+                );
+            });
+
+        return GetGpx(ele);
     }
 
     private List<JObject> JsonReport()
@@ -120,7 +106,7 @@ public class Pairings
                     new JProperty(group.Key.ToString(), group
                     .SelectMany(pair =>
                     {
-                        return new JArray(pair.ToJson());
+                        return new JArray(pair.CreateJsonReport());
                     }))
                 );
             })
@@ -142,18 +128,17 @@ public class Pairings
             .Select(group => // For each group of pairs (for each track):
             {
                 TrackInfo currentTrack = group.Key; // Send the info of the current track to a variable
-                
+
                 string fileNameWithoutExtension = string.Join("_", new[] { prefix, currentTrack.ToString(), suffix }.Where(component => !string.IsNullOrEmpty(component))); // if prefix or suffix null, don't include
                 string extension = format.ToString().ToLower(); // file extension is selected format in lowercase letters
                 string fileNameWithExtension = $"{fileNameWithoutExtension}.{extension}"; // pair the filename and file extension
 
                 string filePath = Path.Combine(directory, fileNameWithExtension); // Create full file path that has the parent directory before above file name
-                string friendlyName = currentTrack.ToString(); // string printed to GPX and XSPF <name> header tags' inner text
 
                 switch (format)
                 {
                     case TrackFormat.GPX:
-                        XDocument gpxDocument = GpxWaypoints(group, friendlyName); // generate a GPX file
+                        XDocument gpxDocument = GpxWaypoints(group); // generate a GPX file
                         Save(gpxDocument, filePath); // save that file
                         return TrackCountsString(gpxDocument.Descendants(Options.OutputNs + "wpt").Count(), currentTrack); // return the per-track point counts
 
@@ -169,7 +154,7 @@ public class Pairings
                         return TrackCountsString(txtArray.Length, currentTrack); // return the per-track song uri counts
 
                     case TrackFormat.XSPF:
-                        XDocument xspfDocument = XspfSongs(group, friendlyName); // generate an XSPF file
+                        XDocument xspfDocument = GetXspf(group); // generate an XSPF file
                         Save(xspfDocument, filePath); // save that file
                         return TrackCountsString(xspfDocument.Descendants(Options.Xspf + "track").Count(), currentTrack); // return the per-track song counts
 
@@ -204,56 +189,44 @@ public class Pairings
         }
     }
 
-    private static XDocument GpxWaypoints(IEnumerable<SongPoint> pairs, string name)
+    private static XDocument GpxWaypoints(IEnumerable<SongPoint> pairs)
     {
-        return new XDocument(
-                    new XDeclaration("1.0", "utf-8", null),
-                    new XElement(Options.OutputNs + "gpx",
-                        new XAttribute("version", "1.0"),
-                        new XAttribute("creator", "SpotifyGPX"),
-                        new XAttribute(XNamespace.Xmlns + "xsi", Options.Xsi),
-                        new XAttribute("xmlns", Options.OutputNs),
-                        new XAttribute(Options.Xsi + "schemaLocation", Options.Schema),
-                        new XElement(Options.OutputNs + "name", name),
-                        new XElement(Options.OutputNs + "time", DateTimeOffset.Now.UtcDateTime.ToString(Options.GpxOutput)),
-                        pairs.Select(pair =>
-                            new XElement(Options.OutputNs + "wpt",
-                                new XAttribute("lat", pair.Point.Location.Latitude),
-                                new XAttribute("lon", pair.Point.Location.Longitude),
-                                new XElement(Options.OutputNs + "name", pair.Song.ToString()),
-                                new XElement(Options.OutputNs + "time", pair.Point.Time.UtcDateTime.ToString(Options.GpxOutput)),
-                                new XElement(Options.OutputNs + "desc", pair.Description)
-                            )
-                        )
-                    )
-                );
+        return GetGpx(pairs.Select(pair => pair.ToGPX("wpt")));
     }
 
     private static List<JObject> JsonObjects(IEnumerable<SongPoint> pairs) => pairs.Select(pair => pair.Song.Json).ToList();
 
     private static string[] UriList(IEnumerable<SongPoint> pairs) => pairs.Select(pair => pair.Song.Song_URI).Where(s => s != null).ToArray();
 
-    private static XDocument XspfSongs(IEnumerable<SongPoint> pairs, string name)
+    private static XDocument GetGpx(IEnumerable<XElement> ele)
     {
         return new XDocument(
-                new XDeclaration("1.0", "utf-8", null),
-                new XElement(Options.Xspf + "playlist",
-                    new XAttribute("version", "1.0"),
-                    new XAttribute("xmlns", Options.Xspf),
-                    new XElement(Options.Xspf + "name", name),
-                    new XElement(Options.Xspf + "creator", "SpotifyGPX"),
-                    new XElement(Options.Xspf + "trackList",
-                        pairs.Select(song =>
-                        new XElement(Options.Xspf + "track",
-                            new XElement(Options.Xspf + "creator", song.Song.Song_Artist),
-                            new XElement(Options.Xspf + "title", song.Song.Song_Name),
-                            new XElement(Options.Xspf + "annotation", song.Song.Time.UtcDateTime.ToString(Options.GpxOutput)),
-                            new XElement(Options.Xspf + "duration", song.Song.Time_Played)
-                            )
-                        )
-                    )
+            new XDeclaration("1.0", "utf-8", null),
+            new XElement(Options.OutputNs + "gpx",
+                new XAttribute("version", "1.0"),
+                new XAttribute("creator", "SpotifyGPX"),
+                new XAttribute(XNamespace.Xmlns + "xsi", Options.Xsi),
+                new XAttribute("xmlns", Options.OutputNs),
+                new XAttribute(Options.Xsi + "schemaLocation", Options.Schema),
+                new XElement(Options.OutputNs + "time", DateTimeOffset.Now.UtcDateTime.ToString(Options.GpxOutput)),
+                ele
+            )
+        );
+    }
+
+    private static XDocument GetXspf(IEnumerable<SongPoint> pairs)
+    {
+        return new XDocument(
+            new XDeclaration("1.0", "utf-8", null),
+            new XElement(Options.Xspf + "playlist",
+                new XAttribute("version", "1.0"),
+                new XAttribute("xmlns", Options.Xspf),
+                new XElement(Options.Xspf + "creator", "SpotifyGPX"),
+                new XElement(Options.Xspf + "trackList",
+                    pairs.Select(song => song.Song.ToXspf())
                 )
-                );
+            )
+        );
     }
 
     public override string ToString()

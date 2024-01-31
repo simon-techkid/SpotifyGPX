@@ -120,7 +120,7 @@ class Program
         {
             string path = Path.Combine(Directory.GetParent(inputGpx).ToString(), $"{Path.GetFileNameWithoutExtension(inputGpx)}_Tracks.gpx");
             pairedEntries.SaveCohesive(Pairings.CohesiveFormat.GPX, path);
-            
+
         }
 
         if (exportWaypoints == true)
