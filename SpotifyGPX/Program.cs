@@ -18,6 +18,7 @@ class Program
         bool exportJson = false;
         bool exportPlist = false;
         bool exportSpotifyURI = false;
+        bool exportJsonReport = false;
 
         switch (args.Length)
         {
@@ -39,8 +40,11 @@ class Program
                     case "-s":
                         Console.WriteLine("[HELP] Pass -s to export and copy to clipboard a TXT list of Spotify tracks you can paste into a playlist on Spotify");
                         break;
+                    case "-r":
+                        Console.WriteLine("[HELP] Press -r to export a verbose JSON report of all created pairings");
+                        break;
                     default:
-                        Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-g]");
+                        Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-w] [-j] [-p] [-s] [-r]");
                         break;
                 }
                 return;
@@ -52,9 +56,10 @@ class Program
                 exportJson = args.Length >= 3 && args.Contains("-j");
                 exportPlist = args.Length >= 3 && args.Contains("-p");
                 exportSpotifyURI = args.Length >= 3 && args.Contains("-s");
+                exportJsonReport = args.Length >= 3 && args.Contains("-r");
                 break;
             default:
-                Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-g]");
+                Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-w] [-j] [-p] [-s] [-r]");
                 return;
         }
 
@@ -114,9 +119,8 @@ class Program
         if (noGpxExport == false)
         {
             string path = Path.Combine(Directory.GetParent(inputGpx).ToString(), $"{Path.GetFileNameWithoutExtension(inputGpx)}_Tracks.gpx");
-
             pairedEntries.SaveCohesive(Pairings.CohesiveFormat.GPX, path);
-            pairedEntries.SaveCohesive(Pairings.CohesiveFormat.JsonReport, Path.ChangeExtension(path, ".json"));
+            
         }
 
         if (exportWaypoints == true)
@@ -137,6 +141,12 @@ class Program
         if (exportSpotifyURI == true)
         {
             pairedEntries.SaveTracks(Pairings.TrackFormat.TXT, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
+        }
+
+        if (exportJsonReport == true)
+        {
+            string path = Path.Combine(Directory.GetParent(inputGpx).ToString(), $"{Path.GetFileNameWithoutExtension(inputGpx)}_Report.json");
+            pairedEntries.SaveCohesive(Pairings.CohesiveFormat.JsonReport, path);
         }
 
         return; // Exit the program

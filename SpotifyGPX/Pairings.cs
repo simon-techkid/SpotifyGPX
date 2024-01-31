@@ -69,8 +69,9 @@ public class Pairings
                 return;
 
             case CohesiveFormat.JsonReport:
-                JObject report = JsonReport();
-                File.WriteAllText(path, report.ToString());
+                List<JObject> report = JsonReport();
+                string rep = JsonConvert.SerializeObject(report, Options.Json);
+                File.WriteAllText(path, rep);
                 return;
 
             default:
@@ -109,19 +110,21 @@ public class Pairings
         );
     }
 
-    private JObject JsonReport()
+    private List<JObject> JsonReport()
     {
-        JArray rowArray = new(
-            Pairs.Select(pairing =>
+        return Pairs
+            .GroupBy(pair => pair.Origin)
+            .Select(group =>
             {
-                return new JObject(pairing.ToJson());
-            }));
-
-        return new JObject(
-            new JProperty("SpotifyGPX", new JObject(
-                new JProperty("pairings", rowArray)
-            ))
-        );
+                return new JObject(
+                    new JProperty(group.Key.ToString(), group
+                    .SelectMany(pair =>
+                    {
+                        return new JArray(pair.ToJson());
+                    }))
+                );
+            })
+            .ToList();
     }
 
     public enum TrackFormat
