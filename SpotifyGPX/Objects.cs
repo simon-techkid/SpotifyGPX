@@ -45,11 +45,23 @@ public readonly struct SpotifyEntry
             }
         }
     }
-
     public readonly string? Song_Artist => (string?)Json["artistName"] ?? (string?)Json["master_metadata_album_artist_name"];
     public readonly string? Song_Name => (string?)Json["trackName"] ?? (string?)Json["master_metadata_track_name"];
     public readonly string? Time_Played => (string?)Json["msPlayed"] ?? (string?)Json["ms_played"];
-    public readonly TimeSpan? TimePlayed => Time_Played != null ? TimeSpan.FromMilliseconds(double.Parse(Time_Played)) : null; // Parse string of milliseconds to TimeSpan
+    public readonly TimeSpan? TimePlayed
+    {
+        get
+        {
+            if (Time_Played != null)
+            {
+                return TimeSpan.FromMilliseconds(double.Parse(Time_Played)); // Parse string of milliseconds to TimeSpan
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
     public readonly string? Spotify_Username => (string?)Json["username"];
     public readonly string? Spotify_Platform => (string?)Json["platform"];
     public readonly string? Spotify_Country => (string?)Json["conn_country"];
@@ -66,6 +78,20 @@ public readonly struct SpotifyEntry
     public readonly bool? Song_Skipped => (bool?)Json["skipped"];
     public readonly bool? Spotify_Offline => (bool?)Json["offline"];
     public readonly string? Spotify_OfflineTS => (string?)Json["offline_timestamp"];
+    public readonly DateTimeOffset? OfflineTimestamp
+    {
+        get
+        {
+            if (Spotify_OfflineTS != null)
+            {
+                return DateTimeOffset.FromUnixTimeSeconds(long.Parse(Spotify_OfflineTS));
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
     public readonly bool? Spotify_Incognito => (bool?)Json["incognito"];
     public override string ToString() => $"{Song_Artist} - {Song_Name}"; // Display format for this song
     public bool WithinTimeFrame(DateTimeOffset Start, DateTimeOffset End) => (Time >= Start) && (Time <= End); // Return true if song within provided time range
@@ -114,36 +140,10 @@ public readonly struct TrackInfo
         Type = type;
     }
 
-    private readonly int? Indexx;
-    public readonly int Index
-    {
-        get
-        {
-            if (Indexx == null)
-            {
-                return (int)Type;
-            }
-            else
-            {
-                return (int)Indexx;
-            }
-        }
-    }
-    private readonly string? NodeName;
-    public readonly string Name
-    {
-        get
-        {
-            if (NodeName == null)
-            {
-                return $"T{Index}";
-            }
-            else
-            {
-                return NodeName;
-            }
-        }
-    }
+    private readonly int? Indexx { get; }
+    public readonly int Index => Indexx == null ? (int)Type : (int)Indexx;
+    private readonly string? NodeName { get; }
+    public readonly string Name => NodeName ?? $"T{Index}";
     public TrackType Type { get; }
     public override string ToString() => Name;
 }
