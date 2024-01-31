@@ -95,6 +95,17 @@ public readonly struct SpotifyEntry
     public readonly bool? Spotify_Incognito => (bool?)Json["incognito"];
     public override string ToString() => $"{Song_Artist} - {Song_Name}"; // Display format for this song
     public bool WithinTimeFrame(DateTimeOffset Start, DateTimeOffset End) => (Time >= Start) && (Time <= End); // Return true if song within provided time range
+
+    public JObject ToJson()
+    {
+        return new JObject(
+            new JProperty("Original", Json),
+            new JProperty("Index", Index),
+            new JProperty("Time", Time),
+            new JProperty("TimePlayed", TimePlayed),
+            new JProperty("OfflineTimestamp", OfflineTimestamp)
+        );
+    }
 }
 
 public readonly struct GPXTrack
@@ -168,6 +179,16 @@ public readonly struct GPXPoint
     public readonly Coordinate Location { get; } // Where on Earth is this point?
     public readonly DateTimeOffset Time { get; } // When was the user at this point?
     // GPXPoint never printed so no need to provide display format
+
+    public JObject ToJson()
+    {
+        return new JObject(
+            new JProperty("Index", Index),
+            new JProperty("lat", Location.Latitude),
+            new JProperty("lon", Location.Longitude),
+            new JProperty("time", Time)
+        );
+    }
 }
 
 public readonly struct Coordinate
@@ -230,6 +251,20 @@ public readonly struct SongPoint
 
         // Print information about the pairing
         return $"[{Origin.ToString()}] [P{Point.Index}, S{Song.Index} ==> #{Index}] [{songTime}S ~ {pointTime}P] [{RoundAccuracy}s] {Song.ToString()}";
+    }
+
+    public JObject ToJson()
+    {
+        return new JObject(
+            new JProperty("Index", Index),
+            new JProperty("SpotifyEntry", Song.ToJson()),
+            new JProperty("GPXPoint", Point.ToJson()),
+            new JProperty("Origin", Origin.ToString()),
+            new JProperty("Accuracy", Accuracy),
+            new JProperty("NormalizedOffset", NormalizedOffset),
+            new JProperty("SongTime", SongTime),
+            new JProperty("PointTime", PointTime)
+        );
     }
 }
 

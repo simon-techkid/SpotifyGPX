@@ -115,27 +115,28 @@ class Program
         {
             string path = Path.Combine(Directory.GetParent(inputGpx).ToString(), $"{Path.GetFileNameWithoutExtension(inputGpx)}_Tracks.gpx");
 
-            pairedEntries.SaveSingleGpx(path);
+            pairedEntries.SaveCohesive(Pairings.CohesiveFormat.GPX, path);
+            pairedEntries.SaveCohesive(Pairings.CohesiveFormat.JsonReport, Path.ChangeExtension(path, ".json"));
         }
 
         if (exportWaypoints == true)
         {
-            pairedEntries.SaveTracks(Pairings.OutputFormat.GPX, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), "Waypoints");
+            pairedEntries.SaveTracks(Pairings.TrackFormat.GPX, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), "Waypoints");
         }
 
         if (exportJson == true)
         {
-            pairedEntries.SaveTracks(Pairings.OutputFormat.JSON, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
+            pairedEntries.SaveTracks(Pairings.TrackFormat.JSON, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
         }
 
         if (exportPlist == true)
         {
-            pairedEntries.SaveTracks(Pairings.OutputFormat.XSPF, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
+            pairedEntries.SaveTracks(Pairings.TrackFormat.XSPF, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
         }
 
         if (exportSpotifyURI == true)
         {
-            pairedEntries.SaveTracks(Pairings.OutputFormat.TXT, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
+            pairedEntries.SaveTracks(Pairings.TrackFormat.TXT, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
         }
 
         return; // Exit the program

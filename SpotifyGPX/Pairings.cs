@@ -53,9 +53,34 @@ public class Pairings
         return correlatedEntries;
     }
 
-    public void SaveSingleGpx(string path)
+    public enum CohesiveFormat
     {
-        XDocument document = new(
+        GPX,
+        JsonReport
+    }
+
+    public void SaveCohesive(CohesiveFormat format, string path)
+    {
+        switch (format)
+        {
+            case CohesiveFormat.GPX:
+                XDocument document = GpxTracks();
+                document.Save(path);
+                return;
+
+            case CohesiveFormat.JsonReport:
+                JObject report = JsonReport();
+                File.WriteAllText(path, report.ToString());
+                return;
+
+            default:
+                throw new ArgumentException("Invalid output format");
+        }
+    }
+
+    private XDocument GpxTracks()
+    {
+        return new XDocument(
             new XDeclaration("1.0", "utf-8", null),
             new XElement(Options.OutputNs + "gpx",
                 new XAttribute("version", "1.0"),
@@ -82,12 +107,24 @@ public class Pairings
                 )
             )
         );
-
-        document.Save(path);
-        Console.WriteLine($"[FILE] {document.Descendants(Options.OutputNs + "trkpt").Count()} points ==> {path}");
     }
 
-    public enum OutputFormat
+    private JObject JsonReport()
+    {
+        JArray rowArray = new(
+            Pairs.Select(pairing =>
+            {
+                return new JObject(pairing.ToJson());
+            }));
+
+        return new JObject(
+            new JProperty("SpotifyGPX", new JObject(
+                new JProperty("pairings", rowArray)
+            ))
+        );
+    }
+
+    public enum TrackFormat
     {
         GPX,
         JSON,
@@ -95,7 +132,7 @@ public class Pairings
         XSPF
     }
 
-    public void SaveTracks(OutputFormat format, string? prefix, string directory, string? suffix)
+    public void SaveTracks(TrackFormat format, string? prefix, string directory, string? suffix)
     {
         List<string> results = Pairs // For all pairs:
             .GroupBy(pair => pair.Origin) // Group them by origin track
@@ -112,22 +149,23 @@ public class Pairings
 
                 switch (format)
                 {
-                    case OutputFormat.GPX:
+                    case TrackFormat.GPX:
                         XDocument gpxDocument = GpxWaypoints(group, friendlyName); // generate a GPX file
                         Save(gpxDocument, filePath); // save that file
                         return TrackCountsString(gpxDocument.Descendants(Options.OutputNs + "wpt").Count(), currentTrack); // return the per-track point counts
 
-                    case OutputFormat.JSON:
+                    case TrackFormat.JSON:
                         List<JObject> jsonList = JsonObjects(group); // generate a JSON file
-                        Save(jsonList, filePath); // save that file
+                        string json = JsonConvert.SerializeObject(jsonList, Options.Json); // Combine objects into a string
+                        Save(json, filePath); // save that file
                         return TrackCountsString(jsonList.Count, currentTrack); // return the per-track song counts
 
-                    case OutputFormat.TXT:
+                    case TrackFormat.TXT:
                         string[] txtArray = UriList(group); // generate a TXT file
                         Save(txtArray, filePath); // save that file
                         return TrackCountsString(txtArray.Length, currentTrack); // return the per-track song uri counts
 
-                    case OutputFormat.XSPF:
+                    case TrackFormat.XSPF:
                         XDocument xspfDocument = XspfSongs(group, friendlyName); // generate an XSPF file
                         Save(xspfDocument, filePath); // save that file
                         return TrackCountsString(xspfDocument.Descendants(Options.Xspf + "track").Count(), currentTrack); // return the per-track song counts
@@ -143,7 +181,7 @@ public class Pairings
 
     private static string TrackCountsString(int count, TrackInfo track) => $"{count} ({track.ToString()})";
 
-    private string SaveFileString(OutputFormat filetype, List<string> payload) => $"[FILE] {Pairs.Count} points ==> {payload.Count} {filetype}s: {string.Join(", ", payload)}";
+    private string SaveFileString(TrackFormat filetype, List<string> payload) => $"[FILE] {Pairs.Count} points ==> {payload.Count} {filetype}s: {string.Join(", ", payload)}";
 
     private static void Save(object content, string path)
     {
@@ -152,9 +190,8 @@ public class Pairings
             case XDocument xDoc:
                 xDoc.Save(path);
                 break;
-            case List<JObject> json:
-                string jsonDocument = JsonConvert.SerializeObject(json, Options.Json);
-                File.WriteAllText(path, jsonDocument);
+            case string json:
+                File.WriteAllText(path, json);
                 break;
             case string[] array:
                 File.WriteAllLines(path, array);
