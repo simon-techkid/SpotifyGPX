@@ -119,34 +119,34 @@ class Program
         if (noGpxExport == false)
         {
             string path = Path.Combine(Directory.GetParent(inputGpx).ToString(), $"{Path.GetFileNameWithoutExtension(inputGpx)}_Tracks.gpx");
-            pairedEntries.SaveCohesive(Pairings.CohesiveFormat.GPX, path);
+            pairedEntries.SaveSingle(Pairings.SingleFile.GPX, path);
 
         }
 
         if (exportWaypoints == true)
         {
-            pairedEntries.SaveTracks(Pairings.TrackFormat.GPX, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), "Waypoints");
+            pairedEntries.SaveTracks(Pairings.PerTrackFile.GPX, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), "Waypoints");
         }
 
         if (exportJson == true)
         {
-            pairedEntries.SaveTracks(Pairings.TrackFormat.JSON, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
+            pairedEntries.SaveTracks(Pairings.PerTrackFile.JSON, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
         }
 
         if (exportPlist == true)
         {
-            pairedEntries.SaveTracks(Pairings.TrackFormat.XSPF, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
+            pairedEntries.SaveTracks(Pairings.PerTrackFile.XSPF, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
         }
 
         if (exportSpotifyURI == true)
         {
-            pairedEntries.SaveTracks(Pairings.TrackFormat.TXT, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
+            pairedEntries.SaveTracks(Pairings.PerTrackFile.TXT, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
         }
 
         if (exportJsonReport == true)
         {
             string path = Path.Combine(Directory.GetParent(inputGpx).ToString(), $"{Path.GetFileNameWithoutExtension(inputGpx)}_Report.json");
-            pairedEntries.SaveCohesive(Pairings.CohesiveFormat.JsonReport, path);
+            pairedEntries.SaveSingle(Pairings.SingleFile.JsonReport, path);
         }
 
         return; // Exit the program
