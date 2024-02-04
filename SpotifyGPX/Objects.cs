@@ -4,7 +4,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace SpotifyGPX;
 
@@ -96,27 +95,6 @@ public readonly struct SpotifyEntry
     public readonly bool? Spotify_Incognito => (bool?)Json["incognito"];
     public override string ToString() => $"{Song_Artist} - {Song_Name}"; // Display format for this song
     public bool WithinTimeFrame(DateTimeOffset Start, DateTimeOffset End) => (Time >= Start) && (Time <= End); // Return true if song within provided time range
-
-    public JObject ToJsonReport()
-    {
-        return new JObject(
-            new JProperty("Original", Json),
-            new JProperty("Index", Index),
-            new JProperty("Time", Time),
-            new JProperty("TimePlayed", TimePlayed),
-            new JProperty("OfflineTimestamp", OfflineTimestamp)
-        );
-    }
-
-    public XElement ToXspf()
-    {
-        return new XElement(Options.Xspf + "track",
-            new XElement(Options.Xspf + "creator", Song_Artist),
-            new XElement(Options.Xspf + "title", Song_Name),
-            new XElement(Options.Xspf + "annotation", Time.UtcDateTime.ToString(Options.GpxOutput)),
-            new XElement(Options.Xspf + "duration", Time_Played) // use TimeSpan instead of this later, add Options format
-        );
-    }
 }
 
 public readonly struct GPXTrack
@@ -190,16 +168,6 @@ public readonly struct GPXPoint
     public readonly Coordinate Location { get; } // Where on Earth is this point?
     public readonly DateTimeOffset Time { get; } // When was the user at this point?
     // GPXPoint never printed so no need to provide display format
-
-    public JObject ToJsonReport()
-    {
-        return new JObject(
-            new JProperty("Index", Index),
-            new JProperty("lat", Location.Latitude),
-            new JProperty("lon", Location.Longitude),
-            new JProperty("time", Time)
-        );
-    }
 }
 
 public readonly struct Coordinate
@@ -247,12 +215,12 @@ public readonly struct SongPoint
     public readonly SpotifyEntry Song { get; } // Contents of the original song entry
     public readonly GPXPoint Point { get; } // Contents of the original GPX point
     public readonly TrackInfo Origin { get; } // Track from which the pairing was created
-    private readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds; // Raw accuracy
+    public readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds; // Raw accuracy
     public readonly double AbsAccuracy => Math.Abs(Accuracy); // Absolute value of the accuracy
     private readonly double RoundAccuracy => Math.Round(Accuracy); // Rounded accuracy
-    private readonly TimeSpan NormalizedOffset => Point.Time.Offset; // Standard offset is defined by the original GPX point offset
-    private DateTimeOffset SongTime => Song.Time.ToOffset(NormalizedOffset); // Song end time, normalized to point time zone
-    private DateTimeOffset PointTime => Point.Time.ToOffset(NormalizedOffset); // Point end time, normalized to point time zone (redundant)
+    public readonly TimeSpan NormalizedOffset => Point.Time.Offset; // Standard offset is defined by the original GPX point offset
+    public DateTimeOffset SongTime => Song.Time.ToOffset(NormalizedOffset); // Song end time, normalized to point time zone
+    public DateTimeOffset PointTime => Point.Time.ToOffset(NormalizedOffset); // Point end time, normalized to point time zone (redundant)
 
     public override string ToString()
     {
@@ -262,30 +230,6 @@ public readonly struct SongPoint
 
         // Print information about the pairing
         return $"[{Origin.ToString()}] [P{Point.Index}, S{Song.Index} ==> #{Index}] [{songTime}S ~ {pointTime}P] [{RoundAccuracy}s] {Song.ToString()}";
-    }
-
-    public JObject CreateJsonReport()
-    {
-        return new JObject(
-            new JProperty("Index", Index),
-            new JProperty("SpotifyEntry", Song.ToJsonReport()),
-            new JProperty("GPXPoint", Point.ToJsonReport()),
-            new JProperty("Accuracy", Accuracy),
-            new JProperty("NormalizedOffset", NormalizedOffset),
-            new JProperty("SongTime", SongTime),
-            new JProperty("PointTime", PointTime)
-        );
-    }
-
-    public XElement ToGPX(string type)
-    {
-        return new XElement(Options.OutputNs + type,
-            new XAttribute("lat", Point.Location.Latitude),
-            new XAttribute("lon", Point.Location.Longitude),
-            new XElement(Options.OutputNs + "name", Song.ToString()),
-            new XElement(Options.OutputNs + "time", Point.Time.UtcDateTime.ToString(Options.GpxOutput)),
-            new XElement(Options.OutputNs + "desc", Description)
-        );
     }
 }
 

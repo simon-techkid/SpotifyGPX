@@ -1,6 +1,5 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Xml.Linq;
@@ -34,14 +33,5 @@ public class Options
     public static string GpxOutput => @"yyyy-MM-ddTHH\:mm\:ssZ"; // Must first be converted to UTC (GPX spec requires ISO 8601)
     public static string DescriptionPlayedAt => @"yyyy-MM-dd HH\:mm\:ss zzz"; // Time of a song and point printed in the <desc> field of exported GPX
     public static string DescriptionTimePlayed => @"hh\:mm\:ss\.fff"; // Duration (msPlayed) of a song in the <desc> field of exported GPX
-    public static XNamespace OutputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of the output GPX
-    public static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance"; // XML schema location of the output GPX
-    public static string Schema => "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd"; // GPX schema location(s) of the output GPX
-
-    // XSPF Export Options
-    public static XNamespace Xspf => "http://xspf.org/ns/0/"; // Namespace of output XSPF
-
-    // JSON Export Options
-    public static Formatting Json => Formatting.Indented; // Formatting of exporting JSON
 }
 

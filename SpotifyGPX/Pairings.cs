@@ -1,13 +1,11 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using SpotifyGPX.Output;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace SpotifyGPX;
 
@@ -61,48 +59,17 @@ public class Pairings
 
     public void SaveSingle(SingleFile format, string path)
     {
-        object contentToSave = format switch
+        switch (format)
         {
-            SingleFile.GPX => GetGpxTracks(),
-            SingleFile.JsonReport => GetJsonReport(),
-            _ => throw new ArgumentException("Invalid output format"),
-        };
-
-        Save(contentToSave, path);
-    }
-    
-    private XDocument GetGpxTracks()
-    {
-        IEnumerable<XElement> ele = Pairs
-            .GroupBy(pair => pair.Origin)
-            .Select(track =>
-            {
-                return new XElement(Options.OutputNs + "trk",
-                    new XElement(Options.OutputNs + "name", track.Key.ToString()),
-                    new XElement(Options.OutputNs + "trkseg",
-                        track.Select(pair => pair.ToGPX("trkpt"))
-                    )
-                );
-            });
-
-        return CreateGpx(ele);
-    }
-
-    private List<JObject> GetJsonReport()
-    {
-        return Pairs
-            .GroupBy(pair => pair.Origin)
-            .Select(group =>
-            {
-                return new JObject(
-                    new JProperty(group.Key.ToString(), group
-                    .SelectMany(pair =>
-                    {
-                        return new JArray(pair.CreateJsonReport());
-                    }))
-                );
-            })
-            .ToList();
+            case SingleFile.GPX:
+                new Gpx(Pairs, Gpx.PlacementStyles.trkpt).Save(path);
+                break;
+            case SingleFile.JsonReport:
+                new JsonReport(Pairs).Save(path);
+                break;
+            default:
+                throw new Exception("Invalid SingleFile format specified");
+        }
     }
 
     public enum PerTrackFile
@@ -115,123 +82,32 @@ public class Pairings
 
     public void SaveTracks(PerTrackFile format, string? prefix, string directory, string? suffix)
     {
-        List<string> results = Pairs // For all pairs:
-            .GroupBy(pair => pair.Origin) // Group them by origin track
-            .Select(group => // For each group of pairs (for each track):
-            {
-                TrackInfo currentTrack = group.Key; // Send the info of the current track to a variable
-
-                string fileNameWithoutExtension = string.Join("_", new[] { prefix, currentTrack.ToString(), suffix }.Where(component => !string.IsNullOrEmpty(component))); // if prefix or suffix null, don't include
-                string extension = format.ToString().ToLower(); // file extension is selected format in lowercase letters
-                string fileNameWithExtension = $"{fileNameWithoutExtension}.{extension}"; // pair the filename and file extension
-
-                string filePath = Path.Combine(directory, fileNameWithExtension); // Create full file path that has the parent directory before above file name
-
-                switch (format)
-                {
-                    case PerTrackFile.GPX:
-                        XDocument gpxDocument = GetGpxWaypoints(group); // generate a GPX file
-                        Save(gpxDocument, filePath); // save that file
-                        return TrackCountsString(gpxDocument.Descendants(Options.OutputNs + "wpt").Count(), currentTrack); // return the per-track point counts
-
-                    case PerTrackFile.JSON:
-                        List<JObject> jsonList = GetJObjects(group); // generate a JSON file
-                        Save(jsonList, filePath); // save that file
-                        return TrackCountsString(jsonList.Count, currentTrack); // return the per-track song counts
-
-                    case PerTrackFile.TXT:
-                        string[] txtArray = GetUris(group); // generate a TXT file
-                        Save(txtArray, filePath); // save that file
-                        return TrackCountsString(txtArray.Length, currentTrack); // return the per-track song uri counts
-
-                    case PerTrackFile.XSPF:
-                        XDocument xspfDocument = GetXspfDocument(group); // generate an XSPF file
-                        Save(xspfDocument, filePath); // save that file
-                        return TrackCountsString(xspfDocument.Descendants(Options.Xspf + "track").Count(), currentTrack); // return the per-track song counts
-
-                    default:
-                        throw new ArgumentException("Invalid output format");
-                }
-            })
-            .ToList();
-
-        Console.WriteLine(SaveFileString(format, results));
-    }
-
-    private static void Save(object content, string path)
-    {
-        switch (content)
+        foreach (var group in Pairs.GroupBy(pair => pair.Origin))
         {
-            case XDocument xml:
-                xml.Save(path);
-                break;
-            case List<JObject> json:
-                string text = JsonConvert.SerializeObject(json, Options.Json);
-                File.WriteAllText(path, text);
-                break;
-            case string str:
-                File.WriteAllText(path, str);
-                break;
-            case string[] array:
-                File.WriteAllLines(path, array);
-                break;
-            default:
-                throw new Exception($"Unable to save pairings document to {path}");
+            TrackInfo currentTrack = group.Key;
+
+            string fileNameWithoutExtension = string.Join("_", new[] { prefix, currentTrack.ToString(), suffix }.Where(component => !string.IsNullOrEmpty(component)));
+            string extension = format.ToString().ToLower();
+            string fileNameWithExtension = $"{fileNameWithoutExtension}.{extension}";
+            string filePath = Path.Combine(directory, fileNameWithExtension);
+
+            switch (format)
+            {
+                case PerTrackFile.GPX:
+                    new Gpx(group, Gpx.PlacementStyles.wpt).Save(filePath);
+                    break;
+                case PerTrackFile.JSON:
+                    new Json(group).Save(filePath);
+                    break;
+                case PerTrackFile.TXT:
+                    new Txt(group).Save(filePath);
+                    break;
+                case PerTrackFile.XSPF:
+                    new Xspf(group).Save(filePath);
+                    break;
+            }
         }
     }
-
-    private static XDocument GetGpxWaypoints(IEnumerable<SongPoint> pairs)
-    {
-        return CreateGpx(pairs.Select(pair => pair.ToGPX("wpt")));
-    }
-
-    private static List<JObject> GetJObjects(IEnumerable<SongPoint> pairs)
-    {
-        return pairs.Select(pair => pair.Song.Json).ToList();
-    }
-
-    private static string[] GetUris(IEnumerable<SongPoint> pairs)
-    {
-        return pairs.Select(pair => pair.Song.Song_URI).Where(s => s != null).ToArray();
-    }
-
-    private static XDocument GetXspfDocument(IEnumerable<SongPoint> pairs)
-    {
-        return CreateXspf(pairs.Select(song => song.Song.ToXspf()));
-    }
-
-    private static XDocument CreateGpx(IEnumerable<XElement> ele)
-    {
-        return new XDocument(
-            new XDeclaration("1.0", "utf-8", null),
-            new XElement(Options.OutputNs + "gpx",
-                new XAttribute("version", "1.0"),
-                new XAttribute("creator", "SpotifyGPX"),
-                new XAttribute(XNamespace.Xmlns + "xsi", Options.Xsi),
-                new XAttribute("xmlns", Options.OutputNs),
-                new XAttribute(Options.Xsi + "schemaLocation", Options.Schema),
-                new XElement(Options.OutputNs + "time", DateTimeOffset.Now.UtcDateTime.ToString(Options.GpxOutput)),
-                ele
-            )
-        );
-    }
-
-    private static XDocument CreateXspf(IEnumerable<XElement> ele)
-    {
-        return new XDocument(
-            new XDeclaration("1.0", "utf-8", null),
-            new XElement(Options.Xspf + "playlist",
-                new XAttribute("version", "1.0"),
-                new XAttribute("xmlns", Options.Xspf),
-                new XElement(Options.Xspf + "creator", "SpotifyGPX"),
-                new XElement(Options.Xspf + "trackList", ele)
-            )
-        );
-    }
-
-    private static string TrackCountsString(int count, TrackInfo track) => $"{count} ({track.ToString()})";
-
-    private string SaveFileString(PerTrackFile filetype, List<string> payload) => $"[FILE] {Pairs.Count} points ==> {payload.Count} {filetype}s: {string.Join(", ", payload)}";
 
     public override string ToString()
     {
