@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Input;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -97,10 +98,10 @@ class Program
         try
         {
             // Step 1: Create list of GPX points from the GPX file
-            List<GPXTrack> tracks = new GpxFile(inputGpx).ParseGpxTracks();
+            List<GPXTrack> tracks = new Gpx(inputGpx).ParseGpxTracks();
 
             // Step 2: Create list of songs played, and filter it to songs played during the GPX tracking timeframe
-            List<SpotifyEntry> filteredEntries = new JsonFile(inputJson).FilterSpotifyJson(tracks);
+            List<SpotifyEntry> filteredEntries = new Json(inputJson).FilterSpotifyJson(tracks);
             // Use above to filter based on filtration options defined in SpotifyGPX.Options. To run unfiltered, use below
             //List<SpotifyEntry> filteredEntries = new JsonFile(inputJson).AllSongs;
 

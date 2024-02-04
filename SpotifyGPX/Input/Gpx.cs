@@ -6,13 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.Input;
 
-public class GpxFile
+public class Gpx
 {
     private readonly XDocument document; // Store the document for on-demand reading
 
-    public GpxFile(string path)
+    public Gpx(string path)
     {
         document = LoadDocument(path);
 
@@ -165,5 +165,5 @@ public class GpxFile
 
     private static string CombinedOrGapTrackName(TrackInfo track1, TrackInfo track2) => $"{track1.ToString()}-{track2.ToString()}";
 
-    private static bool IsValidTrackIndex(int index, int totalTracks) => (index >= 0) && (index < totalTracks);
+    private static bool IsValidTrackIndex(int index, int totalTracks) => index >= 0 && index < totalTracks;
 }
