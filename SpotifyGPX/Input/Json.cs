@@ -10,9 +10,9 @@ namespace SpotifyGPX.Input;
 
 public class Json
 {
-    public readonly List<SpotifyEntry> AllSongs;
-
     public Json(string path) => AllSongs = JsonToSpotifyEntry(path);
+
+    public List<SpotifyEntry> AllSongs { get; }
 
     private static List<SpotifyEntry> JsonToSpotifyEntry(string jsonFilePath)
     {

@@ -2,7 +2,6 @@
 
 using System;
 using System.Globalization;
-using System.Xml.Linq;
 
 namespace SpotifyGPX;
 
@@ -15,7 +14,6 @@ public class Options
     // GPX Import Formats
     public static string GpxInput => @"yyyy-MM-ddTHH\:mm\:ss.fffzzz"; // Time format of a <time> element of a <trkpt> within input GPX
     public static DateTimeStyles GpxTimeStyle => DateTimeStyles.None; // Time zone interpretation of GPX points
-    public static XNamespace InputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of input GPX
 
     // JSON Import Formats
     public static string SpotifyFull => @"MM/dd/yyyy HH\:mm\:ss"; // 30 day (full acc data) dump

@@ -15,7 +15,6 @@ class Program
         string inputJson = string.Empty; // get JSON path
         string inputGpx = string.Empty; // get GPX path
         bool noGpxExport = false;
-        bool exportWaypoints = false;
         bool exportJson = false;
         bool exportPlist = false;
         bool exportSpotifyURI = false;
@@ -28,9 +27,6 @@ class Program
                 {
                     case "-n":
                         Console.WriteLine("[HELP] Pass -n to complete a song-point pairing without sending the pairs to a GPX file");
-                        break;
-                    case "-w":
-                        Console.WriteLine("[HELP] Pass -w to write a GPX of waypoints for each source track");
                         break;
                     case "-j":
                         Console.WriteLine("[HELP] Pass -j to export a JSON of the songs covering your journey");
@@ -45,7 +41,7 @@ class Program
                         Console.WriteLine("[HELP] Press -r to export a verbose JSON report of all created pairings");
                         break;
                     default:
-                        Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-w] [-j] [-p] [-s] [-r]");
+                        Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-r]");
                         break;
                 }
                 return;
@@ -53,14 +49,13 @@ class Program
                 inputJson = args[0];
                 inputGpx = args[1];
                 noGpxExport = args.Length >= 3 && args.Contains("-n");
-                exportWaypoints = args.Length >= 3 && args.Contains("-w");
                 exportJson = args.Length >= 3 && args.Contains("-j");
                 exportPlist = args.Length >= 3 && args.Contains("-p");
                 exportSpotifyURI = args.Length >= 3 && args.Contains("-s");
                 exportJsonReport = args.Length >= 3 && args.Contains("-r");
                 break;
             default:
-                Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-w] [-j] [-p] [-s] [-r]");
+                Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-r]");
                 return;
         }
 
@@ -119,35 +114,27 @@ class Program
 
         if (noGpxExport == false)
         {
-            string path = Path.Combine(Directory.GetParent(inputGpx).ToString(), $"{Path.GetFileNameWithoutExtension(inputGpx)}_Tracks.gpx");
-            pairedEntries.SaveSingle(Pairings.SingleFile.GPX, path);
-
-        }
-
-        if (exportWaypoints == true)
-        {
-            pairedEntries.SaveTracks(Pairings.PerTrackFile.GPX, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), "Waypoints");
+            pairedEntries.Save(Output.Formats.Gpx, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
         }
 
         if (exportJson == true)
         {
-            pairedEntries.SaveTracks(Pairings.PerTrackFile.JSON, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
+            pairedEntries.Save(Output.Formats.Json, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
         }
 
         if (exportPlist == true)
         {
-            pairedEntries.SaveTracks(Pairings.PerTrackFile.XSPF, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
+            pairedEntries.Save(Output.Formats.Xspf, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
         }
 
         if (exportSpotifyURI == true)
         {
-            pairedEntries.SaveTracks(Pairings.PerTrackFile.TXT, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString(), null);
+            pairedEntries.Save(Output.Formats.Txt, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
         }
 
         if (exportJsonReport == true)
         {
-            string path = Path.Combine(Directory.GetParent(inputGpx).ToString(), $"{Path.GetFileNameWithoutExtension(inputGpx)}_Report.json");
-            pairedEntries.SaveSingle(Pairings.SingleFile.JsonReport, path);
+            pairedEntries.Save(Output.Formats.JsonReport, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
         }
 
         return; // Exit the program

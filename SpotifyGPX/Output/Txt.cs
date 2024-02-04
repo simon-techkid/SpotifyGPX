@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class Txt
+public class Txt : FormatHandler.IFileOutput
 {
+    public static bool SupportsMultiTrack => false;
     public Txt(IEnumerable<SongPoint> pairs) => Document = GetUris(pairs);
 
     private string[] Document { get; }
@@ -16,13 +16,10 @@ public class Txt
         return Pairs.Select(pair => pair.Song.Song_URI).Where(s => s != null).ToArray();
     }
 
-    private int Count => Document.Length;
-
     public void Save(string path)
     {
         File.WriteAllLines(path, Document);
-        Console.WriteLine(ToString());
     }
 
-    public override string ToString() => $"[FILE] TXT file containing {Count} points saved!";
+    public int Count => Document.Length;
 }

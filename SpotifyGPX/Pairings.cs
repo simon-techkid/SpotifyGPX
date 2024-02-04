@@ -4,7 +4,6 @@ using SpotifyGPX.Output;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 
 namespace SpotifyGPX;
@@ -51,62 +50,11 @@ public class Pairings
         return correlatedEntries;
     }
 
-    public enum SingleFile
+    public void Save(Formats format, string prefix, string directory)
     {
-        GPX,
-        JsonReport
-    }
+        FormatHandler fmat = new(Pairs, format);
 
-    public void SaveSingle(SingleFile format, string path)
-    {
-        switch (format)
-        {
-            case SingleFile.GPX:
-                new Gpx(Pairs, Gpx.PlacementStyles.trkpt).Save(path);
-                break;
-            case SingleFile.JsonReport:
-                new JsonReport(Pairs).Save(path);
-                break;
-            default:
-                throw new Exception("Invalid SingleFile format specified");
-        }
-    }
-
-    public enum PerTrackFile
-    {
-        GPX,
-        JSON,
-        TXT,
-        XSPF
-    }
-
-    public void SaveTracks(PerTrackFile format, string? prefix, string directory, string? suffix)
-    {
-        foreach (var group in Pairs.GroupBy(pair => pair.Origin))
-        {
-            TrackInfo currentTrack = group.Key;
-
-            string fileNameWithoutExtension = string.Join("_", new[] { prefix, currentTrack.ToString(), suffix }.Where(component => !string.IsNullOrEmpty(component)));
-            string extension = format.ToString().ToLower();
-            string fileNameWithExtension = $"{fileNameWithoutExtension}.{extension}";
-            string filePath = Path.Combine(directory, fileNameWithExtension);
-
-            switch (format)
-            {
-                case PerTrackFile.GPX:
-                    new Gpx(group, Gpx.PlacementStyles.wpt).Save(filePath);
-                    break;
-                case PerTrackFile.JSON:
-                    new Json(group).Save(filePath);
-                    break;
-                case PerTrackFile.TXT:
-                    new Txt(group).Save(filePath);
-                    break;
-                case PerTrackFile.XSPF:
-                    new Xspf(group).Save(filePath);
-                    break;
-            }
-        }
+        fmat.Save(prefix);
     }
 
     public override string ToString()

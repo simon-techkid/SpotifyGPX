@@ -5,8 +5,9 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class Xspf
+public class Xspf : FormatHandler.IFileOutput
 {
+    public static bool SupportsMultiTrack => false;
     private static XNamespace Namespace => "http://xspf.org/ns/0/"; // Namespace of output XSPF
 
     public Xspf(IEnumerable<SongPoint> pairs) => Document = GetXspfDocument(pairs);
@@ -41,13 +42,10 @@ public class Xspf
         );
     }
 
-    private int Count => Document.Descendants(Namespace + "track").Count();
-
     public void Save(string path)
     {
         Document.Save(path);
-        Console.WriteLine(ToString());
     }
 
-    public override string ToString() => $"[FILE] XSPF file containing {Count} points saved!";
+    public int Count => Document.Descendants(Namespace + "track").Count();
 }

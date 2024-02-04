@@ -1,14 +1,14 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class JsonReport
+public class JsonReport : FormatHandler.IFileOutput
 {
+    public static bool SupportsMultiTrack => true;
     private static Formatting Formatting => Formatting.Indented; // Formatting of exporting JSON
 
     public JsonReport(IEnumerable<SongPoint> pairs) => Document = GetJsonReport(pairs);
@@ -19,10 +19,10 @@ public class JsonReport
     {
         return Pairs
             .GroupBy(pair => pair.Origin)
-            .Select(group =>
+            .Select(track =>
             {
                 return new JObject(
-                    new JProperty(group.Key.ToString(), group
+                    new JProperty(track.Key.ToString(), track
                     .SelectMany(pair =>
                     {
                         return new JArray(CreateJsonReport(pair));
@@ -36,8 +36,8 @@ public class JsonReport
     {
         return new JObject(
             new JProperty("Index", pair.Index),
-            new JProperty("SpotifyEntry", ToJsonReport(pair.Song)),
-            new JProperty("GPXPoint", ToJsonReport(pair.Point)),
+            new JProperty("SpotifyEntry", ToJObject(pair.Song)),
+            new JProperty("GPXPoint", ToJObject(pair.Point)),
             new JProperty("Accuracy", pair.Accuracy),
             new JProperty("NormalizedOffset", pair.NormalizedOffset),
             new JProperty("SongTime", pair.SongTime),
@@ -45,7 +45,7 @@ public class JsonReport
         );
     }
 
-    private static JObject ToJsonReport(SpotifyEntry song)
+    private static JObject ToJObject(SpotifyEntry song)
     {
         return new JObject(
             new JProperty("Index", song.Index),
@@ -56,7 +56,7 @@ public class JsonReport
         );
     }
 
-    private static JObject ToJsonReport(GPXPoint point)
+    private static JObject ToJObject(GPXPoint point)
     {
         return new JObject(
             new JProperty("Index", point.Index),
@@ -70,10 +70,7 @@ public class JsonReport
     {
         string text = JsonConvert.SerializeObject(Document, Formatting);
         File.WriteAllText(path, text);
-        Console.WriteLine(ToString());
     }
 
-    private int Count => Document.Count;
-
-    public override string ToString() => $"[FILE] JSON report file containing {Count} points saved!";
+    public int Count => Document.SelectMany(tracks => tracks.Properties().SelectMany(track => track.Value.Children())).Count();
 }

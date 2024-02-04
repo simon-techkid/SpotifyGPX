@@ -5,47 +5,23 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class Gpx
+public class Gpx : FormatHandler.IFileOutput
 {
+    public static bool SupportsMultiTrack => false;
     private static XNamespace Namespace => "http://www.topografix.com/GPX/1/0"; // Namespace of the output GPX
     private static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance"; // XML schema location of the output GPX
     private static string Schema => "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd"; // GPX schema location(s) of the output GPX
+    private static string Waypoint => "wpt";
 
-    public Gpx(IEnumerable<SongPoint> pairs, PlacementStyles style)
-    {
-        Document = GetDocument(pairs);
-        DocumentStyle = style;
-    }
+    public Gpx(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
 
     private XDocument Document { get; }
-
-    private PlacementStyles DocumentStyle { get; }
-
-    public enum PlacementStyles
-    {
-        wpt,
-        trkpt
-    }
 
     private XDocument GetDocument(IEnumerable<SongPoint> Pairs)
     {
         IEnumerable<XElement> elements;
 
-        if (DocumentStyle == PlacementStyles.wpt)
-        {
-            elements = Pairs.Select(ToGPX);
-        }
-        else
-        {
-            elements = Pairs
-                .GroupBy(pair => pair.Origin)
-                .Select(track =>
-                    new XElement(Namespace + "trk",
-                        new XElement(Namespace + "name", track.Key.ToString()),
-                        new XElement(Namespace + "trkseg", track.Select(pair => ToGPX(pair)))
-                    )
-                );
-        }
+        elements = Pairs.Select(ToGPX);
 
         return CreateGpx(elements);
     }
@@ -68,7 +44,7 @@ public class Gpx
 
     private XElement ToGPX(SongPoint pair)
     {
-        return new XElement(Namespace + DocumentStyle.ToString(),
+        return new XElement(Namespace + Waypoint,
             new XAttribute("lat", pair.Point.Location.Latitude),
             new XAttribute("lon", pair.Point.Location.Longitude),
             new XElement(Namespace + "name", pair.Song.ToString()),
@@ -77,13 +53,10 @@ public class Gpx
         );
     }
 
-    private int Count => Document.Descendants(Namespace + DocumentStyle.ToString()).Count();
-
     public void Save(string path)
     {
         Document.Save(path);
-        Console.WriteLine(ToString());
     }
 
-    public override string ToString() => $"[FILE] GPX file containing {Count} points saved!";
+    public int Count => Document.Descendants(Namespace + Waypoint).Count();
 }
