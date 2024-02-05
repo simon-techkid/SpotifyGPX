@@ -15,8 +15,8 @@ Here's how it works:
  2. It matches up the songs with the locations: It looks at the timestamps in both files to figure out which songs you were listening to at each point along your journey.
  3. It creates a new GPX file: Each point in the GPX represents a song you listened to, and it's placed on the map at the location where you were when you listened to it.
 
-Cool things you can do with this:
- - Visualize your musical journeys: You can use mapping tools ([kepler.gl](https://github.com/keplergl/kepler.gl) or [Google MyMaps](https://www.google.com/mymaps) to name a few) to see your route and the songs you listened to along the way, creating a visual memory of your trip.
+Cool things you can do after you return from your journey:
+ - Visualize your musical journeys: You can use mapping tools to see your route and the songs you listened to along the way, creating a visual memory of your trip.
  - Share your musical adventures: You can share the GPX file (or Google MyMaps link) with friends or family so they can experience your trip through your music choices.
  - Create playlists based on your travels: You can export a playlist of the songs you listened to during a particular journey, making it easy to relive those memories.
 
@@ -28,6 +28,8 @@ SpotifyGPX is not endorsed by Spotify Technology SA. It exists only as a third-p
 
 SpotifyGPX does not exchange your data with any outside parties. In other words, the data you feed SpotifyGPX (including your original GPX tracks and Spotify data) is operated on by your computer alone.
 SpotifyGPX does not modify the contents of the files you feed it. It will instead create new files representing its calculated data.
+
+Why don't we just use the Spotify API instead of having users provide JSON? The Spotify API only provides us the [last 50 songs](https://developer.spotify.com/documentation/web-api/reference/get-recently-played) played by a user, which is rarely adequate for including their entire journey (if at all).
 
 ## Requirements
 
@@ -65,7 +67,7 @@ View SpotifyGPX sample data and screenshots [here](Samples/README.md) to check t
 Ensure you take the below steps to prepare before setting off:
 
  1. Make sure you have access to Spotify along the journey.
- 2. Use an app such as [GPSLogger](https://github.com/mendhak/gpslogger) to track your position along the route
+ 2. Use an app such as [GPSLogger (for Android)](https://github.com/mendhak/gpslogger) or [Open GPX Tracker for iOS + WatchOS](https://github.com/merlos/iOS-Open-GPX-Tracker) to track your position along the route
  3. Ensure the logging app's GPS frequency setting is high, since a song is tied to a point (recommended: 1 point every 15-30 seconds)
  4. Make sure the GPS logging app provides each point a time, and make sure the time zone is either UTC, or has its UTC offset included
  5. Run a few test trips. These can be short, but make sure points are created by your tracker. Compare your data to the confirmed [sample data.](Samples/README.md)
@@ -79,6 +81,15 @@ To use SpotifyGPX to tie a song to a place, retrieve the data you tracked:
  1. [Download](https://www.spotify.com/account/privacy/) your `Account data` or `Extended streaming history` data JSON (see below for a comparison between the two forms)
  2. Copy the corresponding GPX tracks from the device you used for tracking.
  3. When fed to SpotifyGPX, each of these GPX files' coordinates will be used to identify (with closest possible precision) a position for a song
+ 4. The exported files can be used for the below described functions:
+
+| Exported file | Use case |
+| ------------- | -------- |
+| Gpx | View a map of where each of your tracks was played using a tool like [kepler.gl](https://github.com/keplergl/kepler.gl) or [Google MyMaps](https://www.google.com/mymaps) |
+| Json | Preserve the original Spotify data (from the original JSON) used for your journey |
+| JsonReport | Preserve all data SpotifyGPX used to create the pairings for your journey. Includes data from Json. |
+| Txt | Create a txt file of a Spotify URI (song link) list of the songs on your journey. [Paste](https://community.spotify.com/t5/Your-Library/how-to-paste-a-list-of-URL-s-into-a-playlist/m-p/5355978/highlight/true#M19851) into Spotify playlists on Desktop. |
+| Xspf | Use as a playlist to visualize your journey's songs in an app such as [VLC Media Player](https://www.videolan.org/) |
 
 ## SpotifyGPX Options
 
@@ -92,18 +103,15 @@ To use SpotifyGPX to tie a song to a place, retrieve the data you tracked:
 | `ConsoleTrack` | `string` | A track's start and end times as presented to the user when there are multiple tracks  to choose from |
 | `GpxInput` | `string` | Each point in your tracked journey's GPX |
 | `GpxTimeStyle` | `DateTimeStyles` | Interpretation of time zone as written in GPX |
-| `InputNs` | `XNamespace` | The `xmlns` attribute of your tracked journey's `<gpx>` header |
 | `SpotifyFull` | `string` | `ts` objects' format within the Spotify data dump |
 | `SpotifyMini` | `string` | `endTime` objects' format within the Spotify data dump |
 | `SpotifyTimeStyle` | `DateTimeStyles` | Interpretation of time zone as written in JSON |
+| `MinimumPlaytime` | `TimeSpan` | Minimum duration a song must have been played for to be considered |
+| `ExcludeSkipped` | `bool` | Don't consider songs that the user skipped, as described by Spotify JSON |
+| `MaximumAbsAccuracy` | `double?` | Don't consider a song and point pair when their times are farther apart than than this (number of seconds). Null for no restriction. |
+| `GpxOutput` | `string` | The time of a pairing, as written to its GPX `<time>` |
 | `DescriptionPlayedAt` | `string` | A time as written to a pairing's description |
 | `DescriptionTimePlayed` | `string` | A duration as written to a pairing's description |
-| `GpxOutput` | `string` | The time of a pairing, as written to its GPX `<time>` |
-| `OutputNs` | `XNamespace` | XML namespace of exported GPX files |
-| `Xsi` | `XNamespace` | XML namespace for exported GPX files' schema |
-| `Schema` | `string` | Provide at least 2 schema locations, in accordance with [GPX](https://www.topografix.com/gpx_manual.asp) |
-| `Xspf` | `XNamespace` | XML namespace for exported XSPF files |
-| `Json` | `Formatting` | Json serialization formatting for exported JSON files |
 
 ### Multi-track selection prompt
 
