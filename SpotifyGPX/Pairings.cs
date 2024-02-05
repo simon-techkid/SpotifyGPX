@@ -50,9 +50,9 @@ public class Pairings
         return correlatedEntries;
     }
 
-    public void Save(Formats format, string prefix, string directory)
+    public void Save(OutputHandler.Formats format, string prefix)
     {
-        FormatHandler fmat = new(Pairs, format);
+        OutputHandler fmat = new(Pairs, format);
 
         fmat.Save(prefix);
     }

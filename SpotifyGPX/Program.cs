@@ -1,6 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
 using SpotifyGPX.Input;
+using SpotifyGPX.Output;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -93,10 +94,10 @@ class Program
         try
         {
             // Step 1: Create list of GPX points from the GPX file
-            List<GPXTrack> tracks = new Gpx(inputGpx).ParseGpxTracks();
+            List<GPXTrack> tracks = new Input.Gpx(inputGpx).ParseGpxTracks();
 
             // Step 2: Create list of songs played, and filter it to songs played during the GPX tracking timeframe
-            List<SpotifyEntry> filteredEntries = new Json(inputJson).FilterSpotifyJson(tracks);
+            List<SpotifyEntry> filteredEntries = new Input.Json(inputJson).FilterSpotifyJson(tracks);
             // Use above to filter based on filtration options defined in SpotifyGPX.Options. To run unfiltered, use below
             //List<SpotifyEntry> filteredEntries = new JsonFile(inputJson).AllSongs;
 
@@ -114,27 +115,27 @@ class Program
 
         if (noGpxExport == false)
         {
-            pairedEntries.Save(Output.Formats.Gpx, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
+            pairedEntries.Save(OutputHandler.Formats.Gpx, Path.GetFileNameWithoutExtension(inputGpx));
         }
 
         if (exportJson == true)
         {
-            pairedEntries.Save(Output.Formats.Json, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
+            pairedEntries.Save(OutputHandler.Formats.Json, Path.GetFileNameWithoutExtension(inputGpx));
         }
 
         if (exportPlist == true)
         {
-            pairedEntries.Save(Output.Formats.Xspf, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
+            pairedEntries.Save(OutputHandler.Formats.Xspf, Path.GetFileNameWithoutExtension(inputGpx));
         }
 
         if (exportSpotifyURI == true)
         {
-            pairedEntries.Save(Output.Formats.Txt, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
+            pairedEntries.Save(OutputHandler.Formats.Txt, Path.GetFileNameWithoutExtension(inputGpx));
         }
 
         if (exportJsonReport == true)
         {
-            pairedEntries.Save(Output.Formats.JsonReport, Path.GetFileNameWithoutExtension(inputGpx), Directory.GetParent(inputGpx).ToString());
+            pairedEntries.Save(OutputHandler.Formats.JsonReport, Path.GetFileNameWithoutExtension(inputGpx));
         }
 
         return; // Exit the program

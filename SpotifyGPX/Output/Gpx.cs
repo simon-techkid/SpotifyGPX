@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class Gpx : FormatHandler.IFileOutput
+public class Gpx : OutputHandler.IFileOutput
 {
     public static bool SupportsMultiTrack => false;
     private static XNamespace Namespace => "http://www.topografix.com/GPX/1/0"; // Namespace of the output GPX

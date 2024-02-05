@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class Xspf : FormatHandler.IFileOutput
+public class Xspf : OutputHandler.IFileOutput
 {
     public static bool SupportsMultiTrack => false;
     private static XNamespace Namespace => "http://xspf.org/ns/0/"; // Namespace of output XSPF

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class Txt : FormatHandler.IFileOutput
+public class Txt : OutputHandler.IFileOutput
 {
     public static bool SupportsMultiTrack => false;
     public Txt(IEnumerable<SongPoint> pairs) => Document = GetUris(pairs);

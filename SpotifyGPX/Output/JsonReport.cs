@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class JsonReport : FormatHandler.IFileOutput
+public class JsonReport : OutputHandler.IFileOutput
 {
     public static bool SupportsMultiTrack => true;
     private static Formatting Formatting => Formatting.Indented; // Formatting of exporting JSON
