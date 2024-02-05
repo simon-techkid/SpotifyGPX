@@ -7,6 +7,9 @@ namespace SpotifyGPX.Output;
 
 public class OutputHandler
 {
+    private static bool ReplaceDuplicateFiles => true;
+    private string GetOutputFileName(string name) => $"{name}.{TargetFormat.ToString().ToLower()}";
+
     public OutputHandler(IEnumerable<SongPoint> pairs, Formats format)
     {
         Pairs = pairs;
@@ -16,7 +19,6 @@ public class OutputHandler
     private IEnumerable<SongPoint> Pairs { get; }
 
     private Formats TargetFormat { get; }
-
 
     private static readonly Dictionary<Formats, Type> FormatTypeMapping = new()
     {
@@ -49,33 +51,60 @@ public class OutputHandler
         _ => throw new Exception("Invalid Format specified when saving pairings!")
     };
 
-    private void SaveFile(IEnumerable<SongPoint> pairs, string path)
+    private double SaveFile(IEnumerable<SongPoint> pairs, string path)
     {
         IFileOutput export = GetFileSaver(pairs);
         export.Save(path);
 
-        double percentSuccess = (export.Count / pairs.Count()) * 100;
-        Console.WriteLine($"[OUT] {Path.GetFileName(path)}: {export.Count}/{pairs.Count()} ({percentSuccess}%)");
-
+        return export.Count;
     }
 
-    public void Save(string prefix)
+    public void Save(string name)
     {
         if (SupportsMultiTrack)
         {
-            string fileName = $"{prefix}_S.{TargetFormat.ToString().ToLower()}";
-            SaveFile(Pairs, fileName);
+            string fileName = GetUniqueFileName(GetOutputFileName(name));
+            double count = SaveFile(Pairs, fileName);
         }
         else
         {
-            foreach (var track in Pairs.GroupBy(pair => pair.Origin))
+            List<(double count, TrackInfo track)> trackReturns = Pairs
+            .GroupBy(pair => pair.Origin)
+            .Select(track =>
             {
                 TrackInfo currentTrack = track.Key;
+                string fileName = GetUniqueFileName(GetOutputFileName($"{name}_{currentTrack}"));
+                double count = SaveFile(track, fileName);
+                return (count, currentTrack);
+            })
+            .ToList();
 
-                string fileName = $"{prefix}_{currentTrack.ToString()}_S.{TargetFormat.ToString().ToLower()}";
-                SaveFile(track, fileName);
-            }
+            string joinedValues = string.Join(", ", trackReturns.Select(tuple => $"{tuple.count} ({tuple.track.ToString()})"));
+            Console.WriteLine($"[OUT] Exporting to {TargetFormat}: {joinedValues}");
         }
+    }
+
+    private static string GetUniqueFileName(string path)
+    {
+        if (!File.Exists(path) || ReplaceDuplicateFiles)
+        {
+            return path; // If the file doesn't exist, return the original name
+        }
+
+        string directory = Path.GetDirectoryName(path);
+        string fileExtension = Path.GetExtension(path);
+        string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(path);
+
+        int count = 1;
+        string uniqueFileName = path;
+
+        do
+        {
+            uniqueFileName = Path.Combine(directory, $"{fileNameWithoutExtension}_{count}{fileExtension}");
+            count++;
+        } while (File.Exists(uniqueFileName));
+
+        return uniqueFileName;
     }
 
     public interface IFileOutput
