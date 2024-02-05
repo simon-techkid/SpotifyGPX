@@ -117,20 +117,20 @@ public class Gpx
 
     private static void DisplayTrackOptions(List<GPXTrack> allTracks)
     {
-        Console.WriteLine("[TRAK] Multiple GPX tracks found:");
+        Console.WriteLine("[INP] Multiple GPX tracks found:");
 
         foreach (GPXTrack track in allTracks)
         {
-            Console.WriteLine($"[TRAK] Index: {allTracks.IndexOf(track)} {track.ToString()}");
+            Console.WriteLine($"[INP] Index: {allTracks.IndexOf(track)} {track.ToString()}");
         }
 
-        Console.WriteLine("[TRAK] [A] GPX tracks");
-        Console.WriteLine("[TRAK] [B] GPX tracks, and gaps between them");
-        Console.WriteLine("[TRAK] [C] Gaps between GPX tracks only");
-        Console.WriteLine("[TRAK] [D] GPX tracks and Combined track");
-        Console.WriteLine("[TRAK] [E] Gap tracks and Combined track");
-        Console.WriteLine("[TRAK] [F] GPX, Gap, and Combined tracks (everything)");
-        Console.Write("[TRAK] Please enter the index of the track you want to use: ");
+        Console.WriteLine("[INP] [A] GPX tracks");
+        Console.WriteLine("[INP] [B] GPX tracks, and gaps between them");
+        Console.WriteLine("[INP] [C] Gaps between GPX tracks only");
+        Console.WriteLine("[INP] [D] GPX tracks and Combined track");
+        Console.WriteLine("[INP] [E] Gap tracks and Combined track");
+        Console.WriteLine("[INP] [F] GPX, Gap, and Combined tracks (everything)");
+        Console.Write("[INP] Please enter the index of the track you want to use: ");
     }
 
     private static List<GPXTrack> CombineTracks(List<GPXTrack> allTracks)

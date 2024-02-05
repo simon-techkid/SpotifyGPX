@@ -55,7 +55,7 @@ public class OutputHandler
         export.Save(path);
 
         double percentSuccess = (export.Count / pairs.Count()) * 100;
-        Console.WriteLine($"[FILE] {Path.GetFileName(path)}: {export.Count}/{pairs.Count()} ({percentSuccess}%)");
+        Console.WriteLine($"[OUT] {Path.GetFileName(path)}: {export.Count}/{pairs.Count()} ({percentSuccess}%)");
 
     }
 
