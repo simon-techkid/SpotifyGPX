@@ -1,21 +1,22 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class JsonReport : OutputHandler.IFileOutput
+public class JsonReport : IFileOutput
 {
-    public static bool SupportsMultiTrack => true;
+    public static bool SupportsMultiTrack => true; // Does this file format allow multiple GPXTracks to be contained?
     private static Formatting Formatting => Formatting.Indented; // Formatting of exporting JSON
 
-    public JsonReport(IEnumerable<SongPoint> pairs) => Document = GetJsonReport(pairs);
+    public JsonReport(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
 
     public List<JObject> Document { get; }
 
-    private static List<JObject> GetJsonReport(IEnumerable<SongPoint> Pairs)
+    private static List<JObject> GetDocument(IEnumerable<SongPoint> Pairs)
     {
         return Pairs
             .GroupBy(pair => pair.Origin)
@@ -60,9 +61,9 @@ public class JsonReport : OutputHandler.IFileOutput
     {
         return new JObject(
             new JProperty("Index", point.Index),
-            new JProperty("lat", point.Location.Latitude),
-            new JProperty("lon", point.Location.Longitude),
-            new JProperty("time", point.Time)
+            new JProperty("Latitude", point.Location.Latitude),
+            new JProperty("Longitude", point.Location.Longitude),
+            new JProperty("Time", point.Time)
         );
     }
 

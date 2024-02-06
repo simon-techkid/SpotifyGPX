@@ -6,16 +6,16 @@ using System.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class Json : OutputHandler.IFileOutput
+public class Json : IFileOutput
 {
-    public static bool SupportsMultiTrack => false;
+    public static bool SupportsMultiTrack => false; // Does this file format allow multiple GPXTracks to be contained?
     private static Formatting Formatting => Formatting.Indented; // Formatting of exporting JSON
 
-    public Json(IEnumerable<SongPoint> pairs) => Document = GetJObjects(pairs);
+    public Json(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
 
     private List<JObject> Document { get; }
 
-    private static List<JObject> GetJObjects(IEnumerable<SongPoint> Pairs)
+    private static List<JObject> GetDocument(IEnumerable<SongPoint> Pairs)
     {
         return Pairs.Select(pair => pair.Song.Json).ToList();
     }
