@@ -13,7 +13,6 @@ SpotifyGPX allows you to create a map of the songs you listened to on Spotify du
 Here's how it works:
  1. You provide SpotifyGPX with these two files: Your Spotify listening history JSON file and the GPX file of your trip.
  2. It matches up the songs with the locations: It looks at the timestamps in both files to figure out which songs you were listening to at each point along your journey.
- 3. It creates a new GPX file: Each point in the GPX represents a song you listened to, and it's placed on the map at the location where you were when you listened to it.
 
 Cool things you can do after you return from your journey:
  - Visualize your musical journeys: You can use mapping tools to see your route and the songs you listened to along the way, creating a visual memory of your trip.
@@ -37,30 +36,31 @@ View SpotifyGPX sample data and screenshots [here](Samples/README.md) to check t
 
 ### SpotifyGPX:
  - [.NET 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed
- - the [Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/) library available
- - a GPX file of a tracked journey with timings (see below)
- - listened to Spotify during the GPX journey (see below)
- - the JSON of Spotify history covering the journey (see below)
+ - [Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/) library available
+ - GPX file of a tracked journey with timings (see below)
+ - JSON of Spotify history covering the journey (see below)
+ - Listened to Spotify during the GPX journey (see below)
 
 ### Spotify
- - access to the Spotify account you listened with
- - [downloaded](https://www.spotify.com/account/privacy/) your Spotify listening history JSON
+ - Access to the Spotify account you listened with
+ - [Downloaded](https://www.spotify.com/account/privacy/) Spotify listening history JSON
 
 ### GPX tracks
- - your journey, tracked in GPX (if not, [convert other formats to GPX](https://www.gpsvisualizer.com/convert_input))
- - the GPX, containing frequent `<trkpt>` objects, with `lat` and `lon` attributes, and `<time>` for each
+ - Your tracked journey in GPX (if not GPX, [convert other formats to GPX](https://www.gpsvisualizer.com/convert_input))
+ - Your GPX containing frequent `<trkpt>` objects with `lat` and `lon` attributes, and `<time>` for each
 
 ## Usage
 
-> `SpotifyGPX <json_file> <gpx_file> [-j] [-p] [-n]`
+> `SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-r]`
 
  - `SpotifyGPX` - SpotifyGPX executable
  - **Required:** `json_file` - Path to a Spotify listening history JSON
  - **Required:** `gpx_file` - Path to a GPX file
- - *Optional:* `-n` - Do not export a GPX from the calculated points
- - *Optional:* `-j` - Save off the relevant part of the Spotify JSON
+ - *Optional:* `-n` - Do not export a `GPX` from the calculated points
+ - *Optional:* `-j` - Save off the relevant part of the Spotify `json`
  - *Optional:* `-p` - Export a `xspf` playlist of the songs
  - *Optional:* `-s` - Export a `txt` list of Spotify URIs (can be copied and pasted into Spotify Desktop app playlists)
+ - *Optional:* `-r` - Export a `json` report of all the data used to compile the resulting pairings
 
 ## Preparing for a journey
 
@@ -69,27 +69,35 @@ Ensure you take the below steps to prepare before setting off:
  1. Make sure you have access to Spotify along the journey.
  2. Use an app such as [GPSLogger (for Android)](https://github.com/mendhak/gpslogger) or [Open GPX Tracker for iOS + WatchOS](https://github.com/merlos/iOS-Open-GPX-Tracker) to track your position along the route
  3. Ensure the logging app's GPS frequency setting is high, since a song is tied to a point (recommended: 1 point every 15-30 seconds)
- 4. Make sure the GPS logging app provides each point a time, and make sure the time zone is either UTC, or has its UTC offset included
- 5. Run a few test trips. These can be short, but make sure points are created by your tracker. Compare your data to the confirmed [sample data.](Samples/README.md)
+ 5. Run a few test logging sessions. Make sure points (with UTC or UTC offset time) are created by your tracker. Compare your data to the confirmed [sample track log.](Samples/sample.gpx)
 
-As long as there is song playback and GPS tracking running simultaneously, you will be able to create points from songs with SpotifyGPX.
+As long as there is song playback and GPS tracking running simultaneously, you will be able to use SpotifyGPX to pair the two sets of data.
 
 ## After your journey
 
-To use SpotifyGPX to tie a song to a place, retrieve the data you tracked:
+To use SpotifyGPX, retrieve the data you tracked:
 
- 1. [Download](https://www.spotify.com/account/privacy/) your `Account data` or `Extended streaming history` data JSON (see below for a comparison between the two forms)
- 2. Copy the corresponding GPX tracks from the device you used for tracking.
- 3. When fed to SpotifyGPX, each of these GPX files' coordinates will be used to identify (with closest possible precision) a position for a song
- 4. The exported files can be used for the below described functions:
+ 1. [Request and download](https://www.spotify.com/account/privacy/) your `Account data` or `Extended streaming history` data `json` (see below for a comparison between the two forms)
+ 2. Copy the appropriate GPX files from the device you used for tracking
+ 3. Run SpotifyGPX with the following two files:
+
+| Imported file | Use case | Sample |
+| ------------- | -------- | ------ |
+| `Gpx` | The route you took and the times where you were in each place | [GPX](Samples/sample.gpx) |
+| `Json` | The songs you listened to and the times you listened to them | [JSON](Samples/sample.json) |
+
+SpotifyGPX will allow you to:
+
+ 1. Use each of the coordinates (from the GPX) to identify (with closest possible precision) a position for a song
+ 2. Use the exported formats below to parse the song-point positions:
 
 | Exported file | Use case |
 | ------------- | -------- |
-| Gpx | View a map of where each of your tracks was played using a tool like [kepler.gl](https://github.com/keplergl/kepler.gl) or [Google MyMaps](https://www.google.com/mymaps) |
-| Json | Preserve the original Spotify data (from the original JSON) used for your journey |
-| JsonReport | Preserve all data SpotifyGPX used to create the pairings for your journey. Includes data from Json. |
-| Txt | Create a txt file of a Spotify URI (song link) list of the songs on your journey. [Paste](https://community.spotify.com/t5/Your-Library/how-to-paste-a-list-of-URL-s-into-a-playlist/m-p/5355978/highlight/true#M19851) into Spotify playlists on Desktop. |
-| Xspf | Use as a playlist to visualize your journey's songs in an app such as [VLC Media Player](https://www.videolan.org/) |
+| `Gpx` | View a map of where each of your tracks was played using a tool like [kepler.gl](https://github.com/keplergl/kepler.gl) or [Google MyMaps](https://www.google.com/mymaps) |
+| `Json` | Preserve the original Spotify data (from the original JSON) used for your journey |
+| `JsonReport` | Preserve all data SpotifyGPX used to create the pairings for your journey. Includes data from Json. |
+| `Txt` | Create a txt file of a Spotify URI (song link) list of the songs on your journey. [Paste](https://community.spotify.com/t5/Your-Library/how-to-paste-a-list-of-URL-s-into-a-playlist/m-p/5355978/highlight/true#M19851) into Spotify playlists on Desktop. |
+| `Xspf` | Use as a playlist to visualize your journey's songs in an app such as [VLC Media Player](https://www.videolan.org/) |
 
 ## SpotifyGPX Options
 
