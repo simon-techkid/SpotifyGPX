@@ -66,7 +66,7 @@ public class JsonReport : IFileOutput
             new JProperty("Index", song.Index),
             new JProperty("Original", song.Json),
             new JProperty("Time", song.Time),
-            new JProperty("TimePlayed", song.TimePlayed),
+            new JProperty("TimePlayed", song.TimePlayed?.TotalMilliseconds),
             new JProperty("OfflineTimestamp", song.OfflineTimestamp)
         );
     }

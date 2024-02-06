@@ -193,7 +193,7 @@ public readonly struct SongPoint
 
             builder.Append("At this position: {0}", PointTime.ToString(Options.DescriptionPlayedAt));
             builder.Append("Song ended: {0}", SongTime.ToString(Options.DescriptionPlayedAt));
-            builder.Append("Played for {0}", Song.TimePlayed);
+            builder.Append("Played for {0}", Song.TimePlayed?.ToString(Options.DescriptionTimePlayed));
             builder.Append("Skipped: {0}", Song.Song_Skipped);
             builder.Append("Shuffle: {0}", Song.Song_Shuffle);
             builder.Append("IP Address: {0}", Song.Spotify_IP);
