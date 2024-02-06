@@ -91,13 +91,13 @@ SpotifyGPX will allow you to:
  1. Use each of the coordinates (from the GPX) to identify (with closest possible precision) a position for a song
  2. Use the exported formats below to parse the song-point positions:
 
-| Exported file | Use case |
-| ------------- | -------- |
-| `Gpx` | View a map of where each of your tracks was played using a tool like [kepler.gl](https://github.com/keplergl/kepler.gl) or [Google MyMaps](https://www.google.com/mymaps) |
-| `Json` | Preserve the original Spotify data (from the original JSON) used for your journey |
-| `JsonReport` | Preserve all data SpotifyGPX used to create the pairings for your journey. Includes data from Json. |
-| `Txt` | Create a txt file of a Spotify URI (song link) list of the songs on your journey. [Paste](https://community.spotify.com/t5/Your-Library/how-to-paste-a-list-of-URL-s-into-a-playlist/m-p/5355978/highlight/true#M19851) into Spotify playlists on Desktop. |
-| `Xspf` | Use as a playlist to visualize your journey's songs in an app such as [VLC Media Player](https://www.videolan.org/) |
+| Exported file | Use case | Sample |
+| ------------- | -------- | ------ |
+| `Gpx` | View a map of where each of your tracks was played using a tool like [kepler.gl](https://github.com/keplergl/kepler.gl) or [Google MyMaps](https://www.google.com/mymaps) | [Gpx](Samples/sample_20230709.gpx) |
+| `Json` | Preserve the original Spotify data (from the original JSON) used for your journey | [Json](Samples/sample_20230709.json) |
+| `JsonReport` | Preserve all data SpotifyGPX used to create the pairings for your journey. Includes data from Json. | [JsonReport](Samples/sample.jsonreport) |
+| `Txt` | Create a txt file of a Spotify URI (song link) list of the songs on your journey. [Paste](https://community.spotify.com/t5/Your-Library/how-to-paste-a-list-of-URL-s-into-a-playlist/m-p/5355978/highlight/true#M19851) into Spotify playlists on Desktop. | [Txt](Samples/sample_20230709.txt)
+| `Xspf` | Use as a playlist to visualize your journey's songs in an app such as [VLC Media Player](https://www.videolan.org/) | [Xspf](Samples/sample_20230709.xspf)
 
 ## SpotifyGPX Options
 
