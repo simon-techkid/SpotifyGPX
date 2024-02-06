@@ -47,7 +47,7 @@ public readonly struct SpotifyEntry
     }
     public readonly string? Song_Artist => (string?)Json["artistName"] ?? (string?)Json["master_metadata_album_artist_name"];
     public readonly string? Song_Name => (string?)Json["trackName"] ?? (string?)Json["master_metadata_track_name"];
-    public readonly string? Time_Played => (string?)Json["msPlayed"] ?? (string?)Json["ms_played"];
+    private readonly string? Time_Played => (string?)Json["msPlayed"] ?? (string?)Json["ms_played"];
     public readonly TimeSpan? TimePlayed
     {
         get
@@ -77,7 +77,7 @@ public readonly struct SpotifyEntry
     public readonly bool? Song_Shuffle => (bool?)Json["shuffle"];
     public readonly bool? Song_Skipped => (bool?)Json["skipped"];
     public readonly bool? Spotify_Offline => (bool?)Json["offline"];
-    public readonly string? Spotify_OfflineTS => (string?)Json["offline_timestamp"];
+    private readonly string? Spotify_OfflineTS => (string?)Json["offline_timestamp"];
     public readonly DateTimeOffset? OfflineTimestamp
     {
         get
@@ -141,7 +141,7 @@ public readonly struct TrackInfo
     }
 
     private readonly int? Indexx { get; }
-    public readonly int Index => Indexx == null ? (int)Type : (int)Indexx;
+    public readonly int Index => Indexx == null ? (int)Type : (int)Indexx; // If provided index null, use index of TrackType
     private readonly string? NodeName { get; }
     public readonly string Name => NodeName ?? $"T{Index}";
     public TrackType Type { get; }
