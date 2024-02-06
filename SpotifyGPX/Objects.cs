@@ -150,9 +150,9 @@ public readonly struct TrackInfo
 
 public enum TrackType
 {
-    GPX = 0, // Created from a user provided GPX file track
-    Gap = 1, // Created from a gap between GPX tracks
-    Combined = 2 // Created from all GPX points combined (regardless of track)
+    GPX, // Created from a user provided GPX file track
+    Gap, // Created from a gap between GPX tracks
+    Combined // Created from all GPX points combined (regardless of track)
 }
 
 public readonly struct GPXPoint

@@ -12,13 +12,22 @@ public class JsonReport : IFileOutput
     public static bool SupportsMultiTrack => true; // Does this file format allow multiple GPXTracks to be contained?
     private static Formatting Formatting => Formatting.Indented; // Formatting of exporting JSON
 
-    public JsonReport(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
+    public JsonReport(IEnumerable<SongPoint> pairs)
+    {
+        (List<JObject> doc, int count) = GetDocument(pairs);
+        Document = doc;
+        Count = count;
+    }
 
     public List<JObject> Document { get; }
 
-    private static List<JObject> GetDocument(IEnumerable<SongPoint> Pairs)
+    private static (List<JObject>, int) GetDocument(IEnumerable<SongPoint> Pairs)
     {
-        return Pairs
+        int count = 0;
+        
+        return (
+            
+            Pairs
             .GroupBy(pair => pair.Origin)
             .Select(track =>
             {
@@ -26,11 +35,16 @@ public class JsonReport : IFileOutput
                     new JProperty(track.Key.ToString(), track
                     .SelectMany(pair =>
                     {
+                        count++;
                         return new JArray(CreateJsonReport(pair));
-                    }))
+                    })),
+                    new JProperty("Count", track.Count()),
+                    new JProperty("Track", ToObject(track.Key))
                 );
             })
-            .ToList();
+            .ToList(),
+
+            count);
     }
 
     private static JObject CreateJsonReport(SongPoint pair)
@@ -67,11 +81,20 @@ public class JsonReport : IFileOutput
         );
     }
 
+    private static JObject ToObject(TrackInfo tInfo)
+    {
+        return new JObject(
+            new JProperty("Index", tInfo.Index),
+            new JProperty("Name", tInfo.Name),
+            new JProperty("Type", tInfo.Type.ToString())
+        );
+    }
+
     public void Save(string path)
     {
         string text = JsonConvert.SerializeObject(Document, Formatting);
         File.WriteAllText(path, text);
     }
 
-    public int Count => Document.SelectMany(tracks => tracks.Properties().SelectMany(track => track.Value.Children())).Count();
+    public int Count { get; }
 }
