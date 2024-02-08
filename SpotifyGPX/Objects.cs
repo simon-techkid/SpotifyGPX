@@ -47,7 +47,7 @@ public readonly struct SpotifyEntry
     }
     public readonly string? Song_Artist => (string?)Json["artistName"] ?? (string?)Json["master_metadata_album_artist_name"];
     public readonly string? Song_Name => (string?)Json["trackName"] ?? (string?)Json["master_metadata_track_name"];
-    public readonly string? Time_Played => (string?)Json["msPlayed"] ?? (string?)Json["ms_played"];
+    private readonly string? Time_Played => (string?)Json["msPlayed"] ?? (string?)Json["ms_played"];
     public readonly TimeSpan? TimePlayed
     {
         get
@@ -77,7 +77,7 @@ public readonly struct SpotifyEntry
     public readonly bool? Song_Shuffle => (bool?)Json["shuffle"];
     public readonly bool? Song_Skipped => (bool?)Json["skipped"];
     public readonly bool? Spotify_Offline => (bool?)Json["offline"];
-    public readonly string? Spotify_OfflineTS => (string?)Json["offline_timestamp"];
+    private readonly string? Spotify_OfflineTS => (string?)Json["offline_timestamp"];
     public readonly DateTimeOffset? OfflineTimestamp
     {
         get
@@ -141,7 +141,7 @@ public readonly struct TrackInfo
     }
 
     private readonly int? Indexx { get; }
-    public readonly int Index => Indexx == null ? (int)Type : (int)Indexx;
+    public readonly int Index => Indexx == null ? (int)Type : (int)Indexx; // If provided index null, use index of TrackType
     private readonly string? NodeName { get; }
     public readonly string Name => NodeName ?? $"T{Index}";
     public TrackType Type { get; }
@@ -150,9 +150,9 @@ public readonly struct TrackInfo
 
 public enum TrackType
 {
-    GPX = 0, // Created from a user provided GPX file track
-    Gap = 1, // Created from a gap between GPX tracks
-    Combined = 2 // Created from all GPX points combined (regardless of track)
+    GPX, // Created from a user provided GPX file track
+    Gap, // Created from a gap between GPX tracks
+    Combined // Created from all GPX points combined (regardless of track)
 }
 
 public readonly struct GPXPoint
@@ -193,7 +193,7 @@ public readonly struct SongPoint
 
             builder.Append("At this position: {0}", PointTime.ToString(Options.DescriptionPlayedAt));
             builder.Append("Song ended: {0}", SongTime.ToString(Options.DescriptionPlayedAt));
-            builder.Append("Played for {0}", Song.TimePlayed);
+            builder.Append("Played for {0}", Song.TimePlayed?.ToString(Options.DescriptionTimePlayed));
             builder.Append("Skipped: {0}", Song.Song_Skipped);
             builder.Append("Shuffle: {0}", Song.Song_Shuffle);
             builder.Append("IP Address: {0}", Song.Spotify_IP);

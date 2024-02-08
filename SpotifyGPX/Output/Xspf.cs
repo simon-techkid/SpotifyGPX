@@ -5,16 +5,17 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class Xspf : OutputHandler.IFileOutput
+public class Xspf : IFileOutput
 {
-    public static bool SupportsMultiTrack => false;
+    public static bool SupportsMultiTrack => false; // Does this file format allow multiple GPXTracks to be contained?
     private static XNamespace Namespace => "http://xspf.org/ns/0/"; // Namespace of output XSPF
+    private static string Track => "track"; // Name of a track object
 
-    public Xspf(IEnumerable<SongPoint> pairs) => Document = GetXspfDocument(pairs);
+    public Xspf(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
 
     private XDocument Document { get; }
 
-    private static XDocument GetXspfDocument(IEnumerable<SongPoint> Pairs)
+    private static XDocument GetDocument(IEnumerable<SongPoint> Pairs)
     {
         return CreateXspf(Pairs.Select(song => ToXspf(song.Song)));
     }
@@ -34,11 +35,11 @@ public class Xspf : OutputHandler.IFileOutput
 
     private static XElement ToXspf(SpotifyEntry song)
     {
-        return new XElement(Namespace + "track",
+        return new XElement(Namespace + Track,
             new XElement(Namespace + "creator", song.Song_Artist),
             new XElement(Namespace + "title", song.Song_Name),
             new XElement(Namespace + "annotation", song.Time.UtcDateTime.ToString(Options.GpxOutput)),
-            new XElement(Namespace + "duration", song.Time_Played) // use TimeSpan instead of this later, add Options format
+            new XElement(Namespace + "duration", song.TimePlayed?.TotalMilliseconds) // use TimeSpan instead of this later, add Options format
         );
     }
 
@@ -47,5 +48,5 @@ public class Xspf : OutputHandler.IFileOutput
         Document.Save(path);
     }
 
-    public int Count => Document.Descendants(Namespace + "track").Count();
+    public int Count => Document.Descendants(Namespace + Track).Count();
 }

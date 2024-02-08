@@ -4,14 +4,14 @@ using System.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class Txt : OutputHandler.IFileOutput
+public class Txt : IFileOutput
 {
-    public static bool SupportsMultiTrack => false;
-    public Txt(IEnumerable<SongPoint> pairs) => Document = GetUris(pairs);
+    public static bool SupportsMultiTrack => false; // Does this file format allow multiple GPXTracks to be contained?
+    public Txt(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
 
     private string[] Document { get; }
 
-    private static string[] GetUris(IEnumerable<SongPoint> Pairs)
+    private static string[] GetDocument(IEnumerable<SongPoint> Pairs)
     {
         return Pairs.Select(pair => pair.Song.Song_URI).Where(s => s != null).ToArray();
     }

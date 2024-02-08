@@ -1,23 +1,33 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class JsonReport : OutputHandler.IFileOutput
+public class JsonReport : IFileOutput
 {
-    public static bool SupportsMultiTrack => true;
+    public static bool SupportsMultiTrack => true; // Does this file format allow multiple GPXTracks to be contained?
     private static Formatting Formatting => Formatting.Indented; // Formatting of exporting JSON
 
-    public JsonReport(IEnumerable<SongPoint> pairs) => Document = GetJsonReport(pairs);
+    public JsonReport(IEnumerable<SongPoint> pairs)
+    {
+        (List<JObject> doc, int count) = GetDocument(pairs);
+        Document = doc;
+        Count = count;
+    }
 
     public List<JObject> Document { get; }
 
-    private static List<JObject> GetJsonReport(IEnumerable<SongPoint> Pairs)
+    private static (List<JObject>, int) GetDocument(IEnumerable<SongPoint> Pairs)
     {
-        return Pairs
+        int count = 0;
+        
+        return (
+            
+            Pairs
             .GroupBy(pair => pair.Origin)
             .Select(track =>
             {
@@ -25,11 +35,16 @@ public class JsonReport : OutputHandler.IFileOutput
                     new JProperty(track.Key.ToString(), track
                     .SelectMany(pair =>
                     {
+                        count++;
                         return new JArray(CreateJsonReport(pair));
-                    }))
+                    })),
+                    new JProperty("Count", track.Count()),
+                    new JProperty("Track", ToObject(track.Key))
                 );
             })
-            .ToList();
+            .ToList(),
+
+            count);
     }
 
     private static JObject CreateJsonReport(SongPoint pair)
@@ -51,7 +66,7 @@ public class JsonReport : OutputHandler.IFileOutput
             new JProperty("Index", song.Index),
             new JProperty("Original", song.Json),
             new JProperty("Time", song.Time),
-            new JProperty("TimePlayed", song.TimePlayed),
+            new JProperty("TimePlayed", song.TimePlayed?.TotalMilliseconds),
             new JProperty("OfflineTimestamp", song.OfflineTimestamp)
         );
     }
@@ -60,9 +75,18 @@ public class JsonReport : OutputHandler.IFileOutput
     {
         return new JObject(
             new JProperty("Index", point.Index),
-            new JProperty("lat", point.Location.Latitude),
-            new JProperty("lon", point.Location.Longitude),
-            new JProperty("time", point.Time)
+            new JProperty("Latitude", point.Location.Latitude),
+            new JProperty("Longitude", point.Location.Longitude),
+            new JProperty("Time", point.Time)
+        );
+    }
+
+    private static JObject ToObject(TrackInfo tInfo)
+    {
+        return new JObject(
+            new JProperty("Index", tInfo.Index),
+            new JProperty("Name", tInfo.Name),
+            new JProperty("Type", tInfo.Type.ToString())
         );
     }
 
@@ -72,5 +96,5 @@ public class JsonReport : OutputHandler.IFileOutput
         File.WriteAllText(path, text);
     }
 
-    public int Count => Document.SelectMany(tracks => tracks.Properties().SelectMany(track => track.Value.Children())).Count();
+    public int Count { get; }
 }

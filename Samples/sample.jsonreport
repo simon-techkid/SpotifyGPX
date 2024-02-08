@@ -1,0 +1,306 @@
+[
+  {
+    "20230709": [
+      {
+        "Index": 0,
+        "SpotifyEntry": {
+          "Index": 1,
+          "Original": {
+            "ts": "2023-07-09T15:44:01Z",
+            "username": null,
+            "platform": "android",
+            "ms_played": "176496",
+            "conn_country": "FR",
+            "ip_addr_decrypted": null,
+            "user_agent_decrypted": null,
+            "master_metadata_track_name": "Apples",
+            "master_metadata_album_artist_name": "Little May",
+            "master_metadata_album_album_name": "Blame My Body",
+            "spotify_track_uri": "spotify:track:6d02wtoltkQ05i3mqzfBFG",
+            "episode_name": null,
+            "episode_show_name": null,
+            "spotify_episode_uri": null,
+            "reason_start": "trackdone",
+            "reason_end": "trackdone",
+            "shuffle": false,
+            "skipped": false,
+            "offline": false,
+            "offline_timestamp": "1688917265",
+            "incognito": null
+          },
+          "Time": "2023-07-09T15:44:01+00:00",
+          "TimePlayed": 496,
+          "OfflineTimestamp": "2023-07-09T15:41:05+00:00"
+        },
+        "GPXPoint": {
+          "Index": 7,
+          "Latitude": 44.96196068713781,
+          "Longitude": -0.3619575231220995,
+          "Time": "2023-07-09T17:43:56.999+02:00"
+        },
+        "Accuracy": 4.001,
+        "NormalizedOffset": "02:00:00",
+        "SongTime": "2023-07-09T17:44:01+02:00",
+        "PointTime": "2023-07-09T17:43:56.999+02:00"
+      },
+      {
+        "Index": 1,
+        "SpotifyEntry": {
+          "Index": 2,
+          "Original": {
+            "ts": "2023-07-09T15:47:38Z",
+            "username": null,
+            "platform": "android",
+            "ms_played": "216093",
+            "conn_country": "FR",
+            "ip_addr_decrypted": null,
+            "user_agent_decrypted": null,
+            "master_metadata_track_name": "On A Midnight Street",
+            "master_metadata_album_artist_name": "Matthew And The Atlas",
+            "master_metadata_album_album_name": "Temple",
+            "spotify_track_uri": "spotify:track:4AIzqWgbH94S0cNid1f3mT",
+            "episode_name": null,
+            "episode_show_name": null,
+            "spotify_episode_uri": null,
+            "reason_start": "trackdone",
+            "reason_end": "trackdone",
+            "shuffle": false,
+            "skipped": false,
+            "offline": false,
+            "offline_timestamp": "1688917442",
+            "incognito": null
+          },
+          "Time": "2023-07-09T15:47:38+00:00",
+          "TimePlayed": 93,
+          "OfflineTimestamp": "2023-07-09T15:44:02+00:00"
+        },
+        "GPXPoint": {
+          "Index": 14,
+          "Latitude": 44.94663761172837,
+          "Longitude": -0.32882642308137994,
+          "Time": "2023-07-09T17:47:32.999+02:00"
+        },
+        "Accuracy": 5.001,
+        "NormalizedOffset": "02:00:00",
+        "SongTime": "2023-07-09T17:47:38+02:00",
+        "PointTime": "2023-07-09T17:47:32.999+02:00"
+      },
+      {
+        "Index": 2,
+        "SpotifyEntry": {
+          "Index": 3,
+          "Original": {
+            "ts": "2023-07-09T15:51:01Z",
+            "username": null,
+            "platform": "android",
+            "ms_played": "202164",
+            "conn_country": "FR",
+            "ip_addr_decrypted": null,
+            "user_agent_decrypted": null,
+            "master_metadata_track_name": "Watching the Wires",
+            "master_metadata_album_artist_name": "Hiss Golden Messenger",
+            "master_metadata_album_album_name": "Watching the Wires",
+            "spotify_track_uri": "spotify:track:7M9OysBhaeVEEOZW0sl4IN",
+            "episode_name": null,
+            "episode_show_name": null,
+            "spotify_episode_uri": null,
+            "reason_start": "trackdone",
+            "reason_end": "trackdone",
+            "shuffle": false,
+            "skipped": false,
+            "offline": false,
+            "offline_timestamp": "1688917659",
+            "incognito": null
+          },
+          "Time": "2023-07-09T15:51:01+00:00",
+          "TimePlayed": 164,
+          "OfflineTimestamp": "2023-07-09T15:47:39+00:00"
+        },
+        "GPXPoint": {
+          "Index": 21,
+          "Latitude": 44.92381299086086,
+          "Longitude": -0.30094199633638036,
+          "Time": "2023-07-09T17:51:09.999+02:00"
+        },
+        "Accuracy": -8.999,
+        "NormalizedOffset": "02:00:00",
+        "SongTime": "2023-07-09T17:51:01+02:00",
+        "PointTime": "2023-07-09T17:51:09.999+02:00"
+      },
+      {
+        "Index": 3,
+        "SpotifyEntry": {
+          "Index": 4,
+          "Original": {
+            "ts": "2023-07-09T15:54:57Z",
+            "username": null,
+            "platform": "android",
+            "ms_played": "235871",
+            "conn_country": "FR",
+            "ip_addr_decrypted": null,
+            "user_agent_decrypted": null,
+            "master_metadata_track_name": "Thought You'd Never Ask",
+            "master_metadata_album_artist_name": "Folk Road Show",
+            "master_metadata_album_album_name": "Thought You'd Never Ask",
+            "spotify_track_uri": "spotify:track:05cmKMGYCSpcs0WBA0nMjX",
+            "episode_name": null,
+            "episode_show_name": null,
+            "spotify_episode_uri": null,
+            "reason_start": "trackdone",
+            "reason_end": "trackdone",
+            "shuffle": false,
+            "skipped": false,
+            "offline": false,
+            "offline_timestamp": "1688917862",
+            "incognito": null
+          },
+          "Time": "2023-07-09T15:54:57+00:00",
+          "TimePlayed": 871,
+          "OfflineTimestamp": "2023-07-09T15:51:02+00:00"
+        },
+        "GPXPoint": {
+          "Index": 28,
+          "Latitude": 44.9207163,
+          "Longitude": -0.2637063,
+          "Time": "2023-07-09T17:54:45.164+02:00"
+        },
+        "Accuracy": 11.836,
+        "NormalizedOffset": "02:00:00",
+        "SongTime": "2023-07-09T17:54:57+02:00",
+        "PointTime": "2023-07-09T17:54:45.164+02:00"
+      },
+      {
+        "Index": 4,
+        "SpotifyEntry": {
+          "Index": 5,
+          "Original": {
+            "ts": "2023-07-09T15:56:53Z",
+            "username": null,
+            "platform": "android",
+            "ms_played": "115960",
+            "conn_country": "FR",
+            "ip_addr_decrypted": null,
+            "user_agent_decrypted": null,
+            "master_metadata_track_name": "Not Every River",
+            "master_metadata_album_artist_name": "Bear's Den",
+            "master_metadata_album_album_name": "So that you might hear me",
+            "spotify_track_uri": "spotify:track:6vpVRpTK1r4FuZb8FtEjYb",
+            "episode_name": null,
+            "episode_show_name": null,
+            "spotify_episode_uri": null,
+            "reason_start": "trackdone",
+            "reason_end": "trackdone",
+            "shuffle": false,
+            "skipped": false,
+            "offline": false,
+            "offline_timestamp": "1688918098",
+            "incognito": null
+          },
+          "Time": "2023-07-09T15:56:53+00:00",
+          "TimePlayed": 960,
+          "OfflineTimestamp": "2023-07-09T15:54:58+00:00"
+        },
+        "GPXPoint": {
+          "Index": 32,
+          "Latitude": 44.9190012,
+          "Longitude": -0.2437124,
+          "Time": "2023-07-09T17:56:48.152+02:00"
+        },
+        "Accuracy": 4.848,
+        "NormalizedOffset": "02:00:00",
+        "SongTime": "2023-07-09T17:56:53+02:00",
+        "PointTime": "2023-07-09T17:56:48.152+02:00"
+      },
+      {
+        "Index": 5,
+        "SpotifyEntry": {
+          "Index": 6,
+          "Original": {
+            "ts": "2023-07-09T16:00:20Z",
+            "username": null,
+            "platform": "android",
+            "ms_played": "205742",
+            "conn_country": "FR",
+            "ip_addr_decrypted": null,
+            "user_agent_decrypted": null,
+            "master_metadata_track_name": "Won't Happen - Stripped-Back",
+            "master_metadata_album_artist_name": "Ten Fé",
+            "master_metadata_album_album_name": "Won't Happen",
+            "spotify_track_uri": "spotify:track:70Rz9c3gY6QNxqBrxCmJJa",
+            "episode_name": null,
+            "episode_show_name": null,
+            "spotify_episode_uri": null,
+            "reason_start": "trackdone",
+            "reason_end": "trackdone",
+            "shuffle": false,
+            "skipped": false,
+            "offline": false,
+            "offline_timestamp": "1688918214",
+            "incognito": null
+          },
+          "Time": "2023-07-09T16:00:20+00:00",
+          "TimePlayed": 742,
+          "OfflineTimestamp": "2023-07-09T15:56:54+00:00"
+        },
+        "GPXPoint": {
+          "Index": 39,
+          "Latitude": 44.90750014910081,
+          "Longitude": -0.23220191613252472,
+          "Time": "2023-07-09T18:00:23+02:00"
+        },
+        "Accuracy": -3.0,
+        "NormalizedOffset": "02:00:00",
+        "SongTime": "2023-07-09T18:00:20+02:00",
+        "PointTime": "2023-07-09T18:00:23+02:00"
+      },
+      {
+        "Index": 6,
+        "SpotifyEntry": {
+          "Index": 7,
+          "Original": {
+            "ts": "2023-07-09T16:02:42Z",
+            "username": null,
+            "platform": "android",
+            "ms_played": "141653",
+            "conn_country": "FR",
+            "ip_addr_decrypted": null,
+            "user_agent_decrypted": null,
+            "master_metadata_track_name": "Sea so Blue",
+            "master_metadata_album_artist_name": "Austin Basham",
+            "master_metadata_album_album_name": "You and Me for Now",
+            "spotify_track_uri": "spotify:track:4YI7bOKyyPnCxhltKmrU9P",
+            "episode_name": null,
+            "episode_show_name": null,
+            "spotify_episode_uri": null,
+            "reason_start": "trackdone",
+            "reason_end": "trackdone",
+            "shuffle": false,
+            "skipped": false,
+            "offline": false,
+            "offline_timestamp": "1688918420",
+            "incognito": null
+          },
+          "Time": "2023-07-09T16:02:42+00:00",
+          "TimePlayed": 653,
+          "OfflineTimestamp": "2023-07-09T16:00:20+00:00"
+        },
+        "GPXPoint": {
+          "Index": 44,
+          "Latitude": 44.8997946172835,
+          "Longitude": -0.2140526201234818,
+          "Time": "2023-07-09T18:02:57+02:00"
+        },
+        "Accuracy": -15.0,
+        "NormalizedOffset": "02:00:00",
+        "SongTime": "2023-07-09T18:02:42+02:00",
+        "PointTime": "2023-07-09T18:02:57+02:00"
+      }
+    ],
+    "Count": 7,
+    "Track": {
+      "Index": 0,
+      "Name": "20230709",
+      "Type": "GPX"
+    }
+  }
+]

@@ -81,23 +81,23 @@ To use SpotifyGPX, retrieve the data you tracked:
  2. Copy the appropriate GPX files from the device you used for tracking
  3. Run SpotifyGPX with the following two files:
 
-| Imported file | Use case | Sample |
-| ------------- | -------- | ------ |
-| `Gpx` | The route you took and the times where you were in each place | [GPX](Samples/sample.gpx) |
-| `Json` | The songs you listened to and the times you listened to them | [JSON](Samples/sample.json) |
+| Sample | Use case |
+| ------ | -------- |
+| [Gpx](Samples/sample.gpx) | The route you took and the times where you were in each place |
+| [Json](Samples/sample.json) | The songs you listened to and the times you listened to them |
 
 SpotifyGPX will allow you to:
 
  1. Use each of the coordinates (from the GPX) to identify (with closest possible precision) a position for a song
  2. Use the exported formats below to parse the song-point positions:
 
-| Exported file | Use case |
-| ------------- | -------- |
-| `Gpx` | View a map of where each of your tracks was played using a tool like [kepler.gl](https://github.com/keplergl/kepler.gl) or [Google MyMaps](https://www.google.com/mymaps) |
-| `Json` | Preserve the original Spotify data (from the original JSON) used for your journey |
-| `JsonReport` | Preserve all data SpotifyGPX used to create the pairings for your journey. Includes data from Json. |
-| `Txt` | Create a txt file of a Spotify URI (song link) list of the songs on your journey. [Paste](https://community.spotify.com/t5/Your-Library/how-to-paste-a-list-of-URL-s-into-a-playlist/m-p/5355978/highlight/true#M19851) into Spotify playlists on Desktop. |
-| `Xspf` | Use as a playlist to visualize your journey's songs in an app such as [VLC Media Player](https://www.videolan.org/) |
+| Sample | Use case |
+| ------ | -------- |
+| [Gpx](Samples/sample_20230709.gpx) | View a map of where each of your tracks was played using a tool like [kepler.gl](https://github.com/keplergl/kepler.gl) or [Google MyMaps](https://www.google.com/mymaps) |
+| [Json](Samples/sample_20230709.json) | Preserve the original Spotify data (from the original JSON) used for your journey |
+| [JsonReport](Samples/sample.jsonreport) | Preserve all data SpotifyGPX used to create the pairings for your journey. Includes data from Json. |
+| [Txt](Samples/sample_20230709.txt) | Create a txt file of a Spotify URI (song link) list of the songs on your journey. [Paste](https://community.spotify.com/t5/Your-Library-how-to-paste-a-list-of-URL-s-into-a-playlist/m-p/5355978/highlight/true#M19851) into Spotify playlists on Desktop. |
+| [Xspf](Samples/sample_20230709.xspf) | Use as a playlist to visualize your journey's songs in an app such as [VLC Media Player](https://www.videolan.org/) |
 
 ## SpotifyGPX Options
 
