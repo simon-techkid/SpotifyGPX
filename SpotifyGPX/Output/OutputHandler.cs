@@ -7,35 +7,69 @@ namespace SpotifyGPX.Output;
 
 public class OutputHandler
 {
-    private static bool ReplaceFiles => true;
+    private static bool ReplaceFiles => false;
     private readonly IEnumerable<SongPoint> Pairs;
-    private readonly Dictionary<Formats, Lazy<IFileOutput>> formatHandlers;
 
-    public OutputHandler(IEnumerable<SongPoint> pairs)
-    {
-        Pairs = pairs;
-
-        formatHandlers = new Dictionary<Formats, Lazy<IFileOutput>>
-            {
-                { Formats.Gpx, new Lazy<IFileOutput>(() => new Gpx(pairs)) },
-                { Formats.Json, new Lazy<IFileOutput>(() => new Json(pairs)) },
-                { Formats.JsonReport, new Lazy<IFileOutput>(() => new JsonReport(pairs)) },
-                { Formats.Txt, new Lazy<IFileOutput>(() => new Txt(pairs)) },
-                { Formats.Xspf, new Lazy<IFileOutput>(() => new Xspf(pairs)) }
-            };
-    }
+    public OutputHandler(IEnumerable<SongPoint> pairs) => Pairs = pairs;
 
     public void Save(string name, Formats format)
     {
-        string uppercaseFormat = format.ToString().ToUpper();
-        string lowercaseFormat = format.ToString().ToLower();        
-        string outputFileName = GetOutputFileName(name, lowercaseFormat);
-        string path = GetUniqueFilePath(outputFileName);
+        string lowerFormat = format.ToString().ToLower();
+        string upperFormat = format.ToString().ToUpper();
 
-        IFileOutput export = formatHandlers[format].Value;
-        export.Save(path);
+        List<(IFileOutput file, int total, string name, string path)> tracksToFiles = new();
 
-        Console.WriteLine($"[OUT] {uppercaseFormat} [{export.Count}/{Pairs.Count()}]");
+        bool supportsMulti = AllowsMultiTrack()[format];
+
+        if (supportsMulti)
+        {
+            string outputFileName = GetOutputFileName(name, lowerFormat);
+            string path = GetUniqueFilePath(outputFileName);
+            tracksToFiles.Add((GetHandler(Pairs)[format], Pairs.Count(), "All", path));
+        }
+        else
+        {
+            var groupedPairs = Pairs.GroupBy(pair => pair.Origin);
+
+            foreach (var group in groupedPairs)
+            {
+                string groupName = group.Key.ToString();
+                string outputFileName = GetOutputFileName($"{name}_{groupName}", lowerFormat);
+                string path = GetUniqueFilePath(outputFileName);
+                tracksToFiles.Add((GetHandler(group)[format], group.Count(), groupName, path));
+            }
+        }
+
+        tracksToFiles.ForEach(track => track.file.Save(track.path));
+
+        string joinedExports = string.Join(", ", tracksToFiles.Select(track => $"{track.file.Count}/{track.total} ({track.name})"));
+        double totalExported = tracksToFiles.Select(track => track.file.Count).Sum();
+        double totalPairs = tracksToFiles.Select(track => track.total).Sum();
+        Console.WriteLine($"[OUT] [{upperFormat} {totalExported}/{totalPairs}]: {joinedExports}");
+    }
+
+    private static Dictionary<Formats, IFileOutput> GetHandler(IEnumerable<SongPoint> pairs)
+    {
+        return new Dictionary<Formats, IFileOutput>
+        {
+            { Formats.Gpx, new Gpx(pairs) },
+            { Formats.Json, new Json(pairs) },
+            { Formats.JsonReport, new JsonReport(pairs) },
+            { Formats.Txt, new Txt(pairs) },
+            { Formats.Xspf, new Xspf(pairs) }
+        };
+    }
+
+    private static Dictionary<Formats, bool> AllowsMultiTrack()
+    {
+        return new Dictionary<Formats, bool>
+        {
+            { Formats.Gpx, false },
+            { Formats.Json, false },
+            { Formats.JsonReport, true },
+            { Formats.Txt, false },
+            { Formats.Xspf, false }
+        };
     }
 
     private static string GetOutputFileName(string name, string format) => $"{name}.{format}";
@@ -81,6 +115,6 @@ public class OutputHandler
 public interface IFileOutput
 {
     // Defines the requirements of export format classes:
-    int Count { get; } // Provides the number of pairings in the file
     void Save(string path); // Allows the saving of that file to the local disk
+    int Count { get; } // Provides the number of pairings in the file
 }
