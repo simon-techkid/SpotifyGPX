@@ -53,10 +53,10 @@ public class Pairings
     public void Save(OutputHandler.Formats format, string name)
     {
         // Parse the Pairs in this Pairings object to the specified format, according to user-provided arguments
-        OutputHandler fmat = new(Pairs, format);
+        OutputHandler fmat = new(Pairs);
 
         // Save the handled format as specified by the provided file name prefix
-        fmat.Save(name);
+        fmat.Save(name, format);
     }
 
     public override string ToString()

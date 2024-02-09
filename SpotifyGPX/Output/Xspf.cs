@@ -7,7 +7,6 @@ namespace SpotifyGPX.Output;
 
 public class Xspf : IFileOutput
 {
-    public static bool SupportsMultiTrack => false; // Does this file format allow multiple GPXTracks to be contained?
     private static XNamespace Namespace => "http://xspf.org/ns/0/"; // Namespace of output XSPF
     private static string Track => "track"; // Name of a track object
 

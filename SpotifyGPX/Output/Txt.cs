@@ -6,7 +6,6 @@ namespace SpotifyGPX.Output;
 
 public class Txt : IFileOutput
 {
-    public static bool SupportsMultiTrack => false; // Does this file format allow multiple GPXTracks to be contained?
     public Txt(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
 
     private string[] Document { get; }

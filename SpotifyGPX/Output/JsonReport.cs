@@ -9,7 +9,6 @@ namespace SpotifyGPX.Output;
 
 public class JsonReport : IFileOutput
 {
-    public static bool SupportsMultiTrack => true; // Does this file format allow multiple GPXTracks to be contained?
     private static Formatting Formatting => Formatting.Indented; // Formatting of exporting JSON
 
     public JsonReport(IEnumerable<SongPoint> pairs)
@@ -24,22 +23,22 @@ public class JsonReport : IFileOutput
     private static (List<JObject>, int) GetDocument(IEnumerable<SongPoint> Pairs)
     {
         int count = 0;
-        
+
         return (
-            
+
             Pairs
             .GroupBy(pair => pair.Origin)
             .Select(track =>
             {
                 return new JObject(
+                    new JProperty("Count", track.Count()),
+                    new JProperty("TrackInfo", ToJObject(track.Key)),
                     new JProperty(track.Key.ToString(), track
                     .SelectMany(pair =>
                     {
                         count++;
                         return new JArray(CreateJsonReport(pair));
-                    })),
-                    new JProperty("Count", track.Count()),
-                    new JProperty("Track", ToObject(track.Key))
+                    }))
                 );
             })
             .ToList(),
@@ -81,7 +80,7 @@ public class JsonReport : IFileOutput
         );
     }
 
-    private static JObject ToObject(TrackInfo tInfo)
+    private static JObject ToJObject(TrackInfo tInfo)
     {
         return new JObject(
             new JProperty("Index", tInfo.Index),

@@ -7,7 +7,6 @@ namespace SpotifyGPX.Output;
 
 public class Gpx : IFileOutput
 {
-    public static bool SupportsMultiTrack => false; // Does this file format allow multiple GPXTracks to be contained?
     private static XNamespace Namespace => "http://www.topografix.com/GPX/1/0"; // Namespace of the output GPX
     private static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance"; // XML schema location of the output GPX
     private static string Schema => "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd"; // GPX schema location(s) of the output GPX

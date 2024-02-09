@@ -8,7 +8,6 @@ namespace SpotifyGPX.Output;
 
 public class Json : IFileOutput
 {
-    public static bool SupportsMultiTrack => false; // Does this file format allow multiple GPXTracks to be contained?
     private static Formatting Formatting => Formatting.Indented; // Formatting of exporting JSON
 
     public Json(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
