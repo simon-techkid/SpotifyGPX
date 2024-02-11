@@ -87,5 +87,18 @@ public class JsonReport : IFileOutput
         File.WriteAllText(path, text);
     }
 
-    public int Count => Document.Select(doc => (int)doc["Count"]).Sum();
+    public int Count
+    {
+        get
+        {
+            // For each document (JObject) in Document (List<JObject>),
+            // Get that JObject's children
+            // Select the last child (in this case, the pair list)
+            // Get the count of pairs within the pair list
+            // Get the sum of pairs in that JObject
+            // Get the sum of pairs in all selected JObjects of List<JObject>
+
+            return Document.Select(JObject => JObject.Children().Last().Select(pair => pair.Count()).Sum()).Sum();
+        }
+    }
 }

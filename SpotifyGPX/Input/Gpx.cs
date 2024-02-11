@@ -68,15 +68,17 @@ public class Gpx
 
         if (allTracks.Count > 1)
         {
-            GPXTrack combinedTrack = CombineTracks(allTracks);
-            allTracks = CalculateGaps(allTracks);
-            allTracks.Add(combinedTrack);
+            // If the GPX contains more than one track, provide user parsing options:
 
+            GPXTrack combinedTrack = CombineTracks(allTracks); // Generate a combined track (cohesive of all included tracks)
+            allTracks = CalculateGaps(allTracks); // Add gaps between tracks as track options
+            allTracks.Add(combinedTrack); // Add the combined track to the end of the list
 
+            // Take user input for track/filtration selection
             return HandleMultipleTracks(allTracks);
         }
 
-        return allTracks;
+        return allTracks; // Return final track list
     }
 
     private static List<GPXTrack> HandleMultipleTracks(List<GPXTrack> allTracks)

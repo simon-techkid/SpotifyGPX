@@ -1,6 +1,5 @@
 ﻿// SpotifyGPX by Simon Field
 
-using System;
 using System.Globalization;
 
 namespace SpotifyGPX;
@@ -20,7 +19,7 @@ public class Options
     public static string SpotifyMini => @"yyyy-MM-dd HH\:mm"; // 5 day (past year) dump
     public static DateTimeStyles SpotifyTimeStyle => DateTimeStyles.AssumeUniversal; // Time zone interpretation of Spotify data
 
-    // GPX Export Formats
+    // Time Output Formats
     public static string GpxOutput => @"yyyy-MM-ddTHH\:mm\:ssZ"; // Must first be converted to UTC (GPX spec requires ISO 8601)
     public static string DescriptionPlayedAt => @"yyyy-MM-dd HH\:mm\:ss zzz"; // Time of a song and point printed in the <desc> field of exported GPX
     public static string DescriptionTimePlayed => @"hh\:mm\:ss\.fff"; // Duration (msPlayed) of a song in the <desc> field of exported GPX

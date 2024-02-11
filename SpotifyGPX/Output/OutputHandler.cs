@@ -14,29 +14,35 @@ public class OutputHandler
 
     public void Save(string name, Formats format)
     {
-        string lowerFormat = format.ToString().ToLower();
-        string upperFormat = format.ToString().ToUpper();
+        string lowerFormat = format.ToString().ToLower(); // All lowercase format name
+        string upperFormat = format.ToString().ToUpper(); // All uppercase format name
 
+        // file = the output file
+        // total = the expected pair count
+        // name = the name of the pair batch (usually track name)
+        // path = the export path of the final file
         List<(IFileOutput file, int total, string name, string path)> tracksToFiles = new();
 
-        bool supportsMulti = AllowsMultiTrack()[format];
+        bool supportsMulti = AllowsMultiTrack()[format]; // Determine whether the desired format can hold multiple GPX tracks worth of pairs
 
         if (supportsMulti)
         {
+            string groupName = "All";
             string outputFileName = GetOutputFileName(name, lowerFormat);
             string path = GetUniqueFilePath(outputFileName);
-            tracksToFiles.Add((GetHandler(Pairs)[format], Pairs.Count(), "All", path));
+            tracksToFiles.Add((GetHandler(Pairs)[format], Pairs.Count(), groupName, path));
         }
         else
         {
-            var groupedPairs = Pairs.GroupBy(pair => pair.Origin);
+            var tracks = Pairs.GroupBy(pair => pair.Origin); // Group the pairs by their source GPX track
 
-            foreach (var group in groupedPairs)
+            foreach (var track in tracks)
             {
-                string groupName = group.Key.ToString();
+                string groupName = track.Key.ToString();
                 string outputFileName = GetOutputFileName($"{name}_{groupName}", lowerFormat);
                 string path = GetUniqueFilePath(outputFileName);
-                tracksToFiles.Add((GetHandler(group)[format], group.Count(), groupName, path));
+                IFileOutput handler = GetHandler(track)[format];
+                tracksToFiles.Add((handler, track.Count(), groupName, path));
             }
         }
 
