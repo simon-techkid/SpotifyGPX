@@ -115,27 +115,27 @@ class Program
 
         if (noGpxExport == false)
         {
-            pairedEntries.Save(OutputHandler.Formats.Gpx, Path.GetFileNameWithoutExtension(inputGpx));
+            pairedEntries.Save(Formats.Gpx, Path.GetFileNameWithoutExtension(inputGpx));
         }
 
         if (exportJson == true)
         {
-            pairedEntries.Save(OutputHandler.Formats.Json, Path.GetFileNameWithoutExtension(inputGpx));
+            pairedEntries.Save(Formats.Json, Path.GetFileNameWithoutExtension(inputGpx));
         }
 
         if (exportPlist == true)
         {
-            pairedEntries.Save(OutputHandler.Formats.Xspf, Path.GetFileNameWithoutExtension(inputGpx));
+            pairedEntries.Save(Formats.Xspf, Path.GetFileNameWithoutExtension(inputGpx));
         }
 
         if (exportSpotifyURI == true)
         {
-            pairedEntries.Save(OutputHandler.Formats.Txt, Path.GetFileNameWithoutExtension(inputGpx));
+            pairedEntries.Save(Formats.Txt, Path.GetFileNameWithoutExtension(inputGpx));
         }
 
         if (exportJsonReport == true)
         {
-            pairedEntries.Save(OutputHandler.Formats.JsonReport, Path.GetFileNameWithoutExtension(inputGpx));
+            pairedEntries.Save(Formats.JsonReport, Path.GetFileNameWithoutExtension(inputGpx));
         }
 
         return; // Exit the program

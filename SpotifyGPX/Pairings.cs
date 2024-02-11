@@ -42,13 +42,13 @@ public class Pairings
         .ToList();
     }
 
-    public void Save(OutputHandler.Formats format, string name)
+    public void Save(Formats format, string sourceGpxName)
     {
         // Parse the Pairs in this Pairings object to the specified format, according to user-provided arguments
         OutputHandler fmat = new(Pairs);
 
         // Save the handled format as specified by the provided file name prefix
-        fmat.Save(name, format);
+        fmat.Save(format, sourceGpxName);
     }
 
     public void WriteCounts()

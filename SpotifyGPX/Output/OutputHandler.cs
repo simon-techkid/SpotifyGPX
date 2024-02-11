@@ -12,11 +12,8 @@ public class OutputHandler
 
     public OutputHandler(IEnumerable<SongPoint> pairs) => Pairs = pairs;
 
-    public void Save(string sourceGpxName, Formats format)
+    public void Save(Formats format, string sourceGpxName)
     {
-        string lowerFormat = format.ToString().ToLower(); // All lowercase format name
-        string upperFormat = format.ToString().ToUpper(); // All uppercase format name
-
         // file = the output file
         // total = the expected pair count
         // name = the name of the pair batch (usually track name)
@@ -27,43 +24,46 @@ public class OutputHandler
 
         if (supportsMulti)
         {
+            // If the desired format can support multiple tracks, handle the entire pair list, ungrouped:
             tracksToFiles.Add(HandleTrack(Pairs, format, sourceGpxName, "All"));
         }
         else
         {
-            var tracks = Pairs.GroupBy(pair => pair.Origin); // Group the pairs by their source GPX track
-
-            foreach (var track in tracks)
+            // If the desired format can't support multiple tracks, split each track into its own file:
+            foreach (var track in Pairs.GroupBy(pair => pair.Origin)) // Group the pairs by their source GPX track
             {
-                tracksToFiles.Add(HandleTrack(track, format, sourceGpxName, track.Key.ToString()));
+                tracksToFiles.Add(HandleTrack(track, format, sourceGpxName, track.Key.ToString())); // Original GPX track name included in file name
             }
         }
 
-        tracksToFiles.ForEach(track => track.file.Save(track.path));
+        tracksToFiles.ForEach(track => track.file.Save(track.path)); // For each track file, save it to the disk
 
+        // Print the individual track results (number of pairs):
         string joinedExports = string.Join(", ", tracksToFiles.Select(track => $"{track.file.Count}/{track.total} ({track.name})"));
-        double totalExported = tracksToFiles.Select(track => track.file.Count).Sum();
-        double totalPairs = tracksToFiles.Select(track => track.total).Sum();
-        Console.WriteLine($"[OUT] [{upperFormat} {totalExported}/{totalPairs}]: {joinedExports}");
+        double totalExported = tracksToFiles.Select(track => track.file.Count).Sum(); // Sum of all files' exported pairs
+        double totalPairs = tracksToFiles.Select(track => track.total).Sum(); // Sum of all tracks' pairs
+        Console.WriteLine($"[OUT] [{format.ToString().ToUpper()} {totalExported}/{totalPairs}]: {joinedExports}");
     }
 
     private static (IFileOutput, int, string, string) HandleTrack(IEnumerable<SongPoint> pairs, Formats format, string sourceGpxName, string trackName)
     {
+        // Include both the original GPX name, and the name of the source GPX track in the output file
         string outputFileName = GetOutputFileName($"{sourceGpxName}_{trackName}", format.ToString().ToLower());
-        string path = GetUniqueFilePath(outputFileName);
-        IFileOutput handler = GetHandler(pairs)[format];
-        return (handler, pairs.Count(), trackName, path);
+        string path = GetUniqueFilePath(outputFileName); // Ensure exporting to unique file name
+        IFileOutput handler = GetHandler(pairs)[format]; // Get file output class with IFileOutput
+        return (handler, pairs.Count(), trackName, path); // Return tuple of values for tracksToFiles list
     }
 
     private static Dictionary<Formats, IFileOutput> GetHandler(IEnumerable<SongPoint> pairs)
     {
-        return new Dictionary<Formats, IFileOutput>
+        return new Dictionary<Formats, IFileOutput> // Each of the below classes inherit IFileOutput, as they are format classes sharing methods and fields
         {
             { Formats.Gpx, new Gpx(pairs) },
             { Formats.Json, new Json(pairs) },
             { Formats.JsonReport, new JsonReport(pairs) },
             { Formats.Txt, new Txt(pairs) },
             { Formats.Xspf, new Xspf(pairs) }
+            // To add a new format, create an entry in enum Formats, and associate it with a class
         };
     }
 
@@ -73,13 +73,14 @@ public class OutputHandler
         {
             { Formats.Gpx, false },
             { Formats.Json, false },
-            { Formats.JsonReport, true },
+            { Formats.JsonReport, true }, // Supports multiple tracks in the same file
             { Formats.Txt, false },
             { Formats.Xspf, false }
+            // To add a new format, create an entry in enum Formats, and define here whether it can hold multiple tracks
         };
     }
 
-    private static string GetOutputFileName(string name, string format) => $"{name}.{format}";
+    private static string GetOutputFileName(string name, string extension) => $"{name}.{extension}";
 
     private static string GetUniqueFilePath(string path)
     {
@@ -107,16 +108,16 @@ public class OutputHandler
         } while (File.Exists(uniqueFileName)); // Until non-existing file path found, repeat iteration
 
         return uniqueFileName;
-    }
+    }   
+}
 
-    public enum Formats
-    {
-        Gpx,
-        Json,
-        JsonReport,
-        Txt,
-        Xspf
-    }
+public enum Formats
+{
+    Gpx,
+    Json,
+    JsonReport,
+    Txt,
+    Xspf
 }
 
 public interface IFileOutput
