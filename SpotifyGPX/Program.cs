@@ -103,7 +103,8 @@ class Program
             // Step 3: Create list of songs and points paired as close as possible to one another
             pairedEntries = new Pairings(filteredEntries, tracks);
 
-            Console.WriteLine(pairedEntries.ToString());
+            pairedEntries.WriteCounts();
+            pairedEntries.WriteAverages();
         }
         catch (Exception ex)
         {

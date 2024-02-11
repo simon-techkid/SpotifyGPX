@@ -21,7 +21,7 @@ public class Pairings
 
         int index = 0; // Index of the pairing
 
-        List<SongPoint> correlatedEntries = gpxTracks // For each GPX track
+        return gpxTracks // For each GPX track
         .SelectMany(gpxTrack => songs // Get the list of SpotifyEntries
         .Where(spotifyEntry => spotifyEntry.WithinTimeFrame(gpxTrack.Start, gpxTrack.End)) // If the SpotifyEntry falls within the boundaries of the track
         .Select(spotifyEntry => // Select the Spotify entry if it falls in range of the GPX track
@@ -40,15 +40,6 @@ public class Pairings
         )
         .Where(pair => MaximumAbsAccuracy == null || pair.AbsAccuracy <= MaximumAbsAccuracy) // Only create pairings with accuracy equal to or below max allowed accuracy
         .ToList();
-
-        if (correlatedEntries.Count > 0)
-        {
-            // Calculate and print the average correlation accuracy in seconds
-            Console.WriteLine($"[PAIR] Song-Point Correlation Accuracy (avg sec): {Math.Round(correlatedEntries.Average(correlatedPair => correlatedPair.AbsAccuracy))}");
-        }
-
-        // Return the correlated entries list (including each Spotify song and its corresponding point), and the list of accuracies
-        return correlatedEntries;
     }
 
     public void Save(OutputHandler.Formats format, string name)
@@ -60,10 +51,25 @@ public class Pairings
         fmat.Save(name, format);
     }
 
-    public override string ToString()
+    public void WriteCounts()
     {
         string countsJoined = string.Join(", ", Pairs.GroupBy(pair => pair.Origin).Select(track => $"{track.Count()} ({track.Key.ToString()})"));
+        int trackCount = Pairs.GroupBy(pair => pair.Origin).Count(); // Total number of tracks represented
+        string typesJoined = string.Join(", ", Pairs.GroupBy(pair => pair.Origin.Type).Select(track => $"{track.Count()} ({track.Key.ToString()})"));
+        int typeCount = Pairs.GroupBy(pair => pair.Origin.Type).Count(); // Total number of track types represented
 
-        return $"[PAIR] Paired {Pairs.Count} entries from {Pairs.GroupBy(pair => pair.Origin).Count()} tracks: {countsJoined}";
+        Console.WriteLine($"[PAIR] Paired {Pairs.Count} entries from {trackCount} tracks: {countsJoined}");
+        Console.WriteLine($"[PAIR] Paired {Pairs.Count} entries of {typeCount} types: {typesJoined}");
+    }
+
+    public void WriteAverages()
+    {
+        // Uncomment below to group by track, rather than track type
+        //string accuraciesJoined = string.Join(", ", Pairs.GroupBy(pair => pair.Origin).Select(track => $"{Math.Round(track.Average(pair => pair.AbsAccuracy))}s ({track.Key.ToString()})"));
+
+        // Calculate Accuracies for Track Types (GPX, Gap, Combined)
+        string accuraciesJoined = string.Join(", ", Pairs.GroupBy(pair => pair.Origin.Type).Select(track => $"{Math.Round(track.Average(pair => pair.AbsAccuracy))}s ({track.Key.ToString()})"));
+
+        Console.WriteLine($"[PAIR] Song-Point Correlation Average Accuracies: {accuraciesJoined}");
     }
 }

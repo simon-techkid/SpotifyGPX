@@ -12,7 +12,7 @@ public class OutputHandler
 
     public OutputHandler(IEnumerable<SongPoint> pairs) => Pairs = pairs;
 
-    public void Save(string name, Formats format)
+    public void Save(string sourceGpxName, Formats format)
     {
         string lowerFormat = format.ToString().ToLower(); // All lowercase format name
         string upperFormat = format.ToString().ToUpper(); // All uppercase format name
@@ -27,10 +27,7 @@ public class OutputHandler
 
         if (supportsMulti)
         {
-            string groupName = "All";
-            string outputFileName = GetOutputFileName(name, lowerFormat);
-            string path = GetUniqueFilePath(outputFileName);
-            tracksToFiles.Add((GetHandler(Pairs)[format], Pairs.Count(), groupName, path));
+            tracksToFiles.Add(HandleTrack(Pairs, format, sourceGpxName, "All"));
         }
         else
         {
@@ -38,11 +35,7 @@ public class OutputHandler
 
             foreach (var track in tracks)
             {
-                string groupName = track.Key.ToString();
-                string outputFileName = GetOutputFileName($"{name}_{groupName}", lowerFormat);
-                string path = GetUniqueFilePath(outputFileName);
-                IFileOutput handler = GetHandler(track)[format];
-                tracksToFiles.Add((handler, track.Count(), groupName, path));
+                tracksToFiles.Add(HandleTrack(track, format, sourceGpxName, track.Key.ToString()));
             }
         }
 
@@ -52,6 +45,14 @@ public class OutputHandler
         double totalExported = tracksToFiles.Select(track => track.file.Count).Sum();
         double totalPairs = tracksToFiles.Select(track => track.total).Sum();
         Console.WriteLine($"[OUT] [{upperFormat} {totalExported}/{totalPairs}]: {joinedExports}");
+    }
+
+    private static (IFileOutput, int, string, string) HandleTrack(IEnumerable<SongPoint> pairs, Formats format, string sourceGpxName, string trackName)
+    {
+        string outputFileName = GetOutputFileName($"{sourceGpxName}_{trackName}", format.ToString().ToLower());
+        string path = GetUniqueFilePath(outputFileName);
+        IFileOutput handler = GetHandler(pairs)[format];
+        return (handler, pairs.Count(), trackName, path);
     }
 
     private static Dictionary<Formats, IFileOutput> GetHandler(IEnumerable<SongPoint> pairs)
