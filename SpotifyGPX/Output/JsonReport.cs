@@ -44,10 +44,10 @@ public class JsonReport : IFileOutput
             new JProperty("Index", pair.Index),
             new JProperty("SpotifyEntry", ToJObject(pair.Song)),
             new JProperty("GPXPoint", ToJObject(pair.Point)),
-            new JProperty("Accuracy", pair.Accuracy),
             new JProperty("NormalizedOffset", pair.NormalizedOffset),
-            new JProperty("SongTime", pair.SongTime),
-            new JProperty("PointTime", pair.PointTime)
+            new JProperty("PointTime", pair.PointTime.UtcDateTime.ToString(Options.GpxOutput)),
+            new JProperty("Accuracy", pair.Accuracy),
+            new JProperty("SongTime", pair.SongTime.UtcDateTime.ToString(Options.GpxOutput))
         );
     }
 
@@ -56,9 +56,9 @@ public class JsonReport : IFileOutput
         return new JObject(
             new JProperty("Index", song.Index),
             new JProperty("Original", song.Json),
-            new JProperty("Time", song.Time),
-            new JProperty("TimePlayed", song.TimePlayed?.TotalMilliseconds),
-            new JProperty("OfflineTimestamp", song.OfflineTimestamp)
+            new JProperty("Time", song.Time.UtcDateTime.ToString(Options.GpxOutput)),
+            new JProperty("TimePlayed", song.TimePlayed?.ToString(Options.DescriptionTimePlayed)),
+            new JProperty("OfflineTimestamp", song.OfflineTimestamp?.UtcDateTime.ToString(Options.GpxOutput))
         );
     }
 
@@ -68,7 +68,7 @@ public class JsonReport : IFileOutput
             new JProperty("Index", point.Index),
             new JProperty("Latitude", point.Location.Latitude),
             new JProperty("Longitude", point.Location.Longitude),
-            new JProperty("Time", point.Time)
+            new JProperty("Time", point.Time.UtcDateTime.ToString(Options.GpxOutput))
         );
     }
 

@@ -10,9 +10,10 @@ namespace SpotifyGPX;
 
 public class Pairings
 {
-    private readonly List<SongPoint> Pairs;
+    private static double? MaximumAbsAccuracy => null; // Greatest accepted error (in seconds) between song and point time (null = allow all pairings regardless of accuracy)
 
     public Pairings(List<SpotifyEntry> s, List<GPXTrack> t) => Pairs = PairPoints(s, t);
+    private readonly List<SongPoint> Pairs;
 
     private static List<SongPoint> PairPoints(List<SpotifyEntry> songs, List<GPXTrack> gpxTracks)
     {
@@ -37,7 +38,7 @@ public class Pairings
                 return pair;
             })
         )
-        .Where(pair => Options.MaximumAbsAccuracy == null || pair.AbsAccuracy <= Options.MaximumAbsAccuracy) // Only create pairings with accuracy equal to or below max allowed accuracy
+        .Where(pair => MaximumAbsAccuracy == null || pair.AbsAccuracy <= MaximumAbsAccuracy) // Only create pairings with accuracy equal to or below max allowed accuracy
         .ToList();
 
         if (correlatedEntries.Count > 0)

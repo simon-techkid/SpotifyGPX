@@ -20,13 +20,6 @@ public class Options
     public static string SpotifyMini => @"yyyy-MM-dd HH\:mm"; // 5 day (past year) dump
     public static DateTimeStyles SpotifyTimeStyle => DateTimeStyles.AssumeUniversal; // Time zone interpretation of Spotify data
 
-    // Song Filtering Options
-    public static TimeSpan MinimumPlaytime => new(0, 0, 0); // Minimum accepted song playback time
-    public static bool ExcludeSkipped => false; // Ignore songs skipped by the user, as defined by Spotify JSON
-
-    // Pair Creation Options
-    public static double? MaximumAbsAccuracy => null; // Greatest accepted error (in seconds) between song and point time (null = allow all pairings regardless of accuracy)
-
     // GPX Export Formats
     public static string GpxOutput => @"yyyy-MM-ddTHH\:mm\:ssZ"; // Must first be converted to UTC (GPX spec requires ISO 8601)
     public static string DescriptionPlayedAt => @"yyyy-MM-dd HH\:mm\:ss zzz"; // Time of a song and point printed in the <desc> field of exported GPX
