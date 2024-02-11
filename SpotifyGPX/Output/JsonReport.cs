@@ -13,20 +13,15 @@ public class JsonReport : IFileOutput
 
     public JsonReport(IEnumerable<SongPoint> pairs)
     {
-        (List<JObject> doc, int count) = GetDocument(pairs);
-        Document = doc;
-        Count = count;
+        Document = GetDocument(pairs);
     }
 
     public List<JObject> Document { get; }
 
-    private static (List<JObject>, int) GetDocument(IEnumerable<SongPoint> Pairs)
+    private static List<JObject> GetDocument(IEnumerable<SongPoint> Pairs)
     {
-        int count = 0;
 
-        return (
-
-            Pairs
+        return Pairs
             .GroupBy(pair => pair.Origin)
             .Select(track =>
             {
@@ -36,14 +31,11 @@ public class JsonReport : IFileOutput
                     new JProperty(track.Key.ToString(), track
                     .SelectMany(pair =>
                     {
-                        count++;
                         return new JArray(CreateJsonReport(pair));
                     }))
                 );
             })
-            .ToList(),
-
-            count);
+            .ToList();
     }
 
     private static JObject CreateJsonReport(SongPoint pair)
@@ -95,5 +87,5 @@ public class JsonReport : IFileOutput
         File.WriteAllText(path, text);
     }
 
-    public int Count { get; }
+    public int Count => Document.Select(doc => (int)doc["Count"]).Sum();
 }
