@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿// SpotifyGPX by Simon Field
+
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 

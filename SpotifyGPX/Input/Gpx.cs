@@ -91,7 +91,7 @@ public class Gpx
         // Loop the user input request until a valid option is selected
         while (true)
         {
-            string input = Console.ReadLine();
+            string input = Console.ReadLine() ?? string.Empty;
             if (int.TryParse(input, out selectedTrackIndex) && IsValidTrackIndex(selectedTrackIndex, allTracks.Count))
             {
                 break; // Return this selection below

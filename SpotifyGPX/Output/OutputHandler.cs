@@ -1,4 +1,6 @@
-﻿using System;
+﻿// SpotifyGPX by Simon Field
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,8 +9,8 @@ namespace SpotifyGPX.Output;
 
 public class OutputHandler
 {
-    private static bool ReplaceFiles => false;
-    private readonly IEnumerable<SongPoint> Pairs;
+    private static bool ReplaceFiles => false; // Allow SpotifyGPX to replace existing files, rather than generating a unique name
+    private readonly IEnumerable<SongPoint> Pairs; // Hold the pairs list that will be exported
 
     public OutputHandler(IEnumerable<SongPoint> pairs) => Pairs = pairs;
 
@@ -58,7 +60,7 @@ public class OutputHandler
     {
         return new Dictionary<Formats, IFileOutput> // Each of the below classes inherit IFileOutput, as they are format classes sharing methods and fields
         {
-            { Formats.Gpx, new Gpx(pairs) },
+            { Formats.Gpx, new Gpx(pairs) }, // Initialize a new Gpx class with the pairs list provided
             { Formats.Json, new Json(pairs) },
             { Formats.JsonReport, new JsonReport(pairs) },
             { Formats.Txt, new Txt(pairs) },
@@ -108,7 +110,7 @@ public class OutputHandler
         } while (File.Exists(uniqueFileName)); // Until non-existing file path found, repeat iteration
 
         return uniqueFileName;
-    }   
+    }
 }
 
 public enum Formats

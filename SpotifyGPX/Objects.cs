@@ -233,7 +233,7 @@ public readonly struct SongPoint
     }
 }
 
-public class StringBuilder
+public class StringBuilder // Custom SpotifyGPX sb
 {
     private readonly System.Text.StringBuilder builder;
 
@@ -242,10 +242,10 @@ public class StringBuilder
     public StringBuilder Append(string format, object value)
     {
         if (value != null)
-        {
+        { // If appended value not null, append the line to the builder
             builder.AppendLine(string.Format(format, value));
-        }
-        return this;
+        } // If null, the builder will be returned unchanged
+        return this; // Return the builder
     }
 
     public override string ToString() => builder.ToString();
