@@ -18,11 +18,8 @@ public class Gpx : IFileOutput
 
     private XDocument GetDocument(IEnumerable<SongPoint> Pairs)
     {
-        IEnumerable<XElement> elements;
-
-        elements = Pairs.Select(ToGPX);
-
-        return CreateGpx(elements);
+        IEnumerable<XElement> gpxPairs = Pairs.Select(ToGPX); // Get list of <wpt> elements, one for each pair
+        return CreateGpx(gpxPairs); // Create the final Xml document, with header and list of pairs as <wpt> elements
     }
 
     private XElement ToGPX(SongPoint pair)
@@ -36,7 +33,7 @@ public class Gpx : IFileOutput
         );
     }
 
-    private static XDocument CreateGpx(IEnumerable<XElement> elements)
+    private static XDocument CreateGpx(IEnumerable<XElement> gpxPairs)
     {
         return new XDocument(
             new XDeclaration("1.0", "utf-8", null),
@@ -47,7 +44,7 @@ public class Gpx : IFileOutput
                 new XAttribute("xmlns", Namespace),
                 new XAttribute(Xsi + "schemaLocation", Schema),
                 new XElement(Namespace + "time", DateTimeOffset.Now.UtcDateTime.ToString(Options.GpxOutput)),
-                elements
+                gpxPairs // All pairs below header
             )
         );
     }

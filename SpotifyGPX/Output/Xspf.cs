@@ -16,20 +16,8 @@ public class Xspf : IFileOutput
 
     private static XDocument GetDocument(IEnumerable<SongPoint> Pairs)
     {
-        return CreateXspf(Pairs.Select(song => ToXspf(song.Song)));
-    }
-
-    private static XDocument CreateXspf(IEnumerable<XElement> ele)
-    {
-        return new XDocument(
-            new XDeclaration("1.0", "utf-8", null),
-            new XElement(Namespace + "playlist",
-                new XAttribute("version", "1.0"),
-                new XAttribute("xmlns", Namespace),
-                new XElement(Namespace + "creator", "SpotifyGPX"),
-                new XElement(Namespace + "trackList", ele)
-            )
-        );
+        IEnumerable<XElement> xspfPairs = Pairs.Select(pair => ToXspf(pair.Song)); // Get list of <track> elements, one for each pair's song
+        return CreateXspf(xspfPairs); // Create the final Xml document, with header and list of songs as <track> objects
     }
 
     private static XElement ToXspf(SpotifyEntry song)
@@ -39,6 +27,19 @@ public class Xspf : IFileOutput
             new XElement(Namespace + "title", song.Song_Name),
             new XElement(Namespace + "annotation", song.Time.UtcDateTime.ToString(Options.GpxOutput)),
             new XElement(Namespace + "duration", song.TimePlayed?.TotalMilliseconds) // use TimeSpan instead of this later, add Options format
+        );
+    }
+
+    private static XDocument CreateXspf(IEnumerable<XElement> xspfPairs)
+    {
+        return new XDocument(
+            new XDeclaration("1.0", "utf-8", null),
+            new XElement(Namespace + "playlist",
+                new XAttribute("version", "1.0"),
+                new XAttribute("xmlns", Namespace),
+                new XElement(Namespace + "creator", "SpotifyGPX"),
+                new XElement(Namespace + "trackList", xspfPairs) // All pairs inside <trackList>
+            )
         );
     }
 
