@@ -17,7 +17,7 @@ class Program
         bool noGpxExport = false;
         bool exportJson = false;
         bool exportPlist = false;
-        bool exportSpotifyURI = false;
+        bool exportTxt = false;
         bool exportJsonReport = false;
 
         switch (args.Length)
@@ -34,8 +34,8 @@ class Program
                     case "-p":
                         Console.WriteLine("[HELP] Pass -p to export a XSPF playlist of the songs covering your journey");
                         break;
-                    case "-s":
-                        Console.WriteLine("[HELP] Pass -s to export and copy to clipboard a TXT list of Spotify tracks you can paste into a playlist on Spotify");
+                    case "-t":
+                        Console.WriteLine("[HELP] Pass -t to export a TXT list of pairs");
                         break;
                     case "-r":
                         Console.WriteLine("[HELP] Press -r to export a verbose JSON report of all created pairings");
@@ -51,11 +51,11 @@ class Program
                 noGpxExport = args.Length >= 3 && args.Contains("-n");
                 exportJson = args.Length >= 3 && args.Contains("-j");
                 exportPlist = args.Length >= 3 && args.Contains("-p");
-                exportSpotifyURI = args.Length >= 3 && args.Contains("-s");
+                exportTxt = args.Length >= 3 && args.Contains("-t");
                 exportJsonReport = args.Length >= 3 && args.Contains("-r");
                 break;
             default:
-                Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-r]");
+                Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-t] [-r]");
                 return;
         }
 
@@ -128,7 +128,7 @@ class Program
             pairedEntries.Save(Formats.Xspf, Path.GetFileNameWithoutExtension(inputGpx));
         }
 
-        if (exportSpotifyURI == true)
+        if (exportTxt == true)
         {
             pairedEntries.Save(Formats.Txt, Path.GetFileNameWithoutExtension(inputGpx));
         }
