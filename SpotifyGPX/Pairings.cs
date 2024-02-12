@@ -53,23 +53,36 @@ public class Pairings
 
     public void WriteCounts()
     {
-        string countsJoined = string.Join(", ", Pairs.GroupBy(pair => pair.Origin).Select(track => $"{track.Count()} ({track.Key.ToString()})"));
-        int trackCount = Pairs.GroupBy(pair => pair.Origin).Count(); // Total number of tracks represented
-        string typesJoined = string.Join(", ", Pairs.GroupBy(pair => pair.Origin.Type).Select(track => $"{track.Count()} ({track.Key.ToString()})"));
-        int typeCount = Pairs.GroupBy(pair => pair.Origin.Type).Count(); // Total number of track types represented
+        WriteCounts(pair => pair.Origin, "track", "tracks");
+        WriteCounts(pair => pair.Origin.Type, "type", "types");
+        WriteCounts(pair => pair.Song.Spotify_Country, "country", "countries");
+    }
 
-        Console.WriteLine($"[PAIR] Paired {Pairs.Count} entries from {trackCount} tracks: {countsJoined}");
-        Console.WriteLine($"[PAIR] Paired {Pairs.Count} entries of {typeCount} types: {typesJoined}");
+    private void WriteCounts<T>(Func<SongPoint, T> groupingSelector, string nameSingular, string nameMultiple)
+    {
+        var groupedPairs = Pairs.GroupBy(groupingSelector);
+        string countsJoined = string.Join(", ", groupedPairs.Select(group => $"{group.Count()} ({group.Key})"));
+        int groupCount = groupedPairs.Count();
+        string objName = groupCount > 1 ? nameMultiple : nameSingular;
+
+        Console.WriteLine($"[PAIR] Paired {Pairs.Count} songs and points from {groupCount} {objName}: {countsJoined}");
     }
 
     public void WriteAverages()
     {
-        // Uncomment below to group by track, rather than track type
-        //string accuraciesJoined = string.Join(", ", Pairs.GroupBy(pair => pair.Origin).Select(track => $"{Math.Round(track.Average(pair => pair.AbsAccuracy))}s ({track.Key.ToString()})"));
-
-        // Calculate Accuracies for Track Types (GPX, Gap, Combined)
-        string accuraciesJoined = string.Join(", ", Pairs.GroupBy(pair => pair.Origin.Type).Select(track => $"{Math.Round(track.Average(pair => pair.AbsAccuracy))}s ({track.Key.ToString()})"));
-
-        Console.WriteLine($"[PAIR] Song-Point Correlation Average Accuracies: {accuraciesJoined}");
+        WriteAverages(pair => pair.Origin.Type, "track type", "track types"); // Calculate Accuracies by track type (GPX, Gap, Combined)
+        WriteAverages(pair => pair.Origin, "track", "tracks"); // Calculate Accuracies by track
     }
+
+    private void WriteAverages<T>(Func<SongPoint, T> groupingSelector, string nameSingular, string nameMultiple)
+    {
+        var groupedPairs = Pairs.GroupBy(groupingSelector);
+        string accuraciesJoined = string.Join(", ", groupedPairs.Select(group => $"{RoundValue(group.Average(pair => pair.AbsAccuracy))}s ({group.Key})"));
+        int groupCount = groupedPairs.Count();
+        string objName = groupCount > 1 ? nameMultiple : nameSingular;
+
+        Console.WriteLine($"[PAIR] Average Accuracy for {groupCount} {objName}: {accuraciesJoined}");
+    }
+
+    private static double RoundValue(double value) => Math.Round(value);
 }
