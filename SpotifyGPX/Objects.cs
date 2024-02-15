@@ -54,6 +54,7 @@ public readonly struct SpotifyEntry
         {
             if (Time_Played != null)
             {
+                // Parse milliseconds value to TimeSpan
                 return TimeSpan.FromMilliseconds(double.Parse(Time_Played)); // Parse string of milliseconds to TimeSpan
             }
             else
@@ -84,6 +85,7 @@ public readonly struct SpotifyEntry
         {
             if (Spotify_OfflineTS != null)
             {
+                // Parse unix epoch to readable time
                 return DateTimeOffset.FromUnixTimeSeconds(long.Parse(Spotify_OfflineTS));
             }
             else

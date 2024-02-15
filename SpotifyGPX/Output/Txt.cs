@@ -24,14 +24,22 @@ public class Txt : IFileOutput
         return URIs; // Currently returns URI list, but can be changed to your specification
     }
 
-    private static T[] GetWithoutDuplicates<T>(IEnumerable<SongPoint> pairs, Func<SongPoint, T> selector) => pairs.Select(selector).Distinct().ToArray();
+    private static T[] GetWithoutDuplicates<T>(IEnumerable<SongPoint> pairs, Func<SongPoint, T> selector)
+    {
+        // Pass .Distinct() to ensure no duplicate values in returned array
+        return pairs.Select(selector).Distinct().ToArray();
+    }
 
-    private static T[] GetVerbatim<T>(IEnumerable<SongPoint> pairs, Func<SongPoint, T> selector) => pairs.Select(selector).ToArray();
+    private static T[] GetVerbatim<T>(IEnumerable<SongPoint> pairs, Func<SongPoint, T> selector)
+    {
+        // Return all pairs' selected (selector) object as an array
+        return pairs.Select(selector).ToArray();
+    }
 
     public void Save(string path)
     {
         File.WriteAllLines(path, Document.Where(uri => uri != null)!); // Ensure no empty/null lines are created
     }
 
-    public int Count => Document.Length;
+    public int Count => Document.Length; // Number of lines
 }

@@ -53,14 +53,14 @@ public class Pairings
 
     public void WriteCounts()
     {
-        WriteCounts(pair => pair.Origin, "track", "tracks");
-        WriteCounts(pair => pair.Origin.Type, "type", "types");
-        WriteCounts(pair => pair.Song.Spotify_Country, "country", "countries");
+        WriteCounts(pair => pair.Origin, "track", "tracks"); // Write # of pairs per track
+        WriteCounts(pair => pair.Origin.Type, "type", "types"); // Write # of pairs in each type of track (GPX, Gap, Combined)
+        WriteCounts(pair => pair.Song.Spotify_Country, "country", "countries"); // Write # of pairs in each country
     }
 
     private void WriteCounts<T>(Func<SongPoint, T> groupingSelector, string nameSingular, string nameMultiple)
     {
-        var groupedPairs = Pairs.GroupBy(groupingSelector);
+        var groupedPairs = Pairs.GroupBy(groupingSelector); // Group all the song-point pairs by the specified selector
         string countsJoined = string.Join(", ", groupedPairs.Select(group => $"{group.Count()} ({group.Key})"));
         int groupCount = groupedPairs.Count();
         string objName = groupCount > 1 ? nameMultiple : nameSingular;
@@ -76,13 +76,11 @@ public class Pairings
 
     private void WriteAverages<T>(Func<SongPoint, T> groupingSelector, string nameSingular, string nameMultiple)
     {
-        var groupedPairs = Pairs.GroupBy(groupingSelector);
-        string accuraciesJoined = string.Join(", ", groupedPairs.Select(group => $"{RoundValue(group.Average(pair => pair.AbsAccuracy))}s ({group.Key})"));
+        var groupedPairs = Pairs.GroupBy(groupingSelector); // Group all the song-point pairs by the specified selector
+        string accuraciesJoined = string.Join(", ", groupedPairs.Select(group => $"{Math.Round(group.Average(pair => pair.AbsAccuracy))}s ({group.Key})"));
         int groupCount = groupedPairs.Count();
         string objName = groupCount > 1 ? nameMultiple : nameSingular;
 
         Console.WriteLine($"[PAIR] Average Accuracy for {groupCount} {objName}: {accuraciesJoined}");
     }
-
-    private static double RoundValue(double value) => Math.Round(value);
 }

@@ -27,5 +27,5 @@ public class Json : IFileOutput
         File.WriteAllText(path, text);
     }
 
-    public int Count => Document.Count;
+    public int Count => Document.Count; // Number of JObjects in list
 }

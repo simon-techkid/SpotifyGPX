@@ -56,5 +56,5 @@ public class Gpx : IFileOutput
         Document.Save(path);
     }
 
-    public int Count => Document.Descendants(Namespace + Waypoint).Count();
+    public int Count => Document.Descendants(Namespace + Waypoint).Count(); // Number of point elements
 }

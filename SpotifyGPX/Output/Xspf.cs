@@ -28,7 +28,7 @@ public class Xspf : IFileOutput
             new XElement(Namespace + "creator", song.Song_Artist),
             new XElement(Namespace + "title", song.Song_Name),
             new XElement(Namespace + "annotation", song.Time.UtcDateTime.ToString(Options.GpxOutput)),
-            new XElement(Namespace + "duration", song.TimePlayed?.TotalMilliseconds) // use TimeSpan instead of this later, add Options format
+            new XElement(Namespace + "duration", song.TimePlayed?.TotalMilliseconds) // number of milliseconds
         );
     }
 
@@ -50,5 +50,5 @@ public class Xspf : IFileOutput
         Document.Save(path);
     }
 
-    public int Count => Document.Descendants(Namespace + Track).Count();
+    public int Count => Document.Descendants(Namespace + Track).Count(); // Number of track elements
 }

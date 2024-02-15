@@ -22,18 +22,17 @@ public class JsonReport : IFileOutput
 
     private static List<JObject> GetDocument(IEnumerable<SongPoint> Pairs)
     {
-
         return Pairs
-            .GroupBy(pair => pair.Origin)
+            .GroupBy(pair => pair.Origin) // Group the pairs by track (JsonReport supports multiTrack)
             .Select(track =>
             {
                 return new JObject(
-                    new JProperty("Count", track.Count()),
-                    new JProperty("TrackInfo", ToJObject(track.Key)),
+                    new JProperty("Count", track.Count()), // Include # of pairs in this track
+                    new JProperty("TrackInfo", ToJObject(track.Key)), // Include info about the GPX track
                     new JProperty(track.Key.ToString(), track
                     .SelectMany(pair =>
                     {
-                        return new JArray(CreateJsonReport(pair));
+                        return new JArray(CreateJsonReport(pair)); // Create a json report for each pair
                     }))
                 );
             })
@@ -43,12 +42,12 @@ public class JsonReport : IFileOutput
     private static JObject CreateJsonReport(SongPoint pair)
     {
         return new JObject(
-            new JProperty("Index", pair.Index),
-            new JProperty("SpotifyEntry", ToJObject(pair.Song)),
-            new JProperty("GPXPoint", ToJObject(pair.Point)),
-            new JProperty("NormalizedOffset", pair.NormalizedOffset),
+            new JProperty("Index", pair.Index), // Index of this pairing
+            new JProperty("SpotifyEntry", ToJObject(pair.Song)), // Spotify entry index, original Json, time, duration, offline timestamp
+            new JProperty("GPXPoint", ToJObject(pair.Point)), // GPX point index, lat, lon, time
+            new JProperty("NormalizedOffset", pair.NormalizedOffset), // UTC offset
             new JProperty("PointTime", pair.PointTime.UtcDateTime.ToString(Options.GpxOutput)),
-            new JProperty("Accuracy", pair.Accuracy),
+            new JProperty("Accuracy", pair.Accuracy), // Accuracy between point and song time
             new JProperty("SongTime", pair.SongTime.UtcDateTime.ToString(Options.GpxOutput))
         );
     }
