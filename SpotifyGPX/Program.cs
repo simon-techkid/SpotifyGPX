@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Input;
 using SpotifyGPX.Output;
 using System;
 using System.Collections.Generic;
@@ -59,49 +60,23 @@ class Program
                 return;
         }
 
-        // Check the JSON file
-        if (Path.GetExtension(inputJson) != ".json")
-        {
-            // Ensure it has a JSON extension
-            Console.WriteLine($"[ERROR] Provided file, '{inputJson}', is not a JSON file!");
-            return;
-        }
-        else if (!File.Exists(inputJson))
-        {
-            // Ensure it exists
-            Console.WriteLine($"[ERROR] Provided file, '{inputJson}', does not exist!");
-            return;
-        }
-
-        // Check the GPX file
-        if (Path.GetExtension(inputGpx) != ".gpx")
-        {
-            // Ensure it has a GPX extension
-            Console.WriteLine($"[ERROR] Provided file, '{inputGpx}', is not a GPX file!");
-            return;
-        }
-        else if (!File.Exists(inputGpx))
-        {
-            // Ensure it exists
-            Console.WriteLine($"[ERROR] Provided file, '{inputGpx}', does not exist!");
-            return;
-        }
-
         // Create a list of paired songs and points
         PairingsHandler pairedEntries;
 
         try
         {
-            // Step 1: Create list of GPX points from the GPX file
-            List<GPXTrack> tracks = new Input.Gpx(inputGpx).ParseGpxTracks();
+            // Step 0: Get input handler based on file paths
+            InputHandler input = new(inputJson, inputGpx);
 
-            // Step 2: Create list of songs played, and filter it to songs played during the GPX tracking timeframe
-            List<SpotifyEntry> filteredEntries = new Input.Json(inputJson).FilterSpotifyJson(tracks);
-            // Use above to filter based on filtration options defined in SpotifyGPX.Options. To run unfiltered, use below
-            //List<SpotifyEntry> filteredEntries = new Input.Json(inputJson).AllSongs;
+            // Step 1: Get list of GPX tracks from the GPS file
+            List<GPXTrack> gpsTracks = input.GetAllTracks();
+
+            // Step 2: Get list of songs played from the entries file
+            //List<SpotifyEntry> allSongs = input.GetAllSongs(); // Unfiltered run
+            List<SpotifyEntry> filSongs = input.GetFilteredSongs(gpsTracks); // Filtered run
 
             // Step 3: Create list of songs and points paired as close as possible to one another
-            pairedEntries = new PairingsHandler(filteredEntries, tracks);
+            pairedEntries = new PairingsHandler(filSongs, gpsTracks);
 
             pairedEntries.WriteCounts();
             pairedEntries.WriteAverages();

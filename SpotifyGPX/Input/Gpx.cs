@@ -8,53 +8,50 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Input;
 
-public class Gpx
+public class Gpx : IGpsInput
 {
     private static XNamespace InputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of input GPX
+    private static string Track => "trk"; // Name of a track element
+    private static string TrackPoint => "trkpt"; // Name of a track point object, children of tracks
+    private XDocument Document { get; } // Entire input GPX document
+    private List<GPXTrack> Tracks { get; } // Parsed tracks from GPX document
 
     public Gpx(string path)
     {
-        Document = LoadDocument(path);
+        Document = XDocument.Load(path);
 
-        if (!TracksExist)
+        if (TrackCount == 0)
         {
-            // If there are no <trk> tracks in the GPX, throw error
+            // If there are no tracks in the GPX, throw error
             throw new Exception($"No track elements found in '{Path.GetFileName(path)}'!");
         }
 
-        if (!PointsExist)
+        if (PointCount == 0)
         {
-            // If there are no <trkpt> points the GPX, throw error
+            // If there are no points the GPX, throw error
             throw new Exception($"No points found in '{Path.GetFileName(path)}'!");
         }
+
+        Tracks = ParseTracks();
     }
 
-    private XDocument Document { get; } // Store the document for on-demand reading
+    public int TrackCount => Document.Descendants(InputNs + Track).Count();
 
-    private static XDocument LoadDocument(string path)
+    public int PointCount => Document.Descendants(InputNs + TrackPoint).Count();
+
+    public List<GPXTrack> GetAllTracks()
     {
-        try
-        {
-            return XDocument.Load(path);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"The GPX file is incorrectly formatted: {ex.Message}");
-        }
+        return Tracks;
     }
 
-    private bool TracksExist => Document.Descendants(InputNs + "trk").Any();
-
-    private bool PointsExist => Document.Descendants(InputNs + "trkpt").Any();
-
-    public List<GPXTrack> ParseGpxTracks()
+    private List<GPXTrack> ParseTracks()
     {
-        List<GPXTrack> allTracks = Document.Descendants(InputNs + "trk")
+        List<GPXTrack> allTracks = Document.Descendants(InputNs + Track)
             .Select((trk, index) => new GPXTrack( // For each track and its index, create a new GPXTrack
                 index,
                 trk.Element(InputNs + "name")?.Value,
                 TrackType.GPX,
-                trk.Descendants(InputNs + "trkpt")
+                trk.Descendants(InputNs + TrackPoint)
                     .Select((trkpt, pointIndex) => new GPXPoint( // For each point and its index, create a new GPXPoint
                         pointIndex,
                         new Coordinate( // Parse its coordinate

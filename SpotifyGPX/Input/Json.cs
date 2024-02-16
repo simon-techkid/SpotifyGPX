@@ -9,15 +9,30 @@ using System.Linq;
 
 namespace SpotifyGPX.Input;
 
-public class Json
+public class Json : ISongInput
 {
     private static TimeSpan MinimumPlaytime => new(0, 0, 0); // Minimum accepted song playback time
     private static bool ExcludeSkipped => false; // Ignore songs skipped by the user, as defined by Spotify JSON
+    private List<SpotifyEntry> AllSongs { get; } // All songs parsed from the JSON
 
-    public Json(string path) => AllSongs = JsonToSpotifyEntry(path);
-    public List<SpotifyEntry> AllSongs { get; }
+    public Json(string path)
+    {
+        AllSongs = ParseEntries(path);
+    }
 
-    private static List<SpotifyEntry> JsonToSpotifyEntry(string jsonFilePath)
+    public List<SpotifyEntry> GetAllSongs()
+    {
+        return AllSongs;
+    }
+
+    public List<SpotifyEntry> GetFilteredSongs(List<GPXTrack> tracks)
+    {
+        return FilterEntries(tracks);
+    }
+
+    public int Count => AllSongs.Count;
+
+    private static List<SpotifyEntry> ParseEntries(string jsonFilePath)
     {
         var serializer = new JsonSerializer();
 
@@ -41,9 +56,16 @@ public class Json
         return spotifyEntries;
     }
 
-    public List<SpotifyEntry> FilterSpotifyJson(List<GPXTrack> gpxTracks)
+    private List<SpotifyEntry> FilterEntries(List<GPXTrack> tracks)
     {
-        var trackRange = gpxTracks.Select(track => (track.Start, track.End)).ToList(); // List all of the tracks' start and end times
+        var trackRange = tracks.Select(track => (track.Start, track.End)).ToList();
+
+        // FilterEntries() differs from AllSongs because it filters the entire JSON file by the following parameters:
+        // The song must have been played during the GPS tracking timeframe (but PairingsHandler.PairPoints() filters this too)
+        // The song must have been played for longer than the MinimumPlaytime TimeSpan (beginning of this file)
+        // The song must have not been skipped during playback by the user (if ExcludeSkipped is true)
+        
+        // You may add other filtration options below, within the .Any() statement:
 
         return AllSongs.Where(spotifyEntry => // If the spotify entry
             trackRange.Any(trackTimes => // Starts after the beginning of the GPX, and before the end of the GPX
