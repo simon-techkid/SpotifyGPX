@@ -20,6 +20,8 @@ class Program
         bool exportPlist = false;
         bool exportTxt = false;
         bool exportJsonReport = false;
+        bool pointPredict = false;
+        bool autoPredict = false;
 
         switch (args.Length)
         {
@@ -27,22 +29,29 @@ class Program
                 switch (args[0])
                 {
                     case "-n":
-                        Console.WriteLine("[HELP] Pass -n to complete a song-point pairing without sending the pairs to a GPX file");
+                        Console.WriteLine("[HELP] -n: Do not export pairs to a GPX file");
                         break;
                     case "-j":
-                        Console.WriteLine("[HELP] Pass -j to export a JSON of the songs covering your journey");
+                        Console.WriteLine("[HELP] -j: Export a JSON of the songs covering your journey");
                         break;
                     case "-p":
-                        Console.WriteLine("[HELP] Pass -p to export a XSPF playlist of the songs covering your journey");
+                        Console.WriteLine("[HELP] -p: Export a XSPF playlist of the songs covering your journey");
                         break;
                     case "-t":
-                        Console.WriteLine("[HELP] Pass -t to export a TXT list of pairs");
+                        Console.WriteLine("[HELP] -t: Export a TXT list of pairs");
                         break;
                     case "-r":
-                        Console.WriteLine("[HELP] Press -r to export a verbose JSON report of all created pairings");
+                        Console.WriteLine("[HELP] -r: Export a verbose JSON report of all created pairings");
+                        break;
+                    case "-pp":
+                        Console.WriteLine("[HELP] -pp: Run user-prompted prediction on all pairs before exporting");
+                        break;
+                    case "-pa":
+                        Console.WriteLine("[HELP] -pa: Run prediction automatically on all pairs before exporting");
+                        break;
                         break;
                     default:
-                        Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-r]");
+                        Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-r] [-pp]");
                         break;
                 }
                 return;
@@ -54,9 +63,11 @@ class Program
                 exportPlist = args.Length >= 3 && args.Contains("-p");
                 exportTxt = args.Length >= 3 && args.Contains("-t");
                 exportJsonReport = args.Length >= 3 && args.Contains("-r");
+                pointPredict = args.Length >= 3 && args.Contains("-pp");
+                autoPredict = args.Length >= 3 && args.Contains("-pa");
                 break;
             default:
-                Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-t] [-r]");
+                Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-t] [-r] [-pp]");
                 return;
         }
 
@@ -76,7 +87,7 @@ class Program
             List<SpotifyEntry> filSongs = input.GetFilteredSongs(gpsTracks); // Filtered run
 
             // Step 3: Create list of songs and points paired as close as possible to one another
-            pairedEntries = new PairingsHandler(filSongs, gpsTracks);
+            pairedEntries = new PairingsHandler(filSongs, gpsTracks, pointPredict);
 
             pairedEntries.WriteCounts();
             pairedEntries.WriteAverages();

@@ -12,7 +12,21 @@ public class PairingsHandler
 {
     private static double? MaximumAbsAccuracy => null; // Greatest accepted error (in seconds) between song and point time (null = allow all pairings regardless of accuracy)
 
-    public PairingsHandler(List<SpotifyEntry> s, List<GPXTrack> t) => Pairs = PairPoints(s, t);
+    public PairingsHandler(List<SpotifyEntry> s, List<GPXTrack> t, bool predict)
+    {
+        if (predict == true)
+        {
+            // Let's predict some points!
+            DupeHandler dupes = new(PairPoints(s, t));
+            Pairs = dupes.GetDupes(autoPredict);
+        }
+        else
+        {
+            // Nah, just use the verbatim points
+            Pairs = PairPoints(s, t);
+        }
+    }
+
     private readonly List<SongPoint> Pairs;
 
     private static List<SongPoint> PairPoints(List<SpotifyEntry> songs, List<GPXTrack> gpxTracks)

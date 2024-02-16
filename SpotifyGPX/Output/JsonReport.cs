@@ -48,7 +48,8 @@ public class JsonReport : IFileOutput
             new JProperty("NormalizedOffset", pair.NormalizedOffset), // UTC offset
             new JProperty("PointTime", pair.PointTime.UtcDateTime.ToString(Options.GpxOutput)),
             new JProperty("Accuracy", pair.Accuracy), // Accuracy between point and song time
-            new JProperty("SongTime", pair.SongTime.UtcDateTime.ToString(Options.GpxOutput))
+            new JProperty("SongTime", pair.SongTime.UtcDateTime.ToString(Options.GpxOutput)),
+            new JProperty("Predicted", pair.Predicted) // Was the point predicted?
         );
     }
 

@@ -64,7 +64,7 @@ public class Json : ISongInput
         // The song must have been played during the GPS tracking timeframe (but PairingsHandler.PairPoints() filters this too)
         // The song must have been played for longer than the MinimumPlaytime TimeSpan (beginning of this file)
         // The song must have not been skipped during playback by the user (if ExcludeSkipped is true)
-        
+
         // You may add other filtration options below, within the .Any() statement:
 
         return AllSongs.Where(spotifyEntry => // If the spotify entry

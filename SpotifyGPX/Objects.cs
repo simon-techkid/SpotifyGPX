@@ -166,6 +166,12 @@ public readonly struct GPXPoint
         Time = DateTimeOffset.ParseExact(time, Options.GpxInput, null, Options.GpxTimeStyle);
     }
 
+    public GPXPoint(GPXPoint oldPoint, Coordinate newCoord) // Used for prediction only
+    {
+        this = oldPoint;
+        Location = newCoord;
+    }
+
     public readonly int Index { get; } // Unique identifier of this GPXPoint in a list
     public readonly Coordinate Location { get; } // Where on Earth is this point?
     public readonly DateTimeOffset Time { get; } // When was the user at this point?
@@ -182,7 +188,68 @@ public readonly struct Coordinate
 
     public readonly double Latitude { get; }
     public readonly double Longitude { get; }
-    // Coordinate never printed so no need to provide display format
+
+    public override bool Equals(object obj)
+    {
+        if (obj is not Coordinate)
+        {
+            return false;
+        }
+
+        Coordinate other = (Coordinate)obj;
+        return Latitude == other.Latitude && Longitude == other.Longitude;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Latitude, Longitude);
+    }
+
+    public static bool operator ==(Coordinate c1, Coordinate c2)
+    {
+        return c1.Equals(c2);
+    }
+
+    public static bool operator !=(Coordinate c1, Coordinate c2)
+    {
+        return !c1.Equals(c2);
+    }
+
+    public static Coordinate operator +(Coordinate c1, Coordinate c2)
+    {
+        double latSum = c1.Latitude + c2.Latitude;
+        double lonSum = c1.Longitude + c2.Longitude;
+        return new Coordinate(latSum, lonSum);
+    }
+
+    public static Coordinate operator -(Coordinate c1, Coordinate c2)
+    {
+        double latDiff = c1.Latitude - c2.Latitude;
+        double lonDiff = c1.Longitude - c2.Longitude;
+        return new Coordinate(latDiff, lonDiff);
+    }
+
+    public static Coordinate operator *(Coordinate c, double scalar)
+    {
+        double latScaled = c.Latitude * scalar;
+        double lonScaled = c.Longitude * scalar;
+        return new Coordinate(latScaled, lonScaled);
+    }
+
+    public static double CalculateDistance(Coordinate c1, Coordinate c2)
+    {
+        double latDiff = c2.Latitude - c1.Latitude;
+        double lonDiff = c2.Longitude - c1.Longitude;
+
+        double distance = Math.Sqrt(latDiff * latDiff + lonDiff * lonDiff);
+
+        return distance;
+    }
+
+    public override string ToString()
+    {
+        return $"{(Latitude, Longitude)}";
+    }
 }
 
 public readonly struct SongPoint
@@ -200,6 +267,7 @@ public readonly struct SongPoint
             builder.Append("Shuffle: {0}", Song.Song_Shuffle);
             builder.Append("IP Address: {0}", Song.Spotify_IP);
             builder.Append("Country: {0}", Song.Spotify_Country);
+            builder.Append("{0}", Predicted == true ? "Predicted" : null);
 
             return builder.ToString();
         }
@@ -211,6 +279,14 @@ public readonly struct SongPoint
         Song = song;
         Point = point;
         Origin = origin;
+        Predicted = false;
+    }
+
+    public SongPoint(SongPoint oldPair, Coordinate newCoord) // Used for prediction only
+    {
+        this = oldPair;
+        Point = new GPXPoint(oldPair.Point, newCoord); // Create a GPXPoint using an existing point, with a new coordinate
+        Predicted = true;
     }
 
     public readonly int Index { get; } // Unique identifier of this SongPoint in a list
@@ -223,6 +299,7 @@ public readonly struct SongPoint
     public readonly TimeSpan NormalizedOffset => Point.Time.Offset; // Standard offset is defined by the original GPX point offset
     public DateTimeOffset SongTime => Song.Time.ToOffset(NormalizedOffset); // Song end time, normalized to point time zone
     public DateTimeOffset PointTime => Point.Time.ToOffset(NormalizedOffset); // Point end time, normalized to point time zone (redundant)
+    public bool Predicted { get; }
 
     public override string ToString()
     {
