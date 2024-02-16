@@ -88,7 +88,7 @@ class Program
         }
 
         // Create a list of paired songs and points
-        Pairings pairedEntries;
+        PairingsHandler pairedEntries;
 
         try
         {
@@ -101,7 +101,7 @@ class Program
             //List<SpotifyEntry> filteredEntries = new Input.Json(inputJson).AllSongs;
 
             // Step 3: Create list of songs and points paired as close as possible to one another
-            pairedEntries = new Pairings(filteredEntries, tracks);
+            pairedEntries = new PairingsHandler(filteredEntries, tracks);
 
             pairedEntries.WriteCounts();
             pairedEntries.WriteAverages();

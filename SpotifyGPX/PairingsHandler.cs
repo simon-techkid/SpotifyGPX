@@ -8,11 +8,11 @@ using System.Linq;
 
 namespace SpotifyGPX;
 
-public class Pairings
+public class PairingsHandler
 {
     private static double? MaximumAbsAccuracy => null; // Greatest accepted error (in seconds) between song and point time (null = allow all pairings regardless of accuracy)
 
-    public Pairings(List<SpotifyEntry> s, List<GPXTrack> t) => Pairs = PairPoints(s, t);
+    public PairingsHandler(List<SpotifyEntry> s, List<GPXTrack> t) => Pairs = PairPoints(s, t);
     private readonly List<SongPoint> Pairs;
 
     private static List<SongPoint> PairPoints(List<SpotifyEntry> songs, List<GPXTrack> gpxTracks)
