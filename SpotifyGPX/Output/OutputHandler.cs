@@ -22,7 +22,7 @@ public class OutputHandler
         // path = the export path of the final file
         List<(IFileOutput file, int total, string name, string path)> tracksToFiles = new();
 
-        bool supportsMulti = AllowsMultiTrack()[format]; // Determine whether the desired format can hold multiple GPX tracks worth of pairs
+        bool supportsMulti = AllowsMultiTrack[format]; // Determine whether the desired format can hold multiple GPX tracks worth of pairs
 
         if (supportsMulti)
         {
@@ -69,18 +69,15 @@ public class OutputHandler
         };
     }
 
-    private static Dictionary<Formats, bool> AllowsMultiTrack()
+    private readonly static Dictionary<Formats, bool> AllowsMultiTrack = new()
     {
-        return new Dictionary<Formats, bool>
-        {
-            { Formats.Gpx, false },
-            { Formats.Json, false },
-            { Formats.JsonReport, true }, // Supports multiple tracks in the same file
-            { Formats.Txt, false },
-            { Formats.Xspf, false }
-            // To add a new format, create an entry in enum Formats, and define here whether it can hold multiple tracks
-        };
-    }
+        { Formats.Gpx, false },
+        { Formats.Json, false },
+        { Formats.JsonReport, true }, // Supports multiple tracks in the same file
+        { Formats.Txt, false },
+        { Formats.Xspf, false }
+        // To add a new format, create an entry in enum Formats, and define here whether it can hold multiple tracks
+    };
 
     private static string GetOutputFileName(string name, string extension) => $"{name}.{extension}";
 
