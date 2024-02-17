@@ -146,7 +146,7 @@ public class DupeHandler
                     if (relativeIndex >= 0 && relativeIndex < newCoords.Length)
                     {
                         // If the index of this dupe is less than the length of the array of new coordinates,
-                        return new SongPoint(originalPair, newCoords[relativeIndex]); // Create new pair from old pair (with new coords)
+                        return new SongPoint(originalPair, newCoords[relativeIndex], relativeIndex); // Create new pair from old pair (with new coords)
                     }
                 }
 

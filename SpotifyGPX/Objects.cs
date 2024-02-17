@@ -267,7 +267,7 @@ public readonly struct SongPoint
             builder.Append("Shuffle: {0}", Song.Song_Shuffle);
             builder.Append("IP Address: {0}", Song.Spotify_IP);
             builder.Append("Country: {0}", Song.Spotify_Country);
-            builder.Append("{0}", Predicted == true ? "Predicted" : null);
+            builder.Append("Predicted Index: {0}", PredictedIndex != null ? PredictedIndex : null);
 
             return builder.ToString();
         }
@@ -279,14 +279,14 @@ public readonly struct SongPoint
         Song = song;
         Point = point;
         Origin = origin;
-        Predicted = false;
+        PredictedIndex = null;
     }
 
-    public SongPoint(SongPoint oldPair, Coordinate newCoord) // Used for prediction only
+    public SongPoint(SongPoint oldPair, Coordinate newCoord, int relIndex) // Used for prediction only
     {
         this = oldPair;
         Point = new GPXPoint(oldPair.Point, newCoord); // Create a GPXPoint using an existing point, with a new coordinate
-        Predicted = true;
+        PredictedIndex = relIndex;
     }
 
     public readonly int Index { get; } // Unique identifier of this SongPoint in a list
@@ -299,7 +299,7 @@ public readonly struct SongPoint
     public readonly TimeSpan NormalizedOffset => Point.Time.Offset; // Standard offset is defined by the original GPX point offset
     public DateTimeOffset SongTime => Song.Time.ToOffset(NormalizedOffset); // Song end time, normalized to point time zone
     public DateTimeOffset PointTime => Point.Time.ToOffset(NormalizedOffset); // Point end time, normalized to point time zone (redundant)
-    public bool Predicted { get; }
+    public int? PredictedIndex { get; }
 
     public override string ToString()
     {
