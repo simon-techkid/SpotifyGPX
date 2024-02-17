@@ -28,59 +28,15 @@ public class JsonReport : IFileOutput
             {
                 return new JObject(
                     new JProperty("Count", track.Count()), // Include # of pairs in this track
-                    new JProperty("TrackInfo", ToJObject(track.Key)), // Include info about the GPX track
+                    new JProperty("TrackInfo", JToken.FromObject(track.Key)), // Include info about the GPX track
                     new JProperty(track.Key.ToString(), track
                     .SelectMany(pair =>
                     {
-                        return new JArray(CreateJsonReport(pair)); // Create a json report for each pair
+                        return new JArray(JToken.FromObject(pair)); // Create a json report for each pair
                     }))
                 );
             })
             .ToList();
-    }
-
-    private static JObject CreateJsonReport(SongPoint pair)
-    {
-        return new JObject(
-            new JProperty("Index", pair.Index), // Index of this pairing
-            new JProperty("SpotifyEntry", ToJObject(pair.Song)), // Spotify entry index, original Json, time, duration, offline timestamp
-            new JProperty("GPXPoint", ToJObject(pair.Point)), // GPX point index, lat, lon, time
-            new JProperty("NormalizedOffset", pair.NormalizedOffset), // UTC offset
-            new JProperty("PointTime", pair.PointTime.UtcDateTime.ToString(Options.GpxOutput)),
-            new JProperty("Accuracy", pair.Accuracy), // Accuracy between point and song time
-            new JProperty("SongTime", pair.SongTime.UtcDateTime.ToString(Options.GpxOutput)),
-            new JProperty("Predicted", pair.Predicted) // Was the point predicted?
-        );
-    }
-
-    private static JObject ToJObject(SpotifyEntry song)
-    {
-        return new JObject(
-            new JProperty("Index", song.Index),
-            new JProperty("Original", song.Json),
-            new JProperty("Time", song.Time.UtcDateTime.ToString(Options.GpxOutput)),
-            new JProperty("TimePlayed", song.TimePlayed?.ToString(Options.DescriptionTimePlayed)),
-            new JProperty("OfflineTimestamp", song.OfflineTimestamp?.UtcDateTime.ToString(Options.GpxOutput))
-        );
-    }
-
-    private static JObject ToJObject(GPXPoint point)
-    {
-        return new JObject(
-            new JProperty("Index", point.Index),
-            new JProperty("Latitude", point.Location.Latitude),
-            new JProperty("Longitude", point.Location.Longitude),
-            new JProperty("Time", point.Time.UtcDateTime.ToString(Options.GpxOutput))
-        );
-    }
-
-    private static JObject ToJObject(TrackInfo tInfo)
-    {
-        return new JObject(
-            new JProperty("Index", tInfo.Index),
-            new JProperty("Name", tInfo.Name),
-            new JProperty("Type", tInfo.Type.ToString())
-        );
     }
 
     public void Save(string path)

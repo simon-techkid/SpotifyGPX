@@ -95,7 +95,7 @@ SpotifyGPX will allow you to:
 | ------ | -------- |
 | [Gpx](Samples/sample_20230709.gpx) | View a map of where each of your tracks was played using a tool like [kepler.gl](https://github.com/keplergl/kepler.gl) or [Google MyMaps](https://www.google.com/mymaps) |
 | [Json](Samples/sample_20230709.json) | Preserve the original Spotify data (from the original JSON) used for your journey |
-| [JsonReport](Samples/sample.jsonreport) | Preserve all data SpotifyGPX used to create the pairings for your journey. Includes data from Json. |
+| [JsonReport](Samples/sample_All.jsonreport) | Preserve all data SpotifyGPX used to create the pairings for your journey. Includes data from Json. |
 | [Txt](Samples/sample_20230709.txt) | Create a txt file of a Spotify URI (song link) list of the songs on your journey. [Paste](https://community.spotify.com/t5/Your-Library-how-to-paste-a-list-of-URL-s-into-a-playlist/m-p/5355978/highlight/true#M19851) into Spotify playlists on Desktop. |
 | [Xspf](Samples/sample_20230709.xspf) | Use as a playlist to visualize your journey's songs in an app such as [VLC Media Player](https://www.videolan.org/) |
 

@@ -24,7 +24,7 @@ SpotifyGPX generated the following files with the above data:
 
  - [Gpx (pictured below)](sample_20230709.gpx)
  - [Json](sample_20230709.json)
- - [JsonReport](sample.jsonreport)
+ - [JsonReport](sample_All.jsonreport)
  - [Txt](sample_20230709.txt)
  - [Xspf](sample_20230709.xspf)
 
