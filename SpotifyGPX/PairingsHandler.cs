@@ -12,24 +12,24 @@ public class PairingsHandler
 {
     private static double? MaximumAbsAccuracy => null; // Greatest accepted error (in seconds) between song and point time (null = allow all pairings regardless of accuracy)
 
-    public PairingsHandler(List<SpotifyEntry> s, List<GPXTrack> t, bool predict)
+    public PairingsHandler(List<SpotifyEntry> s, List<GPXTrack> t, bool silent, bool predict, bool autoPredict)
     {
         if (predict == true)
         {
             // Let's predict some points!
-            DupeHandler dupes = new(PairPoints(s, t));
+            DupeHandler dupes = new(PairPoints(silent, s, t));
             Pairs = dupes.GetDupes(autoPredict);
         }
         else
         {
             // Nah, just use the verbatim points
-            Pairs = PairPoints(s, t);
+            Pairs = PairPoints(silent, s, t);
         }
     }
 
     private readonly List<SongPoint> Pairs;
 
-    private static List<SongPoint> PairPoints(List<SpotifyEntry> songs, List<GPXTrack> gpxTracks)
+    private static List<SongPoint> PairPoints(bool silent, List<SpotifyEntry> songs, List<GPXTrack> gpxTracks)
     {
         // Correlate Spotify entries with the nearest GPX points
 
@@ -45,7 +45,10 @@ public class PairingsHandler
                 .OrderBy(pair => pair.AbsAccuracy) // Order the points by proximity between point and song
                 .First(); // Closest accuracy wins
 
-                Console.WriteLine(pair.ToString());
+                if (!silent)
+                {
+                    Console.WriteLine(pair.ToString());
+                }
 
                 index++; // Add to the index of all pairings regardless of track
 

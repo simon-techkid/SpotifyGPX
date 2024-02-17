@@ -22,6 +22,7 @@ class Program
         bool exportJsonReport = false;
         bool pointPredict = false;
         bool autoPredict = false;
+        bool silent = false;
 
         switch (args.Length)
         {
@@ -49,9 +50,11 @@ class Program
                     case "-pa":
                         Console.WriteLine("[HELP] -pa: Run prediction automatically on all pairs before exporting");
                         break;
+                    case "--silent":
+                        Console.WriteLine("[HELP] --silent: Do not print out each individual pair");
                         break;
                     default:
-                        Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-r] [-pp]");
+                        Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-r] [-pp] [-pa] [--silent]");
                         break;
                 }
                 return;
@@ -65,9 +68,10 @@ class Program
                 exportJsonReport = args.Length >= 3 && args.Contains("-r");
                 pointPredict = args.Length >= 3 && args.Contains("-pp");
                 autoPredict = args.Length >= 3 && args.Contains("-pa");
+                silent = args.Length >= 3 && args.Contains("--silent");
                 break;
             default:
-                Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-t] [-r] [-pp]");
+                Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-t] [-r] [-pp] [-pa] [--silent]");
                 return;
         }
 
@@ -87,7 +91,7 @@ class Program
             List<SpotifyEntry> filSongs = input.GetFilteredSongs(gpsTracks); // Filtered run
 
             // Step 3: Create list of songs and points paired as close as possible to one another
-            pairedEntries = new PairingsHandler(filSongs, gpsTracks, pointPredict);
+            pairedEntries = new PairingsHandler(filSongs, gpsTracks, silent, pointPredict, autoPredict);
 
             pairedEntries.WriteCounts();
             pairedEntries.WriteAverages();
