@@ -13,67 +13,23 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputJson = string.Empty; // get JSON path
-        string inputGpx = string.Empty; // get GPX path
-        bool noGpxExport = false;
-        bool exportJson = false;
-        bool exportPlist = false;
-        bool exportTxt = false;
-        bool exportJsonReport = false;
-        bool pointPredict = false;
-        bool autoPredict = false;
-        bool silent = false;
-
-        switch (args.Length)
+        if (args.Length < 2)
         {
-            case 1:
-                switch (args[0])
-                {
-                    case "-n":
-                        Console.WriteLine("[HELP] -n: Do not export pairs to a GPX file");
-                        break;
-                    case "-j":
-                        Console.WriteLine("[HELP] -j: Export a JSON of the songs covering your journey");
-                        break;
-                    case "-p":
-                        Console.WriteLine("[HELP] -p: Export a XSPF playlist of the songs covering your journey");
-                        break;
-                    case "-t":
-                        Console.WriteLine("[HELP] -t: Export a TXT list of pairs");
-                        break;
-                    case "-r":
-                        Console.WriteLine("[HELP] -r: Export a verbose JSON report of all created pairings");
-                        break;
-                    case "-pp":
-                        Console.WriteLine("[HELP] -pp: Run user-prompted prediction on all pairs before exporting");
-                        break;
-                    case "-pa":
-                        Console.WriteLine("[HELP] -pa: Run prediction automatically on all pairs before exporting");
-                        break;
-                    case "--silent":
-                        Console.WriteLine("[HELP] --silent: Do not print out each individual pair");
-                        break;
-                    default:
-                        Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-r] [-pp] [-pa] [--silent]");
-                        break;
-                }
-                return;
-            case >= 2:
-                inputJson = args[0];
-                inputGpx = args[1];
-                noGpxExport = args.Length >= 3 && args.Contains("-n");
-                exportJson = args.Length >= 3 && args.Contains("-j");
-                exportPlist = args.Length >= 3 && args.Contains("-p");
-                exportTxt = args.Length >= 3 && args.Contains("-t");
-                exportJsonReport = args.Length >= 3 && args.Contains("-r");
-                pointPredict = args.Length >= 3 && args.Contains("-pp");
-                autoPredict = args.Length >= 3 && args.Contains("-pa");
-                silent = args.Length >= 3 && args.Contains("--silent");
-                break;
-            default:
-                Console.WriteLine("[HELP] Usage: SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-t] [-r] [-pp] [-pa] [--silent]");
-                return;
+            Console.WriteLine("[HELP] Usage: SpotifyGPX <spotify> <gps> [-n] [-j] [-p] [-t] [-r] [-pp] [-pa] [--silent]");
+            return;
         }
+
+        string inputSpotify = args[0];
+        string inputGps = args[1];
+
+        bool noGpxExport = args.Contains("-n");
+        bool exportJson = args.Contains("-j");
+        bool exportPlist = args.Contains("-p");
+        bool exportTxt = args.Contains("-t");
+        bool exportJsonReport = args.Contains("-r");
+        bool pointPredict = args.Contains("-pp");
+        bool autoPredict = args.Contains("-pa");
+        bool silent = args.Contains("--silent");
 
         // Create a list of paired songs and points
         PairingsHandler pairedEntries;
@@ -81,53 +37,43 @@ class Program
         try
         {
             // Step 0: Get input handler based on file paths
-            InputHandler input = new(inputJson, inputGpx);
+            InputHandler input = new(inputSpotify, inputGps);
 
             // Step 1: Get list of GPX tracks from the GPS file
             List<GPXTrack> gpsTracks = input.GetAllTracks();
 
             // Step 2: Get list of songs played from the entries file
+            List<SpotifyEntry> filSongs = input.GetFilteredSongs(gpsTracks);
             //List<SpotifyEntry> allSongs = input.GetAllSongs(); // Unfiltered run
-            List<SpotifyEntry> filSongs = input.GetFilteredSongs(gpsTracks); // Filtered run
 
             // Step 3: Create list of songs and points paired as close as possible to one another
             pairedEntries = new PairingsHandler(filSongs, gpsTracks, silent, pointPredict, autoPredict);
 
+            // Step 4: Write the pairing job's pair counts and averages
             pairedEntries.WriteCounts();
             pairedEntries.WriteAverages();
         }
         catch (Exception ex)
         {
-            // Catch any errors found in the calculation process
             Console.WriteLine(ex);
             return;
         }
 
-        if (noGpxExport == false)
-        {
-            pairedEntries.Save(Formats.Gpx, Path.GetFileNameWithoutExtension(inputGpx));
-        }
+        if (!noGpxExport)
+            pairedEntries.Save(Formats.Gpx, Path.GetFileNameWithoutExtension(inputGps));
 
-        if (exportJson == true)
-        {
-            pairedEntries.Save(Formats.Json, Path.GetFileNameWithoutExtension(inputGpx));
-        }
+        if (exportJson)
+            pairedEntries.Save(Formats.Json, Path.GetFileNameWithoutExtension(inputGps));
 
-        if (exportPlist == true)
-        {
-            pairedEntries.Save(Formats.Xspf, Path.GetFileNameWithoutExtension(inputGpx));
-        }
+        if (exportPlist)
+            pairedEntries.Save(Formats.Xspf, Path.GetFileNameWithoutExtension(inputGps));
 
-        if (exportTxt == true)
-        {
-            pairedEntries.Save(Formats.Txt, Path.GetFileNameWithoutExtension(inputGpx));
-        }
+        if (exportTxt)
+            pairedEntries.Save(Formats.Txt, Path.GetFileNameWithoutExtension(inputGps));
 
-        if (exportJsonReport == true)
-        {
-            pairedEntries.Save(Formats.JsonReport, Path.GetFileNameWithoutExtension(inputGpx));
-        }
+        if (exportJsonReport)
+            pairedEntries.Save(Formats.JsonReport, Path.GetFileNameWithoutExtension(inputGps));
 
-        return; // Exit the program
+        return;
     }
 }

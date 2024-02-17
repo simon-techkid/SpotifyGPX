@@ -80,7 +80,7 @@ public class PairingsHandler
         var groupedPairs = Pairs.GroupBy(groupingSelector); // Group all the song-point pairs by the specified selector
         string countsJoined = string.Join(", ", groupedPairs.Select(group => $"{group.Count()} ({group.Key})"));
         int groupCount = groupedPairs.Count();
-        string objName = groupCount > 1 ? nameMultiple : nameSingular;
+        string objName = groupCount == 1 ? nameSingular : nameMultiple;
 
         Console.WriteLine($"[PAIR] Paired {Pairs.Count} songs and points from {groupCount} {objName}: {countsJoined}");
     }
@@ -96,7 +96,7 @@ public class PairingsHandler
         var groupedPairs = Pairs.GroupBy(groupingSelector); // Group all the song-point pairs by the specified selector
         string accuraciesJoined = string.Join(", ", groupedPairs.Select(group => $"{Math.Round(group.Average(pair => pair.AbsAccuracy))}s ({group.Key})"));
         int groupCount = groupedPairs.Count();
-        string objName = groupCount > 1 ? nameMultiple : nameSingular;
+        string objName = groupCount == 1 ? nameSingular : nameMultiple;
 
         Console.WriteLine($"[PAIR] Average Accuracy for {groupCount} {objName}: {accuraciesJoined}");
     }
