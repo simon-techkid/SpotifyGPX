@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SpotifyGPX.Input;
 
@@ -11,9 +12,6 @@ public class InputHandler
 
     public InputHandler(string songPath, string gpsPath)
     {
-        string songExtension = Path.GetExtension(songPath).ToLower();
-        string gpsExtension = Path.GetExtension(gpsPath).ToLower();
-
         if (!File.Exists(songPath))
         {
             throw new Exception($"The specified file, '{songPath}', does not exist!");
@@ -24,80 +22,100 @@ public class InputHandler
             throw new Exception($"The specified file, '{gpsPath}', does not exist!");
         }
 
-        if (!songFormats.TryGetValue(songExtension, out SongFormats songFormat))
-        {
-            throw new Exception($"The specified file, '{songPath}', is not a valid Spotify data file!");
-        }
+        SongInput = CreateSongInput(songPath);
+        GpsInput = CreateGpsInput(gpsPath);
 
-        if (!gpsFormats.TryGetValue(gpsExtension, out GpsFormats gpsFormat))
-        {
-            throw new Exception($"The specified file, '{gpsPath}', is not a valid GPS exchange data file!");
-        }
-
-        GpsInput = GetGpsHandler(gpsPath)[gpsFormat];
-        SongInput = GetSongHandler(songPath)[songFormat];
         Console.WriteLine($"[INP] '{Path.GetFileName(gpsPath)}' contains {GpsInput.TrackCount} tracks and {GpsInput.PointCount} points");
         Console.WriteLine($"[INP] '{Path.GetFileName(songPath)}' contains {SongInput.Count} total songs");
     }
 
     public List<SpotifyEntry> GetAllSongs()
     {
-        return SongInput.GetAllSongs(); // Return all songs contained in the given JSON
+        // Returns unfiltered (all) songs
+        return SongInput.GetAllSongs();
     }
 
     public List<SpotifyEntry> GetFilteredSongs(List<GPXTrack> tracks)
     {
-        // List all of the tracks' start and end times
-        return SongInput.GetFilteredSongs(tracks); // Return filtered songs based on given JSON
+        // Returns filtered songs
+        return SongInput.GetFilteredSongs(tracks);
     }
 
     public List<GPXTrack> GetAllTracks()
     {
-        return GpsInput.GetAllTracks(); // Return all tracks contained in the given GPX
+        // Return all tracks
+        return GpsInput.GetAllTracks();
     }
 
-    private static readonly Dictionary<string, SongFormats> songFormats = new()
+    private static ISongInput CreateSongInput(string path)
     {
-        { ".json", SongFormats.Json } // Define the extensions corresponding to the Spotify formats
-    };
+        string extension = Path.GetExtension(path).ToLower();
 
-    private static readonly Dictionary<string, GpsFormats> gpsFormats = new()
-    {
-        { ".gpx", GpsFormats.Gpx } // Define the extensions corresponding to the Spotify formats
-    };
-
-    private static Dictionary<SongFormats, ISongInput> GetSongHandler(string songPath)
-    {
-        return new Dictionary<SongFormats, ISongInput> // Each of the below classes inherit ISongInput, as they are format classes sharing methods and fields
+        return extension switch
         {
-            { SongFormats.Json, new Json(songPath) } // Initialize a new Json class with the path provided
+            ".json" => new Json(path),
+            ".jsonreport" => new JsonReport(path),
+            _ => throw new Exception($"Unsupported song file format: {extension}"),
         };
     }
 
-    private static Dictionary<GpsFormats, IGpsInput> GetGpsHandler(string gpsPath)
+    private static IGpsInput CreateGpsInput(string path)
     {
-        return new Dictionary<GpsFormats, IGpsInput> // Each of the below classes inherit IGpsInput, as they are format classes sharing methods and fields
+        string extension = Path.GetExtension(path).ToLower();
+
+        return extension switch
         {
-            { GpsFormats.Gpx, new Gpx(gpsPath) } // Initialize a new Gpx class with the path provided
+            ".gpx" => new Gpx(path),
+            ".jsonreport" => new JsonReport(path),
+            _ => throw new Exception($"Unsupported GPS file format: {extension}"),
         };
     }
-
 }
 
 public enum SongFormats
 {
-    Json // To create a new format, create an entry here, an import class, and add it to GetSongHandler and songFormats
+    Json, // To create a new format, create an entry here, an import class, and add it to GetSongHandler and songFormats
+    JsonReport
 }
 
 public enum GpsFormats
 {
-    Gpx // To create a new format, create an entry here, an import class, and add it to GetGpsHandler and gpsFormats
+    Gpx, // To create a new format, create an entry here, an import class, and add it to GetGpsHandler and gpsFormats
+    JsonReport
 }
 
 public interface ISongInput
 {
+    private static TimeSpan MinimumPlaytime => new(0, 0, 0); // Minimum accepted song playback time (0,0,0 for all songs)
+    private static bool ExcludeSkipped => false; // Ignore songs skipped by the user, as defined by Spotify JSON (false for all songs)
+
     List<SpotifyEntry> GetAllSongs();
-    List<SpotifyEntry> GetFilteredSongs(List<GPXTrack> tracks);
+
+    List<SpotifyEntry> GetFilteredSongs(List<GPXTrack> tracks)
+    {
+        List<SpotifyEntry> AllSongs = GetAllSongs();
+
+        var trackRange = tracks.Select(track => (track.Start, track.End)).ToList();
+
+        // FilterEntries() differs from AllSongs because it filters the entire JSON file by the following parameters:
+        // The song must have been played during the GPS tracking timeframe (but PairingsHandler.PairPoints() filters this too)
+        // The song must have been played for longer than the MinimumPlaytime TimeSpan (beginning of this file)
+        // The song must have not been skipped during playback by the user (if ExcludeSkipped is true)
+
+        // You may add other filtration options below, within the .Any() statement:
+
+        List<SpotifyEntry> FilteredSongs = AllSongs.Where(spotifyEntry => // If the spotify entry
+            trackRange.Any(trackTimes =>
+                spotifyEntry.WithinTimeFrame(trackTimes.Start, trackTimes.End) && // Within the time range of tracks
+                (spotifyEntry.TimePlayed == null || spotifyEntry.TimePlayed >= MinimumPlaytime) && // Long enough duration
+                (spotifyEntry.Song_Skipped != true || !ExcludeSkipped))) // Wasn't skipped
+            .ToList(); // Send the songs passing the filter to a list
+
+        Console.WriteLine($"[INP] {FilteredSongs.Count} songs filtered from {AllSongs.Count} total");
+
+        return FilteredSongs;
+    }
+
     int Count { get; }
 }
 
