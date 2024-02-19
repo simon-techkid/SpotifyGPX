@@ -8,6 +8,9 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Input;
 
+/// <summary>
+/// Provides instructions for parsing GPS data from the GPX format.
+/// </summary>
 public class Gpx : IGpsInput
 {
     private static XNamespace InputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of input GPX
@@ -16,6 +19,11 @@ public class Gpx : IGpsInput
     private XDocument Document { get; } // Entire input GPX document
     private List<GPXTrack> Tracks { get; } // Parsed tracks from GPX document
 
+    /// <summary>
+    /// Creates a new input handler for handling files in the GPX format.
+    /// </summary>
+    /// <param name="path">The path to the GPX file.</param>
+    /// <exception cref="Exception">No tracks and/or points were found in the given file.</exception>
     public Gpx(string path)
     {
         Document = XDocument.Load(path);
@@ -35,15 +43,30 @@ public class Gpx : IGpsInput
         Tracks = ParseTracks();
     }
 
+    /// <summary>
+    /// The total number of track elements in this GPX file.
+    /// </summary>
     public int TrackCount => Document.Descendants(InputNs + Track).Count();
 
+    /// <summary>
+    /// The total number of point elements in this GPX file.
+    /// </summary>
     public int PointCount => Document.Descendants(InputNs + TrackPoint).Count();
 
+    /// <summary>
+    /// Gets all the tracks in this GPX file.
+    /// </summary>
+    /// <returns>A list of GPXTrack objects.</returns>
     public List<GPXTrack> GetAllTracks()
     {
         return Tracks;
     }
 
+    /// <summary>
+    /// Parses this GPX document into a readable list of tracks.
+    /// </summary>
+    /// <returns>A list of GPXTrack objects.</returns>
+    /// <exception cref="Exception">An element (latitude, longitude, or time) of this point was null.</exception>
     private List<GPXTrack> ParseTracks()
     {
         List<GPXTrack> allTracks = Document.Descendants(InputNs + Track)
@@ -78,6 +101,11 @@ public class Gpx : IGpsInput
         return allTracks; // Return final track list
     }
 
+    /// <summary>
+    /// Gets input from the user about which tracks to intake.
+    /// </summary>
+    /// <param name="allTracks">The entire list of tracks.</param>
+    /// <returns>A list of GPXTrack objects based on user selection.</returns>
     private static List<GPXTrack> HandleMultipleTracks(List<GPXTrack> allTracks)
     {
         // Display all the tracks to the user
@@ -119,6 +147,10 @@ public class Gpx : IGpsInput
         return selectedTracks;
     }
 
+    /// <summary>
+    /// Write each track to the console, and display user options for intake selection.
+    /// </summary>
+    /// <param name="allTracks">The entire list of tracks.</param>
     private static void DisplayTrackOptions(List<GPXTrack> allTracks)
     {
         Console.WriteLine("[INP] Multiple GPX tracks found:");
@@ -137,6 +169,12 @@ public class Gpx : IGpsInput
         Console.Write("[INP] Please enter the index of the track you want to use: ");
     }
 
+    /// <summary>
+    /// Combine a list of tracks into a single track.
+    /// </summary>
+    /// <param name="allTracks">A list of GPXTrack objects.</param>
+    /// <returns>A single GPXTrack with data from each in the list.</returns>
+    /// <exception cref="Exception">The list provided was null or contained no tracks.</exception>
     private static GPXTrack CombineTracks(List<GPXTrack> allTracks)
     {
         if (allTracks == null || allTracks.Count == 0)
@@ -153,6 +191,11 @@ public class Gpx : IGpsInput
         return combinedTrack;
     }
 
+    /// <summary>
+    /// Calculate all the gaps between tracks.
+    /// </summary>
+    /// <param name="allTracks">A list of GPXTrack objects.</param>
+    /// <returns>A list of GPXTrack objects, containing the original tracks as well as tracks created based on the gaps between each in the original list.</returns>
     private static List<GPXTrack> CalculateGaps(List<GPXTrack> allTracks)
     {
         return allTracks
@@ -181,7 +224,19 @@ public class Gpx : IGpsInput
             .ToList();
     }
 
+    /// <summary>
+    /// Creates a friendly name for a bridge track (combination or gap track) between GPXTrack objects.
+    /// </summary>
+    /// <param name="track1">The track before the break.</param>
+    /// <param name="track2">The track after the break.</param>
+    /// <returns>A name combining the names of the two given tracks.</returns>
     private static string CombinedOrGapTrackName(TrackInfo track1, TrackInfo track2) => $"{track1.ToString()}-{track2.ToString()}";
 
+    /// <summary>
+    /// Determines whether a user-input track selection is valid.
+    /// </summary>
+    /// <param name="index">The user-provided index of a GPXTrack.</param>
+    /// <param name="totalTracks">The total number of tracks available for selection.</param>
+    /// <returns>True, if the user-provided index is an existing GPXTrack.</returns>
     private static bool IsValidTrackIndex(int index, int totalTracks) => index >= 0 && index < totalTracks;
 }

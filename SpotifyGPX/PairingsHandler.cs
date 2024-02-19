@@ -8,10 +8,22 @@ using System.Linq;
 
 namespace SpotifyGPX;
 
+/// <summary>
+/// Handle SongPoint pairings, including list calculation, generation, operations, and exporting.
+/// </summary>
 public class PairingsHandler
 {
     private static double? MaximumAbsAccuracy => null; // Greatest accepted error (in seconds) between song and point time (null = allow all pairings regardless of accuracy)
+    private List<SongPoint> Pairs { get; }
 
+    /// <summary>
+    /// Create a handler for pairing GPS information with Song information.
+    /// </summary>
+    /// <param name="s">A series of Spotify playback records, used to associate a song with a point.</param>
+    /// <param name="t">A list of GPXTrack objects, used to associate songs with a track and position on Earth.</param>
+    /// <param name="silent">If true, do not print each pairing to the console upon creation.</param>
+    /// <param name="predict">If true, create a DupeHandler for predicting duplicates in the resulting pair list.</param>
+    /// <param name="autoPredict">If true, and predict is true, automatically predict all duplicate positions.</param>
     public PairingsHandler(List<SpotifyEntry> s, List<GPXTrack> t, bool silent, bool predict, bool autoPredict)
     {
         if (predict == true)
@@ -27,21 +39,26 @@ public class PairingsHandler
         }
     }
 
-    private readonly List<SongPoint> Pairs;
-
-    private static List<SongPoint> PairPoints(bool silent, List<SpotifyEntry> songs, List<GPXTrack> gpxTracks)
+    /// <summary>
+    /// Pair songs with points (positions on Earth), by finding the closest gap of time between each.
+    /// </summary>
+    /// <param name="silent">If true, do not print each pairing to the console upon creation.</param>
+    /// <param name="songs">A series of Spotify playback records, used to associate a song with a point.</param>
+    /// <param name="tracks">A list of GPXTrack objects, used to associate songs with a track and position on Earth.</param>
+    /// <returns>A list of Song-Point pairs, each song and its point (on Earth), in a list.</returns>
+    private static List<SongPoint> PairPoints(bool silent, List<SpotifyEntry> songs, List<GPXTrack> tracks)
     {
         // Correlate Spotify entries with the nearest GPX points
 
         int index = 0; // Index of the pairing
 
-        return gpxTracks // For each GPX track
-        .SelectMany(gpxTrack => songs // Get the list of SpotifyEntries
-        .Where(spotifyEntry => spotifyEntry.WithinTimeFrame(gpxTrack.Start, gpxTrack.End)) // If the SpotifyEntry falls within the boundaries of the track
+        return tracks // For each GPX track
+        .SelectMany(track => songs // Get the list of SpotifyEntries
+        .Where(spotifyEntry => spotifyEntry.WithinTimeFrame(track.Start, track.End)) // If the SpotifyEntry falls within the boundaries of the track
         .Select(spotifyEntry => // Select the Spotify entry if it falls in range of the GPX track
             {
-                SongPoint pair = gpxTrack.Points
-                .Select(point => new SongPoint(index, spotifyEntry, point, gpxTrack.Track)) // For each point in the track's point list,
+                SongPoint pair = track.Points
+                .Select(point => new SongPoint(index, spotifyEntry, point, track.Track)) // For each point in the track's point list,
                 .OrderBy(pair => pair.AbsAccuracy) // Order the points by proximity between point and song
                 .First(); // Closest accuracy wins
 
@@ -59,6 +76,11 @@ public class PairingsHandler
         .ToList();
     }
 
+    /// <summary>
+    /// Save the paired songs and points to a file.
+    /// </summary>
+    /// <param name="format">The file format in which the pairs will be saved.</param>
+    /// <param name="sourceGpxName">The name of the original GPX file.</param>
     public void Save(Formats format, string sourceGpxName)
     {
         // Parse the Pairs in this Pairings object to the specified format, according to user-provided arguments
@@ -68,6 +90,9 @@ public class PairingsHandler
         fmat.Save(format, sourceGpxName);
     }
 
+    /// <summary>
+    /// Write the counts of grouped elements of pairings (ie. no. of pairs by track, type, or country).
+    /// </summary>
     public void WriteCounts()
     {
         WriteCounts(pair => pair.Origin, "track", "tracks"); // Write # of pairs per track
@@ -75,6 +100,13 @@ public class PairingsHandler
         WriteCounts(pair => pair.Song.Spotify_Country, "country", "countries"); // Write # of pairs in each country
     }
 
+    /// <summary>
+    /// Write the number of pairs in each group (based on a selector) to the console.
+    /// </summary>
+    /// <typeparam name="T">The object of a pair by which all pairs should be grouped.</typeparam>
+    /// <param name="groupingSelector">The grouping selector, the parameter of each pair by which the collection of pairs should be grouped.</param>
+    /// <param name="nameSingular">The name of one of these groups.</param>
+    /// <param name="nameMultiple">The name of multiple of these groups.</param>
     private void WriteCounts<T>(Func<SongPoint, T> groupingSelector, string nameSingular, string nameMultiple)
     {
         var groupedPairs = Pairs.GroupBy(groupingSelector); // Group all the song-point pairs by the specified selector
@@ -85,12 +117,22 @@ public class PairingsHandler
         Console.WriteLine($"[PAIR] Paired {Pairs.Count} songs and points from {groupCount} {objName}: {countsJoined}");
     }
 
+    /// <summary>
+    /// Write the averages of grouped elements of pairings (ie. average accuracy by track, track type).
+    /// </summary>
     public void WriteAverages()
     {
         WriteAverages(pair => pair.Origin.Type, "track type", "track types"); // Calculate Accuracies by track type (GPX, Gap, Combined)
         WriteAverages(pair => pair.Origin, "track", "tracks"); // Calculate Accuracies by track
     }
 
+    /// <summary>
+    /// Write the average accuracies (in seconds, between each song and point in a pair) to the console in groups (based on a selector).
+    /// </summary>
+    /// <typeparam name="T">The object of a pair by which all pairs should be grouped.</typeparam>
+    /// <param name="groupingSelector">The grouping selector, the parameter of each pair by which the collection of pairs should be grouped.</param>
+    /// <param name="nameSingular">The name of one of these groups.</param>
+    /// <param name="nameMultiple">The name of multiple of these groups.</param>
     private void WriteAverages<T>(Func<SongPoint, T> groupingSelector, string nameSingular, string nameMultiple)
     {
         var groupedPairs = Pairs.GroupBy(groupingSelector); // Group all the song-point pairs by the specified selector

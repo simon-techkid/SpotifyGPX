@@ -12,8 +12,17 @@ public class OutputHandler
     private static bool ReplaceFiles => false; // Allow SpotifyGPX to replace existing files, rather than generating a unique name
     private IEnumerable<SongPoint> Pairs { get; } // Hold the pairs list that will be exported
 
+    /// <summary>
+    /// Creates a handler for exporting output files
+    /// </summary>
+    /// <param name="pairs">A list of pairs to send to a file.</param>
     public OutputHandler(IEnumerable<SongPoint> pairs) => Pairs = pairs;
 
+    /// <summary>
+    /// Saves the pairs contained in this handler to a file in the given format.
+    /// </summary>
+    /// <param name="format">The format to use for the exported file.</param>
+    /// <param name="sourceGpxName">The name of the original GPS file used.</param>
     public void Save(Formats format, string sourceGpxName)
     {
         List<OutFile> files = new();
@@ -43,8 +52,18 @@ public class OutputHandler
         Console.WriteLine($"[OUT] [{format.ToString().ToUpper()} {totalExported}/{totalPairs}]: {joinedExports}");
     }
 
+    /// <summary>
+    /// Represents an output file.
+    /// </summary>
     private readonly struct OutFile
     {
+        /// <summary>
+        /// Stages an output file, containing the given pairs, in the given format, with the specified names.
+        /// </summary>
+        /// <param name="pairs">The pairs to include in the output file.</param>
+        /// <param name="format">The format of the output file.</param>
+        /// <param name="sourceGpxName">The prefix of the output file name.</param>
+        /// <param name="trackName">The name of the track represented in this file (if this file only has one track).</param>
         public OutFile(IEnumerable<SongPoint> pairs, Formats format, string sourceGpxName, string trackName)
         {
             Handler = CreateFileOutput(format, pairs);
@@ -55,15 +74,49 @@ public class OutputHandler
             Path = GetUniqueFilePath($"{fileName}.{extension}"); // Ensure exporting to unique file name
         }
 
-        private IFileOutput Handler { get; } // The output file
-        public int OriginalCount { get; } // The number of pairs in the original pairing list
-        public int ExportCount => Handler.Count; // The number of pairs apart of the exported file
-        private string Name { get; } // The name of the track
-        private string Path { get; } // The export path of the final file
-        public string Result => $"{ExportCount}/{OriginalCount} ({Name})"; // Printed string of outcome
-        public void Save() => Handler.Save(Path); // Save the file to the path
+        /// <summary>
+        /// The output file handler.
+        /// </summary>
+        private IFileOutput Handler { get; }
+
+        /// <summary>
+        /// The number of pairs in the original pairing list
+        /// </summary>
+        public int OriginalCount { get; }
+
+        /// <summary>
+        /// The number of pairs apart of the exported file
+        /// </summary>
+        public int ExportCount => Handler.Count;
+
+        /// <summary>
+        /// The name of the track
+        /// </summary>
+        private string Name { get; }
+
+        /// <summary>
+        /// The export path of the final file
+        /// </summary>
+        private string Path { get; }
+
+        /// <summary>
+        /// A string representing the outcome of the export.
+        /// </summary>
+        public string Result => $"{ExportCount}/{OriginalCount} ({Name})";
+
+        /// <summary>
+        /// Save the file to the path.
+        /// </summary>
+        public void Save() => Handler.Save(Path);
     }
 
+    /// <summary>
+    /// Determines the appropriate output class for handling pairs in the given format.
+    /// </summary>
+    /// <param name="format">The desired export format.</param>
+    /// <param name="pairs">The pairs to create in the specified file format.</param>
+    /// <returns>An IFileOutput interface allowing interfacing with the corresponding format.</returns>
+    /// <exception cref="Exception">The provided file doesn't have an export class associated with it.</exception>
     private static IFileOutput CreateFileOutput(Formats format, IEnumerable<SongPoint> pairs)
     {
         return format switch
@@ -77,6 +130,12 @@ public class OutputHandler
         };
     }
 
+    /// <summary>
+    /// Determines whether the given format supports multiple tracks (distinguishing between them).
+    /// </summary>
+    /// <param name="format">The format.</param>
+    /// <returns>True, if the format supports multiple tracks. If it doesn't, false.</returns>
+    /// <exception cref="Exception"></exception>
     private static bool AllowsMultiTrack(Formats format)
     {
         return format switch
@@ -90,6 +149,11 @@ public class OutputHandler
         };
     }
 
+    /// <summary>
+    /// Generate a unique file path given a provided path.
+    /// </summary>
+    /// <param name="path">A path that will be checked for an existing file.</param>
+    /// <returns>If the given path is already an existing file, a unique path that doesn't already exist as a file. Otherwise, the original path.</returns>
     private static string GetUniqueFilePath(string path)
     {
         if (!File.Exists(path) || ReplaceFiles)
@@ -119,15 +183,40 @@ public class OutputHandler
     }
 }
 
+/// <summary>
+/// A list of the supported export formats.
+/// </summary>
 public enum Formats
 {
+    /// <summary>
+    /// A GPX file containing song-point pairs as a waypoints.
+    /// </summary>
     Gpx,
+
+    /// <summary>
+    /// A JSON file containing only the original Spotify data records used for pairs.
+    /// </summary>
     Json,
+
+    /// <summary>
+    /// A .jsonreport file containing all pairing and track data.
+    /// </summary>
     JsonReport,
+
+    /// <summary>
+    /// A plain text file containing a string per pair.
+    /// </summary>
     Txt,
+
+    /// <summary>
+    /// An XML playlist file compatible with audio playback software.
+    /// </summary>
     Xspf
 }
 
+/// <summary>
+/// Interfaces with file output classes, unifying all formats that pairs can written to.
+/// </summary>
 public interface IFileOutput
 {
     // Defines the requirements of export format classes:

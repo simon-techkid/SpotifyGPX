@@ -40,14 +40,14 @@ class Program
             InputHandler input = new(inputSpotify, inputGps);
 
             // Step 1: Get list of GPX tracks from the GPS file
-            List<GPXTrack> gpsTracks = input.GetAllTracks();
+            List<GPXTrack> tracks = input.GetAllTracks();
 
             // Step 2: Get list of songs played from the entries file
-            List<SpotifyEntry> filSongs = input.GetFilteredSongs(gpsTracks);
-            //List<SpotifyEntry> allSongs = input.GetAllSongs(); // Unfiltered run
+            List<SpotifyEntry> songs = input.GetFilteredSongs(tracks);
+            //List<SpotifyEntry> songs = input.GetAllSongs(); // Unfiltered run
 
             // Step 3: Create list of songs and points paired as close as possible to one another
-            pairedEntries = new PairingsHandler(filSongs, gpsTracks, silent, pointPredict, autoPredict);
+            pairedEntries = new PairingsHandler(songs, tracks, silent, pointPredict, autoPredict);
 
             // Step 4: Write the pairing job's pair counts and averages
             pairedEntries.WriteCounts();

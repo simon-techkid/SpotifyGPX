@@ -10,6 +10,12 @@ public class InputHandler
     private ISongInput SongInput { get; }
     private IGpsInput GpsInput { get; }
 
+    /// <summary>
+    /// Creates a handler for taking files as input.
+    /// </summary>
+    /// <param name="songPath">The path to a file containing Spotify playback records.</param>
+    /// <param name="gpsPath">The path to a file containing GPS journey data.</param>
+    /// <exception cref="Exception">A provided file does not exist.</exception>
     public InputHandler(string songPath, string gpsPath)
     {
         if (!File.Exists(songPath))
@@ -29,24 +35,43 @@ public class InputHandler
         Console.WriteLine($"[INP] '{Path.GetFileName(songPath)}' contains {SongInput.Count} total songs");
     }
 
+    /// <summary>
+    /// Gets all song records from the given file.
+    /// </summary>
+    /// <returns>A list of SpotifyEntries, each representing a single song of playback.</returns>
     public List<SpotifyEntry> GetAllSongs()
     {
         // Returns unfiltered (all) songs
         return SongInput.GetAllSongs();
     }
 
+    /// <summary>
+    /// Filters the song records from the given file.
+    /// </summary>
+    /// <param name="tracks">A list of GPXTracks, by which the contents of the song record list will be filtered.</param>
+    /// <returns>A list of SpotifyEntries, each representing a single song of playback.</returns>
     public List<SpotifyEntry> GetFilteredSongs(List<GPXTrack> tracks)
     {
         // Returns filtered songs
         return SongInput.GetFilteredSongs(tracks);
     }
 
+    /// <summary>
+    /// Gets all journey tracks from the given file.
+    /// </summary>
+    /// <returns>A list of GPXTracks, each representing a collection of positions comprising a journey's path.</returns>
     public List<GPXTrack> GetAllTracks()
     {
         // Return all tracks
         return GpsInput.GetAllTracks();
     }
 
+    /// <summary>
+    /// Determines the appropriate import class for handling this song records file.
+    /// </summary>
+    /// <param name="path">The path to the song records file.</param>
+    /// <returns>An ISongInput interface allowing interfacing with the corresponding format.</returns>
+    /// <exception cref="Exception">The provided file doesn't have an import class associated with it.</exception>
     private static ISongInput CreateSongInput(string path)
     {
         string extension = Path.GetExtension(path).ToLower();
@@ -59,6 +84,12 @@ public class InputHandler
         };
     }
 
+    /// <summary>
+    /// Determines the appropriate import class for handling this GPS journey file.
+    /// </summary>
+    /// <param name="path">The path to the GPS journey file.</param>
+    /// <returns>An IGpsInput interface allowing interfacing with the corresponding format.</returns>
+    /// <exception cref="Exception">The provided file doesn't have an import class associated with it.</exception>
     private static IGpsInput CreateGpsInput(string path)
     {
         string extension = Path.GetExtension(path).ToLower();
@@ -72,18 +103,41 @@ public class InputHandler
     }
 }
 
+/// <summary>
+/// A list of the accepted formats containing song records.
+/// </summary>
 public enum SongFormats
 {
-    Json, // To create a new format, create an entry here, an import class, and add it to GetSongHandler and songFormats
+    /// <summary>
+    /// A JSON file containing user playback data in the Spotify format.
+    /// </summary>
+    Json,
+
+    /// <summary>
+    /// A .jsonreport file created by SpotifyGPX that can be used as input.
+    /// </summary>
     JsonReport
 }
 
+/// <summary>
+/// A list of the accepted formats containing GPS journeys.
+/// </summary>
 public enum GpsFormats
 {
-    Gpx, // To create a new format, create an entry here, an import class, and add it to GetGpsHandler and gpsFormats
+    /// <summary>
+    /// A GPX file containing geospatial information for a journey.
+    /// </summary>
+    Gpx,
+
+    /// <summary>
+    /// A .jsonreport file created by SpotifyGPX that can be used as input.
+    /// </summary>
     JsonReport
 }
 
+/// <summary>
+/// Interfaces with song input classes, unifying all formats accepting song records.
+/// </summary>
 public interface ISongInput
 {
     private static TimeSpan MinimumPlaytime => new(0, 0, 0); // Minimum accepted song playback time (0,0,0 for all songs)
@@ -119,6 +173,9 @@ public interface ISongInput
     int Count { get; }
 }
 
+/// <summary>
+/// Interfaces with GPS input classes, unifying all formats accepting GPS journeys.
+/// </summary>
 public interface IGpsInput
 {
     List<GPXTrack> GetAllTracks();

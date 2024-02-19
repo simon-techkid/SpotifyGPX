@@ -9,19 +9,30 @@ using System.Linq;
 
 namespace SpotifyGPX.Output;
 
+/// <summary>
+/// Provides instructions for exporting pairing data to the JsonReport format.
+/// </summary>
 public class JsonReport : IFileOutput
 {
     private static Formatting Formatting => Formatting.Indented; // Formatting of exporting JSON
-
-    public JsonReport(IEnumerable<SongPoint> pairs)
-    {
-        Document = GetDocument(pairs);
-    }
-
     public List<JObject> Document { get; }
 
+    /// <summary>
+    /// Creates a new output handler for handling files in the JsonReport format.
+    /// </summary>
+    /// <param name="pairs">A list of pairs to be exported.</param>
+    public JsonReport(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
+
+    /// <summary>
+    /// Creates a JsonReport document (a list of JObjects) representing tracks and their pairs.
+    /// </summary>
+    /// <param name="Pairs">A list of pairs.</param>
+    /// <returns>A list of JObjects, each representing a track containing pairs.</returns>
     private static List<JObject> GetDocument(IEnumerable<SongPoint> Pairs)
     {
+        // Create a serializer with the settings from Options.JsonSettings
+        JsonSerializer serializer = JsonSerializer.Create(Options.JsonSettings);
+
         return Pairs
             .GroupBy(pair => pair.Origin) // Group the pairs by track (JsonReport supports multiTrack)
             .Select(track =>
@@ -29,22 +40,25 @@ public class JsonReport : IFileOutput
                 return new JObject(
                     new JProperty("Count", track.Count()), // Include # of pairs in this track
                     new JProperty("TrackInfo", JToken.FromObject(track.Key)), // Include info about the GPX track
-                    new JProperty(track.Key.ToString(), track
-                    .SelectMany(pair =>
-                    {
-                        return new JArray(JToken.FromObject(pair)); // Create a json report for each pair
-                    }))
+                    new JProperty(track.Key.ToString(), JToken.FromObject(track.SelectMany(pair => new JArray(JToken.FromObject(pair))), serializer)) // Create a json report for each pair
                 );
             })
             .ToList();
     }
 
+    /// <summary>
+    /// Saves this JsonReport file to the provided path.
+    /// </summary>
+    /// <param name="path">The path where this JsonReport will be saved.</param>
     public void Save(string path)
     {
         string text = JsonConvert.SerializeObject(Document, Formatting);
         File.WriteAllText(path, text);
     }
 
+    /// <summary>
+    /// The number of pairs within this JsonReport file, regardless of track.
+    /// </summary>
     public int Count
     {
         get

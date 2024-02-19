@@ -7,8 +7,17 @@ using System.Linq;
 
 namespace SpotifyGPX;
 
+/// <summary>
+/// A record of a Spotify song played by the user. Contains metadata about the song itself as well as the time it was played.
+/// </summary>
 public readonly struct SpotifyEntry
 {
+    /// <summary>
+    /// Creates a SpotifyEntry containing information about a single song's worth of playback.
+    /// </summary>
+    /// <param name="index">The index of this song (in a created list).</param>
+    /// <param name="json">The JSON object for this song (from Spotify data dump).</param>
+    /// <exception cref="Exception"></exception>
     public SpotifyEntry(int index, JObject json)
     {
         try
@@ -22,20 +31,38 @@ public readonly struct SpotifyEntry
         }
     }
 
-    public readonly JObject Json { get; } // Original Json object for this song
+    /// <summary>
+    /// Unique identifier of this SpotifyEntry in a list
+    /// </summary>
+    public readonly int Index { get; }
 
-    public readonly int Index { get; } // Unique identifier of this SpotifyEntry in a list
-    public readonly DateTimeOffset Time
+    /// <summary>
+    /// The JSON object containing the Spotify data from which this entry was derived.
+    /// </summary>
+    public readonly JObject Json { get; }
+
+    /// <summary>
+    /// The time the song started (estimate) or ended (as detailed in Spotify data).
+    /// </summary>
+    public readonly DateTimeOffset Time => UseEstStartTime ? (DateTimeOffset)TimeStartedEst : TimeEnded;
+
+    /// <summary>
+    /// This field is a timestamp indicating when the track stopped playing in UTC (Coordinated Universal Time).
+    /// </summary>
+    private readonly string? Time_Ended => (string?)Json["endTime"] ?? (string?)Json["ts"];
+
+    /// <summary>
+    /// This field is a timestamp indicating when the track stopped playing in UTC (Coordinated Universal Time).
+    /// </summary>
+    public DateTimeOffset TimeEnded
     {
         get
         {
-            string time = ((string?)Json["endTime"] ?? (string?)Json["ts"]) ?? throw new Exception($"JSON 'ts' or 'endTime' cannot be null, check your JSON");
-
-            if (DateTimeOffset.TryParseExact(time, Options.SpotifyMini, null, Options.SpotifyTimeStyle, out var result))
+            if (DateTimeOffset.TryParseExact(Time_Ended, Options.SpotifyMini, null, Options.SpotifyTimeStyle, out var result))
             {
                 return result; // return parsed "account data" format song end time
             }
-            else if (DateTimeOffset.TryParseExact(time, Options.SpotifyFull, null, Options.SpotifyTimeStyle, out result))
+            else if (DateTimeOffset.TryParseExact(Time_Ended, Options.SpotifyFull, null, Options.SpotifyTimeStyle, out result))
             {
                 return result; // return parsed "extended streaming history" format song end time
             }
@@ -45,9 +72,36 @@ public readonly struct SpotifyEntry
             }
         }
     }
-    public readonly string? Song_Artist => (string?)Json["artistName"] ?? (string?)Json["master_metadata_album_artist_name"];
-    public readonly string? Song_Name => (string?)Json["trackName"] ?? (string?)Json["master_metadata_track_name"];
+
+    /// <summary>
+    /// Determines whether or not to use the estimated start time (EstStartTime) as the reference time.
+    /// </summary>
+    private readonly bool UseEstStartTime => Options.PreferEstimatedStartTime && TimeStartedEst != null;
+
+    /// <summary>
+    /// The estimated time and date when the song started.
+    /// Can be used in place of the end time provided by Spotify if you prefer the pairings be based on when the song began.
+    /// </summary>
+    public readonly DateTimeOffset? TimeStartedEst => TimeEnded - TimePlayed;
+
+    /// <summary>
+    /// This field is your Spotify username.
+    /// </summary>
+    public readonly string? Spotify_Username => (string?)Json["username"];
+
+    /// <summary>
+    /// This field is the platform used when streaming the track (e.g. Android OS, Google Chromecast).
+    /// </summary>
+    public readonly string? Spotify_Platform => (string?)Json["platform"];
+
+    /// <summary>
+    /// This field is the number of milliseconds the stream was played.
+    /// </summary>
     private readonly string? Time_Played => (string?)Json["msPlayed"] ?? (string?)Json["ms_played"];
+
+    /// <summary>
+    /// The duration of playback of this song.
+    /// </summary>
     public readonly TimeSpan? TimePlayed
     {
         get
@@ -63,22 +117,95 @@ public readonly struct SpotifyEntry
             }
         }
     }
-    public readonly string? Spotify_Username => (string?)Json["username"];
-    public readonly string? Spotify_Platform => (string?)Json["platform"];
+
+    /// <summary>
+    /// This field is the country code of the country where the stream was played (e.g. SE - Sweden).
+    /// </summary>
     public readonly string? Spotify_Country => (string?)Json["conn_country"];
+
+    /// <summary>
+    /// This field contains the IP address logged when streaming the track.
+    /// </summary>
     public readonly string? Spotify_IP => (string?)Json["ip_addr_decrypted"];
+
+    /// <summary>
+    /// This field contains the user agent used when streaming the track (e.g. a browser, like Mozilla Firefox, or Safari).
+    /// </summary>
     public readonly string? Spotify_UA => (string?)Json["user_agent_decrypted"];
+
+    /// <summary>
+    /// This field is the name of the track.
+    /// </summary>
+    public readonly string? Song_Name => (string?)Json["trackName"] ?? (string?)Json["master_metadata_track_name"];
+
+    /// <summary>
+    /// This field is the name of the artist, band or podcast.
+    /// </summary>
+    public readonly string? Song_Artist => (string?)Json["artistName"] ?? (string?)Json["master_metadata_album_artist_name"];
+
+    /// <summary>
+    /// This field is the name of the album of the track.
+    /// </summary>
     public readonly string? Song_Album => (string?)Json["master_metadata_album_album_name"];
+
+    /// <summary>
+    /// A Spotify URI, uniquely identifying the track in the form of spotify:track:base-62 string.
+    /// </summary>
     public readonly string? Song_URI => (string?)Json["spotify_track_uri"];
+
+    /// <summary>
+    /// The base-62 identifier found at the end of the Spotify URI.
+    /// </summary>
+    public readonly string? Song_ID => Song_URI?.Split(':', 3)[2];
+
+    /// <summary>
+    /// This field contains the name of the episode of the podcast.
+    /// </summary>
     public readonly string? Episode_Name => (string?)Json["episode_name"];
+
+    /// <summary>
+    /// This field contains the name of the show of the podcast.
+    /// </summary>
     public readonly string? Episode_Show => (string?)Json["episode_show_name"];
+
+    /// <summary>
+    /// A Spotify Episode URI, uniquely identifying the podcast episode in the form of spotify:episode:base-62 string.
+    /// </summary>
     public readonly string? Episode_URI => (string?)Json["spotify_episode_uri"];
+
+    /// <summary>
+    /// This field is a value telling why the track started (e.g. “trackdone”).
+    /// </summary>
     public readonly string? Song_StartReason => (string?)Json["reason_start"];
+
+    /// <summary>
+    /// This field is a value telling why the track ended (e.g. “endplay”).
+    /// </summary>
     public readonly string? Song_EndReason => (string?)Json["reason_end"];
+
+    /// <summary>
+    /// This field has the value True or False depending on if shuffle mode was used when playing the track.
+    /// </summary>
     public readonly bool? Song_Shuffle => (bool?)Json["shuffle"];
+
+    /// <summary>
+    /// This field indicates if the user skipped to the next song.
+    /// </summary>
     public readonly bool? Song_Skipped => (bool?)Json["skipped"];
+
+    /// <summary>
+    /// This field indicates whether the track was played in offline mode (“True”) or not (“False”).
+    /// </summary>
     public readonly bool? Spotify_Offline => (bool?)Json["offline"];
+
+    /// <summary>
+    /// This field is a timestamp of when offline mode was used, if used.
+    /// </summary>
     private readonly string? Spotify_OfflineTS => (string?)Json["offline_timestamp"];
+
+    /// <summary>
+    /// The time and date of when offline mode was used.
+    /// </summary>
     public readonly DateTimeOffset? OfflineTimestamp
     {
         get
@@ -94,13 +221,39 @@ public readonly struct SpotifyEntry
             }
         }
     }
+
+    /// <summary>
+    /// This field indicates whether the track was played in incognito mode (“True”) or not (“False”).
+    /// </summary>
     public readonly bool? Spotify_Incognito => (bool?)Json["incognito"];
+
+    /// <summary>
+    /// Converts this SpotifyEntry to a string.
+    /// </summary>
+    /// <returns>The artist and name of this song, separated by a dash.</returns>
     public override string ToString() => $"{Song_Artist} - {Song_Name}"; // Display format for this song
+
+    /// <summary>
+    /// Determines whether this song falls within a provided time frame.
+    /// </summary>
+    /// <param name="Start">The start of the time frame.</param>
+    /// <param name="End">The end of the time frame.</param>
+    /// <returns>True, if this song is within the provided time frame. False, if this song is outside the provided time frame.</returns>
     public bool WithinTimeFrame(DateTimeOffset Start, DateTimeOffset End) => (Time >= Start) && (Time <= End); // Return true if song within provided time range
 }
 
+/// <summary>
+/// A journey track, with a name, type, and series of points representing the path on Earth of the journey. 
+/// </summary>
 public readonly struct GPXTrack
 {
+    /// <summary>
+    /// Creates a GPXTrack, holding a series of points.
+    /// </summary>
+    /// <param name="index">The index of this track (in a series of tracks)</param>
+    /// <param name="name">The friendly name of this track.</param>
+    /// <param name="type">The type of this track (GPX, Gap, or Combined).</param>
+    /// <param name="points">A list of the points comprising this track.</param>
     public GPXTrack(int? index, string? name, TrackType type, List<GPXPoint> points)
     {
         Track = new TrackInfo(index, name, type);
@@ -115,10 +268,30 @@ public readonly struct GPXTrack
         // End = Points.Select(point => point.Time).Last(); // Last point's time
     }
 
+    /// <summary>
+    /// Information about this track (such as its name, index in a list, and type).
+    /// </summary>
     public readonly TrackInfo Track { get; } // Metadata for this track, including its name and index in a list
+
+    /// <summary>
+    /// A series of points that comprise this track (journey).
+    /// </summary>
     public readonly List<GPXPoint> Points { get; } // Where and when were all the points in this track taken?
+
+    /// <summary>
+    /// The time and date at which this track's earliest point was taken.
+    /// </summary>
     public readonly DateTimeOffset Start { get; } // What time was the earliest point logged?
+
+    /// <summary>
+    /// The time and date at which this track's latest point was taken.
+    /// </summary>
     public readonly DateTimeOffset End { get; } // What time was the latest point logged?
+
+    /// <summary>
+    /// Converts this GPXTrack object to a string.
+    /// </summary>
+    /// <returns>A string, containing the name, number of points, start and end times, and type of the track.</returns>
     public override string ToString() // Display format for this track
     {
         StringBuilder builder = new();
@@ -133,8 +306,17 @@ public readonly struct GPXTrack
     }
 }
 
+/// <summary>
+/// Metadata for a journey track.
+/// </summary>
 public readonly struct TrackInfo
 {
+    /// <summary>
+    /// Creates a TrackInfo object for holding track information.
+    /// </summary>
+    /// <param name="index">The index of this track (in a series of tracks).</param>
+    /// <param name="name">The friendly name of this track.</param>
+    /// <param name="type">The type of this track (GPX, Gap, or Combined).</param>
     public TrackInfo(int? index, string? name, TrackType type)
     {
         Indexx = index;
@@ -142,54 +324,156 @@ public readonly struct TrackInfo
         Type = type;
     }
 
+    /// <summary>
+    /// The index of this track (as provided to the constructor).
+    /// </summary>
     private readonly int? Indexx { get; }
-    public readonly int Index => Indexx == null ? (int)Type : (int)Indexx; // If provided index null, use index of TrackType
+
+    /// <summary>
+    /// The index of this track in a series of tracks.
+    /// If no index, a generic index (based on track type) will be used.
+    /// </summary>
+    public readonly int Index => Indexx == null ? (int)Type : (int)Indexx;
+
+    /// <summary>
+    /// The name of this track (as provided to the constructor).
+    /// </summary>
     private readonly string? NodeName { get; }
+
+    /// <summary>
+    /// The friendly name of this track.
+    /// If no name, a generic name will be used.
+    /// </summary>
     public readonly string Name => NodeName ?? $"T{Index}";
+
+    /// <summary>
+    /// The type of track represented (GPX, Gap, or Combined).
+    /// </summary>
     public TrackType Type { get; }
+
+    /// <summary>
+    /// Converts this TrackInfo object to a string.
+    /// </summary>
+    /// <returns>The name of the track.</returns>
     public override string ToString() => Name;
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is TrackInfo other)
+        {
+            return Equals(other);
+        }
+        return false;
+    }
+
+    public bool Equals(TrackInfo other) => Index == other.Index && Name == other.Name && Type == other.Type;
+
+    public override int GetHashCode() => HashCode.Combine(Index, Name, Type);
+
+    public static bool operator ==(TrackInfo left, TrackInfo right) => left.Equals(right);
+
+    public static bool operator !=(TrackInfo left, TrackInfo right) => !(left == right);
 }
 
+/// <summary>
+/// The list of possible types a journey track can represent.
+/// </summary>
 public enum TrackType
 {
-    GPX, // Created from a user provided GPX file track
-    Gap, // Created from a gap between GPX tracks
-    Combined // Created from all GPX points combined (regardless of track)
+    /// <summary>
+    /// A track created from original GPS data.
+    /// </summary>
+    GPX,
+
+    /// <summary>
+    /// A track created from gaps between GPS tracks.
+    /// </summary>
+    Gap,
+
+    /// <summary>
+    /// A single track containing all journey data combined (including gaps).
+    /// </summary>
+    Combined
 }
 
+/// <summary>
+/// A single point holding geopositioning information, including coordinate and time, of one space in time.
+/// </summary>
 public readonly struct GPXPoint
 {
+    /// <summary>
+    /// Creates a GPXPoint for holding a single point of geopositioning information.
+    /// </summary>
+    /// <param name="index">The index of this GPXPoint (in a created list).</param>
+    /// <param name="point">The coordinate (pair) of this point's position.</param>
+    /// <param name="time">The string representing the time of the point.</param>
     public GPXPoint(int index, Coordinate point, string time)
     {
         Index = index;
         Location = point;
+        OriTime = time;
         Time = DateTimeOffset.ParseExact(time, Options.GpxInput, null, Options.GpxTimeStyle);
     }
 
+    /// <summary>
+    /// Creates a GPXPoint with a new coordinate, based on an existing GPXPoint. 
+    /// </summary>
+    /// <param name="oldPoint">An existing GPXPoint.</param>
+    /// <param name="newCoord">The new coordinate for this GPXPoint</param>
     public GPXPoint(GPXPoint oldPoint, Coordinate newCoord) // Used for prediction only
     {
         this = oldPoint;
         Location = newCoord;
     }
 
-    public readonly int Index { get; } // Unique identifier of this GPXPoint in a list
-    public readonly Coordinate Location { get; } // Where on Earth is this point?
-    public readonly DateTimeOffset Time { get; } // When was the user at this point?
-    // GPXPoint never printed so no need to provide display format
+    /// <summary>
+    /// Unique identifier of this GPXPoint in a list.
+    /// </summary>
+    public readonly int Index { get; }
+
+    /// <summary>
+    /// The coordinates (lat/lon pair) of this point on Earth.
+    /// </summary>
+    public readonly Coordinate Location { get; }
+
+    /// <summary>
+    /// The time and date at which this point was taken.
+    /// </summary>
+    public readonly DateTimeOffset Time { get; }
+
+    /// <summary>
+    /// The original string representation of this point's time
+    /// </summary>
+    public readonly string OriTime { get; }
 }
 
+/// <summary>
+/// A latitude/longitude pair.
+/// </summary>
 public readonly struct Coordinate
 {
+    /// <summary>
+    /// Creates a coordinate object with a latitude and longitude.
+    /// </summary>
+    /// <param name="lat">Latitude</param>
+    /// <param name="lon">Longitude</param>
     public Coordinate(double lat, double lon)
     {
         Latitude = lat;
         Longitude = lon;
     }
 
+    /// <summary>
+    /// This coordinate pair's latitude value.
+    /// </summary>
     public readonly double Latitude { get; }
+
+    /// <summary>
+    /// This coordinate pair's longitude value.
+    /// </summary>
     public readonly double Longitude { get; }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is not Coordinate)
         {
@@ -200,20 +484,11 @@ public readonly struct Coordinate
         return Latitude == other.Latitude && Longitude == other.Longitude;
     }
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Latitude, Longitude);
-    }
+    public override int GetHashCode() => HashCode.Combine(Latitude, Longitude);
 
-    public static bool operator ==(Coordinate c1, Coordinate c2)
-    {
-        return c1.Equals(c2);
-    }
+    public static bool operator ==(Coordinate c1, Coordinate c2) => c1.Equals(c2);
 
-    public static bool operator !=(Coordinate c1, Coordinate c2)
-    {
-        return !c1.Equals(c2);
-    }
+    public static bool operator !=(Coordinate c1, Coordinate c2) => !c1.Equals(c2);
 
     public static Coordinate operator +(Coordinate c1, Coordinate c2)
     {
@@ -245,16 +520,17 @@ public readonly struct Coordinate
 
         return distance;
     }
-
-    public override string ToString()
-    {
-        return $"{(Latitude, Longitude)}";
-    }
 }
 
+/// <summary>
+/// A Song-Point pair created from a correlation between a place and a played song.
+/// </summary>
 public readonly struct SongPoint
 {
-    public readonly string Description // GPX point description in exported GPX
+    /// <summary>
+    /// The description of this pair, as printed to description fields.
+    /// </summary>
+    public readonly string Description
     {
         get
         {
@@ -273,6 +549,13 @@ public readonly struct SongPoint
         }
     }
 
+    /// <summary>
+    /// Create a new SongPoint pairing.
+    /// </summary>
+    /// <param name="index">The index of this SongPoint (in a created list).</param>
+    /// <param name="song">The SpotifyEntry (containing song data) of this pair's song.</param>
+    /// <param name="point">The GPXPoint (containing geospatial data) of this pair's point.</param>
+    /// <param name="origin">The TrackInfo (track information) about the track from which this pair was created.</param>
     public SongPoint(int index, SpotifyEntry song, GPXPoint point, TrackInfo origin)
     {
         Index = index;
@@ -282,6 +565,12 @@ public readonly struct SongPoint
         PredictedIndex = null;
     }
 
+    /// <summary>
+    /// Creates a SongPoint pairing with a new Coordinate (lat/lon), based on an existing SongPoint pairing.
+    /// </summary>
+    /// <param name="oldPair">An existing SongPoint pairing.</param>
+    /// <param name="newCoord">The new coordinate for this SongPoint.</param>
+    /// <param name="relIndex">The index of this prediction in a set of predictions.</param>
     public SongPoint(SongPoint oldPair, Coordinate newCoord, int relIndex) // Used for prediction only
     {
         this = oldPair;
@@ -289,18 +578,66 @@ public readonly struct SongPoint
         PredictedIndex = relIndex;
     }
 
-    public readonly int Index { get; } // Unique identifier of this SongPoint in a list
-    public readonly SpotifyEntry Song { get; } // Contents of the original song entry
-    public readonly GPXPoint Point { get; } // Contents of the original GPX point
-    public readonly TrackInfo Origin { get; } // Track from which the pairing was created
-    public readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds; // Raw accuracy
-    public readonly double AbsAccuracy => Math.Abs(Accuracy); // Absolute value of the accuracy
-    private readonly double RoundAccuracy => Math.Round(Accuracy); // Rounded accuracy
-    public readonly TimeSpan NormalizedOffset => Point.Time.Offset; // Standard offset is defined by the original GPX point offset
-    public DateTimeOffset SongTime => Song.Time.ToOffset(NormalizedOffset); // Song end time, normalized to point time zone
-    public DateTimeOffset PointTime => Point.Time.ToOffset(NormalizedOffset); // Point end time, normalized to point time zone (redundant)
+    /// <summary>
+    /// Unique identifier of this SongPoint in a list.
+    /// </summary>
+    public readonly int Index { get; }
+
+    /// <summary>
+    /// This song-point pair's song data.
+    /// </summary>
+    public readonly SpotifyEntry Song { get; }
+
+    /// <summary>
+    /// This song-point pair's point data.
+    /// </summary>
+    public readonly GPXPoint Point { get; }
+
+    /// <summary>
+    /// Information about the track from which the point was created.
+    /// </summary>
+    public readonly TrackInfo Origin { get; }
+
+    /// <summary>
+    /// The total number of seconds between the song and the point.
+    /// </summary>
+    public readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds;
+
+    /// <summary>
+    /// The absolute value (in seconds) between the song and the point.
+    /// </summary>
+    public readonly double AbsAccuracy => Math.Abs(Accuracy);
+
+    /// <summary>
+    /// The rounded number of seconds between the song and the point.
+    /// </summary>
+    private readonly double RoundAccuracy => Math.Round(Accuracy);
+
+    /// <summary>
+    /// This pair's UTC offset, defined by the offset of the point's time.
+    /// </summary>
+    public readonly TimeSpan NormalizedOffset => Point.Time.Offset;
+
+    /// <summary>
+    /// The time and date the song ended, converted to the pair's UTC offset (NormalizedOffset).
+    /// </summary>
+    public DateTimeOffset SongTime => Song.Time.ToOffset(NormalizedOffset);
+
+    /// <summary>
+    /// The time and date the point was taken, converted to the pair's UTC offset (NormalizedOffset).
+    /// </summary>
+    public DateTimeOffset PointTime => Point.Time.ToOffset(NormalizedOffset);
+
+    /// <summary>
+    /// The index of this pair in a series of predictions (if it's point was predicted).
+    /// If not predicted, null.
+    /// </summary>
     public int? PredictedIndex { get; }
 
+    /// <summary>
+    /// Converts this SongPoint pairing to a string.
+    /// </summary>
+    /// <returns>A single line (to be printed to the console), representing this pairing.</returns>
     public override string ToString()
     {
         // Set both the song and point times to the UTC offset provided by the original GPX point
@@ -312,12 +649,21 @@ public readonly struct SongPoint
     }
 }
 
-public class StringBuilder // Custom SpotifyGPX sb
+/// <summary>
+/// The StringBuilder used to add non-null objects as lines to a pair's description.
+/// </summary>
+public class StringBuilder
 {
     private readonly System.Text.StringBuilder builder;
 
     public StringBuilder() => builder = new System.Text.StringBuilder();
 
+    /// <summary>
+    /// Appends the provided value to a string on a new line.
+    /// </summary>
+    /// <param name="format">The format of the given new line.</param>
+    /// <param name="value">The value to be placed on the new line.</param>
+    /// <returns>The given StringBuilder, with the new line added (if the provided value wasn't null).</returns>
     public StringBuilder Append(string format, object value)
     {
         if (value != null)
@@ -327,5 +673,9 @@ public class StringBuilder // Custom SpotifyGPX sb
         return this; // Return the builder
     }
 
+    /// <summary>
+    /// Converts this StringBuilder to a string.
+    /// </summary>
+    /// <returns>This StringBuilder, as a string.</returns>
     public override string ToString() => builder.ToString();
 }
