@@ -28,10 +28,15 @@ public class Txt : IFileOutput
     private static string?[] GetDocument(IEnumerable<SongPoint> Pairs)
     {
         // Below are some examples of arrays
+        string?[] strings = GetVerbatim(Pairs, pair => pair.ToString()); // Full pair strings
+        string?[] Titles = GetVerbatim(Pairs, pair => pair.Song.ToString()); // Song names
         string?[] URIs = GetVerbatim(Pairs, pair => pair.Song.Song_URI); // Song URIs (paste into Spotify desktop in a new playlist)
         string?[] IPs = GetWithoutDuplicates(Pairs, pair => pair.Song.Spotify_IP); // IP Addresses
         string?[] Platforms = GetWithoutDuplicates(Pairs, pair => pair.Song.Spotify_Platform); // Device platforms
         string?[] Countries = GetWithoutDuplicates(Pairs, pair => pair.Song.Spotify_Country); // Countries
+        string?[] Accuracies = GetWithoutDuplicates(Pairs, pair => pair.Accuracy.ToString()); // Accuracies
+        string?[] StartReasons = GetWithoutDuplicates(Pairs, pair => pair.Song.Song_StartReason); // Start reasons
+        string?[] EndReasons = GetWithoutDuplicates(Pairs, pair => pair.Song.Song_EndReason); // End reasons
 
         return URIs; // Currently returns URI list, but can be changed to your specification
     }
