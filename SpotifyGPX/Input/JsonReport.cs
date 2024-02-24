@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿// SpotifyGPX by Simon Field
+
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -66,24 +68,34 @@ public class JsonReport : ISongInput, IGpsInput
                 // Get the Point item
                 JObject point = pair.Value<JObject>("Point") ?? throw new Exception($"Pair {pairIndex} is missing a Point.");
                 int index = point.Value<int>("Index");
+                string time = point.Value<string>("OriTime") ?? throw new Exception($"Pair {pairIndex} is missing an OriTime.");
+
+                // Get the Location item
                 JObject coordinate = point.Value<JObject>("Location") ?? throw new Exception($"Pair {pairIndex} is missing a Point/Location.");
                 double lat = coordinate.Value<double>("Latitude");
                 double lon = coordinate.Value<double>("Longitude");
-                string time = point.Value<string>("OriTime") ?? throw new Exception($"Pair {pairIndex} is missing an OriTime.");
+
+                // Create the Coordinate
+                Coordinate location = new(lat, lon);
 
                 // Create the GPXPoint
-                GPXPoint pt = new(index, new Coordinate(lat, lon), time);
+                GPXPoint pt = new(index, location, time);
                 points.Add(pt);
 
                 // Get the Song item
-                SpotifyEntry song = pair["Song"].ToObject<SpotifyEntry>();
-                songs.Add(song);
+                JObject song = pair.Value<JObject>("Song") ?? throw new Exception($"Pair {pairIndex} is missing a Song");
+
+                // Create the SpotifyEntry
+                SpotifyEntry sg = song.ToObject<SpotifyEntry>();
+                songs.Add(sg);
 
                 // Get the TrackOrigin item
                 JObject origin = pair.Value<JObject>("Origin") ?? throw new Exception($"Pair {pairIndex} is missing an Origin.");
                 int pairTrackIndex = origin.Value<int>("Index");
                 string pairTrackName = origin.Value<string>("Name") ?? throw new Exception($"Pair {pairIndex} is missing an Origin/Name");
                 TrackType pairTrackType = (TrackType)origin.Value<int>("Type");
+
+                // Create the TrackInfo
                 TrackInfo pairTinfo = new(pairTrackIndex, pairTrackName, pairTrackType);
 
                 // Verify the TrackOrigin
@@ -92,7 +104,6 @@ public class JsonReport : ISongInput, IGpsInput
                     throw new Exception($"Pair {pairIndex} TrackOrigin does not match origin of parent track {trackIndex}");
                 }
 
-                // Verify the Pair index
                 trackCount++;
             }
 
