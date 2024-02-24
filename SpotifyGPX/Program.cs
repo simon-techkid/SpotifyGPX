@@ -40,7 +40,7 @@ class Program
             InputHandler input = new(inputSpotify, inputGps);
 
             // Step 1: Get list of GPX tracks from the GPS file
-            List<GPXTrack> tracks = input.GetAllTracks();
+            List<GPXTrack> tracks = input.GetSelectedTracks();
 
             // Step 2: Get list of songs played from the entries file
             List<SpotifyEntry> songs = input.GetFilteredSongs(tracks);
