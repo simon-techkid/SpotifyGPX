@@ -42,25 +42,58 @@ View SpotifyGPX sample data and screenshots [here](Samples/README.md) to check t
  - Listened to Spotify during the GPX journey (see below)
 
 ### Spotify
+ - Your account's listening/playback history is stored in a compatible (see below) format
  - Access to the Spotify account you listened with
- - [Downloaded](https://www.spotify.com/account/privacy/) Spotify listening history JSON
 
-### GPX tracks
- - Your tracked journey in GPX (if not GPX, [convert other formats to GPX](https://www.gpsvisualizer.com/convert_input))
- - Your GPX containing frequent `<trkpt>` objects with `lat` and `lon` attributes, and `<time>` for each
+### Journey
+ - Your tracked journey is stored in a compatible (see below) format
+ - Access to the device/storage medium your journey is stored on
+
+## Supported Formats
+
+The formats natively supported by SpotifyGPX are listed below.
+
+SpotifyGPX's InputHandler and OutputHandler classes allow you to easily implement your own formats if desired.
+
+Samples for each can be found [here](Samples/README.md).
+
+### Input
+
+Pairings can be created using the following formats:
+ - **Journey** - GPX
+ - **Spotify** - Json
+ - **Pairs** - JsonReport
+
+### Output
+
+Pairings can be exported to the following formats:
+ - **Pairs** - GPX
+ - **Spotify** - Json
+ - **Pairs** - JsonReport
+ - **Pairs** - Txt
+ - **Pairs** - Xspf
+
+### Both Input & Output
+
+The following formats can be used to both create pairings, and export those pairings to other formats:
+ - **Spotify** - Json
+ - **Pairs** - JsonReport
 
 ## Usage
 
-> `SpotifyGPX <json> <gpx> [-n] [-j] [-p] [-s] [-r]`
+> `SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-n] [-j] [-p] [-t] [-r] [-pp [-pa]] [--silent] [--help]`
 
  - `SpotifyGPX` - SpotifyGPX executable
- - **Required:** `json_file` - Path to a Spotify listening history JSON
- - **Required:** `gpx_file` - Path to a GPX file
+ - `--spotify <spotify> --gps <gps>` - Path to a Spotify playback history and GPS journey file
+ - `--pairs <pairs>` - Path to a pairs file
  - *Optional:* `-n` - Do not export a `GPX` from the calculated points
  - *Optional:* `-j` - Save off the relevant part of the Spotify `json`
  - *Optional:* `-p` - Export a `xspf` playlist of the songs
- - *Optional:* `-s` - Export a `txt` list of Spotify URIs (can be copied and pasted into Spotify Desktop app playlists)
- - *Optional:* `-r` - Export a `json` report of all the data used to compile the resulting pairings
+ - *Optional:* `-t` - Export a `txt` list of pairs
+ - *Optional:* `-r` - Export a `jsonreport` of all the data used to compile the resulting pairings
+ - *Optional:* `-pp` - Predict new positions for duplicate points (use with `-pa` for automatic prediction of all duplicate positions)
+ - *Optional:* `--silent` - Do not print out each newly created Song-Point pairing upon creation
+ - *Optional:* `--help` - Print the help instructions
 
 ## Preparing for a journey
 
@@ -69,7 +102,7 @@ Ensure you take the below steps to prepare before setting off:
  1. Make sure you have access to Spotify along the journey.
  2. Use an app such as [GPSLogger (for Android)](https://github.com/mendhak/gpslogger) or [Open GPX Tracker for iOS + WatchOS](https://github.com/merlos/iOS-Open-GPX-Tracker) to track your position along the route
  3. Ensure the logging app's GPS frequency setting is high, since a song is tied to a point (recommended: 1 point every 15-30 seconds)
- 5. Run a few test logging sessions. Make sure points (with UTC or UTC offset time) are created by your tracker. Compare your data to the confirmed [sample track log.](Samples/sample.gpx)
+ 4. Run a few test logging sessions. Make sure points (with UTC or UTC offset time) are created by your tracker. Compare your data to the confirmed [sample track log.](Samples/sample.gpx)
 
 As long as there is song playback and GPS tracking running simultaneously, you will be able to use SpotifyGPX to pair the two sets of data.
 
