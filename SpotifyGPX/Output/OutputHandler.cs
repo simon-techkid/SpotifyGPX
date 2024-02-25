@@ -7,6 +7,9 @@ using System.Linq;
 
 namespace SpotifyGPX.Output;
 
+/// <summary>
+/// Handle various output file formats for exporting pairs
+/// </summary>
 public class OutputHandler
 {
     private static bool ReplaceFiles => false; // Allow SpotifyGPX to replace existing files, rather than generating a unique name

@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace SpotifyGPX.Input;
 
+/// <summary>
+/// Handle various input file formats for taking in song and GPS information.
+/// </summary>
 public class InputHandler
 {
     private ISongInput SongInput { get; }

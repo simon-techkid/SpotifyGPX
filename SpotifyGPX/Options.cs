@@ -5,6 +5,9 @@ using System.Globalization;
 
 namespace SpotifyGPX;
 
+/// <summary>
+/// Holds constant values representing user options accessible globally.
+/// </summary>
 public class Options
 {
     // Console Printing

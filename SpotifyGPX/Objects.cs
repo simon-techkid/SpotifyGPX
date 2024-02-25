@@ -76,7 +76,7 @@ public readonly struct SpotifyEntry
     /// <summary>
     /// Determines whether or not to use the estimated start time (EstStartTime) as the reference time.
     /// </summary>
-    private readonly bool UseEstStartTime => Options.PreferEstimatedStartTime && TimeStartedEst != null;
+    public readonly bool UseEstStartTime => Options.PreferEstimatedStartTime && TimeStartedEst != null;
 
     /// <summary>
     /// The estimated time and date when the song started.
@@ -536,8 +536,10 @@ public readonly struct SongPoint
         {
             StringBuilder builder = new();
 
+            string activity = Song.UseEstStartTime ? "started (est)" : "ended";
+
             builder.Append("At this position: {0}", PointTime.ToString(Options.DescriptionPlayedAt));
-            builder.Append("Song ended: {0}", SongTime.ToString(Options.DescriptionPlayedAt));
+            builder.Append("Song {0}", $"{activity}: {SongTime.ToString(Options.DescriptionPlayedAt)}");
             builder.Append("Played for {0}", Song.TimePlayed?.ToString(Options.DescriptionTimePlayed));
             builder.Append("Skipped: {0}", Song.Song_Skipped);
             builder.Append("Shuffle: {0}", Song.Song_Shuffle);
@@ -664,7 +666,7 @@ public class StringBuilder
     /// <param name="format">The format of the given new line.</param>
     /// <param name="value">The value to be placed on the new line.</param>
     /// <returns>The given StringBuilder, with the new line added (if the provided value wasn't null).</returns>
-    public StringBuilder Append(string format, object value)
+    public StringBuilder Append(string format, object? value)
     {
         if (value != null)
         { // If appended value not null, append the line to the builder

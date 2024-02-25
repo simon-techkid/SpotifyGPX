@@ -9,6 +9,9 @@ using System.Linq;
 
 namespace SpotifyGPX.Input;
 
+/// <summary>
+/// Provides instructions for parsing song playback data and GPS data from the JsonReport format.
+/// </summary>
 public class JsonReport : ISongInput, IGpsInput
 {
     private List<JObject> JsonTracks { get; }
