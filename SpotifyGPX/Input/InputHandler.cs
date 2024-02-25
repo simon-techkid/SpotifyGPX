@@ -12,6 +12,7 @@ public class InputHandler
 {
     private ISongInput SongInput { get; }
     private IGpsInput GpsInput { get; }
+    private IPairInput? PairInput { get; }
 
     /// <summary>
     /// Creates a handler for taking files as input.
@@ -19,14 +20,14 @@ public class InputHandler
     /// <param name="songPath">The path to a file containing Spotify playback records.</param>
     /// <param name="gpsPath">The path to a file containing GPS journey data.</param>
     /// <exception cref="Exception">A provided file does not exist.</exception>
-    public InputHandler(string songPath, string gpsPath)
+    public InputHandler(string? songPath, string? gpsPath)
     {
-        if (!File.Exists(songPath))
+        if (!File.Exists(songPath) || songPath == null)
         {
             throw new Exception($"The specified file, '{songPath}', does not exist!");
         }
 
-        if (!File.Exists(gpsPath))
+        if (!File.Exists(gpsPath) || gpsPath == null)
         {
             throw new Exception($"The specified file, '{gpsPath}', does not exist!");
         }
@@ -35,7 +36,26 @@ public class InputHandler
         GpsInput = CreateGpsInput(gpsPath);
 
         Console.WriteLine($"[INP] '{Path.GetFileName(gpsPath)}' contains {GpsInput.TrackCount} tracks and {GpsInput.PointCount} points");
-        Console.WriteLine($"[INP] '{Path.GetFileName(songPath)}' contains {SongInput.Count} total songs");
+        Console.WriteLine($"[INP] '{Path.GetFileName(songPath)}' contains {SongInput.SongCount} total songs");
+    }
+
+    /// <summary>
+    /// Creates a handler for taking a file as input.
+    /// </summary>
+    /// <param name="pairPath">The path to a file containing pairing data</param>
+    /// <exception cref="Exception">A provided file does not exist.</exception>
+    public InputHandler(string? pairPath)
+    {
+        if (!File.Exists(pairPath) || pairPath == null)
+        {
+            throw new Exception($"The specified file, '{pairPath}', does not exist!");
+        }
+
+        PairInput = CreatePairInput(pairPath);
+        SongInput = CreateSongInput(pairPath);
+        GpsInput = CreateGpsInput(pairPath);
+
+        Console.WriteLine($"[INP] '{Path.GetFileName(pairPath)}' contains {PairInput.PairCount} total pairs");
     }
 
     /// <summary>
@@ -79,6 +99,22 @@ public class InputHandler
     }
 
     /// <summary>
+    /// Gets all Song-Point pairs from the given file.
+    /// </summary>
+    /// <returns>A list of SongPoint objects, each representing an already-paired Song and Point.</returns>
+    public List<SongPoint> GetAllPairs()
+    {
+        if (PairInput != null)
+        {
+            return PairInput.GetAllPairs();
+        }
+        else
+        {
+            throw new Exception($"Unable to get pairs: this input format does not support pairs.");
+        }
+    }
+
+    /// <summary>
     /// Determines the appropriate import class for handling this song records file.
     /// </summary>
     /// <param name="path">The path to the song records file.</param>
@@ -113,6 +149,17 @@ public class InputHandler
             _ => throw new Exception($"Unsupported GPS file format: {extension}"),
         };
     }
+
+    private static IPairInput CreatePairInput(string path)
+    {
+        string extension = Path.GetExtension(path).ToLower();
+
+        return extension switch
+        {
+            ".jsonreport" => new JsonReport(path),
+            _ => throw new Exception($"Unsupported pairs file format: {extension}")
+        };
+    }
 }
 
 /// <summary>
@@ -145,6 +192,12 @@ public enum GpsFormats
     /// A .jsonreport file created by SpotifyGPX that can be used as input.
     /// </summary>
     JsonReport
+}
+
+public interface IPairInput
+{
+    public List<SongPoint> GetAllPairs();
+    int PairCount { get; }
 }
 
 /// <summary>
@@ -194,7 +247,7 @@ public interface ISongInput
     /// <summary>
     /// The total number of songs in the given file.
     /// </summary>
-    int Count { get; }
+    int SongCount { get; }
 }
 
 /// <summary>

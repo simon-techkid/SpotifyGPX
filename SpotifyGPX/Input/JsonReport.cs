@@ -12,11 +12,12 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Provides instructions for parsing song playback data and GPS data from the JsonReport format.
 /// </summary>
-public class JsonReport : ISongInput, IGpsInput
+public class JsonReport : ISongInput, IGpsInput, IPairInput
 {
     private List<JObject> JsonTracks { get; }
     private List<SpotifyEntry> AllSongs { get; }
     private List<GPXTrack> AllTracks { get; }
+    private List<SongPoint> AllPairs { get; }
 
     /// <summary>
     /// Creates a JsonReport importer that allows job creation from existing job reports.
@@ -25,9 +26,10 @@ public class JsonReport : ISongInput, IGpsInput
     public JsonReport(string path)
     {
         JsonTracks = Deserialize(path);
-        (List<GPXTrack> tracks, List<SpotifyEntry> songs) = GetFromJObject();
+        (List<GPXTrack> tracks, List<SpotifyEntry> songs, List<SongPoint> pairs) = GetFromJObject();
         AllTracks = tracks;
         AllSongs = songs;
+        AllPairs = pairs;
     }
 
     /// <summary>
@@ -35,10 +37,11 @@ public class JsonReport : ISongInput, IGpsInput
     /// </summary>
     /// <returns>A list of tracks and a list of songs representing the included data.</returns>
     /// <exception cref="Exception"></exception>
-    public (List<GPXTrack>, List<SpotifyEntry>) GetFromJObject()
+    public (List<GPXTrack>, List<SpotifyEntry>, List<SongPoint>) GetFromJObject()
     {
         List<GPXTrack> tracks = new(); // All tracks in the JsonReport
         List<SpotifyEntry> allSongs = new(); // All songs in the JsonReport
+        List<SongPoint> allPairs = new(); // All pairs in the JsonReport
 
         int alreadyParsed = 0; // The number of points already parsed
 
@@ -72,17 +75,18 @@ public class JsonReport : ISongInput, IGpsInput
             TrackInfo tInfo = new(trackIndex, trackName, trackType);
 
             // Get the track pairs
-            JArray trackPairs = track.Value<JArray>(trackName) ?? throw new Exception($"No pairs tree found with track name '{trackName}'");
+            JArray pairs = track.Value<JArray>(trackName) ?? throw new Exception($"No pairs tree found with track name '{trackName}'");
 
             // Create the lists
             List<GPXPoint> trackPoints = new();
             List<SpotifyEntry> trackSongs = new();
+            List<SongPoint> trackPairs = new();
 
             List<int> indexes = new();
             int actualPairCount = 0;
 
             // Iterate through each pair
-            foreach (JToken pair in trackPairs)
+            foreach (JToken pair in pairs)
             {
                 // Get the Index item
                 int pairIndex = pair.Value<int>("Index");
@@ -111,6 +115,10 @@ public class JsonReport : ISongInput, IGpsInput
                 TrackType pairTrackType = (TrackType)origin.Value<int>("Type");
                 TrackInfo pairTinfo = new(pairTrackIndex, pairTrackName, pairTrackType);
 
+                // Create the SongPoint
+                SongPoint thisPair = new(pairIndex, pairSong, pairPoint, pairTinfo);
+                trackPairs.Add(thisPair);
+
                 // Verify the TrackOrigin
                 if (tInfo != pairTinfo)
                 {
@@ -126,6 +134,9 @@ public class JsonReport : ISongInput, IGpsInput
 
             // Add the songs to the list
             allSongs.AddRange(trackSongs);
+
+            // Add the pairs to the list
+            allPairs.AddRange(trackPairs);
 
             // Verify the quantity of pairs
             if (actualPairCount != expectedPairCount)
@@ -161,7 +172,7 @@ public class JsonReport : ISongInput, IGpsInput
         }
 
         // Return the tracks and songs
-        return (tracks, allSongs);
+        return (tracks, allSongs, allPairs);
     }
 
     /// <summary>
@@ -187,7 +198,7 @@ public class JsonReport : ISongInput, IGpsInput
     /// <summary>
     /// The total number of songs in the JsonReport file.
     /// </summary>
-    public int Count => AllSongs.Count;
+    public int SongCount => AllSongs.Count;
 
     /// <summary>
     /// The total number of tracks in the JsonReport file.
@@ -198,6 +209,11 @@ public class JsonReport : ISongInput, IGpsInput
     /// The total number of points (across all tracks) in the JsonReport file.
     /// </summary>
     public int PointCount => AllTracks.Select(track => track.Points.Count).Sum();
+
+    /// <summary>
+    /// The total number of pairs in the JsonReport file.
+    /// </summary>
+    public int PairCount => AllPairs.Count;
 
     /// <summary>
     /// Gets a list of all the tracks in the JsonReport file.
@@ -215,6 +231,15 @@ public class JsonReport : ISongInput, IGpsInput
     public List<SpotifyEntry> GetAllSongs()
     {
         return AllSongs;
+    }
+
+    /// <summary>
+    /// Gets a list of all the pairs in the JsonReport file.
+    /// </summary>
+    /// <returns>A list of SongPoint objects, each comprising a paired song and point.</returns>
+    public List<SongPoint> GetAllPairs()
+    {
+        return AllPairs;
     }
 
     /// <summary>

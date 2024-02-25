@@ -40,6 +40,15 @@ public class PairingsHandler
     }
 
     /// <summary>
+    /// Explicitly create a PairingsHandler using an existing pairs list.
+    /// </summary>
+    /// <param name="pairs">An existing pairs list.</param>
+    public PairingsHandler(List<SongPoint> pairs)
+    {
+        Pairs = pairs;
+    }
+
+    /// <summary>
     /// Pair songs with points (positions on Earth), by finding the closest gap of time between each.
     /// </summary>
     /// <param name="silent">If true, do not print each pairing to the console upon creation.</param>

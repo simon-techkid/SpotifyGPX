@@ -36,7 +36,7 @@ public class Json : ISongInput
     /// <summary>
     /// The total number of songs contained in the JSON file.
     /// </summary>
-    public int Count => AllSongs.Count;
+    public int SongCount => AllSongs.Count;
 
     /// <summary>
     /// Parses a JSON file to a list of song records.
