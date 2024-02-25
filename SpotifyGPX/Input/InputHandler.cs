@@ -155,8 +155,17 @@ public interface ISongInput
     private static TimeSpan MinimumPlaytime => new(0, 0, 0); // Minimum accepted song playback time (0,0,0 for all songs)
     private static bool ExcludeSkipped => false; // Ignore songs skipped by the user, as defined by Spotify JSON (false for all songs)
 
+    /// <summary>
+    /// Gets all songs in the file.
+    /// </summary>
+    /// <returns>A list of SpotifyEntry objects.</returns>
     List<SpotifyEntry> GetAllSongs();
 
+    /// <summary>
+    /// Get songs based on an existing list of track times.
+    /// </summary>
+    /// <param name="tracks">A list of GPXTrack objects.</param>
+    /// <returns>A list of SpotifyEntry objects that must be within the times of the GPXTrack object(s).</returns>
     List<SpotifyEntry> GetFilteredSongs(List<GPXTrack> tracks)
     {
         List<SpotifyEntry> AllSongs = GetAllSongs();
@@ -182,6 +191,9 @@ public interface ISongInput
         return FilteredSongs;
     }
 
+    /// <summary>
+    /// The total number of songs in the given file.
+    /// </summary>
     int Count { get; }
 }
 
@@ -190,8 +202,16 @@ public interface ISongInput
 /// </summary>
 public interface IGpsInput
 {
+    /// <summary>
+    /// Gets all tracks in the file.
+    /// </summary>
+    /// <returns>A list of GPXTrack objects.</returns>
     List<GPXTrack> GetAllTracks();
 
+    /// <summary>
+    /// Gets tracks based on user-selection.
+    /// </summary>
+    /// <returns>A list of GPXTrack objects, based on user-selection</returns>
     List<GPXTrack> GetSelectedTracks()
     {
         List<GPXTrack> AllTracks = GetAllTracks();
@@ -349,7 +369,13 @@ public interface IGpsInput
     /// <returns>True, if the user-provided index is an existing GPXTrack.</returns>
     private static bool IsValidTrackIndex(int index, int totalTracks) => index >= 0 && index < totalTracks;
 
-
+    /// <summary>
+    /// The total number of tracks in the given file.
+    /// </summary>
     int TrackCount { get; }
+
+    /// <summary>
+    /// The total number of points in the given file.
+    /// </summary>
     int PointCount { get; }
 }

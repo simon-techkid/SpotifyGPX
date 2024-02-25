@@ -33,7 +33,18 @@ public class JsonReport : IFileOutput
         // Create a serializer with the settings from Options.JsonSettings
         JsonSerializer serializer = JsonSerializer.Create(Options.JsonSettings);
 
-        return Pairs
+        JObject header = new()
+        {
+            Pairs.GroupBy(pair => pair.Origin.Type).Select(type => new JProperty(((int)type.Key).ToString(), type.Count())),
+            new JProperty("Total", Pairs.Count())
+        };
+
+        List<JObject> objs = new()
+        {
+            header
+        };
+
+        objs.AddRange(Pairs
             .GroupBy(pair => pair.Origin) // Group the pairs by track (JsonReport supports multiTrack)
             .Select(track =>
             {
@@ -43,7 +54,9 @@ public class JsonReport : IFileOutput
                     new JProperty(track.Key.ToString(), JToken.FromObject(track.SelectMany(pair => new JArray(JToken.FromObject(pair))), serializer)) // Create a json report for each pair
                 );
             })
-            .ToList();
+            .ToList());
+
+        return objs;
     }
 
     /// <summary>

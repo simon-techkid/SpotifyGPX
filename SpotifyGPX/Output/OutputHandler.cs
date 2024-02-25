@@ -12,7 +12,7 @@ namespace SpotifyGPX.Output;
 /// </summary>
 public class OutputHandler
 {
-    private static bool ReplaceFiles => false; // Allow SpotifyGPX to replace existing files, rather than generating a unique name
+    private static bool ReplaceFiles => true; // Allow SpotifyGPX to replace existing files, rather than generating a unique name
     private IEnumerable<SongPoint> Pairs { get; } // Hold the pairs list that will be exported
 
     /// <summary>
