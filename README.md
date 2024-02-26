@@ -67,6 +67,7 @@ Pairings can be created using the following formats:
 ### Output
 
 Pairings can be exported to the following formats:
+ - **Pairs** - CSV
  - **Pairs** - GPX
  - **Spotify** - Json
  - **Pairs** - JsonReport
@@ -81,12 +82,13 @@ The following formats can be used to both create pairings, and export those pair
 
 ## Usage
 
-> `SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-n] [-j] [-p] [-t] [-r] [-pp [-pa]] [--silent] [--help]`
+> `SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-c] [-n] [-j] [-p] [-t] [-r] [-pp [-pa]] [--silent] [--help]`
 
  - `SpotifyGPX` - SpotifyGPX executable
  - `--spotify <spotify> --gps <gps>` - Path to a Spotify playback history and GPS journey file
  - `--pairs <pairs>` - Path to a pairs file
  - *Optional:* `-n` - Do not export a `GPX` from the calculated points
+ - *Optional:* `-c` - Export a `csv` table of all the pairs
  - *Optional:* `-j` - Save off the relevant part of the Spotify `json`
  - *Optional:* `-p` - Export a `xspf` playlist of the songs
  - *Optional:* `-t` - Export a `txt` list of pairs

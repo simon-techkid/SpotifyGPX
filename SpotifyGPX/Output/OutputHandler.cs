@@ -124,6 +124,7 @@ public class OutputHandler
     {
         return format switch
         {
+            Formats.Csv => new Csv(pairs),
             Formats.Gpx => new Gpx(pairs),
             Formats.Json => new Json(pairs),
             Formats.JsonReport => new JsonReport(pairs),
@@ -143,6 +144,7 @@ public class OutputHandler
     {
         return format switch
         {
+            Formats.Csv => false,
             Formats.Gpx => false,
             Formats.Json => false,
             Formats.JsonReport => true,
@@ -191,6 +193,11 @@ public class OutputHandler
 /// </summary>
 public enum Formats
 {
+    /// <summary>
+    /// A CSV file containing a pair per line.
+    /// </summary>
+    Csv,
+
     /// <summary>
     /// A GPX file containing song-point pairs as a waypoints.
     /// </summary>

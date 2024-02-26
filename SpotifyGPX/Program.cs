@@ -15,7 +15,7 @@ class Program
     {
         if (args.Length == 0 || args.Contains("--help"))
         {
-            Console.WriteLine("[HELP] Usage: SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-n] [-j] [-p] [-t] [-r] [-pp] [-pa] [--silent] [--help]");
+            Console.WriteLine("[HELP] Usage: SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-n] [-c] [-j] [-p] [-t] [-r] [-pp] [-pa] [--silent] [--help]");
             return;
         }
 
@@ -50,6 +50,7 @@ class Program
         }
 
         bool noGpxExport = args.Contains("-n");
+        bool exportCsv = args.Contains("-c");
         bool exportJson = args.Contains("-j");
         bool exportPlist = args.Contains("-p");
         bool exportTxt = args.Contains("-t");
@@ -112,6 +113,9 @@ class Program
 
         if (!noGpxExport)
             pairedEntries.Save(Formats.Gpx, Path.GetFileNameWithoutExtension(prefix));
+
+        if (exportCsv)
+            pairedEntries.Save(Formats.Csv, Path.GetFileNameWithoutExtension(prefix));
 
         if (exportJson)
             pairedEntries.Save(Formats.Json, Path.GetFileNameWithoutExtension(prefix));
