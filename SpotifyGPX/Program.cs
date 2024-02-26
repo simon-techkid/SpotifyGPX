@@ -5,7 +5,6 @@ using SpotifyGPX.Output;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace SpotifyGPX;
 
@@ -13,56 +12,48 @@ class Program
 {
     static void Main(string[] args)
     {
-        if (args.Length == 0 || args.Contains("--help"))
-        {
-            Console.WriteLine("[HELP] Usage: SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-n] [-c] [-j] [-p] [-t] [-r] [-pp] [-pa] [--silent] [--help]");
-            return;
-        }
+        var (options, flags) = ArgumentParser.Parse(args);
 
         string? inputPairs = null;
         string? inputSpotify = null;
         string? inputGps = null;
 
-        if (args.Length >= 2)
+        if (args.Length == 0 || flags.Contains("h"))
         {
-            switch (args[0])
-            {
-                case "--pairs":
-                    inputPairs = args[1];
-                    break;
-                case "--spotify":
-                    inputSpotify = args[1];
-                    if (args.Length >= 4 && args[2] == "--gps")
-                    {
-                        inputGps = args[3];
-                    }
-                    break;
-                case "--gps":
-                    inputGps = args[1];
-                    if (args.Length >= 4 && args[2] == "--spotify")
-                    {
-                        inputSpotify = args[3];
-                    }
-                    break;
-                default:
-                    break;
-            }
+            ArgumentParser.PrintHelp();
+            return;
         }
 
-        bool noGpxExport = args.Contains("-n");
-        bool exportCsv = args.Contains("-c");
-        bool exportJson = args.Contains("-j");
-        bool exportPlist = args.Contains("-p");
-        bool exportTxt = args.Contains("-t");
-        bool exportJsonReport = args.Contains("-r");
-        bool pointPredict = args.Contains("-pp");
-        bool autoPredict = args.Contains("-pa");
-        bool silent = args.Contains("--silent");
+        if (options.ContainsKey("spotify"))
+        {
+            inputSpotify = options["spotify"];
+        }
+
+        if (options.ContainsKey("gps"))
+        {
+            inputGps = options["gps"];
+        }
+
+        if (options.ContainsKey("pairs"))
+        {
+            inputPairs = options["pairs"];
+        }
+        
+        bool noGpxExport = flags.Contains("n");
+        bool exportCsv = flags.Contains("c");
+        bool exportJson = flags.Contains("j");
+        bool exportPlist = flags.Contains("p");
+        bool exportTxt = flags.Contains("t");
+        bool exportJsonReport = flags.Contains("r");
+        bool pointPredict = flags.Contains("pp");
+        bool autoPredict = flags.Contains("pa");
+        bool silent = flags.Contains("s");
 
         // Create a list of paired songs and points
         PairingsHandler pairedEntries;
 
-        string prefix = "";
+        // Prefix for output files
+        string prefix;
 
         try
         {
@@ -111,24 +102,83 @@ class Program
             return;
         }
 
-        if (!noGpxExport)
-            pairedEntries.Save(Formats.Gpx, Path.GetFileNameWithoutExtension(prefix));
+        try
+        {
+            if (!noGpxExport)
+                pairedEntries.Save(Formats.Gpx, Path.GetFileNameWithoutExtension(prefix));
 
-        if (exportCsv)
-            pairedEntries.Save(Formats.Csv, Path.GetFileNameWithoutExtension(prefix));
+            if (exportCsv)
+                pairedEntries.Save(Formats.Csv, Path.GetFileNameWithoutExtension(prefix));
 
-        if (exportJson)
-            pairedEntries.Save(Formats.Json, Path.GetFileNameWithoutExtension(prefix));
+            if (exportJson)
+                pairedEntries.Save(Formats.Json, Path.GetFileNameWithoutExtension(prefix));
 
-        if (exportPlist)
-            pairedEntries.Save(Formats.Xspf, Path.GetFileNameWithoutExtension(prefix));
+            if (exportPlist)
+                pairedEntries.Save(Formats.Xspf, Path.GetFileNameWithoutExtension(prefix));
 
-        if (exportTxt)
-            pairedEntries.Save(Formats.Txt, Path.GetFileNameWithoutExtension(prefix));
+            if (exportTxt)
+                pairedEntries.Save(Formats.Txt, Path.GetFileNameWithoutExtension(prefix));
 
-        if (exportJsonReport)
-            pairedEntries.Save(Formats.JsonReport, Path.GetFileNameWithoutExtension(prefix));
+            if (exportJsonReport)
+                pairedEntries.Save(Formats.JsonReport, Path.GetFileNameWithoutExtension(prefix));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return;
+        }
 
         return;
+    }
+}
+
+public class ArgumentParser
+{
+    public static (Dictionary<string, string> options, HashSet<string> flags) Parse(string[] args)
+    {
+        var options = new Dictionary<string, string>();
+        var flags = new HashSet<string>();
+
+        for (int i = 0; i < args.Length; i++)
+        {
+            string arg = args[i];
+            if (arg.StartsWith("--"))
+            {
+                if (i + 1 < args.Length)
+                {
+                    string key = arg[2..];
+                    string value = args[i + 1];
+                    options[key] = value;
+                    i++;
+                }
+                else
+                {
+                    throw new ArgumentException($"Expected value after {arg}");
+                }
+            }
+            else if (arg.StartsWith('-'))
+            {
+                string flag = arg[1..];
+                flags.Add(flag);
+            }
+        }
+
+        return (options, flags);
+    }
+
+    public static void PrintHelp()
+    {
+        Console.WriteLine("Usage: SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-c] [-n] [-j] [-p] [-t] [-r] [-pp [-pa]] [-s] [-h]");
+        Console.WriteLine("--spotify <spotify> --gps <gps> - Path to a Spotify playback history and GPS journey file");
+        Console.WriteLine("--pairs <pairs> - Path to a pairs file");
+        Console.WriteLine("-n - Do not export a GPX from the calculated points");
+        Console.WriteLine("-c - Export a csv table of all the pairs");
+        Console.WriteLine("-j - Save off the relevant part of the Spotify json");
+        Console.WriteLine("-p - Export a xspf playlist of the songs");
+        Console.WriteLine("-t - Export a txt list of pairs");
+        Console.WriteLine("-r - Export a jsonreport of all the data used to compile the resulting pairings");
+        Console.WriteLine("-pp - Predict new positions for duplicate points (use with -pa for automatic prediction of all duplicate positions)");
+        Console.WriteLine("-s - Do not print out each newly created Song-Point pairing upon creation");
+        Console.WriteLine("-h - Print the help instructions");
     }
 }
