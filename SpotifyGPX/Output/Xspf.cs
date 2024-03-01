@@ -20,14 +20,16 @@ public class Xspf : IFileOutput
     /// Creates a new output handler for handling files in the XSPF format.
     /// </summary>
     /// <param name="pairs">A list of pairs to be exported.</param>
-    public Xspf(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
+    /// <param name="trackName">The name of the track representing the pairs.</param>
+    public Xspf(IEnumerable<SongPoint> pairs, string trackName) => Document = GetDocument(pairs, trackName);
 
     /// <summary>
     /// Creates an XDocument containing each song of each pair, in XSPF format.
     /// </summary>
     /// <param name="pairs">A list of pairs.</param>
+    /// <param name="trackName">The name of the track representing the pairs.</param>
     /// <returns>An XDocument containing the contents of the created XSPF.</returns>
-    private static XDocument GetDocument(IEnumerable<SongPoint> pairs)
+    private static XDocument GetDocument(IEnumerable<SongPoint> pairs, string trackName)
     {
         var xspfPairs = pairs.Select(pair =>
         new XElement(Namespace + Track,
@@ -42,6 +44,7 @@ public class Xspf : IFileOutput
             new XElement(Namespace + "playlist",
                 new XAttribute("version", "1.0"),
                 new XAttribute("xmlns", Namespace),
+                new XElement(Namespace + "title", trackName),
                 new XElement(Namespace + "creator", "SpotifyGPX"),
                 new XElement(Namespace + "trackList", xspfPairs) // All pairs inside <trackList>
             )

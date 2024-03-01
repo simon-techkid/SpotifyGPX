@@ -125,12 +125,12 @@ public class OutputHandler
         return format switch
         {
             Formats.Csv => new Csv(pairs),
-            Formats.Gpx => new Gpx(pairs),
+            Formats.Gpx => new Gpx(pairs, trackName),
             Formats.Html => new Html(pairs, trackName),
             Formats.Json => new Json(pairs),
             Formats.JsonReport => new JsonReport(pairs),
             Formats.Txt => new Txt(pairs),
-            Formats.Xspf => new Xspf(pairs),
+            Formats.Xspf => new Xspf(pairs, trackName),
             _ => throw new Exception($"Unsupported file export format: {format}")
         };
     }

@@ -22,14 +22,16 @@ public class Gpx : IFileOutput
     /// Creates a new output handler for handling files in the GPX format.
     /// </summary>
     /// <param name="pairs">A list of pairs to be exported.</param>
-    public Gpx(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
+    /// <param name="trackName">The name of the track representing the pairs.</param>
+    public Gpx(IEnumerable<SongPoint> pairs, string trackName) => Document = GetDocument(pairs, trackName);
 
     /// <summary>
     /// Creates an XDocument containing each pair, in GPX format.
     /// </summary>
     /// <param name="pairs">A list of pairs.</param>
+    /// <param name="trackName">The name of the track representing the pairs.</param>
     /// <returns>An XDocument containing the contents of the created GPX.</returns>
-    private static XDocument GetDocument(IEnumerable<SongPoint> pairs)
+    private static XDocument GetDocument(IEnumerable<SongPoint> pairs, string trackName)
     {
         var gpxPairs = pairs.Select(pair =>
             new XElement(Namespace + Waypoint,
@@ -49,6 +51,7 @@ public class Gpx : IFileOutput
                 new XAttribute(XNamespace.Xmlns + "xsi", Xsi),
                 new XAttribute("xmlns", Namespace),
                 new XAttribute(Xsi + "schemaLocation", Schema),
+                new XElement(Namespace + "name", trackName),
                 new XElement(Namespace + "time", DateTimeOffset.Now.UtcDateTime.ToString(Options.GpxOutput)),
                 gpxPairs
             )
