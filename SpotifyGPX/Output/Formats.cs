@@ -13,14 +13,9 @@ public enum Formats
     Csv,
 
     /// <summary>
-    /// A GPX file containing song-point pairs as a waypoints.
+    /// A GPX file containing song-point pairs as waypoints.
     /// </summary>
     Gpx,
-
-    /// <summary>
-    /// A HTML file containing a visualized webpage of pairs.
-    /// </summary>
-    Html,
 
     /// <summary>
     /// A JSON file containing only the original Spotify data records used for pairs.

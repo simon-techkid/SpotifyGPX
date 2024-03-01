@@ -1,10 +1,8 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace SpotifyGPX.Output;
@@ -12,9 +10,9 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the JsonReport format.
 /// </summary>
-public partial class JsonReport : IFileOutput
+public partial class JsonReport : JsonSaveable, IFileOutput, ISaveable, ITransformable
 {
-    public List<JObject> Document { get; }
+    protected override List<JObject> Document { get; }
 
     /// <summary>
     /// Creates a new output handler for handling files in the JsonReport format.
@@ -29,9 +27,6 @@ public partial class JsonReport : IFileOutput
     /// <returns>A list of JObjects, each representing a track containing pairs.</returns>
     private static List<JObject> GetDocument(IEnumerable<SongPoint> Pairs)
     {
-        // Create a serializer with the settings from Options.JsonSettings
-        JsonSerializer serializer = JsonSerializer.Create(JsonSettings);
-
         List<JObject> objects = Pairs
             .GroupBy(pair => pair.Origin) // Group the pairs by track (JsonReport supports multiTrack)
             .Select(track =>
@@ -39,14 +34,14 @@ public partial class JsonReport : IFileOutput
                 return new JObject(
                     new JProperty("Count", track.Count()), // Include # of pairs in this track
                     new JProperty("TrackInfo", JToken.FromObject(track.Key)), // Include info about the GPX track
-                    new JProperty(track.Key.ToString(), JToken.FromObject(track.SelectMany(pair => new JArray(JToken.FromObject(pair))), serializer)) // Create a json report for each pair
+                    new JProperty(track.Key.ToString(), JToken.FromObject(track.SelectMany(pair => new JArray(JToken.FromObject(pair))))) // Create a json report for each pair
                 );
             })
             .ToList();
 
         JsonHashProvider<IEnumerable<JObject>> hasher = new();
         string hash = hasher.ComputeHash(objects);
-        
+
         JObject header = new()
         {
             //new JProperty("Created", DateTimeOffset.Now.ToUniversalTime()),
@@ -57,16 +52,6 @@ public partial class JsonReport : IFileOutput
         objects.Insert(0, header);
 
         return objects;
-    }
-
-    /// <summary>
-    /// Saves this JsonReport file to the provided path.
-    /// </summary>
-    /// <param name="path">The path where this JsonReport will be saved.</param>
-    public void Save(string path)
-    {
-        string text = JsonConvert.SerializeObject(Document, JsonSettings.Formatting, JsonSettings);
-        File.WriteAllText(path, text, OutputEncoding);
     }
 
     /// <summary>

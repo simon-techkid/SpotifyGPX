@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -11,9 +10,9 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the XSPF format.
 /// </summary>
-public partial class Xspf : IFileOutput
+public partial class Xspf : XmlSaveable, IFileOutput, ISaveable, ITransformable
 {
-    private XDocument Document { get; }
+    protected override XDocument Document { get; }
 
     /// <summary>
     /// Creates a new output handler for handling files in the XSPF format.
@@ -57,16 +56,6 @@ public partial class Xspf : IFileOutput
                 new XElement(Namespace + "trackList", xspfPairs) // All pairs inside <trackList>
             )
         );
-    }
-
-    /// <summary>
-    /// Saves this XSPF file to the provided path.
-    /// </summary>
-    /// <param name="path">The path where this XSPF will be saved.</param>
-    public void Save(string path)
-    {
-        string doc = Document.ToString(OutputSettings);
-        File.WriteAllText(path, doc, OutputEncoding);
     }
 
     /// <summary>

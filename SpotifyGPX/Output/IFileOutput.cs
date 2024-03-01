@@ -3,7 +3,7 @@
 namespace SpotifyGPX.Output;
 
 /// <summary>
-/// Interfaces with file output classes, unifying all formats that pairs can written to.
+/// Interfaces with file output classes, unifying all formats that pairs can be written out as.
 /// </summary>
 public interface IFileOutput
 {

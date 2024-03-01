@@ -89,13 +89,13 @@ public partial class PairingsHandler
     /// </summary>
     /// <param name="format">The file format in which the pairs will be saved.</param>
     /// <param name="sourceGpxName">The name of the original GPX file.</param>
-    public void Save(Formats format, string sourceGpxName)
+    public void Save(Formats format, string sourceGpxName, bool transform)
     {
         // Parse the Pairs in this Pairings object to the specified format, according to user-provided arguments
         OutputHandler fmat = new(Pairs);
 
         // Save the handled format as specified by the provided file name prefix
-        fmat.Save(format, sourceGpxName);
+        fmat.Save(format, sourceGpxName, transform);
     }
 
     /// <summary>

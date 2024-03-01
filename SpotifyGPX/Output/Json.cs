@@ -1,9 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace SpotifyGPX.Output;
@@ -11,9 +9,9 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the JSON format.
 /// </summary>
-public partial class Json : IFileOutput
+public partial class Json : JsonSaveable, IFileOutput, ISaveable, ITransformable
 {
-    private List<JObject> Document { get; }
+    protected override List<JObject> Document { get; }
 
     /// <summary>
     /// Creates a new output handler for handling files in the JSON format.
@@ -29,16 +27,6 @@ public partial class Json : IFileOutput
     private static List<JObject> GetDocument(IEnumerable<SongPoint> Pairs)
     {
         return Pairs.Select(pair => JObject.FromObject(pair.Song)).ToList();
-    }
-
-    /// <summary>
-    /// Saves this JSON file to the provided path.
-    /// </summary>
-    /// <param name="path">The path where this JSON file will be saved.</param>
-    public void Save(string path)
-    {
-        string text = JsonConvert.SerializeObject(Document, JsonSettings.Formatting, JsonSettings);
-        File.WriteAllText(path, text, OutputEncoding);
     }
 
     /// <summary>

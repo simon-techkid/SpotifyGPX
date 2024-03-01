@@ -122,10 +122,25 @@ namespace SpotifyGPX.Output
         private static string AllTracksName => "All";
     }
 
+    public partial class JsonReport
+    {
+        protected override JsonSerializerSettings JsonSettings => Options.JsonReportSettings;
+        protected override SaveOptions OutputOptions => SaveOptions.None;
+        protected override Encoding OutputEncoding => Encoding.UTF8;
+    }
+
+    public partial class Json
+    {
+        protected override JsonSerializerSettings JsonSettings => Options.JsonSettings;
+        protected override SaveOptions OutputOptions => SaveOptions.None;
+        protected override Encoding OutputEncoding => Encoding.UTF8;
+    }
+
     public partial class Csv
     {
         private static string Delimiter => ",";
-        private static Encoding OutputEncoding => Encoding.UTF8;
+        protected override SaveOptions OutputOptions => SaveOptions.None;
+        protected override Encoding OutputEncoding => Encoding.UTF8;
     }
 
     public partial class Gpx
@@ -135,47 +150,14 @@ namespace SpotifyGPX.Output
         private static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance";
         private static string Schema => "http://www.topografix.com/GPX/1/0 http://wwwtopografix.com/GPX/1/0/gpx.xsd";
         private static string Waypoint => "wpt";
-        private static SaveOptions OutputSettings => SaveOptions.None;
-        private static Encoding OutputEncoding => Encoding.UTF8;
-    }
-
-    public partial class Html
-    {
-        private static XNamespace Namespace => "http://www.w3.org/1999/xhtml";
-        private static string DocumentEncoding => "utf-8";
-        private static string CSS => @"
-body {
-  background-color: #E4F3FF;
-  font-family: sans-serif, Helvetica, Arial;
-  font-size: 13px;
-}
-h1 {
-  color: #2D58AE;
-  font-size: 25px;
-}
-hr {
-  color: #555555;
-}
-";
-        private static SaveOptions OutputSettings => SaveOptions.None;
-        private static Encoding OutputEncoding => Encoding.UTF8;
-    }
-
-    public partial class Json
-    {
-        private static JsonSerializerSettings JsonSettings => Options.JsonSettings;
-        private static Encoding OutputEncoding => Encoding.UTF8;
-    }
-
-    public partial class JsonReport
-    {
-        private static JsonSerializerSettings JsonSettings => Options.JsonReportSettings;
-        private static Encoding OutputEncoding => Encoding.UTF8;
+        protected override SaveOptions OutputOptions => SaveOptions.None;
+        protected override Encoding OutputEncoding => Encoding.UTF8;
     }
 
     public partial class Txt
     {
-        private static Encoding OutputEncoding => Encoding.UTF8;
+        protected override SaveOptions OutputOptions => SaveOptions.None;
+        protected override Encoding OutputEncoding => Encoding.UTF8;
     }
 
     public partial class Xspf
@@ -183,7 +165,7 @@ hr {
         private static XNamespace Namespace => "http://xspf.org/ns/0/";
         private static string DocumentEncoding => "utf-8";
         private static string Track => "track";
-        private static SaveOptions OutputSettings => SaveOptions.None;
-        private static Encoding OutputEncoding => Encoding.UTF8;
+        protected override SaveOptions OutputOptions => SaveOptions.None;
+        protected override Encoding OutputEncoding => Encoding.UTF8;
     }
 }

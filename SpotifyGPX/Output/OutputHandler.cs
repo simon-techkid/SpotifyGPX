@@ -25,7 +25,8 @@ public partial class OutputHandler
     /// </summary>
     /// <param name="format">The format to use for the exported file.</param>
     /// <param name="sourceGpxName">The name of the original GPS file used.</param>
-    public void Save(Formats format, string sourceGpxName)
+    /// <param name="transform">Transform the created files based on XSLT stylesheets.</param>
+    public void Save(Formats format, string sourceGpxName, bool transform)
     {
         List<OutFile> files = new();
 
@@ -45,7 +46,7 @@ public partial class OutputHandler
                 .Select(track => new OutFile(track, format, sourceGpxName, track.Key.ToString())));
         }
 
-        files.ForEach(file => file.Save()); // Save each file to the disk
+        files.ForEach(file => file.Save(transform)); // Save each file to the disk
 
         // Print the individual track results (number of pairs):
         string joinedExports = string.Join(", ", files.Select(file => file.Result));
@@ -69,47 +70,34 @@ public partial class OutputHandler
         public OutFile(IEnumerable<SongPoint> pairs, Formats format, string sourceGpxName, string trackName)
         {
             Handler = CreateFileOutput(format, pairs, trackName);
+            Format = format;
+            SourceName = sourceGpxName;
+            TrackName = trackName;
             OriginalCount = pairs.Count();
-            Name = trackName;
-            string fileName = $"{sourceGpxName}_{trackName}";
-            string extension = format.ToString().ToLower();
-            Path = GetUniqueFilePath($"{fileName}.{extension}"); // Ensure exporting to unique file name
         }
 
-        /// <summary>
-        /// The output file handler.
-        /// </summary>
         private IFileOutput Handler { get; }
-
-        /// <summary>
-        /// The number of pairs in the original pairing list
-        /// </summary>
+        private Formats Format { get; }
+        private string SourceName { get; }
+        private string TrackName { get; }
         public int OriginalCount { get; }
-
-        /// <summary>
-        /// The number of pairs apart of the exported file
-        /// </summary>
         public int ExportCount => Handler.Count;
+        private string FinalName => $"{SourceName}_{TrackName}.{Extension}";
+        private string Extension => Format.ToString().ToLower();
+        public string Result => $"{ExportCount}/{OriginalCount} ({TrackName})";
 
-        /// <summary>
-        /// The name of the track
-        /// </summary>
-        private string Name { get; }
+        public void Save(bool transform)
+        {
+            if (transform && Handler is ITransformable)
+            {
+                (Handler as ITransformable)?.Transform(GetUniqueFilePath(FinalName), $"{Extension}.xslt");
+            }
 
-        /// <summary>
-        /// The export path of the final file
-        /// </summary>
-        private string Path { get; }
-
-        /// <summary>
-        /// A string representing the outcome of the export.
-        /// </summary>
-        public string Result => $"{ExportCount}/{OriginalCount} ({Name})";
-
-        /// <summary>
-        /// Save the file to the path.
-        /// </summary>
-        public void Save() => Handler.Save(Path);
+            if (Handler is ISaveable)
+            {
+                (Handler as ISaveable)?.Save(GetUniqueFilePath(FinalName));
+            }
+        }
     }
 
     /// <summary>
@@ -125,7 +113,6 @@ public partial class OutputHandler
         {
             Formats.Csv => new Csv(pairs),
             Formats.Gpx => new Gpx(pairs, trackName),
-            Formats.Html => new Html(pairs, trackName),
             Formats.Json => new Json(pairs),
             Formats.JsonReport => new JsonReport(pairs),
             Formats.Txt => new Txt(pairs),
@@ -146,7 +133,6 @@ public partial class OutputHandler
         {
             Formats.Csv => false,
             Formats.Gpx => false,
-            Formats.Html => false,
             Formats.Json => false,
             Formats.JsonReport => true,
             Formats.Txt => false,

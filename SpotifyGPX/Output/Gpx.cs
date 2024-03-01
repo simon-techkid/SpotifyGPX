@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -11,9 +10,9 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the GPX format.
 /// </summary>
-public partial class Gpx : IFileOutput
+public partial class Gpx : XmlSaveable, IFileOutput, ISaveable, ITransformable
 {
-    private XDocument Document { get; }
+    protected override XDocument Document { get; }
 
     /// <summary>
     /// Creates a new output handler for handling files in the GPX format.
@@ -57,16 +56,6 @@ public partial class Gpx : IFileOutput
                 gpxPairs
             )
         );
-    }
-
-    /// <summary>
-    /// Saves this GPX file to the provided path.
-    /// </summary>
-    /// <param name="path">The path where this GPX file will be saved.</param>
-    public void Save(string path)
-    {
-        string doc = Document.ToString(OutputSettings);
-        File.WriteAllText(path, doc, OutputEncoding);
     }
 
     /// <summary>

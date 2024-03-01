@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace SpotifyGPX.Output;
@@ -10,9 +9,9 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the TXT format.
 /// </summary>
-public partial class Txt : IFileOutput
+public partial class Txt : TxtSaveable, IFileOutput, ISaveable, ITransformable
 {
-    private string?[] Document { get; }
+    protected override string?[] Document { get; }
 
     /// <summary>
     /// Creates a new output handler for handling files in the TXT format.
@@ -65,15 +64,6 @@ public partial class Txt : IFileOutput
     {
         // Return all pairs' selected (selector) object as an array
         return pairs.Select(selector).ToArray();
-    }
-
-    /// <summary>
-    /// Saves this array of strings (excluding null strings) to a TXT file at the provided path.
-    /// </summary>
-    /// <param name="path">The path where this TXT file will be saved.</param>
-    public void Save(string path)
-    {
-        File.WriteAllLines(path, Document.Where(uri => uri != null)!, OutputEncoding); // Ensure no empty/null lines are created
     }
 
     /// <summary>

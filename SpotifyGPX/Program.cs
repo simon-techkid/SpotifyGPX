@@ -41,7 +41,6 @@ class Program
 
         bool noGpxExport = flags.Contains("n");
         bool exportCsv = flags.Contains("c");
-        bool exportHtml = flags.Contains("w");
         bool exportJson = flags.Contains("j");
         bool exportPlist = flags.Contains("p");
         bool exportTxt = flags.Contains("t");
@@ -49,6 +48,7 @@ class Program
         bool pointPredict = flags.Contains("pp");
         bool autoPredict = flags.Contains("pa");
         bool silent = flags.Contains("s");
+        bool transform = flags.Contains("x");
 
         // Create a list of paired songs and points
         PairingsHandler pairedEntries;
@@ -106,25 +106,22 @@ class Program
         try
         {
             if (!noGpxExport)
-                pairedEntries.Save(Formats.Gpx, Path.GetFileNameWithoutExtension(prefix));
+                pairedEntries.Save(Formats.Gpx, Path.GetFileNameWithoutExtension(prefix), transform);
 
             if (exportCsv)
-                pairedEntries.Save(Formats.Csv, Path.GetFileNameWithoutExtension(prefix));
-
-            if (exportHtml)
-                pairedEntries.Save(Formats.Html, Path.GetFileNameWithoutExtension(prefix));
+                pairedEntries.Save(Formats.Csv, Path.GetFileNameWithoutExtension(prefix), transform);
 
             if (exportJson)
-                pairedEntries.Save(Formats.Json, Path.GetFileNameWithoutExtension(prefix));
+                pairedEntries.Save(Formats.Json, Path.GetFileNameWithoutExtension(prefix), transform);
 
             if (exportPlist)
-                pairedEntries.Save(Formats.Xspf, Path.GetFileNameWithoutExtension(prefix));
+                pairedEntries.Save(Formats.Xspf, Path.GetFileNameWithoutExtension(prefix), transform);
 
             if (exportTxt)
-                pairedEntries.Save(Formats.Txt, Path.GetFileNameWithoutExtension(prefix));
+                pairedEntries.Save(Formats.Txt, Path.GetFileNameWithoutExtension(prefix), transform);
 
             if (exportJsonReport)
-                pairedEntries.Save(Formats.JsonReport, Path.GetFileNameWithoutExtension(prefix));
+                pairedEntries.Save(Formats.JsonReport, Path.GetFileNameWithoutExtension(prefix), transform);
         }
         catch (Exception ex)
         {

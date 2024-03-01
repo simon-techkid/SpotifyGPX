@@ -2,17 +2,28 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace SpotifyGPX.Output;
 
-public partial class Csv : IFileOutput
+/// <summary>
+/// Provides instructions for exporting pairing data to the CSV format.
+/// </summary>
+public partial class Csv : TxtSaveable, IFileOutput, ISaveable, ITransformable
 {
-    private string[] Document { get; }
+    protected override string?[] Document { get; }
 
+    /// <summary>
+    /// Creates a new output handler for handling files in the CSV format.
+    /// </summary>
+    /// <param name="pairs">A list of pairs to be exported.</param>
     public Csv(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
 
+    /// <summary>
+    /// Creates a string array representing the lines of the CSV document.
+    /// </summary>
+    /// <param name="pairs">A list of pairs.</param>
+    /// <returns>A string[], each element being a line.</returns>
     private static string[] GetDocument(IEnumerable<SongPoint> pairs)
     {
         string[] header = // The header line for the CSV file
@@ -50,10 +61,8 @@ public partial class Csv : IFileOutput
         return csvWithHeader;
     }
 
-    public void Save(string fileName)
-    {
-        File.WriteAllLines(fileName, Document, OutputEncoding);
-    }
-
+    /// <summary>
+    /// The number of pairs (lines, excluding the header) in the file.
+    /// </summary>
     public int Count => Document.Length - 1; // Subtract one for the header line
 }
