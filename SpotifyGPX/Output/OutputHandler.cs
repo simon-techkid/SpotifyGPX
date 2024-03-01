@@ -69,7 +69,7 @@ public class OutputHandler
         /// <param name="trackName">The name of the track represented in this file (if this file only has one track).</param>
         public OutFile(IEnumerable<SongPoint> pairs, Formats format, string sourceGpxName, string trackName)
         {
-            Handler = CreateFileOutput(format, pairs);
+            Handler = CreateFileOutput(format, pairs, trackName);
             OriginalCount = pairs.Count();
             Name = trackName;
             string fileName = $"{sourceGpxName}_{trackName}";
@@ -120,12 +120,13 @@ public class OutputHandler
     /// <param name="pairs">The pairs to create in the specified file format.</param>
     /// <returns>An IFileOutput interface allowing interfacing with the corresponding format.</returns>
     /// <exception cref="Exception">The provided file doesn't have an export class associated with it.</exception>
-    private static IFileOutput CreateFileOutput(Formats format, IEnumerable<SongPoint> pairs)
+    private static IFileOutput CreateFileOutput(Formats format, IEnumerable<SongPoint> pairs, string trackName)
     {
         return format switch
         {
             Formats.Csv => new Csv(pairs),
             Formats.Gpx => new Gpx(pairs),
+            Formats.Html => new Html(pairs, trackName),
             Formats.Json => new Json(pairs),
             Formats.JsonReport => new JsonReport(pairs),
             Formats.Txt => new Txt(pairs),
@@ -146,6 +147,7 @@ public class OutputHandler
         {
             Formats.Csv => false,
             Formats.Gpx => false,
+            Formats.Html => false,
             Formats.Json => false,
             Formats.JsonReport => true,
             Formats.Txt => false,
@@ -202,6 +204,11 @@ public enum Formats
     /// A GPX file containing song-point pairs as a waypoints.
     /// </summary>
     Gpx,
+
+    /// <summary>
+    /// A HTML file containing a visualized webpage of pairs.
+    /// </summary>
+    Html,
 
     /// <summary>
     /// A JSON file containing only the original Spotify data records used for pairs.
