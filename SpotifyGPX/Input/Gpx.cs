@@ -11,11 +11,8 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Provides instructions for parsing GPS data from the GPX format.
 /// </summary>
-public class Gpx : IGpsInput
+public partial class Gpx : IGpsInput
 {
-    private static XNamespace InputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of input GPX
-    private static string Track => "trk"; // Name of a track element
-    private static string TrackPoint => "trkpt"; // Name of a track point object, children of tracks
     private XDocument Document { get; } // Entire input GPX document
     private List<GPXTrack> Tracks { get; } // Parsed tracks from GPX document
 
@@ -81,7 +78,7 @@ public class Gpx : IGpsInput
                             double.Parse(trkpt.Attribute("lat")?.Value ?? throw new Exception($"GPX 'lat' cannot be null, check your GPX")),
                             double.Parse(trkpt.Attribute("lon")?.Value ?? throw new Exception($"GPX 'lon' cannot be null, check your GPX"))
                         ),
-                        trkpt.Element(InputNs + "time")?.Value ?? throw new Exception($"GPX 'time' cannot be null, check your GPX")
+                        DateTimeOffset.ParseExact(trkpt.Element(InputNs + "time")?.Value ?? throw new Exception($"GPX 'time' cannot be null, check your GPX"), TimeFormat, null, TimeStyle)
                     )).ToList() // Send all points to List<GPXPoint>
             ))
             .ToList(); // Send all tracks to List<GPXTrack>

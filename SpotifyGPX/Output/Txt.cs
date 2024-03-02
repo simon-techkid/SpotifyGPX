@@ -10,7 +10,7 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the TXT format.
 /// </summary>
-public class Txt : IFileOutput
+public partial class Txt : IFileOutput
 {
     private string?[] Document { get; }
 
@@ -73,7 +73,7 @@ public class Txt : IFileOutput
     /// <param name="path">The path where this TXT file will be saved.</param>
     public void Save(string path)
     {
-        File.WriteAllLines(path, Document.Where(uri => uri != null)!); // Ensure no empty/null lines are created
+        File.WriteAllLines(path, Document.Where(uri => uri != null)!, OutputEncoding); // Ensure no empty/null lines are created
     }
 
     /// <summary>

@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace SpotifyGPX.Output;
 
-public class Csv : IFileOutput
+public partial class Csv : IFileOutput
 {
     private string[] Document { get; }
 
@@ -26,7 +26,7 @@ public class Csv : IFileOutput
         };
 
         // Convert the header to a CSV line
-        string headerString = string.Join(",", header.Select(heading => $"\"{heading}\""));
+        string headerString = string.Join(Delimiter, header.Select(heading => $"\"{heading}\""));
 
         string[] csv = pairs.Select(pair => // Convert each pair to a CSV line
         {
@@ -40,7 +40,7 @@ public class Csv : IFileOutput
                 pair.Point.Time.ToString(),
             };
 
-            return string.Join(",", columns.Select(column => $"\"{column}\""));
+            return string.Join(Delimiter, columns.Select(column => $"\"{column}\""));
         }).ToArray();
 
         string[] csvWithHeader = new string[csv.Length + 1]; // Add one for the header line
@@ -52,7 +52,7 @@ public class Csv : IFileOutput
 
     public void Save(string fileName)
     {
-        File.WriteAllLines(fileName, Document);
+        File.WriteAllLines(fileName, Document, OutputEncoding);
     }
 
     public int Count => Document.Length - 1; // Subtract one for the header line

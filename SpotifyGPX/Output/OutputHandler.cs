@@ -10,9 +10,8 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Handle various output file formats for exporting pairs
 /// </summary>
-public class OutputHandler
+public partial class OutputHandler
 {
-    private static bool ReplaceFiles => true; // Allow SpotifyGPX to replace existing files, rather than generating a unique name
     private IEnumerable<SongPoint> Pairs { get; } // Hold the pairs list that will be exported
 
     /// <summary>
@@ -35,7 +34,7 @@ public class OutputHandler
         if (supportsMulti)
         {
             // If the desired format supports multiple tracks, provide the entire pair list:
-            files.Add(new OutFile(Pairs, format, sourceGpxName, "All"));
+            files.Add(new OutFile(Pairs, format, sourceGpxName, AllTracksName));
         }
         else
         {

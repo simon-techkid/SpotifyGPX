@@ -10,7 +10,7 @@ namespace SpotifyGPX;
 /// <summary>
 /// A record of a Spotify song played by the user. Contains metadata about the song itself as well as the time it was played.
 /// </summary>
-public readonly struct SpotifyEntry
+public readonly partial struct SpotifyEntry
 {
     /// <summary>
     /// Creates a SpotifyEntry containing information about a single song's worth of playback.
@@ -58,11 +58,11 @@ public readonly struct SpotifyEntry
     {
         get
         {
-            if (DateTimeOffset.TryParseExact(Time_Ended, Options.SpotifyMini, null, Options.SpotifyTimeStyle, out var result))
+            if (DateTimeOffset.TryParseExact(Time_Ended, Options.DateTimeOnly, null, Options.InterpretAsUniversal, out var result))
             {
                 return result; // return parsed "account data" format song end time
             }
-            else if (DateTimeOffset.TryParseExact(Time_Ended, Options.SpotifyFull, null, Options.SpotifyTimeStyle, out result))
+            else if (DateTimeOffset.TryParseExact(Time_Ended, Options.ISO8601UTC, null, Options.InterpretAsUniversal, out result))
             {
                 return result; // return parsed "extended streaming history" format song end time
             }
@@ -76,7 +76,7 @@ public readonly struct SpotifyEntry
     /// <summary>
     /// Determines whether or not to use the estimated start time (EstStartTime) as the reference time.
     /// </summary>
-    public readonly bool UseEstStartTime => Options.PreferEstimatedStartTime && TimeStartedEst != null;
+    public readonly bool UseEstStartTime => PreferEstimatedStartTime && TimeStartedEst != null;
 
     /// <summary>
     /// The estimated time and date when the song started.
@@ -298,8 +298,8 @@ public readonly struct GPXTrack
 
         builder.Append("   Name: {0}", Track.ToString());
         builder.Append("   Points: {0}", Points.Count);
-        builder.Append("   Starts: {0}", Start.ToString(Options.ConsoleTrack));
-        builder.Append("   Ends: {0}", End.ToString(Options.ConsoleTrack));
+        builder.Append("   Starts: {0}", Start.ToString(Options.ISO8601Offset));
+        builder.Append("   Ends: {0}", End.ToString(Options.ISO8601Offset));
         builder.Append("   Type: {0}", Track.Type);
 
         return builder.ToString();
@@ -407,12 +407,11 @@ public readonly struct GPXPoint
     /// <param name="index">The index of this GPXPoint (in a created list).</param>
     /// <param name="point">The coordinate (pair) of this point's position.</param>
     /// <param name="time">The string representing the time of the point.</param>
-    public GPXPoint(int index, Coordinate point, string time)
+    public GPXPoint(int index, Coordinate point, DateTimeOffset time)
     {
         Index = index;
         Location = point;
-        OriTime = time;
-        Time = DateTimeOffset.ParseExact(time, Options.GpxInput, null, Options.GpxTimeStyle);
+        Time = time;
     }
 
     /// <summary>
@@ -440,11 +439,6 @@ public readonly struct GPXPoint
     /// The time and date at which this point was taken.
     /// </summary>
     public readonly DateTimeOffset Time { get; }
-
-    /// <summary>
-    /// The original string representation of this point's time
-    /// </summary>
-    public readonly string OriTime { get; }
 }
 
 /// <summary>
@@ -538,9 +532,9 @@ public readonly struct SongPoint
 
             string activity = Song.UseEstStartTime ? "started (est)" : "ended";
 
-            builder.Append("At this position: {0}", PointTime.ToString(Options.DescriptionPlayedAt));
-            builder.Append("Song {0}", $"{activity}: {SongTime.ToString(Options.DescriptionPlayedAt)}");
-            builder.Append("Played for {0}", Song.TimePlayed?.ToString(Options.DescriptionTimePlayed));
+            builder.Append("At this position: {0}", PointTime.ToString(Options.ISO8601Offset));
+            builder.Append("Song {0}", $"{activity}: {SongTime.ToString(Options.ISO8601Offset)}");
+            builder.Append("Played for {0}", Song.TimePlayed?.ToString(Options.TimeSpan));
             builder.Append("Skipped: {0}", Song.Song_Skipped);
             builder.Append("Shuffle: {0}", Song.Song_Shuffle);
             builder.Append("IP Address: {0}", Song.Spotify_IP);
@@ -643,8 +637,8 @@ public readonly struct SongPoint
     public override string ToString()
     {
         // Set both the song and point times to the UTC offset provided by the original GPX point
-        string songTime = SongTime.ToString(Options.Console);
-        string pointTime = PointTime.ToString(Options.Console);
+        string songTime = SongTime.ToString(Options.TimeOnly);
+        string pointTime = PointTime.ToString(Options.TimeOnly);
 
         // Print information about the pairing
         return $"[{Origin.ToString()}] [P{Point.Index}, S{Song.Index} ==> #{Index}] [{songTime}S ~ {pointTime}P] [{RoundAccuracy}s] {Song.ToString()}";

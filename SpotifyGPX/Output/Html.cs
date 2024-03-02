@@ -1,6 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -9,23 +10,8 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the HTML format.
 /// </summary>
-public class Html : IFileOutput
+public partial class Html : IFileOutput
 {
-    private static XNamespace Namespace => "http://www.w3.org/1999/xhtml";
-    private static string CSS => @"
-body {
-  background-color: #E4F3FF;
-  font-family: sans-serif, Helvetica, Arial;
-  font-size: 13px;
-}
-h1 {
-  color: #2D58AE;
-  font-size: 25px;
-}
-hr {
-  color: #555555;
-}
-";
     private XDocument Document { get; }
 
     /// <summary>
@@ -44,7 +30,7 @@ hr {
     private static XDocument GetDocument(IEnumerable<SongPoint> pairs, string trackName)
     {
         return new XDocument(
-            new XDeclaration("1.0", "utf-8", null),
+            new XDeclaration("1.0", DocumentEncoding, null),
             new XDocumentType("html", "-//W3C//DTD XHTML 1.1//EN", null, "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"),
             new XElement(Namespace + "html",
                 new XAttribute("xmlns", Namespace),
@@ -77,7 +63,8 @@ hr {
     /// <param name="path">The path where this GPX file will be saved.</param>
     public void Save(string path)
     {
-        Document.Save(path);
+        string doc = Document.ToString(OutputSettings);
+        File.WriteAllText(path, doc, OutputEncoding);
     }
 
     /// <summary>

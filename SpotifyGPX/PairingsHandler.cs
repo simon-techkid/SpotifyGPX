@@ -11,9 +11,8 @@ namespace SpotifyGPX;
 /// <summary>
 /// Handle SongPoint pairings, including list calculation, generation, operations, and exporting.
 /// </summary>
-public class PairingsHandler
+public partial class PairingsHandler
 {
-    private static double? MaximumAbsAccuracy => null; // Greatest accepted error (in seconds) between song and point time (null = allow all pairings regardless of accuracy)
     private List<SongPoint> Pairs { get; }
 
     /// <summary>

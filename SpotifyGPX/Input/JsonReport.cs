@@ -12,7 +12,7 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Provides instructions for parsing song playback data and GPS data from the JsonReport format.
 /// </summary>
-public class JsonReport : ISongInput, IGpsInput, IPairInput
+public partial class JsonReport : ISongInput, IGpsInput, IPairInput
 {
     private List<JObject> JsonTracks { get; }
     private List<SpotifyEntry> AllSongs { get; }
@@ -95,7 +95,8 @@ public class JsonReport : ISongInput, IGpsInput, IPairInput
                 // Get the Point item
                 JObject point = pair.Value<JObject>("Point") ?? throw new Exception($"Pair {pairIndex} is missing a Point.");
                 int index = point.Value<int>("Index");
-                string time = point.Value<string>("OriTime") ?? throw new Exception($"Pair {pairIndex} is missing an OriTime.");
+                string timeStr = point.Value<string>("Time") ?? throw new Exception($"Pair {pairIndex} is missing an OriTime.");
+                DateTimeOffset time = DateTimeOffset.ParseExact(timeStr, Options.ISO8601Offset, null, Options.InterpretAsUniversal);
                 JObject coordinate = point.Value<JObject>("Location") ?? throw new Exception($"Pair {pairIndex} is missing a Point/Location.");
                 double lat = coordinate.Value<double>("Latitude");
                 double lon = coordinate.Value<double>("Longitude");
@@ -258,7 +259,7 @@ public class JsonReport : ISongInput, IGpsInput, IPairInput
             {
                 if (jsonReader.TokenType == JsonToken.StartObject)
                 {
-                    var serializer = JsonSerializer.Create(Options.JsonSettings);
+                    var serializer = JsonSerializer.Create(JsonSettings);
                     var json = serializer.Deserialize<JObject>(jsonReader);
                     if (json != null)
                     {

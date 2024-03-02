@@ -11,9 +11,8 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the JSON format.
 /// </summary>
-public class Json : IFileOutput
+public partial class Json : IFileOutput
 {
-    private static Formatting Formatting => Formatting.Indented; // Formatting of exporting JSON
     private List<JObject> Document { get; }
 
     /// <summary>
@@ -38,8 +37,8 @@ public class Json : IFileOutput
     /// <param name="path">The path where this JSON file will be saved.</param>
     public void Save(string path)
     {
-        string text = JsonConvert.SerializeObject(Document, Formatting, Options.JsonSettings);
-        File.WriteAllText(path, text);
+        string text = JsonConvert.SerializeObject(Document, OutputFormatting, JsonSettings);
+        File.WriteAllText(path, text, OutputEncoding);
     }
 
     /// <summary>

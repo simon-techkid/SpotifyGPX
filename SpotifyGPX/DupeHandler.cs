@@ -9,9 +9,8 @@ namespace SpotifyGPX;
 /// <summary>
 /// Handle duplicate coordinate placements by shifting them to other locations.
 /// </summary>
-public class DupeHandler
+public partial class DupeHandler
 {
-    private static int MinimumMatchingCoords => 2;
     private List<SongPoint> Pairs { get; }
 
     /// <summary>

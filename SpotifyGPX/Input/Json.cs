@@ -11,7 +11,7 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Provides instructions for parsing song playback data from the JSON format.
 /// </summary>
-public class Json : ISongInput
+public partial class Json : ISongInput
 {
     private List<SpotifyEntry> AllSongs { get; } // All songs parsed from the JSON
 
@@ -50,7 +50,7 @@ public class Json : ISongInput
         int index = 0; // Index of the current entry
 
         // Create a serializer with the settings from Options.JsonSettings
-        JsonSerializer serializer = JsonSerializer.Create(Options.JsonSettings);
+        JsonSerializer serializer = JsonSerializer.Create(JsonSettings);
 
         // Open the file stream and create a JsonTextReader
         using (var fileStream = File.OpenRead(jsonFilePath)) // Open the file stream

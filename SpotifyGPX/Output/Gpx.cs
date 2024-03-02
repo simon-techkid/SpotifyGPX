@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -10,12 +11,8 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the GPX format.
 /// </summary>
-public class Gpx : IFileOutput
+public partial class Gpx : IFileOutput
 {
-    private static XNamespace Namespace => "http://www.topografix.com/GPX/1/0"; // Namespace of the output GPX
-    private static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance"; // XML schema location of the output GPX
-    private static string Schema => "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd"; // GPX schema location(s) of the output GPX
-    private static string Waypoint => "wpt"; // Name of a waypoint object
     private XDocument Document { get; }
 
     /// <summary>
@@ -38,13 +35,13 @@ public class Gpx : IFileOutput
                 new XAttribute("lat", pair.Point.Location.Latitude),
                 new XAttribute("lon", pair.Point.Location.Longitude),
                 new XElement(Namespace + "name", pair.Song.ToString()),
-                new XElement(Namespace + "time", pair.Point.Time.UtcDateTime.ToString(Options.GpxOutput)),
+                new XElement(Namespace + "time", pair.Point.Time.UtcDateTime.ToString(Options.ISO8601UTC)),
                 new XElement(Namespace + "desc", pair.Description)
             )
         );
 
         return new XDocument(
-            new XDeclaration("1.0", "utf-8", null),
+            new XDeclaration("1.0", DocumentEncoding, null),
             new XElement(Namespace + "gpx",
                 new XAttribute("version", "1.0"),
                 new XAttribute("creator", "SpotifyGPX"),
@@ -52,7 +49,7 @@ public class Gpx : IFileOutput
                 new XAttribute("xmlns", Namespace),
                 new XAttribute(Xsi + "schemaLocation", Schema),
                 new XElement(Namespace + "name", trackName),
-                new XElement(Namespace + "time", DateTimeOffset.Now.UtcDateTime.ToString(Options.GpxOutput)),
+                new XElement(Namespace + "time", DateTimeOffset.Now.UtcDateTime.ToString(Options.ISO8601UTC)),
                 gpxPairs
             )
         );
@@ -64,7 +61,8 @@ public class Gpx : IFileOutput
     /// <param name="path">The path where this GPX file will be saved.</param>
     public void Save(string path)
     {
-        Document.Save(path);
+        string doc = Document.ToString(OutputSettings);
+        File.WriteAllText(path, doc, OutputEncoding);
     }
 
     /// <summary>

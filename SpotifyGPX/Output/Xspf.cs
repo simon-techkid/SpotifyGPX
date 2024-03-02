@@ -4,16 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using System.IO;
 
 namespace SpotifyGPX.Output;
 
 /// <summary>
 /// Provides instructions for exporting pairing data to the XSPF format.
 /// </summary>
-public class Xspf : IFileOutput
+public partial class Xspf : IFileOutput
 {
-    private static XNamespace Namespace => "http://xspf.org/ns/0/"; // Namespace of output XSPF
-    private static string Track => "track"; // Name of a track object
     private XDocument Document { get; }
 
     /// <summary>
@@ -33,19 +32,23 @@ public class Xspf : IFileOutput
     {
         var xspfPairs = pairs.Select(pair =>
         new XElement(Namespace + Track,
-            new XElement(Namespace + "creator", pair.Song.Song_Artist),
+            new XElement(Namespace + "identifier", pair.Song.Song_ID),
             new XElement(Namespace + "title", pair.Song.Song_Name),
-            new XElement(Namespace + "annotation", pair.Song.Time.UtcDateTime.ToString(Options.GpxOutput)),
-            new XElement(Namespace + "duration", pair.Song.TimePlayed?.TotalMilliseconds) // number of milliseconds
+            new XElement(Namespace + "creator", pair.Song.Song_Artist),
+            new XElement(Namespace + "annotation", pair.Song.Time.UtcDateTime.ToString(Options.ISO8601UTC)),
+            new XElement(Namespace + "album", pair.Song.Song_Album),
+            new XElement(Namespace + "duration", pair.Song.TimePlayed?.TotalMilliseconds),
+            new XElement(Namespace + "link", pair.Song.Song_URI)
         ));
 
         return new XDocument(
-            new XDeclaration("1.0", "utf-8", null),
+            new XDeclaration("1.0", DocumentEncoding, null),
             new XElement(Namespace + "playlist",
                 new XAttribute("version", "1.0"),
                 new XAttribute("xmlns", Namespace),
                 new XElement(Namespace + "title", trackName),
                 new XElement(Namespace + "creator", "SpotifyGPX"),
+                new XElement(Namespace + "date", DateTimeOffset.Now.UtcDateTime.ToString(Options.ISO8601UTC)),
                 new XElement(Namespace + "trackList", xspfPairs) // All pairs inside <trackList>
             )
         );
@@ -57,7 +60,8 @@ public class Xspf : IFileOutput
     /// <param name="path">The path where this XSPF will be saved.</param>
     public void Save(string path)
     {
-        Document.Save(path);
+        string doc = Document.ToString(OutputSettings);
+        File.WriteAllText(path, doc, OutputEncoding);
     }
 
     /// <summary>
