@@ -34,7 +34,7 @@ namespace SpotifyGPX
         public static string ISO8601UTC => @"yyyy-MM-ddTHH\:mm\:ssZ";
 
         /// <summary>
-        /// An ISO8601 time including an offset
+        /// An ISO8601 time including an offset.
         /// Can be any UTC offset.
         /// </summary>
         public static string ISO8601Offset => @"yyyy-MM-dd HH\:mm\:ss zzz";
@@ -43,6 +43,24 @@ namespace SpotifyGPX
         /// A duration of time in HH:mm:ss.fff format.
         /// </summary>
         public static string TimeSpan => @"hh\:mm\:ss\.fff";
+
+        public static JsonSerializerSettings JsonSettings => new()
+        {
+            DateParseHandling = DateParseHandling.DateTime,
+            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+            DateFormatString = Options.SpotifyTimeFormat,
+            NullValueHandling = NullValueHandling.Include,
+            Formatting = Formatting.Indented
+        };
+
+        public static JsonSerializerSettings JsonReportSettings => new()
+        {
+            DateParseHandling = DateParseHandling.DateTimeOffset,
+            DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
+            DateFormatString = $"yyyy-MM-ddTHH:mm:ss.ffffffK",
+            NullValueHandling = NullValueHandling.Include,
+            Formatting = Formatting.Indented
+        };
     }
 
     public readonly partial struct SpotifyEntry
@@ -80,24 +98,12 @@ namespace SpotifyGPX.Input
 
     public partial class Json
     {
-        private static JsonSerializerSettings JsonSettings => new()
-        {
-            DateParseHandling = DateParseHandling.DateTime,
-            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-            DateFormatString = Options.SpotifyTimeFormat,
-            NullValueHandling = NullValueHandling.Include
-        };
+        private static JsonSerializerSettings JsonSettings => Options.JsonSettings;
     }
 
     public partial class JsonReport
     {
-        private static JsonSerializerSettings JsonSettings => new()
-        {
-            DateParseHandling = DateParseHandling.DateTimeOffset,
-            DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
-            DateFormatString = $"yyyy-MM-ddTHH:mm:ss.ffffffK",
-            NullValueHandling = NullValueHandling.Include
-        };
+        private static JsonSerializerSettings JsonSettings => Options.JsonReportSettings;
     }
 }
 
@@ -150,27 +156,13 @@ hr {
 
     public partial class Json
     {
-        private static JsonSerializerSettings JsonSettings => new()
-        {
-            DateParseHandling = DateParseHandling.DateTimeOffset,
-            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-            DateFormatString = Options.SpotifyTimeFormat,
-            NullValueHandling = NullValueHandling.Include,
-            Formatting = Formatting.Indented
-        };
+        private static JsonSerializerSettings JsonSettings => Options.JsonSettings;
         private static Encoding OutputEncoding => Encoding.UTF8;
     }
 
     public partial class JsonReport
     {
-        private static JsonSerializerSettings JsonSettings => new()
-        {
-            DateParseHandling = DateParseHandling.DateTimeOffset,
-            DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
-            DateFormatString = $"yyyy-MM-ddTHH:mm:ss.ffffffK",
-            NullValueHandling = NullValueHandling.Include,
-            Formatting = Formatting.Indented
-        };
+        private static JsonSerializerSettings JsonSettings => Options.JsonReportSettings;
         private static Encoding OutputEncoding => Encoding.UTF8;
     }
 
