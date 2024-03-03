@@ -1,6 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,23 +12,31 @@ namespace SpotifyGPX;
 /// </summary>
 public readonly partial struct SpotifyEntry
 {
-    /// <summary>
-    /// Creates a SpotifyEntry containing information about a single song's worth of playback.
-    /// </summary>
-    /// <param name="index">The index of this song (in a created list).</param>
-    /// <param name="json">The JSON object for this song (from Spotify data dump).</param>
-    /// <exception cref="Exception"></exception>
-    public SpotifyEntry(int index, JObject json)
+    [JsonConstructor]
+    public SpotifyEntry(int index, DateTimeOffset ts, string? username, string? platform, double msPlayed, string? conn_country, string? ip_addr_decrypted, string? user_agent_decrypted, string? master_metadata_track_name, string? master_metadata_album_artist_name, string? master_metadata_album_album_name, string? spotify_track_uri, string? episode_name, string? episode_show_name, string? spotify_episode_uri, string? reason_start, string? reason_end, bool? shuffle, bool? skipped, bool? offline, long? offline_timestamp, bool? incognito_mode)
     {
-        try
-        {
-            Index = index;
-            Json = json;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error parsing contents of JSON tag:\n{json}\nto a valid song entry:\n{ex}");
-        }
+        Index = index;
+        TimeEnded = UseEstStartTime ? ts + TimeSpan.FromMilliseconds(msPlayed) : ts; // must fix later
+        Spotify_Username = username;
+        Spotify_Platform = platform;
+        Time_Played = msPlayed;
+        Spotify_Country = conn_country;
+        Spotify_IP = ip_addr_decrypted;
+        Spotify_UA = user_agent_decrypted;
+        Song_Name = master_metadata_track_name;
+        Song_Artist = master_metadata_album_artist_name;
+        Song_Album = master_metadata_album_album_name;
+        Song_URI = spotify_track_uri;
+        Episode_Name = episode_name;
+        Episode_Show = episode_show_name;
+        Episode_URI = spotify_episode_uri;
+        Song_StartReason = reason_start;
+        Song_EndReason = reason_end;
+        Song_Shuffle = shuffle;
+        Song_Skipped = skipped;
+        Spotify_Offline = offline;
+        Spotify_OfflineTS = offline_timestamp;
+        Spotify_Incognito = incognito_mode;
     }
 
     /// <summary>
@@ -37,24 +45,20 @@ public readonly partial struct SpotifyEntry
     public readonly int Index { get; }
 
     /// <summary>
-    /// The JSON object containing the Spotify data from which this entry was derived.
-    /// </summary>
-    public readonly JObject Json { get; }
-
-    /// <summary>
     /// The time the song started (<see cref="TimeStartedEst"/>) or ended (<see cref="TimeEnded"/>).
     /// </summary>
+    [JsonProperty("ts")]
     public readonly DateTimeOffset Time => UseEstStartTime ? TimeStartedEst : TimeEnded;
 
     /// <summary>
     /// Determines whether or not to use <see cref="TimeStartedEst"/> as the reference time.
     /// </summary>
-    public static bool UseEstStartTime => PreferEstimatedStartTime;
+    public readonly bool UseEstStartTime => PreferEstimatedStartTime;
 
     /// <summary>
     /// This field is a timestamp indicating when the track stopped playing in UTC (Coordinated Universal Time).
     /// </summary>
-    public readonly DateTimeOffset TimeEnded => (DateTimeOffset?)Json["endTime"] ?? (DateTimeOffset?)Json["ts"] ?? throw new Exception("");
+    public readonly DateTimeOffset TimeEnded { get; }
 
     /// <summary>
     /// The estimated time and date when the song started.
@@ -65,17 +69,20 @@ public readonly partial struct SpotifyEntry
     /// <summary>
     /// This field is your Spotify username.
     /// </summary>
-    public readonly string? Spotify_Username => (string?)Json["username"];
+    [JsonProperty("username")]
+    public readonly string? Spotify_Username { get; }
 
     /// <summary>
     /// This field is the platform used when streaming the track (e.g. Android OS, Google Chromecast).
     /// </summary>
-    public readonly string? Spotify_Platform => (string?)Json["platform"];
+    [JsonProperty("platform")]
+    public readonly string? Spotify_Platform { get; }
 
     /// <summary>
     /// This field is the number of milliseconds the stream was played.
     /// </summary>
-    private readonly double Time_Played => (double?)Json["msPlayed"] ?? (double?)Json["ms_played"] ?? throw new Exception("");
+    [JsonProperty("msPlayed")]
+    private readonly double Time_Played { get; }
 
     /// <summary>
     /// The duration of playback of this song, parsed from <see cref="Time_Played"/>.
@@ -85,111 +92,119 @@ public readonly partial struct SpotifyEntry
     /// <summary>
     /// This field is the country code of the country where the stream was played (e.g. SE - Sweden).
     /// </summary>
-    public readonly string? Spotify_Country => (string?)Json["conn_country"];
+    [JsonProperty("conn_country")]
+    public readonly string? Spotify_Country { get; }
 
     /// <summary>
     /// This field contains the IP address logged when streaming the track.
     /// </summary>
-    public readonly string? Spotify_IP => (string?)Json["ip_addr_decrypted"];
+    [JsonProperty("ip_addr_decrypted")]
+    public readonly string? Spotify_IP { get; }
 
     /// <summary>
     /// This field contains the user agent used when streaming the track (e.g. a browser, like Mozilla Firefox, or Safari).
     /// </summary>
-    public readonly string? Spotify_UA => (string?)Json["user_agent_decrypted"];
+    [JsonProperty("user_agent_decrypted")]
+    public readonly string? Spotify_UA { get; }
 
     /// <summary>
     /// This field is the name of the track.
     /// </summary>
-    public readonly string? Song_Name => (string?)Json["trackName"] ?? (string?)Json["master_metadata_track_name"];
+    [JsonProperty("master_metadata_track_name")]
+    public readonly string? Song_Name { get; }
 
     /// <summary>
     /// This field is the name of the artist, band or podcast.
     /// </summary>
-    public readonly string? Song_Artist => (string?)Json["artistName"] ?? (string?)Json["master_metadata_album_artist_name"];
+    [JsonProperty("master_metadata_album_artist_name")]
+    public readonly string? Song_Artist { get; }
 
     /// <summary>
     /// This field is the name of the album of the track.
     /// </summary>
-    public readonly string? Song_Album => (string?)Json["master_metadata_album_album_name"];
+    [JsonProperty("master_metadata_album_album_name")]
+    public readonly string? Song_Album { get; }
 
     /// <summary>
     /// A Spotify URI, uniquely identifying the track in the form of spotify:track:base-62 string.
     /// </summary>
-    public readonly string? Song_URI => (string?)Json["spotify_track_uri"];
+    [JsonProperty("spotify_track_uri")]
+    public readonly string? Song_URI { get; }
 
     /// <summary>
     /// The base-62 identifier found at the end of the Spotify URI, parsed from <see cref="Song_URI"/>.
     /// </summary>
-    public readonly string? Song_ID => Song_URI?.Split(':', 3)[2];
+    public readonly string? Song_ID => Song_URI?.Split(':').Last();
+
+    /// <summary>
+    /// The URL leading to the song on Spotify, parsed from <see cref="Song_ID"/>.
+    /// </summary>
+    public readonly string? Song_URL => Song_ID == null ? null : $"http://open.spotify.com/track/{Song_ID}";
 
     /// <summary>
     /// This field contains the name of the episode of the podcast.
     /// </summary>
-    public readonly string? Episode_Name => (string?)Json["episode_name"];
+    [JsonProperty("episode_name")]
+    public readonly string? Episode_Name { get; }
 
     /// <summary>
     /// This field contains the name of the show of the podcast.
     /// </summary>
-    public readonly string? Episode_Show => (string?)Json["episode_show_name"];
+    [JsonProperty("episode_show_name")]
+    public readonly string? Episode_Show { get; }
 
     /// <summary>
     /// A Spotify Episode URI, uniquely identifying the podcast episode in the form of spotify:episode:base-62 string.
     /// </summary>
-    public readonly string? Episode_URI => (string?)Json["spotify_episode_uri"];
+    [JsonProperty("spotify_episode_uri")]
+    public readonly string? Episode_URI { get; }
 
     /// <summary>
     /// This field is a value telling why the track started (e.g. “trackdone”).
     /// </summary>
-    public readonly string? Song_StartReason => (string?)Json["reason_start"];
+    [JsonProperty("reason_start")]
+    public readonly string? Song_StartReason { get; }
 
     /// <summary>
     /// This field is a value telling why the track ended (e.g. “endplay”).
     /// </summary>
-    public readonly string? Song_EndReason => (string?)Json["reason_end"];
+    [JsonProperty("reason_end")]
+    public readonly string? Song_EndReason { get; }
 
     /// <summary>
     /// This field has the value True or False depending on if shuffle mode was used when playing the track.
     /// </summary>
-    public readonly bool? Song_Shuffle => (bool?)Json["shuffle"];
+    [JsonProperty("shuffle")]
+    public readonly bool? Song_Shuffle { get; }
 
     /// <summary>
     /// This field indicates if the user skipped to the next song.
     /// </summary>
-    public readonly bool? Song_Skipped => (bool?)Json["skipped"];
+    [JsonProperty("skipped")]
+    public readonly bool? Song_Skipped { get; }
 
     /// <summary>
     /// This field indicates whether the track was played in offline mode (“True”) or not (“False”).
     /// </summary>
-    public readonly bool? Spotify_Offline => (bool?)Json["offline"];
+    [JsonProperty("offline")]
+    public readonly bool? Spotify_Offline { get; }
 
     /// <summary>
     /// This field is a timestamp of when offline mode was used, if used.
     /// </summary>
-    private readonly string? Spotify_OfflineTS => (string?)Json["offline_timestamp"];
+    [JsonProperty("offline_timestamp")]
+    private readonly long? Spotify_OfflineTS { get; }
 
     /// <summary>
     /// The time and date of when offline mode was used, parsed from <see cref="Spotify_OfflineTS"/>.
     /// </summary>
-    public readonly DateTimeOffset? OfflineTimestamp
-    {
-        get
-        {
-            if (Spotify_OfflineTS != null)
-            {
-                // Parse unix epoch to readable time
-                return DateTimeOffset.FromUnixTimeSeconds(long.Parse(Spotify_OfflineTS));
-            }
-            else
-            {
-                return null;
-            }
-        }
-    }
+    public readonly DateTimeOffset? OfflineTimestamp => Spotify_OfflineTS == null ? null : DateTimeOffset.FromUnixTimeSeconds((long)Spotify_OfflineTS);
 
     /// <summary>
     /// This field indicates whether the track was played in incognito mode (“True”) or not (“False”).
     /// </summary>
-    public readonly bool? Spotify_Incognito => (bool?)Json["incognito"];
+    [JsonProperty("incognito_mode")]
+    public readonly bool? Spotify_Incognito { get; }
 
     /// <summary>
     /// Converts this SpotifyEntry to a string.
@@ -281,6 +296,7 @@ public readonly struct TrackInfo
     /// <param name="index">The index of this track (in a series of tracks).</param>
     /// <param name="name">The friendly name of this track.</param>
     /// <param name="type">The type of this track (GPX, Gap, or Combined).</param>
+    [JsonConstructor]
     public TrackInfo(int? index, string? name, TrackType type)
     {
         Indexx = index;
@@ -332,8 +348,6 @@ public readonly struct TrackInfo
 
     public bool Equals(TrackInfo other) => Index == other.Index && Name == other.Name && Type == other.Type;
 
-    public override int GetHashCode() => HashCode.Combine(Index, Name, Type);
-
     public static bool operator ==(TrackInfo left, TrackInfo right) => left.Equals(right);
 
     public static bool operator !=(TrackInfo left, TrackInfo right) => !(left == right);
@@ -371,10 +385,11 @@ public readonly struct GPXPoint
     /// <param name="index">The index of this GPXPoint (in a created list).</param>
     /// <param name="point">The coordinate (pair) of this point's position.</param>
     /// <param name="time">The string representing the time of the point.</param>
-    public GPXPoint(int index, Coordinate point, DateTimeOffset time)
+    [JsonConstructor]
+    public GPXPoint(int index, Coordinate location, DateTimeOffset time)
     {
         Index = index;
-        Location = point;
+        Location = location;
         Time = time;
     }
 
@@ -415,10 +430,10 @@ public readonly struct Coordinate
     /// </summary>
     /// <param name="lat">Latitude</param>
     /// <param name="lon">Longitude</param>
-    public Coordinate(double lat, double lon)
+    public Coordinate(double latitude, double longitude)
     {
-        Latitude = lat;
-        Longitude = lon;
+        Latitude = latitude;
+        Longitude = longitude;
     }
 
     /// <summary>
@@ -442,12 +457,16 @@ public readonly struct Coordinate
         return Latitude == other.Latitude && Longitude == other.Longitude;
     }
 
-    public override int GetHashCode() => HashCode.Combine(Latitude, Longitude);
-
     public static bool operator ==(Coordinate c1, Coordinate c2) => c1.Equals(c2);
 
     public static bool operator !=(Coordinate c1, Coordinate c2) => !c1.Equals(c2);
 
+    /// <summary>
+    /// Adds two coordinates together.
+    /// </summary>
+    /// <param name="c1">The first coordinate.</param>
+    /// <param name="c2">The second coordinate.</param>
+    /// <returns>A coordinate representing the added coordinates.</returns>
     public static Coordinate operator +(Coordinate c1, Coordinate c2)
     {
         double latSum = c1.Latitude + c2.Latitude;
@@ -455,6 +474,12 @@ public readonly struct Coordinate
         return new Coordinate(latSum, lonSum);
     }
 
+    /// <summary>
+    /// Subtracts one coordinate from another.
+    /// </summary>
+    /// <param name="c1">The first coordinate</param>
+    /// <param name="c2">The second coordinate.</param>
+    /// <returns>A coordinate representing the difference between the coordinates.</returns>
     public static Coordinate operator -(Coordinate c1, Coordinate c2)
     {
         double latDiff = c1.Latitude - c2.Latitude;
@@ -462,6 +487,12 @@ public readonly struct Coordinate
         return new Coordinate(latDiff, lonDiff);
     }
 
+    /// <summary>
+    /// Multiplies a coordinate by a scalar.
+    /// </summary>
+    /// <param name="c">A coordinate object.</param>
+    /// <param name="scalar">The scalar value to shift the coordinate by.</param>
+    /// <returns>A new coordinate representing the scaled original coordinate.</returns>
     public static Coordinate operator *(Coordinate c, double scalar)
     {
         double latScaled = c.Latitude * scalar;
@@ -469,6 +500,12 @@ public readonly struct Coordinate
         return new Coordinate(latScaled, lonScaled);
     }
 
+    /// <summary>
+    /// Calculates the distance between two coordinates.
+    /// </summary>
+    /// <param name="c1">The first coordinate.</param>
+    /// <param name="c2">The second coordinate.</param>
+    /// <returns>A double representing the distance between the two coordinates.</returns>
     public static double CalculateDistance(Coordinate c1, Coordinate c2)
     {
         double latDiff = c2.Latitude - c1.Latitude;
@@ -494,7 +531,7 @@ public readonly struct SongPoint
         {
             StringBuilder builder = new();
 
-            string activity = SpotifyEntry.UseEstStartTime ? "started (est)" : "ended";
+            string activity = Song.UseEstStartTime ? "started (est)" : "ended";
 
             builder.Append("At this position: {0}", PointTime.ToString(Options.ISO8601Offset));
             builder.Append("Song {0}", $"{activity}: {SongTime.ToString(Options.ISO8601Offset)}");
@@ -516,6 +553,7 @@ public readonly struct SongPoint
     /// <param name="song">The SpotifyEntry (containing song data) of this pair's song.</param>
     /// <param name="point">The GPXPoint (containing geospatial data) of this pair's point.</param>
     /// <param name="origin">The TrackInfo (track information) about the track from which this pair was created.</param>
+    [JsonConstructor]
     public SongPoint(int index, SpotifyEntry song, GPXPoint point, TrackInfo origin)
     {
         Index = index;

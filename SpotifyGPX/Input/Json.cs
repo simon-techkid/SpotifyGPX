@@ -36,7 +36,32 @@ public partial class Json : ISongInput, IJsonDeserializer
 
     public List<SpotifyEntry> ParseEntriesToSongs()
     {
-        return AllEntries.Select((entry, index) => new SpotifyEntry(index, entry)).ToList();
+        return AllEntries
+            .Select((entry, index) => new SpotifyEntry(
+                index,
+                (DateTimeOffset?)entry["endTime"] ?? (DateTimeOffset?)entry["ts"] ?? throw new Exception(""),
+                (string?)entry["username"],
+                (string?)entry["platform"],
+                (double?)entry["msPlayed"] ?? (double?)entry["ms_played"] ?? throw new Exception(""),
+                (string?)entry["conn_country"],
+                (string?)entry["ip_addr_decrypted"],
+                (string?)entry["user_agent_decrypted"],
+                (string?)entry["trackName"] ?? (string?)entry["master_metadata_track_name"],
+                (string?)entry["artistName"] ?? (string?)entry["master_metadata_album_artist_name"],
+                (string?)entry["master_metadata_album_album_name"],
+                (string?)entry["spotify_track_uri"],
+                (string?)entry["episode_name"],
+                (string?)entry["episode_show_name"],
+                (string?)entry["spotify_episode_uri"],
+                (string?)entry["reason_start"],
+                (string?)entry["reason_end"],
+                (bool?)entry["shuffle"],
+                (bool?)entry["skipped"],
+                (bool?)entry["offline"],
+                (long?)entry["offline_timestamp"],
+                (bool?)entry["incognito"]
+                )
+            ).ToList();
     }
 
     /// <summary>

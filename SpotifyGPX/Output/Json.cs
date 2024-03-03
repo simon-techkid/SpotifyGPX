@@ -28,7 +28,7 @@ public partial class Json : IFileOutput
     /// <returns>A list of JObjects, each representing the original Spotify playback JSON from each pair.</returns>
     private static List<JObject> GetDocument(IEnumerable<SongPoint> Pairs)
     {
-        return Pairs.Select(pair => pair.Song.Json).ToList();
+        return Pairs.Select(pair => JObject.FromObject(pair.Song)).ToList();
     }
 
     /// <summary>
