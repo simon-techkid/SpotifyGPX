@@ -2,9 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using System.IO;
 
 namespace SpotifyGPX.Output;
 
@@ -37,7 +37,7 @@ public partial class Xspf : IFileOutput
             new XElement(Namespace + "creator", pair.Song.Song_Artist),
             new XElement(Namespace + "annotation", pair.Song.Time.UtcDateTime.ToString(Options.ISO8601UTC)),
             new XElement(Namespace + "album", pair.Song.Song_Album),
-            new XElement(Namespace + "duration", pair.Song.TimePlayed?.TotalMilliseconds),
+            new XElement(Namespace + "duration", pair.Song.TimePlayed.TotalMilliseconds),
             new XElement(Namespace + "link", pair.Song.Song_URI)
         ));
 

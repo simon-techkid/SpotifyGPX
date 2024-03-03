@@ -235,7 +235,7 @@ public interface ISongInput
         List<SpotifyEntry> FilteredSongs = AllSongs.Where(spotifyEntry => // If the spotify entry
             trackRange.Any(trackTimes =>
                 spotifyEntry.WithinTimeFrame(trackTimes.Start, trackTimes.End) && // Within the time range of tracks
-                (spotifyEntry.TimePlayed == null || spotifyEntry.TimePlayed >= MinimumPlaytime) && // Long enough duration
+                (spotifyEntry.TimePlayed >= MinimumPlaytime) && // Long enough duration
                 (spotifyEntry.Song_Skipped != true || !ExcludeSkipped))) // Wasn't skipped
             .ToList(); // Send the songs passing the filter to a list
 

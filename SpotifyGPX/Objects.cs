@@ -42,47 +42,25 @@ public readonly partial struct SpotifyEntry
     public readonly JObject Json { get; }
 
     /// <summary>
-    /// The time the song started (estimate) or ended (as detailed in Spotify data).
+    /// The time the song started (<see cref="TimeStartedEst"/>) or ended (<see cref="TimeEnded"/>).
     /// </summary>
-    public readonly DateTimeOffset Time => UseEstStartTime ? (DateTimeOffset)TimeStartedEst : TimeEnded;
+    public readonly DateTimeOffset Time => UseEstStartTime ? TimeStartedEst : TimeEnded;
+
+    /// <summary>
+    /// Determines whether or not to use <see cref="TimeStartedEst"/> as the reference time.
+    /// </summary>
+    public static bool UseEstStartTime => PreferEstimatedStartTime;
 
     /// <summary>
     /// This field is a timestamp indicating when the track stopped playing in UTC (Coordinated Universal Time).
     /// </summary>
-    private readonly string? Time_Ended => (string?)Json["endTime"] ?? (string?)Json["ts"];
-
-    /// <summary>
-    /// This field is a timestamp indicating when the track stopped playing in UTC (Coordinated Universal Time).
-    /// </summary>
-    public DateTimeOffset TimeEnded
-    {
-        get
-        {
-            if (DateTimeOffset.TryParseExact(Time_Ended, Options.DateTimeOnly, null, Options.InterpretAsUniversal, out var result))
-            {
-                return result; // return parsed "account data" format song end time
-            }
-            else if (DateTimeOffset.TryParseExact(Time_Ended, Options.ISO8601UTC, null, Options.InterpretAsUniversal, out result))
-            {
-                return result; // return parsed "extended streaming history" format song end time
-            }
-            else
-            {
-                throw new Exception("Couldn't find valid time formats, 'ts' or 'endTime' in JSON");
-            }
-        }
-    }
-
-    /// <summary>
-    /// Determines whether or not to use the estimated start time (EstStartTime) as the reference time.
-    /// </summary>
-    public readonly bool UseEstStartTime => PreferEstimatedStartTime && TimeStartedEst != null;
+    public readonly DateTimeOffset TimeEnded => (DateTimeOffset?)Json["endTime"] ?? (DateTimeOffset?)Json["ts"] ?? throw new Exception("");
 
     /// <summary>
     /// The estimated time and date when the song started.
-    /// Can be used in place of the end time provided by Spotify if you prefer the pairings be based on when the song began.
+    /// Can be used in place of <see cref="TimeEnded"/> (provided by Spotify) if you prefer the pairings be based on when the song began.
     /// </summary>
-    public readonly DateTimeOffset? TimeStartedEst => TimeEnded - TimePlayed;
+    public readonly DateTimeOffset TimeStartedEst => TimeEnded - TimePlayed;
 
     /// <summary>
     /// This field is your Spotify username.
@@ -97,26 +75,12 @@ public readonly partial struct SpotifyEntry
     /// <summary>
     /// This field is the number of milliseconds the stream was played.
     /// </summary>
-    private readonly string? Time_Played => (string?)Json["msPlayed"] ?? (string?)Json["ms_played"];
+    private readonly double Time_Played => (double?)Json["msPlayed"] ?? (double?)Json["ms_played"] ?? throw new Exception("");
 
     /// <summary>
-    /// The duration of playback of this song.
+    /// The duration of playback of this song, parsed from <see cref="Time_Played"/>.
     /// </summary>
-    public readonly TimeSpan? TimePlayed
-    {
-        get
-        {
-            if (Time_Played != null)
-            {
-                // Parse milliseconds value to TimeSpan
-                return TimeSpan.FromMilliseconds(double.Parse(Time_Played)); // Parse string of milliseconds to TimeSpan
-            }
-            else
-            {
-                return null;
-            }
-        }
-    }
+    public readonly TimeSpan TimePlayed => TimeSpan.FromMilliseconds(Time_Played);
 
     /// <summary>
     /// This field is the country code of the country where the stream was played (e.g. SE - Sweden).
@@ -154,7 +118,7 @@ public readonly partial struct SpotifyEntry
     public readonly string? Song_URI => (string?)Json["spotify_track_uri"];
 
     /// <summary>
-    /// The base-62 identifier found at the end of the Spotify URI.
+    /// The base-62 identifier found at the end of the Spotify URI, parsed from <see cref="Song_URI"/>.
     /// </summary>
     public readonly string? Song_ID => Song_URI?.Split(':', 3)[2];
 
@@ -204,7 +168,7 @@ public readonly partial struct SpotifyEntry
     private readonly string? Spotify_OfflineTS => (string?)Json["offline_timestamp"];
 
     /// <summary>
-    /// The time and date of when offline mode was used.
+    /// The time and date of when offline mode was used, parsed from <see cref="Spotify_OfflineTS"/>.
     /// </summary>
     public readonly DateTimeOffset? OfflineTimestamp
     {
@@ -530,11 +494,11 @@ public readonly struct SongPoint
         {
             StringBuilder builder = new();
 
-            string activity = Song.UseEstStartTime ? "started (est)" : "ended";
+            string activity = SpotifyEntry.UseEstStartTime ? "started (est)" : "ended";
 
             builder.Append("At this position: {0}", PointTime.ToString(Options.ISO8601Offset));
             builder.Append("Song {0}", $"{activity}: {SongTime.ToString(Options.ISO8601Offset)}");
-            builder.Append("Played for {0}", Song.TimePlayed?.ToString(Options.TimeSpan));
+            builder.Append("Played for {0}", Song.TimePlayed.ToString(Options.TimeSpan));
             builder.Append("Skipped: {0}", Song.Song_Skipped);
             builder.Append("Shuffle: {0}", Song.Song_Shuffle);
             builder.Append("IP Address: {0}", Song.Spotify_IP);

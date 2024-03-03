@@ -95,8 +95,7 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput
                 // Get the Point item
                 JObject point = pair.Value<JObject>("Point") ?? throw new Exception($"Pair {pairIndex} is missing a Point.");
                 int index = point.Value<int>("Index");
-                string timeStr = point.Value<string>("Time") ?? throw new Exception($"Pair {pairIndex} is missing an OriTime.");
-                DateTimeOffset time = DateTimeOffset.ParseExact(timeStr, Options.ISO8601Offset, null, Options.InterpretAsUniversal);
+                DateTimeOffset time = point.Value<DateTimeOffset?>("Time") ?? throw new Exception($"Pair {pairIndex} is missing an OriTime.");
                 JObject coordinate = point.Value<JObject>("Location") ?? throw new Exception($"Pair {pairIndex} is missing a Point/Location.");
                 double lat = coordinate.Value<double>("Latitude");
                 double lon = coordinate.Value<double>("Longitude");

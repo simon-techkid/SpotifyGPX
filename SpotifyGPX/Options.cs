@@ -2,8 +2,8 @@
 
 using Newtonsoft.Json;
 using System.Globalization;
-using System.Xml.Linq;
 using System.Text;
+using System.Xml.Linq;
 
 namespace SpotifyGPX
 {
@@ -12,22 +12,9 @@ namespace SpotifyGPX
     /// </summary>
     public class Options
     {
-        /// <summary>
-        /// Interpret this parsed string as a universal (UTC) time.
-        /// </summary>
-        public static DateTimeStyles InterpretAsUniversal => DateTimeStyles.AssumeUniversal;
+        private static bool IsMiniSpotify => false; // (true = "Account data", false = "Extended streaming history data")
 
-        /// <summary>
-        /// Interpret this parsed string as a local (system) time.
-        /// </summary>
-        public static DateTimeStyles InterpretAsLocal => DateTimeStyles.AssumeLocal;
-
-        /// <summary>
-        /// Interpret this parsed string as a time in any timezone, converted to UTC.
-        /// </summary>
-        public static DateTimeStyles ConvertToUniversal => DateTimeStyles.AdjustToUniversal;
-
-        // Time Outputs
+        public static string SpotifyTimeFormat => IsMiniSpotify ? DateTimeOnly : ISO8601UTC;
 
         /// <summary>
         /// A time in HH:mm:ss format with no date or offset.
@@ -78,10 +65,10 @@ namespace SpotifyGPX.Input
 {
     public partial class Gpx
     {
-        private static XNamespace InputNs => "http://www.topografix.com/GPX/1/0"; // Namespace of input GPX
-        private static string Track => "trk"; // Name of a track element
-        private static string TrackPoint => "trkpt"; // Name of a track point object, children of tracks
-        private static string TimeFormat => @"yyyy-MM-ddTHH\:mm\:ss.fffzzz";
+        private static XNamespace InputNs => "http://www.topografix.com/GPX/1/0";
+        private static string Track => "trk";
+        private static string TrackPoint => "trkpt";
+        private static string TimeFormat => $"yyyy-MM-ddTHH:mm:ss.fffzzz";
         private static DateTimeStyles TimeStyle => DateTimeStyles.None;
     }
 
@@ -89,8 +76,9 @@ namespace SpotifyGPX.Input
     {
         private static JsonSerializerSettings JsonSettings => new()
         {
-            DateParseHandling = DateParseHandling.None,
-            DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
+            DateParseHandling = DateParseHandling.DateTime,
+            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+            DateFormatString = Options.SpotifyTimeFormat,
             NullValueHandling = NullValueHandling.Include
         };
     }
@@ -99,8 +87,9 @@ namespace SpotifyGPX.Input
     {
         private static JsonSerializerSettings JsonSettings => new()
         {
-            DateParseHandling = DateParseHandling.None,
+            DateParseHandling = DateParseHandling.DateTimeOffset,
             DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
+            DateFormatString = $"yyyy-MM-ddTHH:mm:ss.ffffffK",
             NullValueHandling = NullValueHandling.Include
         };
     }
@@ -110,25 +99,25 @@ namespace SpotifyGPX.Output
 {
     public partial class OutputHandler
     {
-        private static bool ReplaceFiles => true; // Allow SpotifyGPX to replace existing files, rather than generating a unique name
-        private static string AllTracksName => "All"; // Prefix of a file containing multiple tracks
+        private static bool ReplaceFiles => true;
+        private static string AllTracksName => "All";
     }
 
     public partial class Csv
     {
-        private static string Delimiter => ","; // Delimiter of the output CSV
-        private static Encoding OutputEncoding => Encoding.UTF8; // Encoding of the output CSV
+        private static string Delimiter => ",";
+        private static Encoding OutputEncoding => Encoding.UTF8;
     }
-    
+
     public partial class Gpx
     {
-        private static XNamespace Namespace => "http://www.topografix.com/GPX/1/0"; // Namespace of the output GPX
+        private static XNamespace Namespace => "http://www.topografix.com/GPX/1/0";
         private static string DocumentEncoding => "utf-8";
-        private static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance"; // XML schema location of the output GPX
-        private static string Schema => "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd"; // GPX schema location(s) of the output GPX
-        private static string Waypoint => "wpt"; // Name of a waypoint object
+        private static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance";
+        private static string Schema => "http://www.topografix.com/GPX/1/0 http://wwwtopografix.com/GPX/1/0/gpx.xsd";
+        private static string Waypoint => "wpt";
         private static SaveOptions OutputSettings => SaveOptions.None;
-        private static Encoding OutputEncoding => Encoding.UTF8; // Encoding of the output XSPF
+        private static Encoding OutputEncoding => Encoding.UTF8;
     }
 
     public partial class Html
@@ -150,7 +139,7 @@ hr {
 }
 ";
         private static SaveOptions OutputSettings => SaveOptions.None;
-        private static Encoding OutputEncoding => Encoding.UTF8; // Encoding of the output XSPF
+        private static Encoding OutputEncoding => Encoding.UTF8;
     }
 
     public partial class Json
@@ -158,9 +147,12 @@ hr {
         private static Formatting OutputFormatting => Formatting.Indented;
         private static JsonSerializerSettings JsonSettings => new()
         {
-            
+            DateParseHandling = DateParseHandling.DateTimeOffset,
+            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+            DateFormatString = Options.SpotifyTimeFormat,
+            NullValueHandling = NullValueHandling.Include
         };
-        private static Encoding OutputEncoding => Encoding.UTF8; // Encoding of the output JSON
+        private static Encoding OutputEncoding => Encoding.UTF8;
     }
 
     public partial class JsonReport
@@ -168,25 +160,25 @@ hr {
         private static Formatting OutputFormatting => Formatting.Indented;
         private static JsonSerializerSettings JsonSettings => new()
         {
+            DateParseHandling = DateParseHandling.DateTimeOffset,
             DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
-            DateFormatHandling = DateFormatHandling.IsoDateFormat,
-            DateFormatString = "yyyy-MM-ddTHH:mm:ss.ffffffK",
+            DateFormatString = $"yyyy-MM-ddTHH:mm:ss.ffffffK",
             NullValueHandling = NullValueHandling.Include,
         };
-        private static Encoding OutputEncoding => Encoding.UTF8; // Encoding of the output JSON
+        private static Encoding OutputEncoding => Encoding.UTF8;
     }
 
     public partial class Txt
     {
-        private static Encoding OutputEncoding => Encoding.UTF8; // Encoding of the output TXT
+        private static Encoding OutputEncoding => Encoding.UTF8;
     }
 
     public partial class Xspf
     {
-        private static XNamespace Namespace => "http://xspf.org/ns/0/"; // Namespace of output XSPF
+        private static XNamespace Namespace => "http://xspf.org/ns/0/";
         private static string DocumentEncoding => "utf-8";
-        private static string Track => "track"; // Name of a track object
+        private static string Track => "track";
         private static SaveOptions OutputSettings => SaveOptions.None;
-        private static Encoding OutputEncoding => Encoding.UTF8; // Encoding of the output XSPF
+        private static Encoding OutputEncoding => Encoding.UTF8;
     }
 }
