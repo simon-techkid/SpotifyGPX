@@ -1,10 +1,8 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace SpotifyGPX.Input;
@@ -12,8 +10,9 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Provides instructions for parsing song playback data and GPS data from the JsonReport format.
 /// </summary>
-public partial class JsonReport : ISongInput, IGpsInput, IPairInput
+public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeserializer
 {
+    private JsonDeserializer JsonDeserializer { get; }
     private List<JObject> JsonTracks { get; }
     private List<SpotifyEntry> AllSongs { get; }
     private List<GPXTrack> AllTracks { get; }
@@ -25,11 +24,17 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput
     /// <param name="path">The path to a JsonReport file.</param>
     public JsonReport(string path)
     {
-        JsonTracks = Deserialize(path);
+        JsonDeserializer = new JsonDeserializer(path, JsonSettings);
+        JsonTracks = Deserialize();
         (List<GPXTrack> tracks, List<SpotifyEntry> songs, List<SongPoint> pairs) = GetFromJObject();
         AllTracks = tracks;
         AllSongs = songs;
         AllPairs = pairs;
+    }
+
+    public List<JObject> Deserialize()
+    {
+        return JsonDeserializer.Deserialize();
     }
 
     /// <summary>
@@ -240,33 +245,5 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput
     public List<SongPoint> GetAllPairs()
     {
         return AllPairs;
-    }
-
-    /// <summary>
-    /// Gets a list of the first-level JSON objects in the JsonReport.
-    /// </summary>
-    /// <param name="jsonFilePath">The path to a JsonReport file.</param>
-    /// <returns>A list of JObjects where each track is a JObject.</returns>
-    private static List<JObject> Deserialize(string jsonFilePath)
-    {
-        List<JObject> tracks = new();
-
-        using (var fileStream = File.OpenRead(jsonFilePath))
-        using (var streamReader = new StreamReader(fileStream))
-        using (var jsonReader = new JsonTextReader(streamReader))
-            while (jsonReader.Read())
-            {
-                if (jsonReader.TokenType == JsonToken.StartObject)
-                {
-                    var serializer = JsonSerializer.Create(JsonSettings);
-                    var json = serializer.Deserialize<JObject>(jsonReader);
-                    if (json != null)
-                    {
-                        tracks.Add(json);
-                    }
-                }
-            }
-
-        return tracks;
     }
 }

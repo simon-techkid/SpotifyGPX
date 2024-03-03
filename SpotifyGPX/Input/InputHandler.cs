@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -431,4 +432,9 @@ public interface IGpsInput
     /// The total number of points in the given file.
     /// </summary>
     int PointCount { get; }
+}
+
+public interface IJsonDeserializer
+{
+    List<JObject> Deserialize();
 }

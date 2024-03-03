@@ -5,14 +5,17 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SpotifyGPX.Input;
 
 /// <summary>
 /// Provides instructions for parsing song playback data from the JSON format.
 /// </summary>
-public partial class Json : ISongInput
+public partial class Json : ISongInput, IJsonDeserializer
 {
+    private JsonDeserializer JsonDeserializer { get; }
+    private List<JObject> AllEntries { get; }
     private List<SpotifyEntry> AllSongs { get; } // All songs parsed from the JSON
 
     /// <summary>
@@ -21,7 +24,19 @@ public partial class Json : ISongInput
     /// <param name="path">The path of the JSON file.</param>
     public Json(string path)
     {
-        AllSongs = ParseEntries(path);
+        JsonDeserializer = new JsonDeserializer(path, JsonSettings);
+        AllEntries = Deserialize();
+        AllSongs = ParseEntriesToSongs();
+    }
+
+    public List<JObject> Deserialize()
+    {
+        return JsonDeserializer.Deserialize();
+    }
+
+    public List<SpotifyEntry> ParseEntriesToSongs()
+    {
+        return AllEntries.Select((entry, index) => new SpotifyEntry(index, entry)).ToList();
     }
 
     /// <summary>
@@ -37,46 +52,47 @@ public partial class Json : ISongInput
     /// The total number of songs contained in the JSON file.
     /// </summary>
     public int SongCount => AllSongs.Count;
+}
 
-    /// <summary>
-    /// Parses a JSON file to a list of song records.
-    /// </summary>
-    /// <param name="jsonFilePath">The path to a JSON file containing Spotify playback data</param>
-    /// <returns>A list of SpotifyEntry objects, each representing song playback information.</returns>
-    /// <exception cref="Exception"></exception>
-    private static List<SpotifyEntry> ParseEntries(string jsonFilePath)
+public class JsonDeserializer : IJsonDeserializer
+{
+    private string JsonPath { get; }
+    private JsonSerializerSettings? SerializerSettings { get; }
+
+    public JsonDeserializer(string path, JsonSerializerSettings? settings)
     {
-        List<SpotifyEntry> spotifyEntries = new(); // List of SpotifyEntries to be returned
-        int index = 0; // Index of the current entry
+        JsonPath = path;
+        SerializerSettings = settings;
+    }
 
-        // Create a serializer with the settings from Options.JsonSettings
-        JsonSerializer serializer = JsonSerializer.Create(JsonSettings);
+    public List<JObject> Deserialize()
+    {
+        List<JObject> tracks = new();
 
-        // Open the file stream and create a JsonTextReader
-        using (var fileStream = File.OpenRead(jsonFilePath)) // Open the file stream
-        using (var streamReader = new StreamReader(fileStream)) // Create a StreamReader from the file stream
-        using (var jsonReader = new JsonTextReader(streamReader)) // Create a JsonTextReader from the StreamReader
+        JsonSerializer serializer = JsonSerializer.Create(SerializerSettings);
+
+        using (var fileStream = File.OpenRead(JsonPath))
+        using (var streamReader = new StreamReader(fileStream))
+        using (var jsonReader = new JsonTextReader(streamReader))
         {
-            // Read JSON objects from the file
             while (jsonReader.Read())
             {
-                // Check if the current token is the start of an object
                 if (jsonReader.TokenType == JsonToken.StartObject)
                 {
-                    JObject? json = serializer.Deserialize<JObject>(jsonReader); // Deserialize the JSON object
+                    var json = serializer.Deserialize<JObject>(jsonReader);
 
-                    if (json != null) // If deserialization is successful, add a new SpotifyEntry to the list
+                    if (json != null)
                     {
-                        spotifyEntries.Add(new SpotifyEntry(index++, json));
+                        tracks.Add(json);
                     }
-                    else // If deserialization is unsuccessful, throw an exception
+                    else
                     {
-                        throw new Exception($"Input file contains null JSON entries on top level entry {index++}");
+                        throw new Exception($"Input file contains null JSON entries on top level entry.");
                     }
                 }
             }
         }
 
-        return spotifyEntries;
+        return tracks;
     }
 }
