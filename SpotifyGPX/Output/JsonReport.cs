@@ -34,7 +34,7 @@ public partial class JsonReport : IFileOutput
 
         JObject header = new()
         {
-            Pairs.GroupBy(pair => pair.Origin.Type).Select(type => new JProperty(((int)type.Key).ToString(), type.Count())),
+            //new JProperty("Created", DateTimeOffset.Now.ToUniversalTime()),
             new JProperty("Total", Pairs.Count())
         };
 
@@ -55,6 +55,10 @@ public partial class JsonReport : IFileOutput
             })
             .ToList());
 
+        JsonHashProvider<IEnumerable<JObject>> hasher = new();
+        string hash = hasher.ComputeHash(objs);
+        objs.Add(new JObject(new JProperty("SHA256Hash", hash)));
+
         return objs;
     }
 
@@ -64,7 +68,7 @@ public partial class JsonReport : IFileOutput
     /// <param name="path">The path where this JsonReport will be saved.</param>
     public void Save(string path)
     {
-        string text = JsonConvert.SerializeObject(Document, OutputFormatting, JsonSettings);
+        string text = JsonConvert.SerializeObject(Document, JsonSettings.Formatting, JsonSettings);
         File.WriteAllText(path, text, OutputEncoding);
     }
 

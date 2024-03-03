@@ -37,7 +37,7 @@ public partial class Json : IFileOutput
     /// <param name="path">The path where this JSON file will be saved.</param>
     public void Save(string path)
     {
-        string text = JsonConvert.SerializeObject(Document, OutputFormatting, JsonSettings);
+        string text = JsonConvert.SerializeObject(Document, JsonSettings.Formatting, JsonSettings);
         File.WriteAllText(path, text, OutputEncoding);
     }
 

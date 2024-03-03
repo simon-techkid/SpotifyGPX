@@ -40,6 +40,9 @@ public partial class Gpx : IFileOutput
             )
         );
 
+        XmlHashProvider hasher = new();
+        string hash = hasher.ComputeHash(gpxPairs);
+
         return new XDocument(
             new XDeclaration("1.0", DocumentEncoding, null),
             new XElement(Namespace + "gpx",
@@ -49,6 +52,7 @@ public partial class Gpx : IFileOutput
                 new XAttribute("xmlns", Namespace),
                 new XAttribute(Xsi + "schemaLocation", Schema),
                 new XElement(Namespace + "name", trackName),
+                new XElement(Namespace + "desc", hash),
                 new XElement(Namespace + "time", DateTimeOffset.Now.UtcDateTime.ToString(Options.ISO8601UTC)),
                 gpxPairs
             )

@@ -14,8 +14,6 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
 {
     private JsonDeserializer JsonDeserializer { get; }
     private List<JObject> JsonTracks { get; }
-    private List<SpotifyEntry> AllSongs { get; }
-    private List<GPXTrack> AllTracks { get; }
     private List<SongPoint> AllPairs { get; }
 
     /// <summary>
@@ -26,9 +24,7 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
     {
         JsonDeserializer = new JsonDeserializer(path, JsonSettings);
         JsonTracks = Deserialize();
-        (List<GPXTrack> tracks, List<SpotifyEntry> songs, List<SongPoint> pairs) = GetFromJObject();
-        AllTracks = tracks;
-        AllSongs = songs;
+        List<SongPoint> pairs = GetFromJObject();
         AllPairs = pairs;
     }
 
@@ -42,142 +38,54 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
     /// </summary>
     /// <returns>A list of tracks and a list of songs representing the included data.</returns>
     /// <exception cref="Exception"></exception>
-    public (List<GPXTrack>, List<SpotifyEntry>, List<SongPoint>) GetFromJObject()
+    public List<SongPoint> GetFromJObject()
     {
-        List<GPXTrack> tracks = new(); // All tracks in the JsonReport
-        List<SpotifyEntry> allSongs = new(); // All songs in the JsonReport
-        List<SongPoint> allPairs = new(); // All pairs in the JsonReport
-
         int alreadyParsed = 0; // The number of points already parsed
 
         // Get the header
         JObject header = JsonTracks.First();
-        int expectedGpx = header.Value<int>("0");
-        int actualGpx = 0;
-        int expectedGap = header.Value<int>("1");
-        int actualGap = 0;
-        int expectedCombined = header.Value<int>("2");
-        int actualCombined = 0;
-        int total = header.Value<int>("Total");
+        int expectedTotal = header.Value<int>("Total");
 
-        // Verify the header
-        if (expectedGpx + expectedGap + expectedCombined != total)
-        {
-            throw new Exception($"File header pair track types total invalid!");
-        }
-
-        // Iterate through each track
-        foreach (JObject track in JsonTracks.Skip(1)) // Skip the header track
-        {
-            // Get the Count item
-            int expectedPairCount = track.Value<int>("Count");
-
-            // Get the TrackInfo item
-            JObject trackInfo = track.Value<JObject>("TrackInfo") ?? throw new Exception($"No TrackInfo object for track {JsonTracks.IndexOf(track)}");
-            int trackIndex = trackInfo.Value<int>("Index");
-            string trackName = trackInfo.Value<string>("Name") ?? throw new Exception($"No Name value in TrackInfo for track {trackIndex}");
-            TrackType trackType = (TrackType)trackInfo.Value<int>("Type");
-            TrackInfo tInfo = new(trackIndex, trackName, trackType);
-
-            // Get the track pairs
-            JArray pairs = track.Value<JArray>(trackName) ?? throw new Exception($"No pairs tree found with track name '{trackName}'");
-
-            // Create the lists
-            List<GPXPoint> trackPoints = new();
-            List<SpotifyEntry> trackSongs = new();
-            List<SongPoint> trackPairs = new();
-
-            List<int> indexes = new();
-            int actualPairCount = 0;
-
-            // Iterate through each pair
-            foreach (JToken pair in pairs)
+        List<SongPoint> allPairs = JsonTracks
+            .Skip(1).SkipLast(1)
+            .SelectMany(track =>
             {
-                // Get the Index item
-                int pairIndex = pair.Value<int>("Index");
-                indexes.Add(pairIndex);
+                // Get the Count item
+                int expectedPairCount = track.Value<int>("Count");
 
-                // Get the Point item
-                JObject point = pair.Value<JObject>("Point") ?? throw new Exception($"Pair {pairIndex} is missing a Point.");
-                int index = point.Value<int>("Index");
-                DateTimeOffset time = point.Value<DateTimeOffset?>("Time") ?? throw new Exception($"Pair {pairIndex} is missing an OriTime.");
-                JObject coordinate = point.Value<JObject>("Location") ?? throw new Exception($"Pair {pairIndex} is missing a Point/Location.");
-                double lat = coordinate.Value<double>("Latitude");
-                double lon = coordinate.Value<double>("Longitude");
-                Coordinate location = new(lat, lon);
-                GPXPoint pairPoint = new(index, location, time);
-                trackPoints.Add(pairPoint);
+                // Get the TrackInfo item
+                JObject trackInfo = track.Value<JObject>("TrackInfo") ?? throw new Exception($"No TrackInfo object for track {JsonTracks.IndexOf(track)}");
+                TrackInfo tInfo = trackInfo.ToObject<TrackInfo>();
 
-                // Get the Song item
-                JObject song = pair.Value<JObject>("Song") ?? throw new Exception($"Pair {pairIndex} is missing a Song");
-                SpotifyEntry pairSong = song.ToObject<SpotifyEntry>();
-                trackSongs.Add(pairSong);
+                // Get the track pairs
+                JArray pairs = track.Value<JArray>(tInfo.Name) ?? throw new Exception($"No pairs tree found with track name '{tInfo.Name}'");
 
-                // Get the TrackOrigin item
-                JObject origin = pair.Value<JObject>("Origin") ?? throw new Exception($"Pair {pairIndex} is missing an Origin.");
-                int pairTrackIndex = origin.Value<int>("Index");
-                string pairTrackName = origin.Value<string>("Name") ?? throw new Exception($"Pair {pairIndex} is missing an Origin/Name");
-                TrackType pairTrackType = (TrackType)origin.Value<int>("Type");
-                TrackInfo pairTinfo = new(pairTrackIndex, pairTrackName, pairTrackType);
+                List<SongPoint> trackPairs = pairs
+                    .Select(pair => pair.ToObject<SongPoint>())
+                    .Where((pair, index) => pair.Origin == tInfo && pair.Index - alreadyParsed == index)
+                    .ToList();
 
-                // Create the SongPoint
-                SongPoint thisPair = new(pairIndex, pairSong, pairPoint, pairTinfo);
-                trackPairs.Add(thisPair);
+                List<int> indexes = trackPairs.Select(pair => pair.Index).ToList();
 
-                // Verify the TrackOrigin
-                if (tInfo != pairTinfo)
+                // Verify the quantity of pairs
+                if (trackPairs.Count != expectedPairCount)
                 {
-                    throw new Exception($"Pair {pairIndex} TrackOrigin does not match origin of parent track {trackIndex}");
+                    VerifyQuantity(alreadyParsed, expectedPairCount, indexes, tInfo.Index);
                 }
 
-                actualPairCount++;
-            }
+                alreadyParsed += trackPairs.Count; // Add the number of pairs in this track
 
-            // Create the GPXTrack
-            GPXTrack t = new(trackIndex, trackName, trackType, trackPoints);
-            tracks.Add(t);
+                return trackPairs;
+            })
+            .ToList();
 
-            // Add the songs to the list
-            allSongs.AddRange(trackSongs);
+        JsonHashProvider<IEnumerable<JObject>> hasher = new();
+        string actualHash = hasher.ComputeHash(JsonTracks.SkipLast(1));
 
-            // Add the pairs to the list
-            allPairs.AddRange(trackPairs);
+        string expectedHash = JsonTracks.Last().Value<string>("SHA256Hash") ?? throw new Exception($"Hash missing from end of file.");
+        Console.WriteLine($"Hashes: expected: {expectedHash} actual: {actualHash}");
 
-            // Verify the quantity of pairs
-            if (actualPairCount != expectedPairCount)
-            {
-                VerifyQuantity(alreadyParsed, expectedPairCount, indexes, trackIndex);
-            }
-
-            // Update the actual pair counts
-            if (trackType == TrackType.GPX)
-            {
-                actualGpx += actualPairCount;
-            }
-            else if (trackType == TrackType.Gap)
-            {
-                actualGap += actualPairCount;
-            }
-            else if (trackType == TrackType.Combined)
-            {
-                actualCombined += actualPairCount;
-            }
-
-            alreadyParsed += actualPairCount; // Add the number of pairs in this track
-        }
-
-        // Verify the total pair counts
-        if (actualGpx != expectedGpx || actualGap != expectedGap || actualCombined != expectedCombined)
-        {
-            throw new Exception($"File pair track types total invalid!");
-        }
-        else if (alreadyParsed != total)
-        {
-            throw new Exception($"File pair total invalid!");
-        }
-
-        // Return the tracks and songs
-        return (tracks, allSongs, allPairs);
+        return allPairs;
     }
 
     /// <summary>
@@ -203,7 +111,7 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
     /// <summary>
     /// The total number of songs in the JsonReport file.
     /// </summary>
-    public int SongCount => AllSongs.Count;
+    public int SongCount => AllPairs.Select(pair => pair.Song).Count();
 
     /// <summary>
     /// The total number of tracks in the JsonReport file.
@@ -213,7 +121,7 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
     /// <summary>
     /// The total number of points (across all tracks) in the JsonReport file.
     /// </summary>
-    public int PointCount => AllTracks.Select(track => track.Points.Count).Sum();
+    public int PointCount => AllPairs.Select(pair => pair.Point).Count();
 
     /// <summary>
     /// The total number of pairs in the JsonReport file.
@@ -226,7 +134,7 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
     /// <returns>A list of GPXTracks represented in the file, in their original order.</returns>
     public List<GPXTrack> GetAllTracks()
     {
-        return AllTracks;
+        return AllPairs.GroupBy(pair => pair.Origin).Select(type => new GPXTrack(type.Key.Index, type.Key.Name, type.Key.Type, type.Select(pair => pair.Point).ToList())).ToList();
     }
 
     /// <summary>
@@ -235,7 +143,7 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
     /// <returns>A list of SpotifyEntries represented in the file, in their original order.</returns>
     public List<SpotifyEntry> GetAllSongs()
     {
-        return AllSongs;
+        return AllPairs.Select(pair => pair.Song).ToList();
     }
 
     /// <summary>

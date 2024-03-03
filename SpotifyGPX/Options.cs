@@ -144,26 +144,26 @@ hr {
 
     public partial class Json
     {
-        private static Formatting OutputFormatting => Formatting.Indented;
         private static JsonSerializerSettings JsonSettings => new()
         {
             DateParseHandling = DateParseHandling.DateTimeOffset,
             DateTimeZoneHandling = DateTimeZoneHandling.Utc,
             DateFormatString = Options.SpotifyTimeFormat,
-            NullValueHandling = NullValueHandling.Include
+            NullValueHandling = NullValueHandling.Include,
+            Formatting = Formatting.Indented
         };
         private static Encoding OutputEncoding => Encoding.UTF8;
     }
 
     public partial class JsonReport
     {
-        private static Formatting OutputFormatting => Formatting.Indented;
         private static JsonSerializerSettings JsonSettings => new()
         {
             DateParseHandling = DateParseHandling.DateTimeOffset,
             DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
             DateFormatString = $"yyyy-MM-ddTHH:mm:ss.ffffffK",
             NullValueHandling = NullValueHandling.Include,
+            Formatting = Formatting.Indented
         };
         private static Encoding OutputEncoding => Encoding.UTF8;
     }

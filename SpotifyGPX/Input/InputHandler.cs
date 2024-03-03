@@ -52,9 +52,9 @@ public class InputHandler
             throw new Exception($"The specified file, '{pairPath}', does not exist!");
         }
 
-        PairInput = CreatePairInput(pairPath);
         SongInput = CreateSongInput(pairPath);
         GpsInput = CreateGpsInput(pairPath);
+        PairInput = CreatePairInput(pairPath);
 
         Console.WriteLine($"[INP] '{Path.GetFileName(pairPath)}' contains {PairInput.PairCount} total pairs");
     }
@@ -66,7 +66,14 @@ public class InputHandler
     public List<SpotifyEntry> GetAllSongs()
     {
         // Returns unfiltered (all) songs
-        return SongInput.GetAllSongs();
+        if (SongInput != null)
+        {
+            return SongInput.GetAllSongs();
+        }
+        else
+        {
+            throw new Exception($"Unable to get pairs: this input format does not support pairs.");
+        }
     }
 
     /// <summary>
@@ -76,7 +83,6 @@ public class InputHandler
     /// <returns>A list of SpotifyEntries, each representing a single song of playback.</returns>
     public List<SpotifyEntry> GetFilteredSongs(List<GPXTrack> tracks)
     {
-        // Returns filtered songs
         return SongInput.GetFilteredSongs(tracks);
     }
 
@@ -86,7 +92,6 @@ public class InputHandler
     /// <returns>A list of GPXTracks, each representing a collection of positions comprising a journey's path.</returns>
     public List<GPXTrack> GetAllTracks()
     {
-        // Return all tracks
         return GpsInput.GetAllTracks();
     }
 

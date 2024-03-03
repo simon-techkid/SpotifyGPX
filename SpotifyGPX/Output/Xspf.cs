@@ -41,6 +41,9 @@ public partial class Xspf : IFileOutput
             new XElement(Namespace + "link", pair.Song.Song_URI)
         ));
 
+        XmlHashProvider hasher = new();
+        string hash = hasher.ComputeHash(xspfPairs);
+
         return new XDocument(
             new XDeclaration("1.0", DocumentEncoding, null),
             new XElement(Namespace + "playlist",
@@ -48,6 +51,8 @@ public partial class Xspf : IFileOutput
                 new XAttribute("xmlns", Namespace),
                 new XElement(Namespace + "title", trackName),
                 new XElement(Namespace + "creator", "SpotifyGPX"),
+                new XElement(Namespace + "annotation", ""),
+                new XElement(Namespace + "identifier", hash),
                 new XElement(Namespace + "date", DateTimeOffset.Now.UtcDateTime.ToString(Options.ISO8601UTC)),
                 new XElement(Namespace + "trackList", xspfPairs) // All pairs inside <trackList>
             )

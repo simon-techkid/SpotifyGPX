@@ -29,6 +29,11 @@ public partial class Html : IFileOutput
     /// <returns>An XDocument containg the contents of the created HTML.</returns>
     private static XDocument GetDocument(IEnumerable<SongPoint> pairs, string trackName)
     {
+        var htmlPairs = pairs.Select(pair => new XElement(Namespace + "li", pair.Song.ToString()));
+
+        XmlHashProvider hasher = new();
+        string hash = hasher.ComputeHash(htmlPairs);
+
         return new XDocument(
             new XDeclaration("1.0", DocumentEncoding, null),
             new XDocumentType("html", "-//W3C//DTD XHTML 1.1//EN", null, "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"),
@@ -50,7 +55,8 @@ public partial class Html : IFileOutput
                 new XElement(Namespace + "body",
                     new XElement(Namespace + "h1", trackName),
                     new XElement(Namespace + "hr"),
-                    new XElement(Namespace + "ol", pairs.Select(pair => new XElement(Namespace + "li", pair.Song.ToString()))),
+                    new XElement(Namespace + "p", $"Hash: {hash}"),
+                    new XElement(Namespace + "ol", htmlPairs),
                     new XElement(Namespace + "hr")
                     )
                 )
