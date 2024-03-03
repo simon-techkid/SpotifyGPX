@@ -1,6 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
 using Newtonsoft.Json;
+using System;
 using System.Globalization;
 using System.Text;
 using System.Xml.Linq;
@@ -60,9 +61,14 @@ namespace SpotifyGPX
     }
 }
 
-
 namespace SpotifyGPX.Input
 {
+    public partial interface ISongInput
+    {
+        private static TimeSpan MinimumPlaytime => new(0, 0, 0); // Minimum accepted song playback time (0,0,0 for all songs)
+        private static bool ExcludeSkipped => false; // Ignore songs skipped by the user, as defined by Spotify JSON (false for all songs)
+    }
+
     public partial class Gpx
     {
         private static XNamespace InputNs => "http://www.topografix.com/GPX/1/0";

@@ -1,10 +1,8 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace SpotifyGPX.Input;
@@ -77,47 +75,4 @@ public partial class Json : ISongInput, IJsonDeserializer
     /// The total number of songs contained in the JSON file.
     /// </summary>
     public int SongCount => AllSongs.Count;
-}
-
-public class JsonDeserializer : IJsonDeserializer
-{
-    private string JsonPath { get; }
-    private JsonSerializerSettings? SerializerSettings { get; }
-
-    public JsonDeserializer(string path, JsonSerializerSettings? settings)
-    {
-        JsonPath = path;
-        SerializerSettings = settings;
-    }
-
-    public List<JObject> Deserialize()
-    {
-        List<JObject> tracks = new();
-
-        JsonSerializer serializer = JsonSerializer.Create(SerializerSettings);
-
-        using (var fileStream = File.OpenRead(JsonPath))
-        using (var streamReader = new StreamReader(fileStream))
-        using (var jsonReader = new JsonTextReader(streamReader))
-        {
-            while (jsonReader.Read())
-            {
-                if (jsonReader.TokenType == JsonToken.StartObject)
-                {
-                    var json = serializer.Deserialize<JObject>(jsonReader);
-
-                    if (json != null)
-                    {
-                        tracks.Add(json);
-                    }
-                    else
-                    {
-                        throw new Exception($"Input file contains null JSON entries on top level entry.");
-                    }
-                }
-            }
-        }
-
-        return tracks;
-    }
 }
