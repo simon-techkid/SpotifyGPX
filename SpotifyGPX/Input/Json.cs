@@ -37,10 +37,10 @@ public partial class Json : ISongInput, IJsonDeserializer
         return AllEntries
             .Select((entry, index) => new SpotifyEntry(
                 index,
-                (DateTimeOffset?)entry["endTime"] ?? (DateTimeOffset?)entry["ts"] ?? throw new Exception(""),
+                (DateTimeOffset?)entry["endTime"] ?? (DateTimeOffset?)entry["ts"] ?? throw new Exception($"'ts' timestamp missing from JSON entry {index}"),
                 (string?)entry["username"],
                 (string?)entry["platform"],
-                (double?)entry["msPlayed"] ?? (double?)entry["ms_played"] ?? throw new Exception(""),
+                (double?)entry["msPlayed"] ?? (double?)entry["ms_played"] ?? throw new Exception($"'msPlayed' duration missing from JSON entry {index}"),
                 (string?)entry["conn_country"],
                 (string?)entry["ip_addr_decrypted"],
                 (string?)entry["user_agent_decrypted"],
@@ -72,7 +72,12 @@ public partial class Json : ISongInput, IJsonDeserializer
     }
 
     /// <summary>
-    /// The total number of songs contained in the JSON file.
+    /// The total number of songs in the JSON file.
     /// </summary>
-    public int SongCount => AllSongs.Count;
+    public int SourceSongCount => AllEntries.Count;
+
+    /// <summary>
+    /// The total number of songs parsed to SpotifyEntry objects from the JSON file.
+    /// </summary>
+    public int ParsedSongCount => AllSongs.Count;
 }

@@ -12,9 +12,11 @@ namespace SpotifyGPX.Input;
 /// </summary>
 public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeserializer
 {
-    private JsonDeserializer JsonDeserializer { get; }
-    private List<JObject> JsonTracks { get; }
-    private List<SongPoint> AllPairs { get; }
+    private JsonDeserializer JsonDeserializer { get; } // Deserializer for handling Json deserialization for hashing
+    private List<JObject> JsonObjects { get; } // Everything in the JsonReport file
+    private List<JObject> JsonTracksOnly { get; } // Only the tracks portion of the JsonReport file (excluding header, hash)
+    private List<JObject> HashedPortion { get; } // Everything in the JsonReport file except for the hash
+    private List<SongPoint> AllPairs { get; } // Pairs parsed from the JsonTracksOnly portion of the file
 
     /// <summary>
     /// Creates a JsonReport importer that allows job creation from existing job reports.
@@ -23,7 +25,9 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
     public JsonReport(string path)
     {
         JsonDeserializer = new JsonDeserializer(path, JsonSettings);
-        JsonTracks = Deserialize();
+        JsonObjects = Deserialize();
+        JsonTracksOnly = JsonObjects.Skip(1).SkipLast(1).ToList();
+        HashedPortion = JsonObjects.SkipLast(1).ToList();
         List<SongPoint> pairs = GetFromJObject();
         AllPairs = pairs;
     }
@@ -43,18 +47,17 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
         int alreadyParsed = 0; // The number of points already parsed
 
         // Get the header
-        JObject header = JsonTracks.First();
+        JObject header = JsonObjects.First();
         int expectedTotal = header.Value<int>("Total");
 
-        List<SongPoint> allPairs = JsonTracks
-            .Skip(1).SkipLast(1)
-            .SelectMany(track =>
+        List<SongPoint> allPairs = JsonTracksOnly
+            .SelectMany((track, index) =>
             {
                 // Get the Count item
                 int expectedPairCount = track.Value<int>("Count");
 
                 // Get the TrackInfo item
-                JObject trackInfo = track.Value<JObject>("TrackInfo") ?? throw new Exception($"No TrackInfo object for track {JsonTracks.IndexOf(track)}");
+                JObject trackInfo = track.Value<JObject>("TrackInfo") ?? throw new Exception($"No TrackInfo object for track {index}");
                 TrackInfo tInfo = trackInfo.ToObject<TrackInfo>();
 
                 // Get the track pairs
@@ -78,12 +81,6 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
                 return trackPairs;
             })
             .ToList();
-
-        JsonHashProvider<IEnumerable<JObject>> hasher = new();
-        string actualHash = hasher.ComputeHash(JsonTracks.SkipLast(1));
-
-        string expectedHash = JsonTracks.Last().Value<string>("SHA256Hash") ?? throw new Exception($"Hash missing from end of file.");
-        Console.WriteLine($"Hashes: expected: {expectedHash} actual: {actualHash}");
 
         return allPairs;
     }
@@ -111,22 +108,42 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
     /// <summary>
     /// The total number of songs in the JsonReport file.
     /// </summary>
-    public int SongCount => AllPairs.Select(pair => pair.Song).Count();
+    public int SourceSongCount => JsonTracksOnly.Select(JObject => JObject.Value<int>("Count")).Sum();
 
     /// <summary>
-    /// The total number of tracks in the JsonReport file.
+    /// The total number of points in the source JsonReport file
     /// </summary>
-    public int TrackCount => JsonTracks.Count;
+    public int SourcePointCount => JsonTracksOnly.Select(JObject => JObject.Value<int>("Count")).Sum();
 
     /// <summary>
-    /// The total number of points (across all tracks) in the JsonReport file.
+    /// The total number of tracks in the source JsonReport file.
     /// </summary>
-    public int PointCount => AllPairs.Select(pair => pair.Point).Count();
+    public int SourceTrackCount => JsonTracksOnly.Count;
 
     /// <summary>
-    /// The total number of pairs in the JsonReport file.
+    /// The total number of pairs in the source JsonReport file.
     /// </summary>
-    public int PairCount => AllPairs.Count;
+    public int SourcePairCount => JsonTracksOnly.Select(JObject => JObject.Value<int>("Count")).Sum();
+
+    /// <summary>
+    /// The total number of songs parsed to SpotifyEntry objects from the JsonReport file
+    /// </summary>
+    public int ParsedSongCount => AllPairs.Select(pair => pair.Song).Count();
+
+    /// <summary>
+    /// The total number of points parsed to GPXPoint objects from the JsonReport file.
+    /// </summary>
+    public int ParsedPointCount => AllPairs.Select(pair => pair.Point).Count();
+
+    /// <summary>
+    /// The total number of tracks parsed from the JsonReport file.
+    /// </summary>
+    public int ParsedTrackCount => AllPairs.GroupBy(pair => pair.Origin).Count();
+
+    /// <summary>
+    /// The total number of pairs parsed to SongPoint objects from the JsonReport file.
+    /// </summary>
+    public int ParsedPairCount => AllPairs.Count;
 
     /// <summary>
     /// Gets a list of all the tracks in the JsonReport file.

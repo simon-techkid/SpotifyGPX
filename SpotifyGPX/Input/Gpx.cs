@@ -25,13 +25,13 @@ public partial class Gpx : IGpsInput
     {
         Document = XDocument.Load(path);
 
-        if (TrackCount == 0)
+        if (SourceTrackCount == 0)
         {
             // If there are no tracks in the GPX, throw error
             throw new Exception($"No track elements found in '{Path.GetFileName(path)}'!");
         }
 
-        if (PointCount == 0)
+        if (SourcePointCount == 0)
         {
             // If there are no points the GPX, throw error
             throw new Exception($"No points found in '{Path.GetFileName(path)}'!");
@@ -43,15 +43,25 @@ public partial class Gpx : IGpsInput
     /// <summary>
     /// The total number of track elements in this GPX file.
     /// </summary>
-    public int TrackCount => Document.Descendants(InputNs + Track).Count();
+    public int SourceTrackCount => Document.Descendants(InputNs + Track).Count();
 
     /// <summary>
     /// The total number of point elements in this GPX file.
     /// </summary>
-    public int PointCount => Document.Descendants(InputNs + TrackPoint).Count();
+    public int SourcePointCount => Document.Descendants(InputNs + TrackPoint).Count();
 
     /// <summary>
-    /// Gets all the tracks in this GPX file.
+    /// The total number of tracks parsed from the GPX file to GPXTrack objects.
+    /// </summary>
+    public int ParsedTrackCount => Tracks.Count;
+
+    /// <summary>
+    /// The total number of points parsed from the GPX file to GPXPoint objects.
+    /// </summary>
+    public int ParsedPointCount => Tracks.Select(track => track.Points.Count).Sum();
+
+    /// <summary>
+    /// Gets all the tracks in this GPX file. 
     /// </summary>
     /// <returns>A list of GPXTrack objects.</returns>
     public List<GPXTrack> GetAllTracks()

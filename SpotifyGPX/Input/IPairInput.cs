@@ -4,8 +4,24 @@ using System.Collections.Generic;
 
 namespace SpotifyGPX.Input;
 
+/// <summary>
+/// Interfaces with pair input classes, unifying all formats accepting pairs.
+/// </summary>
 public interface IPairInput
 {
+    /// <summary>
+    /// Gets all pairs in the file.
+    /// </summary>
+    /// <returns>A list of Song-Point (SongPoint) pair objects.</returns>
     public List<SongPoint> GetAllPairs();
-    int PairCount { get; }
+
+    /// <summary>
+    /// The number of pairs in the source file.
+    /// </summary>
+    int SourcePairCount { get; }
+
+    /// <summary>
+    /// The number of pairs parsed successfuly from the source file.
+    /// </summary>
+    int ParsedPairCount { get; }
 }

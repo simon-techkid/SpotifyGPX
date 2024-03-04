@@ -13,11 +13,16 @@ public partial class Xspf : ISongInput
     private XDocument Document { get; }
     private List<SpotifyEntry> AllSongs { get; }
 
+    /// <summary>
+    /// Creates a new input handler for handling files in the XSPF format.
+    /// </summary>
+    /// <param name="path">The path to the XSPF file.</param>
+    /// <exception cref="Exception">The file contains no valid elements.</exception>
     public Xspf(string path)
     {
         Document = XDocument.Load(path);
 
-        if (SongCount == 0)
+        if (SourceSongCount == 0)
         {
             // If there are no tracks in the GPX, throw error
             throw new Exception($"No track elements found in '{Path.GetFileName(path)}'!");
@@ -26,6 +31,10 @@ public partial class Xspf : ISongInput
         AllSongs = ParseSongs();
     }
 
+    /// <summary>
+    /// Parse the contents of the XSPF file to a list of songs.
+    /// </summary>
+    /// <returns>A list of SpotifyEntry objects, each representing a song record.</returns>
     public List<SpotifyEntry> ParseSongs()
     {
         return Document.Descendants(InputNs + Track).Select((element, index) => new SpotifyEntry(
@@ -54,6 +63,10 @@ public partial class Xspf : ISongInput
             ).ToList();
     }
 
+    /// <summary>
+    /// Get all the songs from the XSPF file.
+    /// </summary>
+    /// <returns>A list of SpotifyEntry objects representing all of the song records in the XSPF.</returns>
     public List<SpotifyEntry> GetAllSongs()
     {
         return AllSongs;
@@ -62,5 +75,10 @@ public partial class Xspf : ISongInput
     /// <summary>
     /// The total number of songs in the XSPF file.
     /// </summary>
-    public int SongCount => Document.Descendants(InputNs + Track).Count();
+    public int SourceSongCount => Document.Descendants(InputNs + Track).Count();
+
+    /// <summary>
+    /// The total number of songs parsed to SpotifyEntry objects from the XSPF file.
+    /// </summary>
+    public int ParsedSongCount => AllSongs.Count;
 }

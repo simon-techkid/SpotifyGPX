@@ -179,12 +179,22 @@ public interface IGpsInput
     private static bool IsValidTrackIndex(int index, int totalTracks) => index >= 0 && index < totalTracks;
 
     /// <summary>
-    /// The total number of tracks in the given file.
+    /// The total number of tracks in the source file.
     /// </summary>
-    int TrackCount { get; }
+    int SourceTrackCount { get; }
 
     /// <summary>
-    /// The total number of points in the given file.
+    /// The total number of points in the source file.
     /// </summary>
-    int PointCount { get; }
+    int SourcePointCount { get; }
+
+    /// <summary>
+    /// The total number of tracks parsed from the source file to GPXTrack objects.
+    /// </summary>
+    int ParsedTrackCount { get; }
+
+    /// <summary>
+    /// The total number of points parsed from the source file to GPXPoint objects.
+    /// </summary>
+    int ParsedPointCount { get; }
 }

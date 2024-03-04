@@ -36,8 +36,8 @@ public class InputHandler
         SongInput = CreateSongInput(songPath);
         GpsInput = CreateGpsInput(gpsPath);
 
-        Console.WriteLine($"[INP] '{Path.GetFileName(gpsPath)}' contains {GpsInput.TrackCount} tracks and {GpsInput.PointCount} points");
-        Console.WriteLine($"[INP] '{Path.GetFileName(songPath)}' contains {SongInput.SongCount} total songs");
+        Console.WriteLine($"[INP] Parsed {GpsInput.ParsedTrackCount}/{GpsInput.SourceTrackCount} tracks and {GpsInput.ParsedPointCount}/{GpsInput.SourcePointCount} points from '{Path.GetFileName(gpsPath)}'");
+        Console.WriteLine($"[INP] Parsed {SongInput.ParsedSongCount}/{SongInput.SourceSongCount} songs from '{Path.GetFileName(songPath)}'");
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public class InputHandler
         GpsInput = CreateGpsInput(pairPath);
         PairInput = CreatePairInput(pairPath);
 
-        Console.WriteLine($"[INP] '{Path.GetFileName(pairPath)}' contains {PairInput.PairCount} total pairs");
+        Console.WriteLine($"[INP] Parsed {PairInput.ParsedPairCount}/{PairInput.SourcePairCount} pairs from '{Path.GetFileName(pairPath)}'");
     }
 
     /// <summary>

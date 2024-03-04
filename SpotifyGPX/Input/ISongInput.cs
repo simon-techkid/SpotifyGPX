@@ -50,5 +50,10 @@ public partial interface ISongInput
     /// <summary>
     /// The total number of songs in the given file.
     /// </summary>
-    int SongCount { get; }
+    int SourceSongCount { get; }
+
+    /// <summary>
+    /// The total number of SpotifyEntry objects parsed from the given file.
+    /// </summary>
+    int ParsedSongCount { get; }
 }
