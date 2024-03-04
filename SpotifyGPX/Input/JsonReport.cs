@@ -10,12 +10,11 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Provides instructions for parsing song playback data and GPS data from the JsonReport format.
 /// </summary>
-public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeserializer
+public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeserializer, IHashVerifier
 {
     private JsonDeserializer JsonDeserializer { get; } // Deserializer for handling Json deserialization for hashing
     private List<JObject> JsonObjects { get; } // Everything in the JsonReport file
     private List<JObject> JsonTracksOnly { get; } // Only the tracks portion of the JsonReport file (excluding header, hash)
-    private List<JObject> HashedPortion { get; } // Everything in the JsonReport file except for the hash
     private List<SongPoint> AllPairs { get; } // Pairs parsed from the JsonTracksOnly portion of the file
 
     /// <summary>
@@ -26,8 +25,7 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
     {
         JsonDeserializer = new JsonDeserializer(path, JsonSettings);
         JsonObjects = Deserialize();
-        JsonTracksOnly = JsonObjects.Skip(1).SkipLast(1).ToList();
-        HashedPortion = JsonObjects.SkipLast(1).ToList();
+        JsonTracksOnly = JsonObjects.Skip(1).ToList();
         List<SongPoint> pairs = GetFromJObject();
         AllPairs = pairs;
     }
@@ -170,5 +168,16 @@ public partial class JsonReport : ISongInput, IGpsInput, IPairInput, IJsonDeseri
     public List<SongPoint> GetAllPairs()
     {
         return AllPairs;
+    }
+
+    /// <summary>
+    /// Verifies the hash included in the file with the contents of the file.
+    /// </summary>
+    /// <returns>True, if the hashes match. Otherwise, false.</returns>
+    public bool VerifyHash()
+    {
+        JsonHashProvider<IEnumerable<JObject>> hasher = new();
+        string? expectedHash = JsonObjects.First().Value<string>("SHA256Hash");
+        return hasher.VerifyHash(JsonTracksOnly, expectedHash);
     }
 }

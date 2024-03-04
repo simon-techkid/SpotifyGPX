@@ -8,7 +8,7 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Input;
 
-public partial class Xspf : ISongInput
+public partial class Xspf : ISongInput, IHashVerifier
 {
     private XDocument Document { get; }
     private List<SpotifyEntry> AllSongs { get; }
@@ -81,4 +81,15 @@ public partial class Xspf : ISongInput
     /// The total number of songs parsed to SpotifyEntry objects from the XSPF file.
     /// </summary>
     public int ParsedSongCount => AllSongs.Count;
+
+    /// <summary>
+    /// Verifies the hash included in the file with the contents of the file.
+    /// </summary>
+    /// <returns>True, if the hashes match. Otherwise, false.</returns>
+    public bool VerifyHash()
+    {
+        XmlHashProvider hasher = new();
+        string? expectedHash = Document.Descendants(InputNs + "identifier").FirstOrDefault()?.Value;
+        return hasher.VerifyHash(Document.Descendants(InputNs + Track), expectedHash);
+    }
 }

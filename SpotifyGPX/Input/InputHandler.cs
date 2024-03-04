@@ -36,6 +36,9 @@ public class InputHandler
         SongInput = CreateSongInput(songPath);
         GpsInput = CreateGpsInput(gpsPath);
 
+        // If the song and/or GPS format support hash checking, verify their hashes.
+        VerifyAllHashes();
+
         Console.WriteLine($"[INP] Parsed {GpsInput.ParsedTrackCount}/{GpsInput.SourceTrackCount} tracks and {GpsInput.ParsedPointCount}/{GpsInput.SourcePointCount} points from '{Path.GetFileName(gpsPath)}'");
         Console.WriteLine($"[INP] Parsed {SongInput.ParsedSongCount}/{SongInput.SourceSongCount} songs from '{Path.GetFileName(songPath)}'");
     }
@@ -55,6 +58,9 @@ public class InputHandler
         SongInput = CreateSongInput(pairPath);
         GpsInput = CreateGpsInput(pairPath);
         PairInput = CreatePairInput(pairPath);
+
+        // If the pairings format supports hash checking, verify their hashes.
+        VerifyAllHashes();
 
         Console.WriteLine($"[INP] Parsed {PairInput.ParsedPairCount}/{PairInput.SourcePairCount} pairs from '{Path.GetFileName(pairPath)}'");
     }
@@ -172,5 +178,39 @@ public class InputHandler
             ".jsonreport" => new JsonReport(path),
             _ => throw new Exception($"Unsupported pairs file format: {extension}")
         };
+    }
+
+    /// <summary>
+    /// Verify all hashes for provided files.
+    /// </summary>
+    private void VerifyAllHashes()
+    {
+        RunHashVerificationForInput(SongInput);
+        RunHashVerificationForInput(GpsInput);
+        if (PairInput != null)
+        {
+            RunHashVerificationForInput(PairInput);
+        }
+    }
+
+    /// <summary>
+    /// Verify the hash of an input format, if it implements IHashVerifier.
+    /// </summary>
+    /// <param name="inputClass">The input class for the format in question.</param>
+    private static void RunHashVerificationForInput(object inputClass)
+    {
+        if (inputClass is IHashVerifier hashVerifier)
+        {
+            bool hashVerified = hashVerifier.VerifyHash();
+
+            if (hashVerified)
+            {
+                Console.WriteLine($"Hash verification successful for {inputClass.GetType().Name}.");
+            }
+            else
+            {
+                Console.WriteLine($"Hash verification failed for {inputClass.GetType().Name}.");
+            }
+        }
     }
 }

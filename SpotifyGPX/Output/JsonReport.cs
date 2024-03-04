@@ -32,18 +32,7 @@ public partial class JsonReport : IFileOutput
         // Create a serializer with the settings from Options.JsonSettings
         JsonSerializer serializer = JsonSerializer.Create(JsonSettings);
 
-        JObject header = new()
-        {
-            //new JProperty("Created", DateTimeOffset.Now.ToUniversalTime()),
-            new JProperty("Total", Pairs.Count())
-        };
-
-        List<JObject> objs = new()
-        {
-            header
-        };
-
-        objs.AddRange(Pairs
+        List<JObject> objects = Pairs
             .GroupBy(pair => pair.Origin) // Group the pairs by track (JsonReport supports multiTrack)
             .Select(track =>
             {
@@ -53,13 +42,21 @@ public partial class JsonReport : IFileOutput
                     new JProperty(track.Key.ToString(), JToken.FromObject(track.SelectMany(pair => new JArray(JToken.FromObject(pair))), serializer)) // Create a json report for each pair
                 );
             })
-            .ToList());
+            .ToList();
 
         JsonHashProvider<IEnumerable<JObject>> hasher = new();
-        string hash = hasher.ComputeHash(objs);
-        objs.Add(new JObject(new JProperty("SHA256Hash", hash)));
+        string hash = hasher.ComputeHash(objects);
+        
+        JObject header = new()
+        {
+            //new JProperty("Created", DateTimeOffset.Now.ToUniversalTime()),
+            new JProperty("Total", Pairs.Count()),
+            new JProperty("SHA256Hash", hash)
+        };
 
-        return objs;
+        objects.Insert(0, header);
+
+        return objects;
     }
 
     /// <summary>
