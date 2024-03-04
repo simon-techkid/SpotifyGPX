@@ -1,4 +1,6 @@
-﻿using System;
+﻿// SpotifyGPX by Simon Field
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -132,6 +134,7 @@ public class InputHandler
         {
             ".json" => new Json(path),
             ".jsonreport" => new JsonReport(path),
+            ".xspf" => new Xspf(path),
             _ => throw new Exception($"Unsupported song file format: {extension}"),
         };
     }
@@ -154,6 +157,12 @@ public class InputHandler
         };
     }
 
+    /// <summary>
+    /// Determines the appropriate import class for handling this Song-Point pairings file.
+    /// </summary>
+    /// <param name="path">The path to the Song-Point pairings file.</param>
+    /// <returns>An IPairInput interface allowing interfacing with the corresponding format.</returns>
+    /// <exception cref="Exception">The provided file doesn't have an inport class associated with it.</exception>
     private static IPairInput CreatePairInput(string path)
     {
         string extension = Path.GetExtension(path).ToLower();

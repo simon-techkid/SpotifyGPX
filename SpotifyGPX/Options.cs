@@ -105,6 +105,13 @@ namespace SpotifyGPX.Input
     {
         private static JsonSerializerSettings JsonSettings => Options.JsonReportSettings;
     }
+
+    public partial class Xspf
+    {
+        private static XNamespace InputNs => "http://xspf.org/ns/0/";
+        private static string Track => "track";
+        private static DateTimeStyles TimeStyle => DateTimeStyles.AssumeUniversal;
+    }
 }
 
 namespace SpotifyGPX.Output
