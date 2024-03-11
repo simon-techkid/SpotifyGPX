@@ -46,10 +46,10 @@
                     <td><xsl:value-of select="position()"/></td>
                     <td><xsl:value-of select="Index"/></td>
                     <td><xsl:value-of select="Song/master_metadata_track_name"/> - <xsl:value-of select="Song/master_metadata_album_artist_name"/></td>
-                    <td><xsl:value-of select="Point/Time"/></td>
+                    <td><xsl:value-of select="PointTime"/></td>
                     <td><xsl:value-of select="Accuracy"/></td>
-                    <td><xsl:value-of select="Song/ts"/></td>
-                    <td><a href="{Song/Song_URL}">Listen on Spotify</a></td>
+                    <td><xsl:value-of select="SongTime"/></td>
+                    <td><a href="{Song/SGPX_Song_URL}">Listen on Spotify</a></td>
                 </tr>
             </xsl:for-each>
         </table>

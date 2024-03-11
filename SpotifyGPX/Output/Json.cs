@@ -26,7 +26,25 @@ public partial class Json : JsonSaveable, IFileOutput, ISaveable, ITransformable
     /// <returns>A list of JObjects, each representing the original Spotify playback JSON from each pair.</returns>
     private static List<JObject> GetDocument(IEnumerable<SongPoint> Pairs)
     {
-        return Pairs.Select(pair => JObject.FromObject(pair.Song)).ToList();
+        return Pairs.Select(pair =>
+        {
+            JObject songJson = JObject.FromObject(pair.Song);
+
+            // Uncomment below to return unchanged:
+            //return songJson;
+
+            // SpotifyGPX properties' leading name:
+            string prefix = "SGPX_";
+
+            // Remove non-Spotify properties
+            songJson.Properties() // For all the properties in the JObject,
+                .Where(property => property.Name.StartsWith(prefix)) // If the name indicates it is non-Spotify:
+                .ToList() // Send non-Spotify properties to a list
+                .ForEach(removeThis => removeThis.Remove()); // Remove non-Spotify properties.
+
+            return songJson;
+
+        }).ToList();
     }
 
     /// <summary>
