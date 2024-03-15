@@ -1,0 +1,140 @@
+﻿<Root>
+  <Root>
+    <ts>2023-07-09T08:47:38-07:00</ts>
+    <username />
+    <platform>android</platform>
+    <msPlayed>216093</msPlayed>
+    <conn_country>FR</conn_country>
+    <ip_addr_decrypted />
+    <user_agent_decrypted />
+    <master_metadata_track_name>On A Midnight Street</master_metadata_track_name>
+    <master_metadata_album_artist_name>Matthew And The Atlas</master_metadata_album_artist_name>
+    <master_metadata_album_album_name>Temple</master_metadata_album_album_name>
+    <spotify_track_uri>spotify:track:4AIzqWgbH94S0cNid1f3mT</spotify_track_uri>
+    <episode_name />
+    <episode_show_name />
+    <spotify_episode_uri />
+    <reason_start>trackdone</reason_start>
+    <reason_end>trackdone</reason_end>
+    <shuffle>false</shuffle>
+    <skipped>false</skipped>
+    <offline>false</offline>
+    <offline_timestamp>1688917442</offline_timestamp>
+    <incognito_mode />
+  </Root>
+  <Root>
+    <ts>2023-07-09T08:51:01-07:00</ts>
+    <username />
+    <platform>android</platform>
+    <msPlayed>202164</msPlayed>
+    <conn_country>FR</conn_country>
+    <ip_addr_decrypted />
+    <user_agent_decrypted />
+    <master_metadata_track_name>Watching the Wires</master_metadata_track_name>
+    <master_metadata_album_artist_name>Hiss Golden Messenger</master_metadata_album_artist_name>
+    <master_metadata_album_album_name>Watching the Wires</master_metadata_album_album_name>
+    <spotify_track_uri>spotify:track:7M9OysBhaeVEEOZW0sl4IN</spotify_track_uri>
+    <episode_name />
+    <episode_show_name />
+    <spotify_episode_uri />
+    <reason_start>trackdone</reason_start>
+    <reason_end>trackdone</reason_end>
+    <shuffle>false</shuffle>
+    <skipped>false</skipped>
+    <offline>false</offline>
+    <offline_timestamp>1688917659</offline_timestamp>
+    <incognito_mode />
+  </Root>
+  <Root>
+    <ts>2023-07-09T08:54:57-07:00</ts>
+    <username />
+    <platform>android</platform>
+    <msPlayed>235871</msPlayed>
+    <conn_country>FR</conn_country>
+    <ip_addr_decrypted />
+    <user_agent_decrypted />
+    <master_metadata_track_name>Thought You'd Never Ask</master_metadata_track_name>
+    <master_metadata_album_artist_name>Folk Road Show</master_metadata_album_artist_name>
+    <master_metadata_album_album_name>Thought You'd Never Ask</master_metadata_album_album_name>
+    <spotify_track_uri>spotify:track:05cmKMGYCSpcs0WBA0nMjX</spotify_track_uri>
+    <episode_name />
+    <episode_show_name />
+    <spotify_episode_uri />
+    <reason_start>trackdone</reason_start>
+    <reason_end>trackdone</reason_end>
+    <shuffle>false</shuffle>
+    <skipped>false</skipped>
+    <offline>false</offline>
+    <offline_timestamp>1688917862</offline_timestamp>
+    <incognito_mode />
+  </Root>
+  <Root>
+    <ts>2023-07-09T08:56:53-07:00</ts>
+    <username />
+    <platform>android</platform>
+    <msPlayed>115960</msPlayed>
+    <conn_country>FR</conn_country>
+    <ip_addr_decrypted />
+    <user_agent_decrypted />
+    <master_metadata_track_name>Not Every River</master_metadata_track_name>
+    <master_metadata_album_artist_name>Bear's Den</master_metadata_album_artist_name>
+    <master_metadata_album_album_name>So that you might hear me</master_metadata_album_album_name>
+    <spotify_track_uri>spotify:track:6vpVRpTK1r4FuZb8FtEjYb</spotify_track_uri>
+    <episode_name />
+    <episode_show_name />
+    <spotify_episode_uri />
+    <reason_start>trackdone</reason_start>
+    <reason_end>trackdone</reason_end>
+    <shuffle>false</shuffle>
+    <skipped>false</skipped>
+    <offline>false</offline>
+    <offline_timestamp>1688918098</offline_timestamp>
+    <incognito_mode />
+  </Root>
+  <Root>
+    <ts>2023-07-09T09:00:20-07:00</ts>
+    <username />
+    <platform>android</platform>
+    <msPlayed>205742</msPlayed>
+    <conn_country>FR</conn_country>
+    <ip_addr_decrypted />
+    <user_agent_decrypted />
+    <master_metadata_track_name>Won't Happen - Stripped-Back</master_metadata_track_name>
+    <master_metadata_album_artist_name>Ten Fé</master_metadata_album_artist_name>
+    <master_metadata_album_album_name>Won't Happen</master_metadata_album_album_name>
+    <spotify_track_uri>spotify:track:70Rz9c3gY6QNxqBrxCmJJa</spotify_track_uri>
+    <episode_name />
+    <episode_show_name />
+    <spotify_episode_uri />
+    <reason_start>trackdone</reason_start>
+    <reason_end>trackdone</reason_end>
+    <shuffle>false</shuffle>
+    <skipped>false</skipped>
+    <offline>false</offline>
+    <offline_timestamp>1688918214</offline_timestamp>
+    <incognito_mode />
+  </Root>
+  <Root>
+    <ts>2023-07-09T09:02:42-07:00</ts>
+    <username />
+    <platform>android</platform>
+    <msPlayed>141653</msPlayed>
+    <conn_country>FR</conn_country>
+    <ip_addr_decrypted />
+    <user_agent_decrypted />
+    <master_metadata_track_name>Sea so Blue</master_metadata_track_name>
+    <master_metadata_album_artist_name>Austin Basham</master_metadata_album_artist_name>
+    <master_metadata_album_album_name>You and Me for Now</master_metadata_album_album_name>
+    <spotify_track_uri>spotify:track:4YI7bOKyyPnCxhltKmrU9P</spotify_track_uri>
+    <episode_name />
+    <episode_show_name />
+    <spotify_episode_uri />
+    <reason_start>trackdone</reason_start>
+    <reason_end>trackdone</reason_end>
+    <shuffle>false</shuffle>
+    <skipped>false</skipped>
+    <offline>false</offline>
+    <offline_timestamp>1688918420</offline_timestamp>
+    <incognito_mode />
+  </Root>
+</Root>

@@ -1,0 +1,374 @@
+﻿<Root>
+  <Root>
+    <Total>6</Total>
+    <SHA256Hash>571a873e8ba4742dd65136f39c3a9b3ada3f9daa54d528dda98819d39ff89e14</SHA256Hash>
+  </Root>
+  <Root>
+    <Count>6</Count>
+    <TrackInfo>
+      <Index>0</Index>
+      <Name>20230709</Name>
+      <Type>0</Type>
+    </TrackInfo>
+    <_x0032_0230709>
+      <Description>At this position: 2023-07-09 17:43:56 +02:00
+Song started (est): 2023-07-09 17:44:01 +02:00
+Played for 00:03:36.093
+Skipped: False
+Shuffle: False
+Country: FR
+</Description>
+      <Index>0</Index>
+      <Song>
+        <SGPX_Index>2</SGPX_Index>
+        <SGPX_Time>2023-07-09T08:44:01.907-07:00</SGPX_Time>
+        <SGPX_UseEstStartTime>true</SGPX_UseEstStartTime>
+        <ts>2023-07-09T08:47:38-07:00</ts>
+        <SGPX_TimeStartedEst>2023-07-09T08:44:01.907-07:00</SGPX_TimeStartedEst>
+        <username />
+        <platform>android</platform>
+        <msPlayed>216093</msPlayed>
+        <SGPX_TimePlayed>00:03:36.0930000</SGPX_TimePlayed>
+        <conn_country>FR</conn_country>
+        <ip_addr_decrypted />
+        <user_agent_decrypted />
+        <master_metadata_track_name>On A Midnight Street</master_metadata_track_name>
+        <master_metadata_album_artist_name>Matthew And The Atlas</master_metadata_album_artist_name>
+        <master_metadata_album_album_name>Temple</master_metadata_album_album_name>
+        <spotify_track_uri>spotify:track:4AIzqWgbH94S0cNid1f3mT</spotify_track_uri>
+        <SGPX_Song_ID>4AIzqWgbH94S0cNid1f3mT</SGPX_Song_ID>
+        <SGPX_Song_URL>http://open.spotify.com/track/4AIzqWgbH94S0cNid1f3mT</SGPX_Song_URL>
+        <episode_name />
+        <episode_show_name />
+        <spotify_episode_uri />
+        <reason_start>trackdone</reason_start>
+        <reason_end>trackdone</reason_end>
+        <shuffle>false</shuffle>
+        <skipped>false</skipped>
+        <offline>false</offline>
+        <offline_timestamp>1688917442</offline_timestamp>
+        <SGPX_OfflineTimestamp>2023-07-09T08:44:02-07:00</SGPX_OfflineTimestamp>
+        <incognito_mode />
+      </Song>
+      <Point>
+        <Index>7</Index>
+        <Location>
+          <Latitude>44.96196068713781</Latitude>
+          <Longitude>-0.3619575231220995</Longitude>
+        </Location>
+        <Time>2023-07-09T08:43:56.999-07:00</Time>
+      </Point>
+      <Origin>
+        <Index>0</Index>
+        <Name>20230709</Name>
+        <Type>0</Type>
+      </Origin>
+      <Accuracy>4.908</Accuracy>
+      <AbsAccuracy>4.908</AbsAccuracy>
+      <NormalizedOffset>02:00:00</NormalizedOffset>
+      <SongTime>2023-07-09T08:44:01.907-07:00</SongTime>
+      <PointTime>2023-07-09T08:43:56.999-07:00</PointTime>
+      <PredictedIndex />
+    </_x0032_0230709>
+    <_x0032_0230709>
+      <Description>At this position: 2023-07-09 17:47:32 +02:00
+Song started (est): 2023-07-09 17:47:38 +02:00
+Played for 00:03:22.164
+Skipped: False
+Shuffle: False
+Country: FR
+</Description>
+      <Index>1</Index>
+      <Song>
+        <SGPX_Index>3</SGPX_Index>
+        <SGPX_Time>2023-07-09T08:47:38.836-07:00</SGPX_Time>
+        <SGPX_UseEstStartTime>true</SGPX_UseEstStartTime>
+        <ts>2023-07-09T08:51:01-07:00</ts>
+        <SGPX_TimeStartedEst>2023-07-09T08:47:38.836-07:00</SGPX_TimeStartedEst>
+        <username />
+        <platform>android</platform>
+        <msPlayed>202164</msPlayed>
+        <SGPX_TimePlayed>00:03:22.1640000</SGPX_TimePlayed>
+        <conn_country>FR</conn_country>
+        <ip_addr_decrypted />
+        <user_agent_decrypted />
+        <master_metadata_track_name>Watching the Wires</master_metadata_track_name>
+        <master_metadata_album_artist_name>Hiss Golden Messenger</master_metadata_album_artist_name>
+        <master_metadata_album_album_name>Watching the Wires</master_metadata_album_album_name>
+        <spotify_track_uri>spotify:track:7M9OysBhaeVEEOZW0sl4IN</spotify_track_uri>
+        <SGPX_Song_ID>7M9OysBhaeVEEOZW0sl4IN</SGPX_Song_ID>
+        <SGPX_Song_URL>http://open.spotify.com/track/7M9OysBhaeVEEOZW0sl4IN</SGPX_Song_URL>
+        <episode_name />
+        <episode_show_name />
+        <spotify_episode_uri />
+        <reason_start>trackdone</reason_start>
+        <reason_end>trackdone</reason_end>
+        <shuffle>false</shuffle>
+        <skipped>false</skipped>
+        <offline>false</offline>
+        <offline_timestamp>1688917659</offline_timestamp>
+        <SGPX_OfflineTimestamp>2023-07-09T08:47:39-07:00</SGPX_OfflineTimestamp>
+        <incognito_mode />
+      </Song>
+      <Point>
+        <Index>14</Index>
+        <Location>
+          <Latitude>44.94663761172837</Latitude>
+          <Longitude>-0.32882642308137994</Longitude>
+        </Location>
+        <Time>2023-07-09T08:47:32.999-07:00</Time>
+      </Point>
+      <Origin>
+        <Index>0</Index>
+        <Name>20230709</Name>
+        <Type>0</Type>
+      </Origin>
+      <Accuracy>5.837</Accuracy>
+      <AbsAccuracy>5.837</AbsAccuracy>
+      <NormalizedOffset>02:00:00</NormalizedOffset>
+      <SongTime>2023-07-09T08:47:38.836-07:00</SongTime>
+      <PointTime>2023-07-09T08:47:32.999-07:00</PointTime>
+      <PredictedIndex />
+    </_x0032_0230709>
+    <_x0032_0230709>
+      <Description>At this position: 2023-07-09 17:51:09 +02:00
+Song started (est): 2023-07-09 17:51:01 +02:00
+Played for 00:03:55.871
+Skipped: False
+Shuffle: False
+Country: FR
+</Description>
+      <Index>2</Index>
+      <Song>
+        <SGPX_Index>4</SGPX_Index>
+        <SGPX_Time>2023-07-09T08:51:01.129-07:00</SGPX_Time>
+        <SGPX_UseEstStartTime>true</SGPX_UseEstStartTime>
+        <ts>2023-07-09T08:54:57-07:00</ts>
+        <SGPX_TimeStartedEst>2023-07-09T08:51:01.129-07:00</SGPX_TimeStartedEst>
+        <username />
+        <platform>android</platform>
+        <msPlayed>235871</msPlayed>
+        <SGPX_TimePlayed>00:03:55.8710000</SGPX_TimePlayed>
+        <conn_country>FR</conn_country>
+        <ip_addr_decrypted />
+        <user_agent_decrypted />
+        <master_metadata_track_name>Thought You'd Never Ask</master_metadata_track_name>
+        <master_metadata_album_artist_name>Folk Road Show</master_metadata_album_artist_name>
+        <master_metadata_album_album_name>Thought You'd Never Ask</master_metadata_album_album_name>
+        <spotify_track_uri>spotify:track:05cmKMGYCSpcs0WBA0nMjX</spotify_track_uri>
+        <SGPX_Song_ID>05cmKMGYCSpcs0WBA0nMjX</SGPX_Song_ID>
+        <SGPX_Song_URL>http://open.spotify.com/track/05cmKMGYCSpcs0WBA0nMjX</SGPX_Song_URL>
+        <episode_name />
+        <episode_show_name />
+        <spotify_episode_uri />
+        <reason_start>trackdone</reason_start>
+        <reason_end>trackdone</reason_end>
+        <shuffle>false</shuffle>
+        <skipped>false</skipped>
+        <offline>false</offline>
+        <offline_timestamp>1688917862</offline_timestamp>
+        <SGPX_OfflineTimestamp>2023-07-09T08:51:02-07:00</SGPX_OfflineTimestamp>
+        <incognito_mode />
+      </Song>
+      <Point>
+        <Index>21</Index>
+        <Location>
+          <Latitude>44.92381299086086</Latitude>
+          <Longitude>-0.30094199633638036</Longitude>
+        </Location>
+        <Time>2023-07-09T08:51:09.999-07:00</Time>
+      </Point>
+      <Origin>
+        <Index>0</Index>
+        <Name>20230709</Name>
+        <Type>0</Type>
+      </Origin>
+      <Accuracy>-8.87</Accuracy>
+      <AbsAccuracy>8.87</AbsAccuracy>
+      <NormalizedOffset>02:00:00</NormalizedOffset>
+      <SongTime>2023-07-09T08:51:01.129-07:00</SongTime>
+      <PointTime>2023-07-09T08:51:09.999-07:00</PointTime>
+      <PredictedIndex />
+    </_x0032_0230709>
+    <_x0032_0230709>
+      <Description>At this position: 2023-07-09 17:54:45 +02:00
+Song started (est): 2023-07-09 17:54:57 +02:00
+Played for 00:01:55.960
+Skipped: False
+Shuffle: False
+Country: FR
+</Description>
+      <Index>3</Index>
+      <Song>
+        <SGPX_Index>5</SGPX_Index>
+        <SGPX_Time>2023-07-09T08:54:57.04-07:00</SGPX_Time>
+        <SGPX_UseEstStartTime>true</SGPX_UseEstStartTime>
+        <ts>2023-07-09T08:56:53-07:00</ts>
+        <SGPX_TimeStartedEst>2023-07-09T08:54:57.04-07:00</SGPX_TimeStartedEst>
+        <username />
+        <platform>android</platform>
+        <msPlayed>115960</msPlayed>
+        <SGPX_TimePlayed>00:01:55.9600000</SGPX_TimePlayed>
+        <conn_country>FR</conn_country>
+        <ip_addr_decrypted />
+        <user_agent_decrypted />
+        <master_metadata_track_name>Not Every River</master_metadata_track_name>
+        <master_metadata_album_artist_name>Bear's Den</master_metadata_album_artist_name>
+        <master_metadata_album_album_name>So that you might hear me</master_metadata_album_album_name>
+        <spotify_track_uri>spotify:track:6vpVRpTK1r4FuZb8FtEjYb</spotify_track_uri>
+        <SGPX_Song_ID>6vpVRpTK1r4FuZb8FtEjYb</SGPX_Song_ID>
+        <SGPX_Song_URL>http://open.spotify.com/track/6vpVRpTK1r4FuZb8FtEjYb</SGPX_Song_URL>
+        <episode_name />
+        <episode_show_name />
+        <spotify_episode_uri />
+        <reason_start>trackdone</reason_start>
+        <reason_end>trackdone</reason_end>
+        <shuffle>false</shuffle>
+        <skipped>false</skipped>
+        <offline>false</offline>
+        <offline_timestamp>1688918098</offline_timestamp>
+        <SGPX_OfflineTimestamp>2023-07-09T08:54:58-07:00</SGPX_OfflineTimestamp>
+        <incognito_mode />
+      </Song>
+      <Point>
+        <Index>28</Index>
+        <Location>
+          <Latitude>44.9207163</Latitude>
+          <Longitude>-0.2637063</Longitude>
+        </Location>
+        <Time>2023-07-09T08:54:45.164-07:00</Time>
+      </Point>
+      <Origin>
+        <Index>0</Index>
+        <Name>20230709</Name>
+        <Type>0</Type>
+      </Origin>
+      <Accuracy>11.876</Accuracy>
+      <AbsAccuracy>11.876</AbsAccuracy>
+      <NormalizedOffset>02:00:00</NormalizedOffset>
+      <SongTime>2023-07-09T08:54:57.04-07:00</SongTime>
+      <PointTime>2023-07-09T08:54:45.164-07:00</PointTime>
+      <PredictedIndex />
+    </_x0032_0230709>
+    <_x0032_0230709>
+      <Description>At this position: 2023-07-09 17:56:48 +02:00
+Song started (est): 2023-07-09 17:56:54 +02:00
+Played for 00:03:25.742
+Skipped: False
+Shuffle: False
+Country: FR
+</Description>
+      <Index>4</Index>
+      <Song>
+        <SGPX_Index>6</SGPX_Index>
+        <SGPX_Time>2023-07-09T08:56:54.258-07:00</SGPX_Time>
+        <SGPX_UseEstStartTime>true</SGPX_UseEstStartTime>
+        <ts>2023-07-09T09:00:20-07:00</ts>
+        <SGPX_TimeStartedEst>2023-07-09T08:56:54.258-07:00</SGPX_TimeStartedEst>
+        <username />
+        <platform>android</platform>
+        <msPlayed>205742</msPlayed>
+        <SGPX_TimePlayed>00:03:25.7420000</SGPX_TimePlayed>
+        <conn_country>FR</conn_country>
+        <ip_addr_decrypted />
+        <user_agent_decrypted />
+        <master_metadata_track_name>Won't Happen - Stripped-Back</master_metadata_track_name>
+        <master_metadata_album_artist_name>Ten Fé</master_metadata_album_artist_name>
+        <master_metadata_album_album_name>Won't Happen</master_metadata_album_album_name>
+        <spotify_track_uri>spotify:track:70Rz9c3gY6QNxqBrxCmJJa</spotify_track_uri>
+        <SGPX_Song_ID>70Rz9c3gY6QNxqBrxCmJJa</SGPX_Song_ID>
+        <SGPX_Song_URL>http://open.spotify.com/track/70Rz9c3gY6QNxqBrxCmJJa</SGPX_Song_URL>
+        <episode_name />
+        <episode_show_name />
+        <spotify_episode_uri />
+        <reason_start>trackdone</reason_start>
+        <reason_end>trackdone</reason_end>
+        <shuffle>false</shuffle>
+        <skipped>false</skipped>
+        <offline>false</offline>
+        <offline_timestamp>1688918214</offline_timestamp>
+        <SGPX_OfflineTimestamp>2023-07-09T08:56:54-07:00</SGPX_OfflineTimestamp>
+        <incognito_mode />
+      </Song>
+      <Point>
+        <Index>32</Index>
+        <Location>
+          <Latitude>44.9190012</Latitude>
+          <Longitude>-0.2437124</Longitude>
+        </Location>
+        <Time>2023-07-09T08:56:48.152-07:00</Time>
+      </Point>
+      <Origin>
+        <Index>0</Index>
+        <Name>20230709</Name>
+        <Type>0</Type>
+      </Origin>
+      <Accuracy>6.106</Accuracy>
+      <AbsAccuracy>6.106</AbsAccuracy>
+      <NormalizedOffset>02:00:00</NormalizedOffset>
+      <SongTime>2023-07-09T08:56:54.258-07:00</SongTime>
+      <PointTime>2023-07-09T08:56:48.152-07:00</PointTime>
+      <PredictedIndex />
+    </_x0032_0230709>
+    <_x0032_0230709>
+      <Description>At this position: 2023-07-09 18:00:23 +02:00
+Song started (est): 2023-07-09 18:00:20 +02:00
+Played for 00:02:21.653
+Skipped: False
+Shuffle: False
+Country: FR
+</Description>
+      <Index>5</Index>
+      <Song>
+        <SGPX_Index>7</SGPX_Index>
+        <SGPX_Time>2023-07-09T09:00:20.347-07:00</SGPX_Time>
+        <SGPX_UseEstStartTime>true</SGPX_UseEstStartTime>
+        <ts>2023-07-09T09:02:42-07:00</ts>
+        <SGPX_TimeStartedEst>2023-07-09T09:00:20.347-07:00</SGPX_TimeStartedEst>
+        <username />
+        <platform>android</platform>
+        <msPlayed>141653</msPlayed>
+        <SGPX_TimePlayed>00:02:21.6530000</SGPX_TimePlayed>
+        <conn_country>FR</conn_country>
+        <ip_addr_decrypted />
+        <user_agent_decrypted />
+        <master_metadata_track_name>Sea so Blue</master_metadata_track_name>
+        <master_metadata_album_artist_name>Austin Basham</master_metadata_album_artist_name>
+        <master_metadata_album_album_name>You and Me for Now</master_metadata_album_album_name>
+        <spotify_track_uri>spotify:track:4YI7bOKyyPnCxhltKmrU9P</spotify_track_uri>
+        <SGPX_Song_ID>4YI7bOKyyPnCxhltKmrU9P</SGPX_Song_ID>
+        <SGPX_Song_URL>http://open.spotify.com/track/4YI7bOKyyPnCxhltKmrU9P</SGPX_Song_URL>
+        <episode_name />
+        <episode_show_name />
+        <spotify_episode_uri />
+        <reason_start>trackdone</reason_start>
+        <reason_end>trackdone</reason_end>
+        <shuffle>false</shuffle>
+        <skipped>false</skipped>
+        <offline>false</offline>
+        <offline_timestamp>1688918420</offline_timestamp>
+        <SGPX_OfflineTimestamp>2023-07-09T09:00:20-07:00</SGPX_OfflineTimestamp>
+        <incognito_mode />
+      </Song>
+      <Point>
+        <Index>39</Index>
+        <Location>
+          <Latitude>44.90750014910081</Latitude>
+          <Longitude>-0.23220191613252472</Longitude>
+        </Location>
+        <Time>2023-07-09T09:00:23-07:00</Time>
+      </Point>
+      <Origin>
+        <Index>0</Index>
+        <Name>20230709</Name>
+        <Type>0</Type>
+      </Origin>
+      <Accuracy>-2.653</Accuracy>
+      <AbsAccuracy>2.653</AbsAccuracy>
+      <NormalizedOffset>02:00:00</NormalizedOffset>
+      <SongTime>2023-07-09T09:00:20.347-07:00</SongTime>
+      <PointTime>2023-07-09T09:00:23-07:00</PointTime>
+      <PredictedIndex />
+    </_x0032_0230709>
+  </Root>
+</Root>
