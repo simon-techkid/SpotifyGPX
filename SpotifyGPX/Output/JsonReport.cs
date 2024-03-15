@@ -10,7 +10,7 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the JsonReport format.
 /// </summary>
-public partial class JsonReport : JsonSaveable, IFileOutput, ISaveable, ITransformable
+public partial class JsonReport : JsonSaveable
 {
     protected override List<JObject> Document { get; }
 
@@ -57,7 +57,7 @@ public partial class JsonReport : JsonSaveable, IFileOutput, ISaveable, ITransfo
     /// <summary>
     /// The number of pairs within this JsonReport file, regardless of track.
     /// </summary>
-    public int Count
+    public override int Count
     {
         get
         {

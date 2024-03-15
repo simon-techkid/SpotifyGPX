@@ -10,7 +10,7 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the GPX format.
 /// </summary>
-public partial class Gpx : XmlSaveable, IFileOutput, ISaveable, ITransformable
+public partial class Gpx : XmlSaveable
 {
     protected override XDocument Document { get; }
 
@@ -61,5 +61,5 @@ public partial class Gpx : XmlSaveable, IFileOutput, ISaveable, ITransformable
     /// <summary>
     /// The number of waypoints (pairs) within this GPX file.
     /// </summary>
-    public int Count => Document.Descendants(Namespace + Waypoint).Count(); // Number of point elements
+    public override int Count => Document.Descendants(Namespace + Waypoint).Count(); // Number of point elements
 }

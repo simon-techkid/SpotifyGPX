@@ -10,7 +10,7 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the XSPF format.
 /// </summary>
-public partial class Xspf : XmlSaveable, IFileOutput, ISaveable, ITransformable
+public partial class Xspf : XmlSaveable
 {
     protected override XDocument Document { get; }
 
@@ -61,5 +61,5 @@ public partial class Xspf : XmlSaveable, IFileOutput, ISaveable, ITransformable
     /// <summary>
     /// The number of tracks (songs) within this XSPF file.
     /// </summary>
-    public int Count => Document.Descendants(Namespace + Track).Count(); // Number of track elements
+    public override int Count => Document.Descendants(Namespace + Track).Count(); // Number of track elements
 }

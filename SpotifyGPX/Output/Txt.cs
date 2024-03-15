@@ -9,7 +9,7 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the TXT format.
 /// </summary>
-public partial class Txt : TxtSaveable, IFileOutput, ISaveable, ITransformable
+public partial class Txt : TxtSaveable
 {
     protected override string?[] Document { get; }
 
@@ -69,5 +69,5 @@ public partial class Txt : TxtSaveable, IFileOutput, ISaveable, ITransformable
     /// <summary>
     /// The number of pairs within this XSPF file.
     /// </summary>
-    public int Count => Document.Length; // Number of lines
+    public override int Count => Document.Length; // Number of lines
 }

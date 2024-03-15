@@ -88,14 +88,14 @@ public partial class OutputHandler
 
         public void Save(bool transform)
         {
-            if (transform && Handler is ITransformable)
+            if (Handler is not null)
             {
-                (Handler as ITransformable)?.Transform(GetUniqueFilePath(FinalName), $"{Extension}.xslt");
+                Handler?.Save(GetUniqueFilePath(FinalName));
             }
 
-            if (Handler is ISaveable)
+            if (transform && Handler is ITransformableOutput)
             {
-                (Handler as ISaveable)?.Save(GetUniqueFilePath(FinalName));
+                (Handler as ITransformableOutput)?.TransformAndSave(GetUniqueFilePath(FinalName), $"{Extension}.xslt");
             }
         }
     }

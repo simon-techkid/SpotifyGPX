@@ -9,7 +9,7 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the CSV format.
 /// </summary>
-public partial class Csv : TxtSaveable, IFileOutput, ISaveable, ITransformable
+public partial class Csv : TxtSaveable
 {
     protected override string?[] Document { get; }
 
@@ -64,5 +64,5 @@ public partial class Csv : TxtSaveable, IFileOutput, ISaveable, ITransformable
     /// <summary>
     /// The number of pairs (lines, excluding the header) in the file.
     /// </summary>
-    public int Count => Document.Length - 1; // Subtract one for the header line
+    public override int Count => Document.Length - 1; // Subtract one for the header line
 }

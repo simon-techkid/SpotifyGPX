@@ -7,7 +7,6 @@ namespace SpotifyGPX.Output;
 /// </summary>
 public interface IFileOutput
 {
-    // Defines the requirements of export format classes:
     void Save(string path); // Allows the saving of that file to the local disk
     int Count { get; } // Provides the number of pairings in the file
 }

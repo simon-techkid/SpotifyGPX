@@ -9,7 +9,7 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for exporting pairing data to the JSON format.
 /// </summary>
-public partial class Json : JsonSaveable, IFileOutput, ISaveable, ITransformable
+public partial class Json : JsonSaveable
 {
     protected override List<JObject> Document { get; }
 
@@ -50,5 +50,5 @@ public partial class Json : JsonSaveable, IFileOutput, ISaveable, ITransformable
     /// <summary>
     /// The number of songs within this JSON file.
     /// </summary>
-    public int Count => Document.Count; // Number of JObjects in list
+    public override int Count => Document.Count; // Number of JObjects in list
 }
