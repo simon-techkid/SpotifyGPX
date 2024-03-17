@@ -3,7 +3,7 @@
 namespace SpotifyGPX.Output;
 
 /// <summary>
-/// Interfaces with formats sharing the ability to save and transform data.
+/// Interfaces with formats sharing the ability to transform XML using an XSLT stylesheet.
 /// </summary>
 public interface ITransformableOutput
 {

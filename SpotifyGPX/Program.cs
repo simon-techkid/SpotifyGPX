@@ -45,6 +45,7 @@ class Program
         bool exportPlist = flags.Contains("p");
         bool exportTxt = flags.Contains("t");
         bool exportJsonReport = flags.Contains("r");
+        bool exportExcel = flags.Contains("e");
         bool pointPredict = flags.Contains("pp");
         bool autoPredict = flags.Contains("pa");
         bool silent = flags.Contains("s");
@@ -116,6 +117,9 @@ class Program
 
             if (exportPlist)
                 pairedEntries.Save(Formats.Xspf, Path.GetFileNameWithoutExtension(prefix), transform);
+
+            if (exportExcel)
+                pairedEntries.Save(Formats.Xlsx, Path.GetFileNameWithoutExtension(prefix), transform);
 
             if (exportTxt)
                 pairedEntries.Save(Formats.Txt, Path.GetFileNameWithoutExtension(prefix), transform);

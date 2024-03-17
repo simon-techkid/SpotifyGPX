@@ -33,6 +33,11 @@ public enum Formats
     Txt,
 
     /// <summary>
+    /// An XSLX (Excel) workbook containing a table of pairs.
+    /// </summary>
+    Xlsx,
+
+    /// <summary>
     /// An XML playlist file compatible with audio playback software.
     /// </summary>
     Xspf

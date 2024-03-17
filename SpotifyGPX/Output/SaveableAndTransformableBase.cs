@@ -14,33 +14,41 @@ using System.Xml.Xsl;
 namespace SpotifyGPX.Output;
 
 /// <summary>
-/// Provides instructions for serializing data in the source format to a string and transforming and/or saving data in the target format.
+/// Provides instructions for serializing data in the source format to a byte array and saving it in the target format.
 /// </summary>
-/// <typeparam name="T">The source format type.</typeparam>
-public abstract class SaveableAndTransformableBase<T> : IFileOutput, ITransformableOutput
+/// <typeparam name="T">The source format type</typeparam>
+public abstract class SaveableBase<T> : IFileOutput
 {
     protected abstract T Document { get; }
-    protected abstract SaveOptions OutputOptions { get; }
-    protected abstract Encoding OutputEncoding { get; }
     public abstract int Count { get; }
 
     public void Save(string path)
     {
-        string doc = ConvertToString();
-        File.WriteAllText(path, doc, OutputEncoding);
+        byte[] doc = ConvertToBytes();
+        File.WriteAllBytes(path, doc);
     }
+
+    protected abstract byte[] ConvertToBytes();
+}
+
+/// <summary>
+/// Provides instructions for serializing data in the source format to a byte array and saving and/or transforming data in the target format.
+/// </summary>
+/// <typeparam name="T">The source format type.</typeparam>
+public abstract class SaveableAndTransformableBase<T> : SaveableBase<T>, ITransformableOutput
+{
+    protected abstract SaveOptions OutputOptions { get; }
+    protected abstract Encoding OutputEncoding { get; }
 
     public void TransformAndSave(string name, string xsltPath)
     {
-        TransformationResult transformation = TransformationResult.Transform(ConvertToXml(), xsltPath);
+        TransformationResult transformation = TransformationResult.Transform(TransformToXml(), xsltPath);
         string doc = transformation.TransformedDocument.ToString(OutputOptions);
         string outputPath = $"{name}.{transformation.Format}";
         File.WriteAllText(outputPath, doc, transformation.TargetEncoding ?? OutputEncoding);
     }
 
-    protected abstract string ConvertToString();
-
-    protected abstract XDocument ConvertToXml();
+    protected abstract XDocument TransformToXml();
 }
 
 /// <summary>
@@ -50,12 +58,13 @@ public abstract class JsonSaveable : SaveableAndTransformableBase<List<JObject>>
 {
     protected abstract JsonSerializerSettings JsonSettings { get; }
 
-    protected override string ConvertToString()
+    protected override byte[] ConvertToBytes()
     {
-        return JsonConvert.SerializeObject(Document, JsonSettings.Formatting, JsonSettings);
+        string doc = JsonConvert.SerializeObject(Document, JsonSettings.Formatting, JsonSettings);
+        return OutputEncoding.GetBytes(doc);
     }
 
-    protected override XDocument ConvertToXml()
+    protected override XDocument TransformToXml()
     {
         XElement root = new("Root");
 
@@ -73,12 +82,13 @@ public abstract class JsonSaveable : SaveableAndTransformableBase<List<JObject>>
 /// </summary>
 public abstract class XmlSaveable : SaveableAndTransformableBase<XDocument>
 {
-    protected override string ConvertToString()
+    protected override byte[] ConvertToBytes()
     {
-        return Document.ToString(OutputOptions);
+        string doc = Document.ToString(OutputOptions);
+        return OutputEncoding.GetBytes(doc);
     }
 
-    protected override XDocument ConvertToXml()
+    protected override XDocument TransformToXml()
     {
         return Document;
     }
@@ -89,12 +99,13 @@ public abstract class XmlSaveable : SaveableAndTransformableBase<XDocument>
 /// </summary>
 public abstract class TxtSaveable : SaveableAndTransformableBase<string?[]>
 {
-    protected override string ConvertToString()
+    protected override byte[] ConvertToBytes()
     {
-        return string.Join(Environment.NewLine, Document);
+        string doc = string.Join(Environment.NewLine, Document);
+        return OutputEncoding.GetBytes(doc);
     }
 
-    protected override XDocument ConvertToXml()
+    protected override XDocument TransformToXml()
     {
         XElement root = new("Root");
 
@@ -103,6 +114,17 @@ public abstract class TxtSaveable : SaveableAndTransformableBase<string?[]>
             .ForEach(root.Add);
 
         return new XDocument(root);
+    }
+}
+
+/// <summary>
+/// Provides instructions for serializing an array of bytes
+/// </summary>
+public abstract class ByteSaveable : SaveableBase<byte[]>
+{
+    protected override byte[] ConvertToBytes()
+    {
+        return Document;
     }
 }
 

@@ -116,6 +116,7 @@ public partial class OutputHandler
             Formats.Json => new Json(pairs),
             Formats.JsonReport => new JsonReport(pairs),
             Formats.Txt => new Txt(pairs),
+            Formats.Xlsx => new Xlsx(pairs),
             Formats.Xspf => new Xspf(pairs, trackName),
             _ => throw new Exception($"Unsupported file export format: {format}")
         };
@@ -136,6 +137,7 @@ public partial class OutputHandler
             Formats.Json => false,
             Formats.JsonReport => true,
             Formats.Txt => false,
+            Formats.Xlsx => true,
             Formats.Xspf => false,
             _ => throw new Exception($"Unsupported file export format: {format}")
         };

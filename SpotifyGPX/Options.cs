@@ -161,6 +161,11 @@ namespace SpotifyGPX.Output
         protected override Encoding OutputEncoding => Encoding.UTF8;
     }
 
+    public partial class Xlsx
+    {
+
+    }
+
     public partial class Xspf
     {
         private static XNamespace Namespace => "http://xspf.org/ns/0/";
