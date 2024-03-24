@@ -1,5 +1,7 @@
 ﻿# SpotifyGPX
 
+[![.NET Build](https://github.com/TheBoyLeastLikelyTo/SpotifyGPX/actions/workflows/dotnet.yml/badge.svg)](https://github.com/TheBoyLeastLikelyTo/SpotifyGPX/actions/workflows/dotnet.yml)
+
 Great for road trips: match GPS positions to played Spotify songs.
 
 SpotifyGPX allows you to recount where you listened to each song of a set based on a tracked journey, placing points as close as possible to the location of each song.
@@ -52,11 +54,11 @@ See the below `Source` links for each format's input or output definition source
 | ------ | --------- | ----- | ------ | ------------ | ------------ |
 | [JSON](https://en.wikipedia.org/wiki/JSON) | `.json` | [Source](SpotifyGPX/Input/Json.cs) / [Sample](Samples/sample.json) (With [Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/)) | [Source](SpotifyGPX/Output/Json.cs) / [Sample](Samples/sample_20230709.json) (With [Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/)) | Song Records |  |
 | [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_Format) | `.xspf` | [Source](SpotifyGPX/Input/Xspf.cs) / [Sample](Samples/sample_20230709.xspf) | [Source](SpotifyGPX/Output/Xspf.cs) / [Sample](Samples/sample_20230709.xspf) | Song Records | X |
-| [KML](https://en.wikipedia.org/wiki/Keyhole_Markup_Language) | `.kml` | Coming Soon | | GPS Journey |  |
+| [KML](https://en.wikipedia.org/wiki/Keyhole_Markup_Language) | `.kml` | [Source](SpotifyGPX/Input/Kml.cs) | | GPS Journey |  |
 | [GPX](https://en.wikipedia.org/wiki/GPS_Exchange_Format) | `.gpx` | [Source](SpotifyGPX/Input/Gpx.cs) / [Sample](Samples/sample.gpx) | | GPS Journey |  |
 | [JsonReport](https://en.wikipedia.org/wiki/JSON) | `.jsonreport` | [Source](SpotifyGPX/Input/JsonReport.cs) / [Sample](Samples/sample_All.jsonreport) | [Source](SpotifyGPX/Output/JsonReport.cs) / [Sample](Samples/sample_All.jsonreport) | Pair Records | X |
 | [GPX](https://en.wikipedia.org/wiki/GPS_Exchange_Format) | `.gpx` | | [Source](SpotifyGPX/Output/Gpx.cs) / [Sample](Samples/sample_20230709.gpx) | Pair Records | X |
-| [KMZ](https://en.wikipedia.org/wiki/Keyhole_Markup_Language) | `.kmz` | | Coming Soon | Pair Records | X |
+| [KMZ](https://en.wikipedia.org/wiki/Keyhole_Markup_Language) | `.kml` | [Source](SpotifyGPX/Output/Kml.cs) |  | Pair Records | X |
 | [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) | `.csv` | | [Source](SpotifyGPX/Output/Csv.cs) / [Sample](Samples/sample_20230709.csv) | Pair Records |  |
 | [TXT](https://en.wikipedia.org/wiki/Text_file) | `.txt` | | [Source](SpotifyGPX/Output/Txt.cs) / [Sample](Samples/sample_20230709.txt) | Pair Records |  |
 | [XLSX](https://en.wikipedia.org/wiki/Office_Open_XML) | `.xlsx` | | [Source](SpotifyGPX/Output/Xlsx.cs) / [Sample](Samples/sample_20230709.xlsx) (With [EPPlus](https://www.nuget.org/packages/EPPlus/)) | Pair Records |  |
