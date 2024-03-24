@@ -10,10 +10,10 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Provides instructions for parsing GPS data from the KML format.
 /// </summary>
-public partial class Kml : IGpsInput
+public partial class Kml : GpsInputBase
 {
     private XDocument Document { get; }
-    private List<GPXTrack> Tracks { get; }
+    protected override List<GPXTrack> Tracks { get; }
 
     /// <summary>
     /// Creates a new input handler for handling files in the KML format.
@@ -29,31 +29,12 @@ public partial class Kml : IGpsInput
     /// <summary>
     /// The total number of tracks in the source KML file.
     /// </summary>
-    public int SourceTrackCount => Document.Descendants(Gx + "Track").Count();
-
-    /// <summary>
-    /// The total number of tracks parsed from the given file.
-    /// </summary>
-    public int ParsedTrackCount => Tracks.Count();
+    public override int SourceTrackCount => Document.Descendants(Gx + "Track").Count();
 
     /// <summary>
     /// The total number of points in the source KML file.
     /// </summary>
-    public int SourcePointCount => Document.Descendants(Gx + "coord").Count();
-
-    /// <summary>
-    /// The total number of points parsed from the given file.
-    /// </summary>
-    public int ParsedPointCount => Tracks.Select(track => track.Points.Count()).Sum();
-
-    /// <summary>
-    /// Gets all the tracks in this GPX file. 
-    /// </summary>
-    /// <returns>A list of GPXTrack objects.</returns>
-    public List<GPXTrack> GetAllTracks()
-    {
-        return Tracks;
-    }
+    public override int SourcePointCount => Document.Descendants(Gx + "coord").Count();
 
     /// <summary>
     /// Parses this KML document into a readable list of tracks.
