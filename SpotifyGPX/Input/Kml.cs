@@ -7,18 +7,11 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Input;
 
-/// <summary>
-/// Provides instructions for parsing GPS data from the KML format.
-/// </summary>
 public partial class Kml : GpsInputBase
 {
     private XDocument Document { get; }
     protected override List<GPXTrack> Tracks { get; }
 
-    /// <summary>
-    /// Creates a new input handler for handling files in the KML format.
-    /// </summary>
-    /// <param name="path">The path to the KML file.</param>
     public Kml(string path)
     {
         Document = XDocument.Load(path);
@@ -26,20 +19,10 @@ public partial class Kml : GpsInputBase
         Tracks = ParseTracks();
     }
 
-    /// <summary>
-    /// The total number of tracks in the source KML file.
-    /// </summary>
     public override int SourceTrackCount => Document.Descendants(Gx + "Track").Count();
 
-    /// <summary>
-    /// The total number of points in the source KML file.
-    /// </summary>
     public override int SourcePointCount => Document.Descendants(Gx + "coord").Count();
 
-    /// <summary>
-    /// Parses this KML document into a readable list of tracks.
-    /// </summary>
-    /// <returns>A list of GPXTrack objects.</returns>
     private List<GPXTrack> ParseTracks()
     {
         return Document
