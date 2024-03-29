@@ -71,22 +71,14 @@ public partial class InputHandler
     /// <returns>A list of SpotifyEntries, each representing a single song of playback.</returns>
     public List<SpotifyEntry> GetAllSongs()
     {
-        // Returns unfiltered (all) songs
-        if (SongInput != null)
-        {
-            return SongInput.GetAllSongs();
-        }
-        else
-        {
-            throw new Exception($"Unable to get pairs: this input format does not support pairs.");
-        }
+        return SongInput.GetAllSongs();
     }
 
     /// <summary>
-    /// Filters the song records from the given file.
+    /// Get only the song records from the file that occur during the time range of the GPX tracks.
     /// </summary>
-    /// <param name="tracks">A list of GPXTracks, by which the contents of the song record list will be filtered.</param>
-    /// <returns>A list of SpotifyEntries, each representing a single song of playback.</returns>
+    /// <param name="tracks">A list of GPXTrack objects with which to confine the song search to.</param>
+    /// <returns>A list of SpotifyEntry objects, only the songs played between <see cref="GPXTrack.Start"/> and <see cref="GPXTrack.End"/>.</returns>
     public List<SpotifyEntry> GetFilteredSongs(List<GPXTrack> tracks)
     {
         return SongInput.GetFilteredSongs(tracks);
@@ -97,7 +89,7 @@ public partial class InputHandler
     /// </summary>
     /// <returns>A list of GPXTracks, each representing a collection of positions comprising a journey's path.</returns>
     public List<GPXTrack> GetAllTracks()
-    {
+    {   
         return GpsInput.GetAllTracks();
     }
 
@@ -122,7 +114,7 @@ public partial class InputHandler
         }
         else
         {
-            throw new Exception($"Unable to get pairs: this input format does not support pairs.");
+            throw new Exception($"Unable to get pairs: no provided input file supports pair records.");
         }
     }
 

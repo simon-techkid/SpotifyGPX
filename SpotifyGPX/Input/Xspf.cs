@@ -28,30 +28,15 @@ public partial class Xspf : SongInputBase, IHashVerifier
 
     private List<SpotifyEntry> ParseSongs()
     {
-        return Document.Descendants(InputNs + Track).Select((element, index) => new SpotifyEntry(
-            index,
-            DateTimeOffset.ParseExact(element.Element(InputNs + "annotation")?.Value ?? throw new Exception($"'annotation' timestamp missing from XSPF entry {index}"), Options.ISO8601UTC, null, TimeStyle),
-            null,
-            null,
-            int.Parse(element.Element(InputNs + "duration")?.Value ?? throw new Exception($"'msPlayed' duration missing from XSPF entry {index}")),
-            null,
-            null,
-            null,
-            element.Element(InputNs + "title")?.Value,
-            element.Element(InputNs + "creator")?.Value,
-            null,
-            element.Element(InputNs + "link")?.Value,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null)
-            ).ToList();
+        return Document.Descendants(InputNs + Track).Select((element, index) => new SpotifyEntry
+        {
+            Index = index,
+            TimeEnded = DateTimeOffset.ParseExact(element.Element(InputNs + "annotation")?.Value, Options.ISO8601UTC, null, TimeStyle),
+            Time_Played = int.Parse(element.Element(InputNs + "duration")?.Value),
+            Song_Name = element.Element(InputNs + "title")?.Value,
+            Song_Artist = element.Element(InputNs + "creator")?.Value,
+            Song_URI = element.Element(InputNs + "link")?.Value
+        }).ToList();
     }
 
     public override int SourceSongCount => Document.Descendants(InputNs + Track).Count();

@@ -66,7 +66,7 @@ namespace SpotifyGPX
         };
     }
 
-    public readonly partial struct SpotifyEntry
+    public partial struct SpotifyEntry
     {
         private const bool InterpretAsStartTime = false; // Interpret the time played as the start time of the track (false = interpret as end time)
         private const bool PreferEstimatedStartTime = true; // Estimate the start time of the track by subtracting the time played duration from the end time (assumes the user didn't pause playback)

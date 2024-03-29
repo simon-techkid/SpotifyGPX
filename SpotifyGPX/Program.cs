@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Api;
 using SpotifyGPX.Input;
 using SpotifyGPX.Output;
 using System;
@@ -47,6 +48,7 @@ class Program
         bool exportJsonReport = flags.Contains("r");
         bool exportKml = flags.Contains("k");
         bool exportExcel = flags.Contains("e");
+        bool grabApiData = flags.Contains("a");
         bool pointPredict = flags.Contains("pp");
         bool autoPredict = flags.Contains("pa");
         bool silent = flags.Contains("s");
@@ -61,6 +63,7 @@ class Program
         try
         {
             InputHandler input;
+            EntryMatcher matcher;
 
             if (inputPairs != null)
             {
@@ -86,6 +89,13 @@ class Program
                 // Step 2: Get list of songs played from the entries file
                 List<SpotifyEntry> songs = input.GetFilteredSongs(tracks);
                 //List<SpotifyEntry> songs = input.GetAllSongs(); // Unfiltered run
+
+                if (grabApiData)
+                {
+                    // Step 2.5: Get metadata for each song
+                    matcher = new(songs);
+                    songs = matcher.MatchEntries();
+                }
 
                 // Step 3: Create list of songs and points paired as close as possible to one another
                 pairedEntries = new PairingsHandler(songs, tracks, silent, pointPredict, autoPredict);
