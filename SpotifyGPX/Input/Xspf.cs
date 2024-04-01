@@ -33,7 +33,7 @@ public partial class Xspf : SongInputBase, IHashVerifier
             DateTimeOffset.ParseExact(element.Element(InputNs + "annotation")?.Value, Options.ISO8601UTC, null, TimeStyle),
             null,
             null,
-            double.Parse(element.Element(InputNs + "duration")?.Value),
+            int.Parse(element.Element(InputNs + "duration")?.Value),
             null,
             null,
             null,

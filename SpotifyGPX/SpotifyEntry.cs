@@ -17,7 +17,7 @@ public readonly partial struct SpotifyEntry
         DateTimeOffset ts, // Can be start or end time
         string? username,
         string? platform,
-        double msPlayed,
+        int msPlayed,
         string? conn_country,
         string? ip_addr_decrypted,
         string? user_agent_decrypted,
@@ -82,7 +82,7 @@ public readonly partial struct SpotifyEntry
     public string? Spotify_Platform { get; }
 
     [JsonProperty("msPlayed")]
-    public double Time_Played { get; }
+    public int Time_Played { get; }
 
     [JsonProperty("SGPX_TimePlayed")]
     public TimeSpan TimePlayed => TimeSpan.FromMilliseconds(Time_Played);

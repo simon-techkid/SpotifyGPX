@@ -28,7 +28,7 @@ public partial class Json : SongInputBase
                 (DateTimeOffset?)entry["endTime"] ?? (DateTimeOffset?)entry["ts"] ?? throw new Exception($"'ts' timestamp missing from JSON entry {index}"),
                 (string?)entry["username"],
                 (string?)entry["platform"],
-                (double?)entry["msPlayed"] ?? (double?)entry["ms_played"] ?? throw new Exception($"'msPlayed' duration missing from JSON entry {index}"),
+                (int?)entry["msPlayed"] ?? (int?)entry["ms_played"] ?? throw new Exception($"'msPlayed' duration missing from JSON entry {index}"),
                 (string?)entry["conn_country"],
                 (string?)entry["ip_addr_decrypted"],
                 (string?)entry["user_agent_decrypted"],
