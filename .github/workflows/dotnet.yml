@@ -1,0 +1,51 @@
+name: .NET Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Publish (Linux)
+      run: |
+        for project in **/*.csproj; do
+          dotnet publish "$project" --configuration Release --output "out/$(basename "$project" .csproj)"
+        done
+      shell: bash
+      if: matrix.os == 'ubuntu-latest'
+
+    - name: Publish (Windows)
+      run: |
+        Get-ChildItem -Path . -Include *.csproj -Recurse | ForEach-Object {
+          dotnet publish "$_" --configuration Release --output "out/$($_.BaseName)"
+        }
+      shell: pwsh
+      if: matrix.os == 'windows-latest'
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: release-${{ matrix.os }}
+        path: out/
