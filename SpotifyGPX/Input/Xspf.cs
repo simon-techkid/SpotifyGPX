@@ -30,10 +30,10 @@ public partial class Xspf : SongInputBase, IHashVerifier
     {
         return Document.Descendants(InputNs + Track).Select((element, index) => new SpotifyEntry(
             index,
-            DateTimeOffset.ParseExact(element.Element(InputNs + "annotation")?.Value, Options.ISO8601UTC, null, TimeStyle),
+            DateTimeOffset.ParseExact(element.Element(InputNs + "annotation")?.Value ?? throw new Exception($"'annotation' timestamp missing from XSPF entry {index}"), Options.ISO8601UTC, null, TimeStyle),
             null,
             null,
-            int.Parse(element.Element(InputNs + "duration")?.Value),
+            int.Parse(element.Element(InputNs + "duration")?.Value ?? throw new Exception($"'msPlayed' duration missing from XSPF entry {index}")),
             null,
             null,
             null,

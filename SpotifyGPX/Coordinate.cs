@@ -41,6 +41,8 @@ public readonly struct Coordinate
         return Latitude == other.Latitude && Longitude == other.Longitude;
     }
 
+    public override int GetHashCode() => HashCode.Combine(Latitude, Longitude);
+
     public static bool operator ==(Coordinate c1, Coordinate c2) => c1.Equals(c2);
 
     public static bool operator !=(Coordinate c1, Coordinate c2) => !c1.Equals(c2);

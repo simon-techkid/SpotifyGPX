@@ -12,7 +12,7 @@ public interface IFileOutput
     /// </summary>
     /// <param name="path">The path on the disk where the file should be saved.</param>
     void Save(string path);
-    
+
     /// <summary>
     /// The number of pairings in the outgoing document.
     /// </summary>

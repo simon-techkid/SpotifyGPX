@@ -1,6 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
 using Newtonsoft.Json;
+using System;
 
 namespace SpotifyGPX;
 
@@ -64,6 +65,8 @@ public readonly struct TrackInfo
         }
         return false;
     }
+
+    public override int GetHashCode() => HashCode.Combine(Index, Name, Type);
 
     public bool Equals(TrackInfo other) => Index == other.Index && Name == other.Name && Type == other.Type;
 
