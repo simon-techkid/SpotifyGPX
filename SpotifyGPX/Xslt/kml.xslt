@@ -15,6 +15,7 @@
                 <hr />
                 <p>Name: <xsl:value-of select="//kml:Document/kml:name" /></p>
                 <p>Hash: <xsl:value-of select="//kml:Document/kml:description" /></p>
+                <p>Created: <xsl:value-of select="//kml:Document/kml:snippet" /></p>
                 <table>
                     <tr>
                         <th>#</th>

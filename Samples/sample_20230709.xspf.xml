@@ -2,8 +2,8 @@
   <title>20230709</title>
   <creator>SpotifyGPX</creator>
   <annotation></annotation>
-  <identifier>68be19da476cd6d282ee73244ba2f2e014e0b2a9b5e0dce6505cd0854cba410d</identifier>
-  <date>2024-03-15T08:06:42Z</date>
+  <identifier>d562845606f372cbca2dd1a9405bdce869f45378fcbf44b4b779bc7fcfef4c78</identifier>
+  <date>2024-04-09T02:12:35Z</date>
   <trackList>
     <track>
       <identifier>4AIzqWgbH94S0cNid1f3mT</identifier>
@@ -12,7 +12,7 @@
       <annotation>2023-07-09T15:44:01Z</annotation>
       <album>Temple</album>
       <duration>216093</duration>
-      <link>spotify:track:4AIzqWgbH94S0cNid1f3mT</link>
+      <link>http://open.spotify.com/track/4AIzqWgbH94S0cNid1f3mT</link>
     </track>
     <track>
       <identifier>7M9OysBhaeVEEOZW0sl4IN</identifier>
@@ -21,7 +21,7 @@
       <annotation>2023-07-09T15:47:38Z</annotation>
       <album>Watching the Wires</album>
       <duration>202164</duration>
-      <link>spotify:track:7M9OysBhaeVEEOZW0sl4IN</link>
+      <link>http://open.spotify.com/track/7M9OysBhaeVEEOZW0sl4IN</link>
     </track>
     <track>
       <identifier>05cmKMGYCSpcs0WBA0nMjX</identifier>
@@ -30,7 +30,7 @@
       <annotation>2023-07-09T15:51:01Z</annotation>
       <album>Thought You'd Never Ask</album>
       <duration>235871</duration>
-      <link>spotify:track:05cmKMGYCSpcs0WBA0nMjX</link>
+      <link>http://open.spotify.com/track/05cmKMGYCSpcs0WBA0nMjX</link>
     </track>
     <track>
       <identifier>6vpVRpTK1r4FuZb8FtEjYb</identifier>
@@ -39,7 +39,7 @@
       <annotation>2023-07-09T15:54:57Z</annotation>
       <album>So that you might hear me</album>
       <duration>115960</duration>
-      <link>spotify:track:6vpVRpTK1r4FuZb8FtEjYb</link>
+      <link>http://open.spotify.com/track/6vpVRpTK1r4FuZb8FtEjYb</link>
     </track>
     <track>
       <identifier>70Rz9c3gY6QNxqBrxCmJJa</identifier>
@@ -48,7 +48,7 @@
       <annotation>2023-07-09T15:56:54Z</annotation>
       <album>Won't Happen</album>
       <duration>205742</duration>
-      <link>spotify:track:70Rz9c3gY6QNxqBrxCmJJa</link>
+      <link>http://open.spotify.com/track/70Rz9c3gY6QNxqBrxCmJJa</link>
     </track>
     <track>
       <identifier>4YI7bOKyyPnCxhltKmrU9P</identifier>
@@ -57,7 +57,7 @@
       <annotation>2023-07-09T16:00:20Z</annotation>
       <album>You and Me for Now</album>
       <duration>141653</duration>
-      <link>spotify:track:4YI7bOKyyPnCxhltKmrU9P</link>
+      <link>http://open.spotify.com/track/4YI7bOKyyPnCxhltKmrU9P</link>
     </track>
   </trackList>
 </playlist>

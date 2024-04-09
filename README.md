@@ -58,7 +58,7 @@ See the below `Source` links for each format's input or output definition source
 | [GPX](https://en.wikipedia.org/wiki/GPS_Exchange_Format) | `.gpx` | [Source](SpotifyGPX/Input/Gpx.cs) / [Sample](Samples/sample.gpx) | | GPS Journey |  |
 | [JsonReport](https://en.wikipedia.org/wiki/JSON) | `.jsonreport` | [Source](SpotifyGPX/Input/JsonReport.cs) / [Sample](Samples/sample_All.jsonreport) | [Source](SpotifyGPX/Output/JsonReport.cs) / [Sample](Samples/sample_All.jsonreport) | Pair Records | X |
 | [GPX](https://en.wikipedia.org/wiki/GPS_Exchange_Format) | `.gpx` | | [Source](SpotifyGPX/Output/Gpx.cs) / [Sample](Samples/sample_20230709.gpx) | Pair Records | X |
-| [KMZ](https://en.wikipedia.org/wiki/Keyhole_Markup_Language) | `.kml` | [Source](SpotifyGPX/Output/Kml.cs) |  | Pair Records | X |
+| [KML](https://en.wikipedia.org/wiki/Keyhole_Markup_Language) | `.kml` |  | [Source](SpotifyGPX/Output/Kml.cs) | Pair Records | X |
 | [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) | `.csv` | | [Source](SpotifyGPX/Output/Csv.cs) / [Sample](Samples/sample_20230709.csv) | Pair Records |  |
 | [TXT](https://en.wikipedia.org/wiki/Text_file) | `.txt` | | [Source](SpotifyGPX/Output/Txt.cs) / [Sample](Samples/sample_20230709.txt) | Pair Records |  |
 | [XLSX](https://en.wikipedia.org/wiki/Office_Open_XML) | `.xlsx` | | [Source](SpotifyGPX/Output/Xlsx.cs) / [Sample](Samples/sample_20230709.xlsx) (With [EPPlus](https://www.nuget.org/packages/EPPlus/)) | Pair Records |  |
@@ -86,16 +86,23 @@ Below are some pre-created XSLT stylesheets for transforming the converted XML o
 | ---------- | --------------- | ------------- | ----------- | ------ |
 | [copy.xslt](SpotifyGPX/Xslt/copy.xslt) | Any XML | An Identical XML | Maintains the identical structure of the original XML in the transformed XML | |
 | [csv.xslt](SpotifyGPX/Xslt/csv.xslt) | CSV XML | HTML | Creates a table representing the contents of the CSV table | [Sample](Samples/sample_20230709.csv.html) |
-| [gpx.xslt](SpotifyGPX/Xslt/gpx.xslt) | GPX XML | HTML | Creates a table with each song-point pair represented as a row | [Sample](Samples/sample_20230709.gpx.html) |
+| [csv_noquotes.xslt](SpotifyGPX/Xslt/csv_noquotes.xslt) | CSV XML | HTML | Creates a table representing the contents of the CSV table (without encapsulating quotes) | [Sample](Samples/sample_20230709.csv_noquotes.html) |
+| [gpx.xslt](SpotifyGPX/Xslt/gpx.xslt) | GPX | HTML | Creates a table with each song-point pair represented as a row | [Sample](Samples/sample_20230709.gpx.html) |
 | [json.xslt](SpotifyGPX/Xslt/json.xslt) | JSON XML | HTML | Creates a table of song playback records | [Sample](Samples/sample_20230709.json.html) |
 | [jsonreport.xslt](SpotifyGPX/Xslt/jsonreport.xslt) | JsonReport XML | HTML | Creates a table for each track, containing the pairings of the corresponding track | [Sample](Samples/sample_All.jsonreport.html) |
+| [kml.xslt](SpotifyGPX/Xslt/kml.xslt) | KML | HTML | Creates a table with each song-point pair represented as a row | [Sample](Samples/sample_20230709.kml.html) | 
 | [txt.xslt](SpotifyGPX/Xslt/txt.xslt) | TXT XML | HTML | Creates a bulleted list, each bullet containing a line from the text file, with its contents hyperlinked | [Sample](Samples/sample_20230709.txt.html) |
 | [txt_nolink.xslt](SpotifyGPX/Xslt/txt_nolink.xslt) | TXT XML | HTML | Creates a bulleted list, each bullet containing a line from the text file | |
-| [xspf.xslt](SpotifyGPX/Xslt/xspf.xslt) | XSPF XML | HTML | Creates a table of song playback records | [Sample](Samples/sample_20230709.xspf.html) |  
+| [xspf.xslt](SpotifyGPX/Xslt/xspf.xslt) | XSPF | HTML | Creates a table of song playback records | [Sample](Samples/sample_20230709.xspf.html) |
+
+HTML created with the above stylesheets works well with the following included CSS stylesheets:
+
+- [styles.css](SpotifyGPX/Xslt/styles.css)
+- [styles2.css](SpotifyGPX/Xslt/styles2.css)
 
 Transforming XML with XSLT stylesheets using SpotifyGPX:
 
-- if there is an `.xslt` file of the same name as a selected output format class in the running directory (ie. `jsonreport.xslt` for exporting JsonReport with `-r` flag), and,
+- if there is an `.xslt` file of the same name as a selected output format class in the running directory (ie. `jsonreport.xslt` for exporting JsonReports), and,
 - if the data type of said format is supported for conversion to XML (see above table), and,
 - if `-x` is passed
 
@@ -105,16 +112,17 @@ If `-x` is passed and no stylesheet is present, the XML will be saved without tr
 
 ## Usage
 
->  `SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-n] [-c] [-j] [-p] [-t] [-r] [-e] [-x] [-pp [-pa]] [-s] [-h]`
+>  `SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-c] [-g] [-j] [-k] [-p] [-t] [-r] [-e] [-x] [-pp [-pa]] [-s] [-h]`
 
 | Argument | Description |
 | ----- | ----- |
 | `SpotifyGPX` | Path to the SpotifyGPX executable |
 | `--spotify <spotify> --gps <gps>` | Path to a Spotify playback history and GPS journey file |
 | `--pairs <pairs>` | Path to a pairs file |
-| `-n` | Do not export a `GPX` from the calculated points |
 | `-c` | Export a CSV table of all the pairs |
+| `-g` | Export a GPX from the calculated points |
 | `-j` | Export the relevant part of the Spotify `json` |
+| `-k` | Export a KML from the calculated points |
 | `-p` | Export a XSPF playlist of the songs |
 | `-t` | Export a plain text list of pairs |
 | `-r` | Export a JsonReport of all the data used to compile the resulting pairings |

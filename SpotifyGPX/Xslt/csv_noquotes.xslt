@@ -37,7 +37,9 @@
         <xsl:choose>
             <xsl:when test="contains($text, $separator)">
                 <td>
-                    <xsl:value-of select="substring-before(concat($text, $separator), $separator)"/>
+                    <xsl:call-template name="remove-quotes">
+                        <xsl:with-param name="text" select="substring-before(concat($text, $separator), $separator)"/>
+                    </xsl:call-template>
                 </td>
                 <xsl:call-template name="tokenize">
                     <xsl:with-param name="text" select="substring-after($text, $separator)"/>
@@ -45,8 +47,23 @@
             </xsl:when>
             <xsl:otherwise>
                 <td>
-                    <xsl:value-of select="normalize-space($text)"/>
+                    <xsl:call-template name="remove-quotes">
+                        <xsl:with-param name="text" select="$text"/>
+                    </xsl:call-template>
                 </td>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- Template for removing encapsulating quotes from a cell -->
+    <xsl:template name="remove-quotes">
+        <xsl:param name="text"/>
+        <xsl:choose>
+            <xsl:when test="starts-with($text, '&quot;') and substring($text, string-length($text)) = '&quot;'">
+                <xsl:value-of select="substring($text, 2, string-length($text) - 2)"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$text"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>

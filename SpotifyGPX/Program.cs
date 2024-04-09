@@ -39,8 +39,8 @@ class Program
             inputPairs = options["pairs"];
         }
 
-        bool noGpxExport = flags.Contains("n");
         bool exportCsv = flags.Contains("c");
+        bool exportGpx = flags.Contains("g");
         bool exportJson = flags.Contains("j");
         bool exportPlist = flags.Contains("p");
         bool exportTxt = flags.Contains("t");
@@ -112,7 +112,7 @@ class Program
             if (exportCsv)
                 pairedEntries.Save(Formats.Csv, startingPrefix, transform);
 
-            if (!noGpxExport)
+            if (exportGpx)
                 pairedEntries.Save(Formats.Gpx, startingPrefix, transform);
 
             if (exportJson)
@@ -179,12 +179,13 @@ public class ArgumentParser
 
     public static void PrintHelp()
     {
-        Console.WriteLine("Usage: SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-n] [-c] [-j] [-p] [-t] [-r] [-e] [-x] [-pp [-pa]] [-s] [-h]");
+        Console.WriteLine("Usage: SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-c] [-g] [-j] [-k] [-p] [-t] [-r] [-e] [-x] [-pp [-pa]] [-s] [-h]");
         Console.WriteLine("--spotify <spotify> --gps <gps> - Path to a Spotify playback history and GPS journey file");
         Console.WriteLine("--pairs <pairs> - Path to a pairs file");
-        Console.WriteLine("-n - Do not export a GPX from the calculated points");
         Console.WriteLine("-c - Export a CSV table of all the pairs");
+        Console.WriteLine("-g - Export a GPX from the calculated points");
         Console.WriteLine("-j - Save off the relevant part of the Spotify json");
+        Console.WriteLine("-k - Export a KML from the calculated points");
         Console.WriteLine("-p - Export a XSPF playlist of the songs");
         Console.WriteLine("-t - Export a plain text list of pairs");
         Console.WriteLine("-r - Export a JsonReport of all the data used to compile the resulting pairings");

@@ -1,7 +1,7 @@
-﻿[
+[
   {
     "Total": 6,
-    "SHA256Hash": "571a873e8ba4742dd65136f39c3a9b3ada3f9daa54d528dda98819d39ff89e14"
+    "SHA256Hash": "cab02c862b7a7aaf11f6d6906e27402bdfc40c98386c3ff373137d6391fd3656"
   },
   {
     "Count": 6,
@@ -22,7 +22,7 @@
           "SGPX_TimeStartedEst": "2023-07-09T15:44:01.907000+00:00",
           "username": null,
           "platform": "android",
-          "msPlayed": 216093.0,
+          "msPlayed": 216093,
           "SGPX_TimePlayed": "00:03:36.0930000",
           "conn_country": "FR",
           "ip_addr_decrypted": null,
@@ -76,7 +76,7 @@
           "SGPX_TimeStartedEst": "2023-07-09T15:47:38.836000+00:00",
           "username": null,
           "platform": "android",
-          "msPlayed": 202164.0,
+          "msPlayed": 202164,
           "SGPX_TimePlayed": "00:03:22.1640000",
           "conn_country": "FR",
           "ip_addr_decrypted": null,
@@ -130,7 +130,7 @@
           "SGPX_TimeStartedEst": "2023-07-09T15:51:01.129000+00:00",
           "username": null,
           "platform": "android",
-          "msPlayed": 235871.0,
+          "msPlayed": 235871,
           "SGPX_TimePlayed": "00:03:55.8710000",
           "conn_country": "FR",
           "ip_addr_decrypted": null,
@@ -184,7 +184,7 @@
           "SGPX_TimeStartedEst": "2023-07-09T15:54:57.040000+00:00",
           "username": null,
           "platform": "android",
-          "msPlayed": 115960.0,
+          "msPlayed": 115960,
           "SGPX_TimePlayed": "00:01:55.9600000",
           "conn_country": "FR",
           "ip_addr_decrypted": null,
@@ -238,7 +238,7 @@
           "SGPX_TimeStartedEst": "2023-07-09T15:56:54.258000+00:00",
           "username": null,
           "platform": "android",
-          "msPlayed": 205742.0,
+          "msPlayed": 205742,
           "SGPX_TimePlayed": "00:03:25.7420000",
           "conn_country": "FR",
           "ip_addr_decrypted": null,
@@ -292,7 +292,7 @@
           "SGPX_TimeStartedEst": "2023-07-09T16:00:20.347000+00:00",
           "username": null,
           "platform": "android",
-          "msPlayed": 141653.0,
+          "msPlayed": 141653,
           "SGPX_TimePlayed": "00:02:21.6530000",
           "conn_country": "FR",
           "ip_addr_decrypted": null,

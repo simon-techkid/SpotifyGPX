@@ -1,7 +1,7 @@
 ﻿<Root>
   <Root>
     <Total>6</Total>
-    <SHA256Hash>571a873e8ba4742dd65136f39c3a9b3ada3f9daa54d528dda98819d39ff89e14</SHA256Hash>
+    <SHA256Hash>cab02c862b7a7aaf11f6d6906e27402bdfc40c98386c3ff373137d6391fd3656</SHA256Hash>
   </Root>
   <Root>
     <Count>6</Count>
@@ -21,10 +21,10 @@ Country: FR
       <Index>0</Index>
       <Song>
         <SGPX_Index>2</SGPX_Index>
-        <SGPX_Time>2023-07-09T08:44:01.907-07:00</SGPX_Time>
+        <SGPX_Time>2023-07-09T10:44:01.907-05:00</SGPX_Time>
         <SGPX_UseEstStartTime>true</SGPX_UseEstStartTime>
-        <ts>2023-07-09T08:47:38-07:00</ts>
-        <SGPX_TimeStartedEst>2023-07-09T08:44:01.907-07:00</SGPX_TimeStartedEst>
+        <ts>2023-07-09T10:47:38-05:00</ts>
+        <SGPX_TimeStartedEst>2023-07-09T10:44:01.907-05:00</SGPX_TimeStartedEst>
         <username />
         <platform>android</platform>
         <msPlayed>216093</msPlayed>
@@ -47,7 +47,7 @@ Country: FR
         <skipped>false</skipped>
         <offline>false</offline>
         <offline_timestamp>1688917442</offline_timestamp>
-        <SGPX_OfflineTimestamp>2023-07-09T08:44:02-07:00</SGPX_OfflineTimestamp>
+        <SGPX_OfflineTimestamp>2023-07-09T10:44:02-05:00</SGPX_OfflineTimestamp>
         <incognito_mode />
       </Song>
       <Point>
@@ -56,7 +56,7 @@ Country: FR
           <Latitude>44.96196068713781</Latitude>
           <Longitude>-0.3619575231220995</Longitude>
         </Location>
-        <Time>2023-07-09T08:43:56.999-07:00</Time>
+        <Time>2023-07-09T10:43:56.999-05:00</Time>
       </Point>
       <Origin>
         <Index>0</Index>
@@ -66,8 +66,8 @@ Country: FR
       <Accuracy>4.908</Accuracy>
       <AbsAccuracy>4.908</AbsAccuracy>
       <NormalizedOffset>02:00:00</NormalizedOffset>
-      <SongTime>2023-07-09T08:44:01.907-07:00</SongTime>
-      <PointTime>2023-07-09T08:43:56.999-07:00</PointTime>
+      <SongTime>2023-07-09T10:44:01.907-05:00</SongTime>
+      <PointTime>2023-07-09T10:43:56.999-05:00</PointTime>
       <PredictedIndex />
     </_x0032_0230709>
     <_x0032_0230709>
@@ -81,10 +81,10 @@ Country: FR
       <Index>1</Index>
       <Song>
         <SGPX_Index>3</SGPX_Index>
-        <SGPX_Time>2023-07-09T08:47:38.836-07:00</SGPX_Time>
+        <SGPX_Time>2023-07-09T10:47:38.836-05:00</SGPX_Time>
         <SGPX_UseEstStartTime>true</SGPX_UseEstStartTime>
-        <ts>2023-07-09T08:51:01-07:00</ts>
-        <SGPX_TimeStartedEst>2023-07-09T08:47:38.836-07:00</SGPX_TimeStartedEst>
+        <ts>2023-07-09T10:51:01-05:00</ts>
+        <SGPX_TimeStartedEst>2023-07-09T10:47:38.836-05:00</SGPX_TimeStartedEst>
         <username />
         <platform>android</platform>
         <msPlayed>202164</msPlayed>
@@ -107,7 +107,7 @@ Country: FR
         <skipped>false</skipped>
         <offline>false</offline>
         <offline_timestamp>1688917659</offline_timestamp>
-        <SGPX_OfflineTimestamp>2023-07-09T08:47:39-07:00</SGPX_OfflineTimestamp>
+        <SGPX_OfflineTimestamp>2023-07-09T10:47:39-05:00</SGPX_OfflineTimestamp>
         <incognito_mode />
       </Song>
       <Point>
@@ -116,7 +116,7 @@ Country: FR
           <Latitude>44.94663761172837</Latitude>
           <Longitude>-0.32882642308137994</Longitude>
         </Location>
-        <Time>2023-07-09T08:47:32.999-07:00</Time>
+        <Time>2023-07-09T10:47:32.999-05:00</Time>
       </Point>
       <Origin>
         <Index>0</Index>
@@ -126,8 +126,8 @@ Country: FR
       <Accuracy>5.837</Accuracy>
       <AbsAccuracy>5.837</AbsAccuracy>
       <NormalizedOffset>02:00:00</NormalizedOffset>
-      <SongTime>2023-07-09T08:47:38.836-07:00</SongTime>
-      <PointTime>2023-07-09T08:47:32.999-07:00</PointTime>
+      <SongTime>2023-07-09T10:47:38.836-05:00</SongTime>
+      <PointTime>2023-07-09T10:47:32.999-05:00</PointTime>
       <PredictedIndex />
     </_x0032_0230709>
     <_x0032_0230709>
@@ -141,10 +141,10 @@ Country: FR
       <Index>2</Index>
       <Song>
         <SGPX_Index>4</SGPX_Index>
-        <SGPX_Time>2023-07-09T08:51:01.129-07:00</SGPX_Time>
+        <SGPX_Time>2023-07-09T10:51:01.129-05:00</SGPX_Time>
         <SGPX_UseEstStartTime>true</SGPX_UseEstStartTime>
-        <ts>2023-07-09T08:54:57-07:00</ts>
-        <SGPX_TimeStartedEst>2023-07-09T08:51:01.129-07:00</SGPX_TimeStartedEst>
+        <ts>2023-07-09T10:54:57-05:00</ts>
+        <SGPX_TimeStartedEst>2023-07-09T10:51:01.129-05:00</SGPX_TimeStartedEst>
         <username />
         <platform>android</platform>
         <msPlayed>235871</msPlayed>
@@ -167,7 +167,7 @@ Country: FR
         <skipped>false</skipped>
         <offline>false</offline>
         <offline_timestamp>1688917862</offline_timestamp>
-        <SGPX_OfflineTimestamp>2023-07-09T08:51:02-07:00</SGPX_OfflineTimestamp>
+        <SGPX_OfflineTimestamp>2023-07-09T10:51:02-05:00</SGPX_OfflineTimestamp>
         <incognito_mode />
       </Song>
       <Point>
@@ -176,7 +176,7 @@ Country: FR
           <Latitude>44.92381299086086</Latitude>
           <Longitude>-0.30094199633638036</Longitude>
         </Location>
-        <Time>2023-07-09T08:51:09.999-07:00</Time>
+        <Time>2023-07-09T10:51:09.999-05:00</Time>
       </Point>
       <Origin>
         <Index>0</Index>
@@ -186,8 +186,8 @@ Country: FR
       <Accuracy>-8.87</Accuracy>
       <AbsAccuracy>8.87</AbsAccuracy>
       <NormalizedOffset>02:00:00</NormalizedOffset>
-      <SongTime>2023-07-09T08:51:01.129-07:00</SongTime>
-      <PointTime>2023-07-09T08:51:09.999-07:00</PointTime>
+      <SongTime>2023-07-09T10:51:01.129-05:00</SongTime>
+      <PointTime>2023-07-09T10:51:09.999-05:00</PointTime>
       <PredictedIndex />
     </_x0032_0230709>
     <_x0032_0230709>
@@ -201,10 +201,10 @@ Country: FR
       <Index>3</Index>
       <Song>
         <SGPX_Index>5</SGPX_Index>
-        <SGPX_Time>2023-07-09T08:54:57.04-07:00</SGPX_Time>
+        <SGPX_Time>2023-07-09T10:54:57.04-05:00</SGPX_Time>
         <SGPX_UseEstStartTime>true</SGPX_UseEstStartTime>
-        <ts>2023-07-09T08:56:53-07:00</ts>
-        <SGPX_TimeStartedEst>2023-07-09T08:54:57.04-07:00</SGPX_TimeStartedEst>
+        <ts>2023-07-09T10:56:53-05:00</ts>
+        <SGPX_TimeStartedEst>2023-07-09T10:54:57.04-05:00</SGPX_TimeStartedEst>
         <username />
         <platform>android</platform>
         <msPlayed>115960</msPlayed>
@@ -227,7 +227,7 @@ Country: FR
         <skipped>false</skipped>
         <offline>false</offline>
         <offline_timestamp>1688918098</offline_timestamp>
-        <SGPX_OfflineTimestamp>2023-07-09T08:54:58-07:00</SGPX_OfflineTimestamp>
+        <SGPX_OfflineTimestamp>2023-07-09T10:54:58-05:00</SGPX_OfflineTimestamp>
         <incognito_mode />
       </Song>
       <Point>
@@ -236,7 +236,7 @@ Country: FR
           <Latitude>44.9207163</Latitude>
           <Longitude>-0.2637063</Longitude>
         </Location>
-        <Time>2023-07-09T08:54:45.164-07:00</Time>
+        <Time>2023-07-09T10:54:45.164-05:00</Time>
       </Point>
       <Origin>
         <Index>0</Index>
@@ -246,8 +246,8 @@ Country: FR
       <Accuracy>11.876</Accuracy>
       <AbsAccuracy>11.876</AbsAccuracy>
       <NormalizedOffset>02:00:00</NormalizedOffset>
-      <SongTime>2023-07-09T08:54:57.04-07:00</SongTime>
-      <PointTime>2023-07-09T08:54:45.164-07:00</PointTime>
+      <SongTime>2023-07-09T10:54:57.04-05:00</SongTime>
+      <PointTime>2023-07-09T10:54:45.164-05:00</PointTime>
       <PredictedIndex />
     </_x0032_0230709>
     <_x0032_0230709>
@@ -261,10 +261,10 @@ Country: FR
       <Index>4</Index>
       <Song>
         <SGPX_Index>6</SGPX_Index>
-        <SGPX_Time>2023-07-09T08:56:54.258-07:00</SGPX_Time>
+        <SGPX_Time>2023-07-09T10:56:54.258-05:00</SGPX_Time>
         <SGPX_UseEstStartTime>true</SGPX_UseEstStartTime>
-        <ts>2023-07-09T09:00:20-07:00</ts>
-        <SGPX_TimeStartedEst>2023-07-09T08:56:54.258-07:00</SGPX_TimeStartedEst>
+        <ts>2023-07-09T11:00:20-05:00</ts>
+        <SGPX_TimeStartedEst>2023-07-09T10:56:54.258-05:00</SGPX_TimeStartedEst>
         <username />
         <platform>android</platform>
         <msPlayed>205742</msPlayed>
@@ -287,7 +287,7 @@ Country: FR
         <skipped>false</skipped>
         <offline>false</offline>
         <offline_timestamp>1688918214</offline_timestamp>
-        <SGPX_OfflineTimestamp>2023-07-09T08:56:54-07:00</SGPX_OfflineTimestamp>
+        <SGPX_OfflineTimestamp>2023-07-09T10:56:54-05:00</SGPX_OfflineTimestamp>
         <incognito_mode />
       </Song>
       <Point>
@@ -296,7 +296,7 @@ Country: FR
           <Latitude>44.9190012</Latitude>
           <Longitude>-0.2437124</Longitude>
         </Location>
-        <Time>2023-07-09T08:56:48.152-07:00</Time>
+        <Time>2023-07-09T10:56:48.152-05:00</Time>
       </Point>
       <Origin>
         <Index>0</Index>
@@ -306,8 +306,8 @@ Country: FR
       <Accuracy>6.106</Accuracy>
       <AbsAccuracy>6.106</AbsAccuracy>
       <NormalizedOffset>02:00:00</NormalizedOffset>
-      <SongTime>2023-07-09T08:56:54.258-07:00</SongTime>
-      <PointTime>2023-07-09T08:56:48.152-07:00</PointTime>
+      <SongTime>2023-07-09T10:56:54.258-05:00</SongTime>
+      <PointTime>2023-07-09T10:56:48.152-05:00</PointTime>
       <PredictedIndex />
     </_x0032_0230709>
     <_x0032_0230709>
@@ -321,10 +321,10 @@ Country: FR
       <Index>5</Index>
       <Song>
         <SGPX_Index>7</SGPX_Index>
-        <SGPX_Time>2023-07-09T09:00:20.347-07:00</SGPX_Time>
+        <SGPX_Time>2023-07-09T11:00:20.347-05:00</SGPX_Time>
         <SGPX_UseEstStartTime>true</SGPX_UseEstStartTime>
-        <ts>2023-07-09T09:02:42-07:00</ts>
-        <SGPX_TimeStartedEst>2023-07-09T09:00:20.347-07:00</SGPX_TimeStartedEst>
+        <ts>2023-07-09T11:02:42-05:00</ts>
+        <SGPX_TimeStartedEst>2023-07-09T11:00:20.347-05:00</SGPX_TimeStartedEst>
         <username />
         <platform>android</platform>
         <msPlayed>141653</msPlayed>
@@ -347,7 +347,7 @@ Country: FR
         <skipped>false</skipped>
         <offline>false</offline>
         <offline_timestamp>1688918420</offline_timestamp>
-        <SGPX_OfflineTimestamp>2023-07-09T09:00:20-07:00</SGPX_OfflineTimestamp>
+        <SGPX_OfflineTimestamp>2023-07-09T11:00:20-05:00</SGPX_OfflineTimestamp>
         <incognito_mode />
       </Song>
       <Point>
@@ -356,7 +356,7 @@ Country: FR
           <Latitude>44.90750014910081</Latitude>
           <Longitude>-0.23220191613252472</Longitude>
         </Location>
-        <Time>2023-07-09T09:00:23-07:00</Time>
+        <Time>2023-07-09T11:00:23-05:00</Time>
       </Point>
       <Origin>
         <Index>0</Index>
@@ -366,8 +366,8 @@ Country: FR
       <Accuracy>-2.653</Accuracy>
       <AbsAccuracy>2.653</AbsAccuracy>
       <NormalizedOffset>02:00:00</NormalizedOffset>
-      <SongTime>2023-07-09T09:00:20.347-07:00</SongTime>
-      <PointTime>2023-07-09T09:00:23-07:00</PointTime>
+      <SongTime>2023-07-09T11:00:20.347-05:00</SongTime>
+      <PointTime>2023-07-09T11:00:23-05:00</PointTime>
       <PredictedIndex />
     </_x0032_0230709>
   </Root>

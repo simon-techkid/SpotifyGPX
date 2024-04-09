@@ -1,0 +1,23 @@
+body {
+    font-family:arial,sans-serif;
+    color:#000;
+    font-size:13px;
+    color:#333;
+}
+table {
+    font-size:1em;
+    margin:0 0 1em;
+    border-collapse:collapse;
+    border-width:0;
+    empty-cells:show;
+}
+td,th {
+    border:1px solid #ccc;
+    padding:6px 12px;
+    text-align:left;
+    vertical-align:top;
+    background-color:inherit;
+}
+th {
+    background-color:#dee8f1;
+}

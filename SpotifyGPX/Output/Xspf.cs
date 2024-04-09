@@ -23,7 +23,7 @@ public partial class Xspf : XmlSaveable
             new XElement(Namespace + "annotation", pair.Song.Time.UtcDateTime.ToString(Options.ISO8601UTC)),
             new XElement(Namespace + "album", pair.Song.Song_Album),
             new XElement(Namespace + "duration", pair.Song.TimePlayed.TotalMilliseconds),
-            new XElement(Namespace + "link", pair.Song.Song_URI)
+            new XElement(Namespace + "link", pair.Song.Song_URL)
         ));
 
         XmlHashProvider hasher = new();

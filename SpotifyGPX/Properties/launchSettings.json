@@ -2,7 +2,7 @@
   "profiles": {
     "SpotifyGPX": {
       "commandName": "Project",
-      "commandLineArgs": "--spotify F:\\vlog_sort\\Europe\\europe_spotifygpx\\2023.json --gps F:\\vlog_sort\\Europe\\europe_spotifygpx\\combined.gpx -n -e -x"
+      "commandLineArgs": "--spotify C:\\Users\\Simon\\Downloads\\europe_spotifygpx\\2023.json --gps C:\\Users\\Simon\\Downloads\\europe_spotifygpx\\combined.gpx -n -r -x"
     }
   }
 }

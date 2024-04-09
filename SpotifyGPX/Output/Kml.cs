@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -41,6 +42,7 @@ public partial class Kml : XmlSaveable
                 new XElement(Namespace + "Document",
                     new XElement(Namespace + "name", trackName),
                     new XElement(Namespace + "description", hash),
+                    new XElement(Namespace + "snippet", DateTimeOffset.Now.UtcDateTime.ToString(Options.ISO8601UTC)),
                     kmlPairs
                 )
             )
