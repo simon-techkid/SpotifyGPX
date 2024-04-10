@@ -5,28 +5,59 @@
 
     <!-- Match the root element and start creating HTML structure -->
     <xsl:template match="/">
+        <xsl:variable name="type" select="'Pairs Summary'"/>
+        <xsl:variable name="header" select="$type"/>
+        <xsl:variable name="stylesheet" select="'styles.css'"/>
+        <xsl:variable name="pairsInFile" select="count(//Root/Root[position() > 1]/*[position() > 2])"/>
+        <xsl:variable name="headerPosition" select="number(1)"/>
+        <xsl:variable name="pairsExpected" select="//Root/Root[$headerPosition]/Total"/>
+        <xsl:variable name="pairsComp" select="concat($pairsInFile, '/', $pairsExpected)"/>
+        <xsl:variable name="trackCount" select="count(//Root/Root[position() > $headerPosition])"/>
+        <xsl:variable name="hash" select="//Root/Root[$headerPosition]/SHA256Hash"/>
         <html>
-            <head>
-                <title>Pairs Summary</title>
-                <link rel="stylesheet" href="styles.css" />
-            </head>
-            <body>
-                <h1>Pairs Summary</h1>
-                <hr />
-                <h2>All Tracks</h2>
-                <p>Track Count: <xsl:value-of select="count(//Root/Root[position() > 1])"/></p>
-                <p>Pair Count: <xsl:value-of select="count(//Root/Root[position() > 1]/*[position() > 2])"/>/<xsl:value-of select="//Root/Root[1]/Total"/></p>
-                <p>Hash: <xsl:value-of select="//Root/Root[1]/SHA256Hash"/></p>
-                <hr />
-                <!-- Call the main template with the currentRoot parameter -->
-                <xsl:apply-templates select="//Root/Root[position() > 1]" mode="processRoot"/>
-            </body>
+            <xsl:call-template name="html_head_template">
+                <xsl:with-param name="title" select="$header"/>
+                <xsl:with-param name="stylesheet" select="$stylesheet"/>
+            </xsl:call-template>
+            <xsl:call-template name="html_body_template">
+                <xsl:with-param name="header" select="$header"/>
+                <xsl:with-param name="track_count" select="$trackCount"/>
+                <xsl:with-param name="pairComposition" select="$pairsComp"/>
+                <xsl:with-param name="hash" select="$hash"/>
+            </xsl:call-template>
         </html>
+    </xsl:template>
+
+    <!-- Template to create the head section of the HTML -->
+    <xsl:template name="html_head_template">
+        <xsl:param name="title" />
+        <xsl:param name="stylesheet" />
+        <head>
+            <title><xsl:value-of select="$title" /></title>
+            <link rel="stylesheet" href="{$stylesheet}" />
+        </head>
+    </xsl:template>
+
+    <!-- Template to create the body section of the HTML -->
+    <xsl:template name="html_body_template">
+        <xsl:param name="header" />
+        <xsl:param name="track_count"/>
+        <xsl:param name="pairComposition"/>
+        <xsl:param name="hash"/>
+        <body>
+            <h1><xsl:value-of select="$header"/></h1>
+            <hr />
+            <h2>All Tracks</h2>
+            <p>Track Count: <xsl:value-of select="$track_count"/></p>
+            <p>Pair Count: <xsl:value-of select="$pairComposition"/></p>
+            <p>Hash: <xsl:value-of select="$hash"/></p>
+            <hr />
+            <xsl:apply-templates select="//Root/Root[position() > 1]" mode="processRoot"/>
+        </body>
     </xsl:template>
 
     <!-- Template to handle each Root element -->
     <xsl:template match="Root" mode="processRoot">
-        <!-- Pass the currentRoot as parameter to the processRoot template -->
         <xsl:call-template name="processRoot">
             <xsl:with-param name="currentRoot" select="."/>
         </xsl:call-template>
@@ -34,15 +65,12 @@
 
     <!-- Template to process the Root element with proper scoping -->
     <xsl:template name="processRoot">
-        <!-- Define the parameter -->
         <xsl:param name="currentRoot"/>
         <xsl:call-template name="trackHeader"/>
-        <!-- Pass the currentRoot as parameter to the pairCount template -->
         <xsl:call-template name="pairCount">
             <xsl:with-param name="currentRoot" select="$currentRoot"/>
         </xsl:call-template>
         <xsl:call-template name="trackInfo"/>
-        <!-- Pass the currentRoot as parameter to the songTable template -->
         <xsl:call-template name="songTable">
             <xsl:with-param name="currentRoot" select="$currentRoot"/>
         </xsl:call-template>
@@ -51,34 +79,49 @@
 
     <!-- Template for generating the track header -->
     <xsl:template name="trackHeader">
-        <h2>Track <xsl:value-of select="position()"/>: <xsl:value-of select="TrackInfo/Name"/></h2>
+        <xsl:variable name="index" select="position()"/>
+        <xsl:variable name="name" select="TrackInfo/Name"/>
+        <xsl:variable name="header" select="concat('Track ', $index, ': ', $name)"/>
+        <h2><xsl:value-of select="$header"/></h2>
     </xsl:template>
 
     <!-- Template for displaying the pair count -->
     <xsl:template name="pairCount">
-        <!-- Define the parameter -->
         <xsl:param name="currentRoot"/>
-        <p>Pair Count: <xsl:value-of select="count($currentRoot/*[position() > 2])"/>/<xsl:value-of select="Count"/></p>
+        <xsl:variable name="pairCount" select="count($currentRoot/*[position() > 2])"/>
+        <xsl:variable name="pairsExpected" select="Count"/>
+        <xsl:variable name="pairsComp" select="concat('Pair Count: ', $pairCount, '/', $pairsExpected)"/>
+        <p><xsl:value-of select="$pairsComp"/></p>
     </xsl:template>
 
     <!-- Template for displaying track information -->
     <xsl:template name="trackInfo">
-        <p>Index: <xsl:value-of select="TrackInfo/Index"/></p>
-        <p>Name: <xsl:value-of select="TrackInfo/Name"/></p>
-        <p>Type:
-            <xsl:choose>
-                <xsl:when test="TrackInfo/Type = 0">GPX</xsl:when>
-                <xsl:when test="TrackInfo/Type = 1">Gap</xsl:when>
-                <xsl:when test="TrackInfo/Type = 2">Combined</xsl:when>
-                <xsl:otherwise>Unknown</xsl:otherwise>
-            </xsl:choose>
-            (<xsl:value-of select="TrackInfo/Type"/>)
-        </p>
+        <xsl:variable name="index" select="TrackInfo/Index"/>
+        <xsl:variable name="name" select="TrackInfo/Name"/>
+        <xsl:variable name="type" select="TrackInfo/Type"/>
+        <xsl:variable name="typeFriendly">
+            <xsl:call-template name="typePicker">
+                <xsl:with-param name="typeNumeric" select="$type"/>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="typeComposition" select="concat($typeFriendly, ' (', $type, ')' )"/>
+        <p>Index: <xsl:value-of select="$index"/></p>
+        <p>Name: <xsl:value-of select="$name"/></p>
+        <p>Type: <xsl:value-of select="$typeComposition"/></p>
+    </xsl:template>
+
+    <xsl:template name="typePicker">
+        <xsl:param name="typeNumeric"/>
+        <xsl:choose>
+            <xsl:when test="$typeNumeric = 0">GPX</xsl:when>
+            <xsl:when test="$typeNumeric = 1">Gap</xsl:when>
+            <xsl:when test="$typeNumeric = 2">Combined</xsl:when>
+            <xsl:otherwise>Unknown</xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     <!-- Template for generating the song table -->
     <xsl:template name="songTable">
-        <!-- Define the parameter -->
         <xsl:param name="currentRoot"/>
         <table>
             <tr>
@@ -99,7 +142,7 @@
         <tr>
             <td><xsl:value-of select="position()"/></td>
             <td><xsl:value-of select="Index"/></td>
-            <td><xsl:value-of select="Song/master_metadata_track_name"/> - <xsl:value-of select="Song/master_metadata_album_artist_name"/></td>
+            <td><xsl:value-of select="concat(Song/master_metadata_track_name, ' - ', Song/master_metadata_album_artist_name)"/></td>
             <td><xsl:value-of select="PointTime"/></td>
             <td><xsl:value-of select="Accuracy"/></td>
             <td><xsl:value-of select="SongTime"/></td>

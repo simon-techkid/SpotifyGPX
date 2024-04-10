@@ -2,6 +2,10 @@
 
 [![.NET Build](https://github.com/TheBoyLeastLikelyTo/SpotifyGPX/actions/workflows/dotnet.yml/badge.svg)](https://github.com/TheBoyLeastLikelyTo/SpotifyGPX/actions/workflows/dotnet.yml)
 
+![GitHub License](https://img.shields.io/github/license/TheBoyLeastLikelyTo/SpotifyGPX)
+
+![GitHub last commit](https://img.shields.io/github/last-commit/TheBoyLeastLikelyTo/SpotifyGPX)
+
 Great for road trips: match GPS positions to played Spotify songs.
 
 SpotifyGPX allows you to recount where you listened to each song of a set based on a tracked journey, placing points as close as possible to the location of each song.
@@ -86,7 +90,6 @@ Below are some pre-created XSLT stylesheets for transforming the converted XML o
 | ---------- | --------------- | ------------- | ----------- | ------ |
 | [copy.xslt](SpotifyGPX/Xslt/copy.xslt) | Any XML | An Identical XML | Maintains the identical structure of the original XML in the transformed XML | |
 | [csv.xslt](SpotifyGPX/Xslt/csv.xslt) | CSV XML | HTML | Creates a table representing the contents of the CSV table | [Sample](Samples/sample_20230709.csv.html) |
-| [csv_noquotes.xslt](SpotifyGPX/Xslt/csv_noquotes.xslt) | CSV XML | HTML | Creates a table representing the contents of the CSV table (without encapsulating quotes) | [Sample](Samples/sample_20230709.csv_noquotes.html) |
 | [gpx.xslt](SpotifyGPX/Xslt/gpx.xslt) | GPX | HTML | Creates a table with each song-point pair represented as a row | [Sample](Samples/sample_20230709.gpx.html) |
 | [json.xslt](SpotifyGPX/Xslt/json.xslt) | JSON XML | HTML | Creates a table of song playback records | [Sample](Samples/sample_20230709.json.html) |
 | [jsonreport.xslt](SpotifyGPX/Xslt/jsonreport.xslt) | JsonReport XML | HTML | Creates a table for each track, containing the pairings of the corresponding track | [Sample](Samples/sample_All.jsonreport.html) |

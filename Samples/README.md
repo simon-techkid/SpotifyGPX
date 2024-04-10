@@ -25,7 +25,6 @@ SpotifyGPX generated the following files with the above data:
 | Origin | Target | no XSLT | [XSLT](../SpotifyGPX/Xslt/) |
 | ------ | ------ | ------- | --------------------------- |
 | CSV | [-c](sample_20230709.csv) | [-x](sample_20230709.csv.xml) | [-x](sample_20230709.csv.html) |
-| CSV | [-c](sample_20230709.csv) | [-x](sample_20230709.csv.xml) | [-x](sample_20230709.csv_noquotes.html) (noquotes) |
 | GPX | [-g](sample_20230709.gpx) | [-x](sample_20230709.gpx.xml) | [-x](sample_20230709.gpx.html) |
 | JSON | [-j](sample_20230709.json) | [-x](sample_20230709.json.xml) | [-x](sample_20230709.json.html) |
 | JsonReport | [-r](sample_All.jsonreport) | [-x](sample_All.jsonreport.xml) | [-x](sample_All.jsonreport.html) |
