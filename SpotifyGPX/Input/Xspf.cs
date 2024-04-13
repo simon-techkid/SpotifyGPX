@@ -31,8 +31,9 @@ public partial class Xspf : SongInputBase, IHashVerifier
         return Document.Descendants(InputNs + Track).Select((element, index) => new SpotifyEntry
         {
             Index = index,
-            TimeEnded = DateTimeOffset.ParseExact(element.Element(InputNs + "annotation")?.Value, Options.ISO8601UTC, null, TimeStyle),
-            Time_Played = int.Parse(element.Element(InputNs + "duration")?.Value),
+            TimeInterpretation = TimeInterpretation.End,
+            Time = DateTimeOffset.ParseExact(element.Element(InputNs + "annotation")?.Value ?? throw new Exception($"XSPF node {index} doesn't include a time value in the 'annotation' node"), Options.ISO8601UTC, null, TimeStyle),
+            Time_Played = int.Parse(element.Element(InputNs + "duration")?.Value ?? throw new Exception($"XSPF node {index} doesn't include a duration value in the 'annotation' node")),
             Song_Name = element.Element(InputNs + "title")?.Value,
             Song_Artist = element.Element(InputNs + "creator")?.Value,
             Song_URI = element.Element(InputNs + "link")?.Value

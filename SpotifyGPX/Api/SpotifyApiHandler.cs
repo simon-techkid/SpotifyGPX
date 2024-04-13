@@ -58,8 +58,11 @@ public partial class SpotifyApiHandler
 
         public async Task<List<T>> GetEntities(string[] entityIds, int maxBatchSize, string entityName)
         {
-            List<string> distinctIds = entityIds.Distinct().ToList();
-            Console.WriteLine($"[API] Filtered {distinctIds.Count} unique {entityName} IDs from {entityIds.Length} total {entityName} IDs");
+            string[] cleanedIds = entityIds.Where(id => !string.IsNullOrEmpty(id)).ToArray();
+            Console.WriteLine($"[API] Filtered {cleanedIds.Length} non-null or empty IDs from {entityIds.Length} total IDs");
+
+            List<string> distinctIds = cleanedIds.Distinct().ToList();
+            Console.WriteLine($"[API] Filtered {distinctIds.Count} unique {entityName} IDs from {cleanedIds.Length} total {entityName} IDs");
 
             List<IEnumerable<string>> idChunks = SplitIntoChunks(distinctIds, maxBatchSize).ToList();
             int totalChunks = idChunks.Count;

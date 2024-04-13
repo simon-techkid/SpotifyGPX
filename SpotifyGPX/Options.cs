@@ -1,6 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
 using Newtonsoft.Json;
+using SpotifyGPX.Input;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -68,8 +69,7 @@ namespace SpotifyGPX
 
     public partial struct SpotifyEntry
     {
-        private const bool InterpretAsStartTime = false; // Interpret the time played as the start time of the track (false = interpret as end time)
-        private const bool PreferEstimatedStartTime = true; // Estimate the start time of the track by subtracting the time played duration from the end time (assumes the user didn't pause playback)
+        private const TimeUsage timeUsage = TimeUsage.Start; // Instructs the parser to treat the song's primary time as the start or end of the song
     }
 
     public partial class PairingsHandler
@@ -166,6 +166,7 @@ namespace SpotifyGPX.Input
     public partial class Json
     {
         private static JsonSerializerSettings JsonSettings => Options.JsonSettings;
+        private const TimeInterpretation Interpretation = TimeInterpretation.End;
     }
 
     public partial class JsonReport
@@ -186,6 +187,7 @@ namespace SpotifyGPX.Input
         private static XNamespace InputNs => "http://xspf.org/ns/0/";
         private const string Track = "track";
         private const DateTimeStyles TimeStyle = DateTimeStyles.AssumeUniversal;
+        private const TimeInterpretation Interpretation = TimeInterpretation.End;
     }
 }
 

@@ -25,7 +25,8 @@ public partial class Json : SongInputBase
         return AllEntries.Select((entry, index) => new SpotifyEntry
         {
             Index = index,
-            TimeEnded = (DateTimeOffset?)entry["endTime"] ?? (DateTimeOffset?)entry["ts"] ?? throw new Exception($"'ts' timestamp missing from JSON entry {index}"),
+            TimeInterpretation = TimeInterpretation.End,
+            Time = (DateTimeOffset?)entry["endTime"] ?? (DateTimeOffset?)entry["ts"] ?? throw new Exception($"'ts' timestamp missing from JSON entry {index}"),
             Spotify_Username = (string?)entry["username"],
             Spotify_Platform = (string?)entry["platform"],
             Time_Played = (int?)entry["msPlayed"] ?? (int?)entry["ms_played"] ?? throw new Exception($"'msPlayed' duration missing from JSON entry {index}"),

@@ -28,17 +28,21 @@ public class EntryMatcher
     /// <returns></returns>
     public List<SpotifyEntry> MatchEntries()
     {
-        Dictionary<string, SpotifyApiEntry> metadatas = SpotifyApiHandler.GetAllEntries(_songs.Select(s => s.Song_ID).ToArray());
+        // Filter out null values from _songs.Select(s => s.Song_ID) before passing to the GetAllEntries method
+        string[] trackIds = _songs.Select(s => s.Song_ID ?? string.Empty).ToArray();
+
+        // Ensure trackIds is not null before passing it to GetAllEntries
+        Dictionary<string, SpotifyApiEntry> metadatas = SpotifyApiHandler.GetAllEntries(trackIds);
 
         return _songs.Where(song => song.Song_ID != null).Select(song =>
         {
-            if (metadatas.TryGetValue(song.Song_ID, out SpotifyApiEntry metadata))
+            if (metadatas.TryGetValue(song.Song_ID ?? string.Empty, out SpotifyApiEntry metadata))
             {
                 song.Metadata = metadata;
             }
             else
             {
-                Console.WriteLine($"[INP] No metadata found for {song.Song_Name} ({song.Song_ID})");
+                Console.WriteLine($"[API] No metadata found for {song.Song_Name} ({song.Song_ID})");
             }
             return song;
         }).ToList();

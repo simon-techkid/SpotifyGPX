@@ -19,11 +19,14 @@ public readonly struct SongPoint
         {
             StringBuilder builder = new();
 
-            string activity = Song.UseEstStartTime ? "started (est)" : "ended";
+
+            string action = Song.TimeUsage == Input.TimeUsage.Start ? "started" : "ended";
+            bool isEstimated = Song.TimeUsage == Input.TimeUsage.Start ? Song.TimeStartEstimated == true : Song.TimeUsage == Input.TimeUsage.End && Song.TimeEndEstimated;
+            string activity = $"{action}{(isEstimated == true ? " (est)" : "")}";
 
             builder.Append("At this position: {0}", PointTime.ToString(Options.ISO8601Offset));
             builder.Append("Song {0}", $"{activity}: {SongTime.ToString(Options.ISO8601Offset)}");
-            builder.Append("Played for {0}", Song.TimePlayed.ToString(Options.TimeSpan));
+            builder.Append("Played for {0}", Song.TimePlayed == null ? null : Song.TimePlayed?.ToString(Options.TimeSpan));
             builder.Append("Skipped: {0}", Song.Song_Skipped);
             builder.Append("Shuffle: {0}", Song.Song_Shuffle);
             builder.Append("IP Address: {0}", Song.Spotify_IP);

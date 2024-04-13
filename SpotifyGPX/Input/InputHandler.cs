@@ -89,7 +89,7 @@ public partial class InputHandler
     /// </summary>
     /// <returns>A list of GPXTracks, each representing a collection of positions comprising a journey's path.</returns>
     public List<GPXTrack> GetAllTracks()
-    {   
+    {
         return GpsInput.GetAllTracks();
     }
 
