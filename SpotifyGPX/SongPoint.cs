@@ -82,6 +82,30 @@ public readonly struct SongPoint
     public readonly double Accuracy => (Song.Time - Point.Time).TotalSeconds;
 
     /// <summary>
+    /// Calculate the difference between two times.
+    /// </summary>
+    /// <param name="time1"></param>
+    /// <param name="time2"></param>
+    /// <returns>A <see cref="TimeSpan"/> representing a time interval between the provided times.</returns>
+    public static TimeSpan DifferenceCalculator(DateTimeOffset time1, DateTimeOffset time2) => time1 - time2;
+
+    /// <summary>
+    /// Calculate the difference between two times.
+    /// </summary>
+    /// <param name="time1">The first time.</param>
+    /// <param name="time2">The second time.</param>
+    /// <returns>A <see langword="double"/> representing the difference in seconds between two times.</returns>
+    public static double DisplacementCalculator(DateTimeOffset time1, DateTimeOffset time2) => DifferenceCalculator(time1, time2).TotalSeconds;
+
+    /// <summary>
+    /// Calculate the absolute difference between two times.
+    /// </summary>
+    /// <param name="time1">The first time.</param>
+    /// <param name="time2">The second time.</param>
+    /// <returns>A <see langword="double"/> representing the difference in seconds between two times.</returns>
+    public static double DisplacementCalculatorAbs(DateTimeOffset time1, DateTimeOffset time2) => Math.Abs(DisplacementCalculator(time1, time2));
+
+    /// <summary>
     /// The absolute value (in seconds) between the song and the point.
     /// </summary>
     public readonly double AbsAccuracy => Math.Abs(Accuracy);
