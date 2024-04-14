@@ -15,16 +15,16 @@ public partial interface ISongInput
     /// Gets all songs in the file.
     /// </summary>
     /// <returns>A list of SpotifyEntry objects.</returns>
-    List<SpotifyEntry> GetAllSongs();
+    List<ISongEntry> GetAllSongs();
 
     /// <summary>
     /// Get songs based on an existing list of track times.
     /// </summary>
     /// <param name="tracks">A list of GPXTrack objects.</param>
     /// <returns>A list of SpotifyEntry objects that must be within the times of the GPXTrack object(s).</returns>
-    List<SpotifyEntry> GetFilteredSongs(List<GPXTrack> tracks)
+    List<ISongEntry> GetFilteredSongs(List<GPXTrack> tracks)
     {
-        List<SpotifyEntry> AllSongs = GetAllSongs();
+        List<ISongEntry> AllSongs = GetAllSongs();
 
         var trackRange = tracks.Select(track => (track.Start, track.End)).ToList();
 
@@ -35,11 +35,8 @@ public partial interface ISongInput
 
         // You may add other filtration options below, within the .Any() statement:
 
-        List<SpotifyEntry> FilteredSongs = AllSongs.Where(spotifyEntry => // If the spotify entry
-            trackRange.Any(trackTimes =>
-                spotifyEntry.WithinTimeFrame(trackTimes.Start, trackTimes.End) && // Within the time range of tracks
-                (spotifyEntry.TimePlayed >= MinimumPlaytime) && // Long enough duration
-                (spotifyEntry.Song_Skipped != true || !ExcludeSkipped))) // Wasn't skipped
+        List<ISongEntry> FilteredSongs = AllSongs.Where(spotifyEntry => // If the spotify entry
+            trackRange.Any(trackTimes => spotifyEntry.WithinTimeFrame(trackTimes.Start, trackTimes.End))) // Within the time range of tracks
             .ToList(); // Send the songs passing the filter to a list
 
         Console.WriteLine($"[INP] {FilteredSongs.Count} songs filtered from {AllSongs.Count} total");

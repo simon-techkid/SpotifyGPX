@@ -23,7 +23,7 @@ public partial class PairingsHandler
     /// <param name="silent">If true, do not print each pairing to the console upon creation.</param>
     /// <param name="predict">If true, create a DupeHandler for predicting duplicates in the resulting pair list.</param>
     /// <param name="autoPredict">If true, and predict is true, automatically predict all duplicate positions.</param>
-    public PairingsHandler(List<SpotifyEntry> s, List<GPXTrack> t, bool silent, bool predict, bool autoPredict)
+    public PairingsHandler(List<ISongEntry> s, List<GPXTrack> t, bool silent, bool predict, bool autoPredict)
     {
         if (predict == true)
         {
@@ -54,7 +54,7 @@ public partial class PairingsHandler
     /// <param name="songs">A series of Spotify playback records, used to associate a song with a point.</param>
     /// <param name="tracks">A list of GPXTrack objects, used to associate songs with a track and position on Earth.</param>
     /// <returns>A list of Song-Point pairs, each song and its point (on Earth), in a list.</returns>
-    private static List<SongPoint> PairPoints(bool silent, List<SpotifyEntry> songs, List<GPXTrack> tracks)
+    private static List<SongPoint> PairPoints(bool silent, List<ISongEntry> songs, List<GPXTrack> tracks)
     {
         // Correlate Spotify entries with the nearest GPX points
 
@@ -105,7 +105,7 @@ public partial class PairingsHandler
     {
         WriteCounts(pair => pair.Origin, "track", "tracks"); // Write # of pairs per track
         WriteCounts(pair => pair.Origin.Type, "type", "types"); // Write # of pairs in each type of track (GPX, Gap, Combined)
-        WriteCounts(pair => pair.Song.Spotify_Country, "country", "countries"); // Write # of pairs in each country
+        //WriteCounts(pair => pair.Song.Spotify_Country, "country", "countries"); // Write # of pairs in each country
     }
 
     /// <summary>

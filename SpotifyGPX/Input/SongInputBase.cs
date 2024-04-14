@@ -9,8 +9,8 @@ namespace SpotifyGPX.Input;
 /// </summary>
 public abstract class SongInputBase : ISongInput
 {
-    protected abstract List<SpotifyEntry> AllSongs { get; }
+    protected abstract List<ISongEntry> AllSongs { get; }
     public abstract int SourceSongCount { get; }
     public int ParsedSongCount => AllSongs.Count;
-    public List<SpotifyEntry> GetAllSongs() => AllSongs;
+    public List<ISongEntry> GetAllSongs() => AllSongs;
 }

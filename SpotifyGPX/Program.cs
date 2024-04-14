@@ -87,8 +87,8 @@ class Program
                 List<GPXTrack> tracks = input.GetSelectedTracks();
 
                 // Step 2: Get list of songs played from the entries file
-                List<SpotifyEntry> songs = input.GetFilteredSongs(tracks);
-                //List<SpotifyEntry> songs = input.GetAllSongs(); // Unfiltered run
+                List<ISongEntry> songs = input.GetFilteredSongs(tracks);
+                //List<ISongEntry> songs = input.GetAllSongs(); // Unfiltered run
 
                 if (grabApiData)
                 {

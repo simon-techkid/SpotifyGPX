@@ -17,13 +17,12 @@ public partial class Xspf : XmlSaveable
     {
         var xspfPairs = pairs.Select(pair =>
         new XElement(Namespace + Track,
-            new XElement(Namespace + "identifier", pair.Song.Song_ID),
-            new XElement(Namespace + "title", pair.Song.Song_Name),
-            new XElement(Namespace + "creator", pair.Song.Song_Artist),
-            new XElement(Namespace + "annotation", pair.Song.Time.UtcDateTime.ToString(Options.ISO8601UTC)),
-            new XElement(Namespace + "album", pair.Song.Song_Album),
-            new XElement(Namespace + "duration", pair.Song.TimePlayed?.TotalMilliseconds),
-            new XElement(Namespace + "link", pair.Song.Song_URI)
+            CheckNullNode(Namespace + "title", pair.Song.Song_Name),
+            CheckNullNode(Namespace + "creator", pair.Song.Song_Artist),
+            CheckNullNode(Namespace + "annotation", pair.Song.Time.UtcDateTime.ToString(Options.ISO8601UTC)),
+            CheckNullNode(Namespace + "album", pair.Song.GetPropertyValue<SpotifyEntry>(song => song.Song_Album)),
+            CheckNullNode(Namespace + "duration", pair.Song.GetPropertyValue<IDuratableSong>(song => song.TimePlayed.TotalMilliseconds)),
+            CheckNullNode(Namespace + "link", pair.Song.GetPropertyValue<IUrlLinkable>(song => song.Song_URL))
         ));
 
         XmlHashProvider hasher = new();
@@ -36,12 +35,20 @@ public partial class Xspf : XmlSaveable
                 new XAttribute("xmlns", Namespace),
                 new XElement(Namespace + "title", trackName),
                 new XElement(Namespace + "creator", "SpotifyGPX"),
-                new XElement(Namespace + "annotation", ""),
+                new XElement(Namespace + "annotation", Comment),
                 new XElement(Namespace + "identifier", hash),
                 new XElement(Namespace + "date", DateTimeOffset.Now.UtcDateTime.ToString(Options.ISO8601UTC)),
                 new XElement(Namespace + "trackList", xspfPairs) // All pairs inside <trackList>
             )
         );
+    }
+
+    private static XElement? CheckNullNode(XName nodeName, object? content)
+    {
+        if (content != null)
+            return new XElement(nodeName, content);
+
+        return null;
     }
 
     public override int Count => Document.Descendants(Namespace + Track).Count(); // Number of track elements

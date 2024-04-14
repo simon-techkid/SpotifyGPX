@@ -11,107 +11,37 @@ namespace SpotifyGPX;
 /// <summary>
 /// A record of a Spotify song played by the user. Contains metadata about the song itself as well as the time it was played.
 /// </summary>
-public partial struct SpotifyEntry
+public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, ISpotifyApiCompat, IUrlLinkable
 {
-    private DateTimeOffset? _timeEnded; // if null, estimate end time. Not null if time is known.
-    private DateTimeOffset? _timeStarted; // if null, estimate start time. Not null if time is known.
+    public readonly override string ToString() => $"{Song_Artist} - {Song_Name}";
 
-    /// <summary>
-    /// The index of this song in a list of songs.
-    /// </summary>
+    public readonly string Description
+    {
+        get
+        {
+            StringBuilder builder = new();
+
+            builder.AppendLine("Played for {0}", TimePlayed.ToString(Options.TimeSpan));
+            builder.AppendLine("Skipped: {0}", Song_Skipped);
+            builder.AppendLine("Shuffle: {0}", Song_Shuffle);
+            builder.AppendLine("IP Address: {0}", Spotify_IP);
+            builder.Append("Country: {0}", Spotify_Country);
+
+            return builder.ToString();
+        }
+    }
+
     [JsonProperty("SGPX_Index")]
     public int Index { get; set; }
 
-    /// <summary>
-    /// The official time of the song.
-    /// This time will be used for pairing it with a <see cref="GPXPoint"/>. 
-    /// If <see cref="TimeUsage"/> is <see cref="TimeUsage.Start"/>, use <see cref="TimeStarted"/>.
-    /// If <see cref="TimeUsage"/> is <see cref="TimeUsage.End"/>, use <see cref="TimeEnded"/>
-    /// </summary>
-    [JsonProperty("SGPX_Time")]
-    public DateTimeOffset Time
-    {
-        get
-        {
-            return TimeUsage switch
-            {
-                TimeUsage.Start => TimeStarted,
-                TimeUsage.End => TimeEnded,
-                _ => throw new InvalidOperationException("SpotifyEntry time usage not set.")
-            };
-        }
-        set
-        {
-            switch (TimeInterpretation)
-            {
-                case TimeInterpretation.Start:
-                    _timeStarted = value;
-                    break;
-                case TimeInterpretation.End:
-                    _timeEnded = value;
-                    break;
-                default:
-                    throw new InvalidOperationException("SpotifyEntry time interpretation not set.");
-            }
-        }
-    }
-
-    /// <summary>
-    /// Determines whether to treat the given time (from an <see cref="ISongInput"/>) as the start or the end time of the <see cref="SpotifyEntry"/>.
-    /// </summary>
-    [JsonProperty("SGPX_TimeInterpretation")]
-    public TimeInterpretation TimeInterpretation { get; set; }
-
-    /// <summary>
-    /// Determines whether the start or end time of the song should be used for the official <see cref="Time"/> time.
-    /// </summary>
-    [JsonProperty("SGPX_TimeUsage")]
-    public readonly TimeUsage TimeUsage => timeUsage;
-
-    /// <summary>
-    /// The time and date this song ended.
-    /// </summary>
-    [JsonProperty("SGPX_TimeStarted")]
-    public DateTimeOffset TimeStarted
-    {
-        get
-        {
-            if (!_timeStarted.HasValue)
-                _timeStarted = TimeEnded - TimePlayed;
-
-            if (_timeStarted != null)
-                return _timeStarted.Value;
-
-            throw new InvalidOperationException("SpotifyEntry time started not set.");
-        }
-    }
-
     [JsonProperty("ts")]
-    public DateTimeOffset TimeEnded
-    {
-        get
-        {
-            if (!_timeEnded.HasValue)
-                _timeEnded = TimeStarted + TimePlayed;
+    public DateTimeOffset FriendlyTime { get; set; }
 
-            if (_timeEnded != null)
-                return _timeEnded.Value;
+    [JsonProperty("SGPX_TimeInterpretation")]
+    public TimeInterpretation CurrentInterpretation { get; set; }
 
-            throw new InvalidOperationException("SpotifyEntry time ended not set.");
-        }
-    }
-
-    /// <summary>
-    /// Whether or not <see cref="TimeStarted"/> is estimated based on the song duration.
-    /// </summary>
-    [JsonProperty("SGPX_TimeStartEstimated")]
-    public readonly bool TimeStartEstimated => _timeStarted == null;
-
-    /// <summary>
-    /// Whether or not <see cref="TimeEnded"/> is estimated based on the song duration.
-    /// </summary>
-    [JsonProperty("SGPX_TimeEndEstimated")]
-    public readonly bool TimeEndEstimated => _timeEnded == null;
+    [JsonProperty("SGPX_TimeUsage")]
+    public readonly TimeUsage CurrentUsage => timeUsage;
 
     /// <summary>
     /// This field is your Spotify username.
@@ -129,17 +59,10 @@ public partial struct SpotifyEntry
     /// This field is the number of milliseconds the stream was played.
     /// </summary>
     [JsonProperty("msPlayed")]
-    public int? Time_Played
-    {
-        readonly get => (int?)TimePlayed?.TotalMilliseconds ?? null;
-        set => TimePlayed = value == null ? null : TimePlayed = TimeSpan.FromMilliseconds((double)value);
-    }
+    public int Time_Played { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
     [JsonProperty("SGPX_TimePlayed")]
-    public TimeSpan? TimePlayed { get; private set; }
+    public readonly TimeSpan TimePlayed => TimeSpan.FromMilliseconds(Time_Played);
 
     /// <summary>
     /// This field is the country code of the country where the stream was played (e.g. SE - Sweden).
@@ -270,18 +193,4 @@ public partial struct SpotifyEntry
     /// </summary>
     [JsonProperty("SGPX_Metadata")]
     public SpotifyApiEntry? Metadata { get; set; }
-
-    /// <summary>
-    /// Converts this SpotifyEntry to a string.
-    /// </summary>
-    /// <returns>The artist and name of this song, separated by a dash.</returns>
-    public override readonly string ToString() => $"{Song_Artist} - {Song_Name}"; // Display format for this song
-
-    /// <summary>
-    /// Determines whether this song falls within a provided time frame.
-    /// </summary>
-    /// <param name="Start">The start of the time frame.</param>
-    /// <param name="End">The end of the time frame.</param>
-    /// <returns>True, if this song is within the provided time frame. False, if this song is outside the provided time frame.</returns>
-    public bool WithinTimeFrame(DateTimeOffset Start, DateTimeOffset End) => (Time >= Start) && (Time <= End); // Return true if song within provided time range
 }

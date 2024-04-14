@@ -60,11 +60,11 @@ public readonly struct GPXTrack
     {
         StringBuilder builder = new();
 
-        builder.Append("   Name: {0}", Track.ToString());
-        builder.Append("   Points: {0}", Points.Count);
-        builder.Append("   Starts: {0}", Start.ToString(Options.ISO8601Offset));
-        builder.Append("   Ends: {0}", End.ToString(Options.ISO8601Offset));
-        builder.Append("   Type: {0}", Track.Type);
+        builder.AppendLine("   Name: {0}", Track.ToString());
+        builder.AppendLine("   Points: {0}", Points.Count);
+        builder.AppendLine("   Starts: {0}", Start.ToString(Options.ISO8601Offset));
+        builder.AppendLine("   Ends: {0}", End.ToString(Options.ISO8601Offset));
+        builder.AppendLine("   Type: {0}", Track.Type);
 
         return builder.ToString();
     }

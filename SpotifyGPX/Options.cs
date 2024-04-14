@@ -69,7 +69,12 @@ namespace SpotifyGPX
 
     public partial struct SpotifyEntry
     {
-        private const TimeUsage timeUsage = TimeUsage.Start; // Instructs the parser to treat the song's primary time as the start or end of the song
+        private const TimeUsage timeUsage = TimeUsage.Start;
+    }
+
+    public partial struct XspfEntry
+    {
+        private const TimeUsage timeUsage = TimeUsage.Start;
     }
 
     public partial class PairingsHandler
@@ -125,12 +130,6 @@ namespace SpotifyGPX.Input
         }
     }
 
-    public partial interface ISongInput
-    {
-        private static TimeSpan MinimumPlaytime => new(0, 0, 0); // Minimum accepted song playback time (0,0,0 for all songs)
-        private const bool ExcludeSkipped = false; // Ignore songs skipped by the user, as defined by Spotify JSON (false for all songs)
-    }
-
     public partial interface IGpsInput
     {
         private static Dictionary<string, Func<IEnumerable<GPXTrack>, IEnumerable<GPXTrack>>> MultiTrackFilters => new()
@@ -167,6 +166,8 @@ namespace SpotifyGPX.Input
     {
         private static JsonSerializerSettings JsonSettings => Options.JsonSettings;
         private const TimeInterpretation Interpretation = TimeInterpretation.End;
+        private static TimeSpan MinimumPlaytime => new(0, 0, 0); // Minimum accepted song playback time (0,0,0 for all songs)
+        private const bool ExcludeSkipped = false; // Ignore songs skipped by the user, as defined by Spotify JSON (false for all songs)
     }
 
     public partial class JsonReport
@@ -210,7 +211,6 @@ namespace SpotifyGPX.Output
                 Formats.JsonReport => new JsonReport(pairs),
                 Formats.Kml => new Kml(pairs, trackName),
                 Formats.Txt => new Txt(pairs),
-                Formats.Xlsx => new Xlsx(pairs),
                 Formats.Xspf => new Xspf(pairs, trackName),
                 _ => throw new Exception($"Unsupported file export format: {format}")
             };
@@ -281,19 +281,13 @@ namespace SpotifyGPX.Output
         protected override Encoding OutputEncoding => Encoding.UTF8;
     }
 
-    public partial class Xlsx
-    {
-        private const bool CreateTotalRow = true;
-        private const bool CreatePivots = true;
-    }
-
     public partial class Xspf
     {
         private static XNamespace Namespace => "http://xspf.org/ns/0/";
         private const string DocumentEncoding = "utf-8";
         private const string Track = "track";
+        private const string Comment = "";
         protected override SaveOptions OutputOptions => SaveOptions.None;
         protected override Encoding OutputEncoding => Encoding.UTF8;
     }
-
 }

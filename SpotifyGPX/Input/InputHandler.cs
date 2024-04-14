@@ -69,17 +69,12 @@ public partial class InputHandler
     /// Gets all song records from the given file.
     /// </summary>
     /// <returns>A list of SpotifyEntries, each representing a single song of playback.</returns>
-    public List<SpotifyEntry> GetAllSongs()
+    public List<ISongEntry> GetAllSongs()
     {
         return SongInput.GetAllSongs();
     }
 
-    /// <summary>
-    /// Get only the song records from the file that occur during the time range of the GPX tracks.
-    /// </summary>
-    /// <param name="tracks">A list of GPXTrack objects with which to confine the song search to.</param>
-    /// <returns>A list of SpotifyEntry objects, only the songs played between <see cref="GPXTrack.Start"/> and <see cref="GPXTrack.End"/>.</returns>
-    public List<SpotifyEntry> GetFilteredSongs(List<GPXTrack> tracks)
+    public List<ISongEntry> GetFilteredSongs(List<GPXTrack> tracks)
     {
         return SongInput.GetFilteredSongs(tracks);
     }

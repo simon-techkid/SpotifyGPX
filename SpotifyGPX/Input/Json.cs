@@ -11,7 +11,7 @@ public partial class Json : SongInputBase
 {
     private JsonDeserializer JsonDeserializer { get; }
     private List<JObject> AllEntries { get; }
-    protected override List<SpotifyEntry> AllSongs { get; }
+    protected override List<ISongEntry> AllSongs { get; }
 
     public Json(string path)
     {
@@ -20,16 +20,16 @@ public partial class Json : SongInputBase
         AllSongs = ParseSongs();
     }
 
-    private List<SpotifyEntry> ParseSongs()
+    private List<ISongEntry> ParseSongs()
     {
-        return AllEntries.Select((entry, index) => new SpotifyEntry
+        return AllEntries.Select((entry, index) => (ISongEntry)new SpotifyEntry
         {
             Index = index,
-            TimeInterpretation = TimeInterpretation.End,
-            Time = (DateTimeOffset?)entry["endTime"] ?? (DateTimeOffset?)entry["ts"] ?? throw new Exception($"'ts' timestamp missing from JSON entry {index}"),
+            CurrentInterpretation = Interpretation,
+            FriendlyTime = (DateTimeOffset?)entry["endTime"] ?? (DateTimeOffset?)entry["ts"] ?? throw new Exception($"Song timestamp missing from JSON entry {index}"),
             Spotify_Username = (string?)entry["username"],
             Spotify_Platform = (string?)entry["platform"],
-            Time_Played = (int?)entry["msPlayed"] ?? (int?)entry["ms_played"] ?? throw new Exception($"'msPlayed' duration missing from JSON entry {index}"),
+            Time_Played = (int?)entry["msPlayed"] ?? (int?)entry["ms_played"] ?? throw new Exception($"Song duration missing from JSON entry {index}"),
             Spotify_Country = (string?)entry["conn_country"],
             Spotify_IP = (string?)entry["ip_addr_decrypted"],
             Spotify_UA = (string?)entry["user_agent_decrypted"],
@@ -47,7 +47,16 @@ public partial class Json : SongInputBase
             Spotify_Offline = (bool?)entry["offline"],
             Spotify_OfflineTS = (long?)entry["offline_timestamp"],
             Spotify_Incognito = (bool?)entry["incognito"]
-        }).ToList();
+        })
+            //.Where(entry => entry.TimePlayed >= MinimumPlaytime && ExcludeSkipped && entry.Song_Skipped == true)
+            //.Cast<ISongEntry>()
+            .ToList();
+    }
+
+    public List<SpotifyEntry> FilterSongs(List<SpotifyEntry> songs)
+    {
+        return songs
+            .Where(song => !(song.TimePlayed >= MinimumPlaytime) || !ExcludeSkipped || song.Song_Skipped != true).ToList();
     }
 
     public override int SourceSongCount => AllEntries.Count;

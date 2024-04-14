@@ -11,7 +11,7 @@ namespace SpotifyGPX.Input;
 public partial class Xspf : SongInputBase, IHashVerifier
 {
     private XDocument Document { get; }
-    protected override List<SpotifyEntry> AllSongs { get; }
+    protected override List<ISongEntry> AllSongs { get; }
 
     public Xspf(string path)
     {
@@ -26,16 +26,16 @@ public partial class Xspf : SongInputBase, IHashVerifier
         AllSongs = ParseSongs();
     }
 
-    private List<SpotifyEntry> ParseSongs()
+    private List<ISongEntry> ParseSongs()
     {
-        return Document.Descendants(InputNs + Track).Select((element, index) => new SpotifyEntry
+        return Document.Descendants(InputNs + Track).Select((element, index) => (ISongEntry)new XspfEntry
         {
             Index = index,
-            TimeInterpretation = TimeInterpretation.End,
-            Time = DateTimeOffset.ParseExact(element.Element(InputNs + "annotation")?.Value ?? throw new Exception($"XSPF node {index} doesn't include a time value in the 'annotation' node"), Options.ISO8601UTC, null, TimeStyle),
+            CurrentInterpretation = Interpretation,
+            FriendlyTime = DateTimeOffset.ParseExact(element.Element(InputNs + "annotation")?.Value ?? throw new Exception($"XSPF node {index} doesn't include a time value in the 'annotation' node"), Options.ISO8601UTC, null, TimeStyle),
             Time_Played = int.Parse(element.Element(InputNs + "duration")?.Value ?? throw new Exception($"XSPF node {index} doesn't include a duration value in the 'annotation' node")),
-            Song_Name = element.Element(InputNs + "title")?.Value,
-            Song_Artist = element.Element(InputNs + "creator")?.Value,
+            Song_Name = element.Element(InputNs + "title")?.Value ?? throw new Exception($"XSPF node {index} doesn't include a song name in the 'title' node"),
+            Song_Artist = element.Element(InputNs + "creator")?.Value ?? throw new Exception($"XSPF node {index} doesn't include a song artist in the 'creator' node"),
             Song_URI = element.Element(InputNs + "link")?.Value
         }).ToList();
     }
