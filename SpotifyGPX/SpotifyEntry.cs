@@ -11,11 +11,11 @@ namespace SpotifyGPX;
 /// <summary>
 /// A record of a Spotify song played by the user. Contains metadata about the song itself as well as the time it was played.
 /// </summary>
-public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, IUrlLinkable
+public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, ISpotifyApiCompat, ISpotifyApiProportionable, IUrlLinkable
 {
     public readonly override string ToString() => $"{Song_Artist} - {Song_Name}";
 
-    public readonly string Description
+    public string Description
     {
         get
         {
@@ -25,6 +25,7 @@ public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, IUrlLinkable
             builder.AppendLine("Skipped: {0}", Song_Skipped);
             builder.AppendLine("Shuffle: {0}", Song_Shuffle);
             builder.AppendLine("IP Address: {0}", Spotify_IP);
+            builder.AppendLine("Listened: {0}%", PercentListened);
             builder.Append("Country: {0}", Spotify_Country);
 
             return builder.ToString();
@@ -188,9 +189,9 @@ public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, IUrlLinkable
     [JsonProperty("incognito_mode")]
     public bool? Spotify_Incognito { get; set; }
 
-    /// <summary>
-    /// Optional Spotify API metadata layer for this track.
-    /// </summary>
+    [JsonProperty("SGPX_PercentListened")]
+    public decimal? PercentListened => Metadata?.Duration != null ? Math.Round(((decimal)Time_Played / (decimal)Metadata?.Duration!) * 100, 0) : null;
+
     [JsonProperty("SGPX_Metadata")]
     public SpotifyApiEntry? Metadata { get; set; }
 }

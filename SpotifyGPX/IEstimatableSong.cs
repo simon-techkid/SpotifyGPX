@@ -8,7 +8,7 @@ namespace SpotifyGPX;
 /// <summary>
 /// Provides access to estimated start/end times for a song.
 /// </summary>
-public interface IEstimatableSong
+public interface IEstimatableSong : IDuratableSong
 {
     /// <summary>
     /// Determines whether to treat <see cref="Time"/> as the <see cref="TimeInterpretation.Start"/> (start)
@@ -26,7 +26,7 @@ public interface IEstimatableSong
     /// The duration of time during which the song was played.
     /// This value is required for estimation as it provides a basis for calculating the end or start time of the song.
     /// </summary>
-    public TimeSpan TimePlayed { get; }
+    public new TimeSpan TimePlayed { get; }
 
     /// <summary>
     /// The estimated or exact start time of this song.

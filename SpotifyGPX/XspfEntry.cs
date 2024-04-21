@@ -24,7 +24,7 @@ public partial struct XspfEntry : ISongEntry, IEstimatableSong
     public TimeInterpretation CurrentInterpretation { get; set; }
     public readonly TimeUsage CurrentUsage => timeUsage;
     public int Time_Played { get; set; }
-    public TimeSpan TimePlayed => TimeSpan.FromMilliseconds(Time_Played);
+    public readonly TimeSpan TimePlayed => TimeSpan.FromMilliseconds(Time_Played);
     public string? Song_Artist { get; set; }
     public string? Song_Name { get; set; }
     public string? Song_URI { get; set; }

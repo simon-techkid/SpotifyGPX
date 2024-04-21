@@ -28,26 +28,30 @@ public class EntryMatcher
     /// <returns></returns>
     public List<ISongEntry> MatchEntries()
     {
-        // Filter out null values from _songs before passing to the GetAllEntries method
-        string[] trackIds = _songs.Where(s => (s is SpotifyEntry spotifySong) && spotifySong.Song_ID != null)
-                                  .Select(s => ((SpotifyEntry)s).Song_ID)
-                                  .ToArray();
+        // Filter out null values and cast to ISpotifyApiCompat
+        List<ISpotifyApiCompat> validSpotifySongs = _songs
+            .OfType<ISpotifyApiCompat>()
+            .ToList();
 
-        // Ensure trackIds is not null before passing it to GetAllEntries
-        Dictionary<string, SpotifyApiEntry> metadatas = SpotifyApiHandler.GetAllEntries(trackIds);
+        // Extract track IDs
+        string[] trackIds = validSpotifySongs.Select(s => s.SongID).ToArray();
 
-        return _songs.Where(song => (song is SpotifyEntry spotifySong) && spotifySong.Song_ID != null).Select(song =>
+        // Get metadata from Spotify API
+        var metadatas = SpotifyApiHandler.GetAllEntries(trackIds);
+
+        // Update metadata for valid songs
+        foreach (ISpotifyApiCompat song in validSpotifySongs)
         {
-            SpotifyEntry spotifySong = (SpotifyEntry)song; // Cast to SpotifyEntry to access Spotify-specific properties
-            if (metadatas.TryGetValue(spotifySong.Song_ID, out SpotifyApiEntry metadata))
+            if (metadatas.TryGetValue(song.SongID, out SpotifyApiEntry metadata))
             {
-                spotifySong.Metadata = metadata;
+                song.Metadata = metadata;
             }
             else
             {
-                Console.WriteLine($"[API] No metadata found for {spotifySong.Song_Name} ({spotifySong.Song_ID})");
+                Console.WriteLine($"[API] No metadata found for {song.Song_Name} ({song.SongID})");
             }
-            return song;
-        }).ToList();
+        }
+
+        return _songs;
     }
 }
