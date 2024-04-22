@@ -11,7 +11,7 @@ namespace SpotifyGPX;
 /// <summary>
 /// A record of a Spotify song played by the user. Contains metadata about the song itself as well as the time it was played.
 /// </summary>
-public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, ISpotifyApiCompat, IUrlLinkable
+public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, IUrlLinkable
 {
     public readonly override string ToString() => $"{Song_Artist} - {Song_Name}";
 

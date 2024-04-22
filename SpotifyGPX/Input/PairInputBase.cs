@@ -21,5 +21,5 @@ public abstract class PairInputBase : ISongInput, IGpsInput, IPairInput
     public int ParsedSongCount => AllPairs.Select(pair => pair.Song).Count();
     public List<SongPoint> GetAllPairs() => AllPairs;
     public List<ISongEntry> GetAllSongs() => AllPairs.Select(pair => pair.Song).Cast<ISongEntry>().ToList();
-    public List<GPXTrack> GetAllTracks() => AllPairs.GroupBy(pair => pair.Origin).Select(type => new GPXTrack(type.Key.Index, type.Key.Name, type.Key.Type, type.Select(pair => pair.Point).ToList())).ToList();
+    public List<GpsTrack> GetAllTracks() => AllPairs.GroupBy(pair => pair.Origin).Select(type => new GpsTrack(type.Key.Index, type.Key.Name, type.Key.Type, type.Select(pair => pair.Point).ToList())).ToList();
 }

@@ -74,7 +74,7 @@ public partial class InputHandler
         return SongInput.GetAllSongs();
     }
 
-    public List<ISongEntry> GetFilteredSongs(List<GPXTrack> tracks)
+    public List<ISongEntry> GetFilteredSongs(List<GpsTrack> tracks)
     {
         return SongInput.GetFilteredSongs(tracks);
     }
@@ -83,7 +83,7 @@ public partial class InputHandler
     /// Gets all journey tracks from the given file.
     /// </summary>
     /// <returns>A list of GPXTracks, each representing a collection of positions comprising a journey's path.</returns>
-    public List<GPXTrack> GetAllTracks()
+    public List<GpsTrack> GetAllTracks()
     {
         return GpsInput.GetAllTracks();
     }
@@ -92,7 +92,7 @@ public partial class InputHandler
     /// Gets user-selected journey track(s) from the given file.
     /// </summary>
     /// <returns>A list of GPXTrack(s) based on user selection, each representing a collection of positions comprising a journey's path</returns>
-    public List<GPXTrack> GetSelectedTracks()
+    public List<GpsTrack> GetSelectedTracks()
     {
         return GpsInput.GetSelectedTracks();
     }

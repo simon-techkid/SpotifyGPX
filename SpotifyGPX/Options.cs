@@ -132,7 +132,7 @@ namespace SpotifyGPX.Input
 
     public partial interface IGpsInput
     {
-        private static Dictionary<string, Func<IEnumerable<GPXTrack>, IEnumerable<GPXTrack>>> MultiTrackFilters => new()
+        private static Dictionary<string, Func<IEnumerable<GpsTrack>, IEnumerable<GpsTrack>>> MultiTrackFilters => new()
         {
             { "A", allTracks => allTracks.Where(track => track.Track.Type == TrackType.GPX) },
             { "B", allTracks => allTracks.Where(track => track.Track.Type != TrackType.Combined) },

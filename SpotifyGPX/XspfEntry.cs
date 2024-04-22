@@ -19,7 +19,6 @@ public partial struct XspfEntry : ISongEntry, IEstimatableSong
             return builder.ToString();
         }
     }
-
     public int Index { get; set; }
     public DateTimeOffset FriendlyTime { get; set; }
     public TimeInterpretation CurrentInterpretation { get; set; }

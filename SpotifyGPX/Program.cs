@@ -84,7 +84,7 @@ class Program
                 prefix = inputGps;
 
                 // Step 1: Get list of GPX tracks from the GPS file
-                List<GPXTrack> tracks = input.GetSelectedTracks();
+                List<GpsTrack> tracks = input.GetSelectedTracks();
 
                 // Step 2: Get list of songs played from the entries file
                 List<ISongEntry> songs = input.GetFilteredSongs(tracks);

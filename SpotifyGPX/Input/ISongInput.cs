@@ -22,7 +22,7 @@ public partial interface ISongInput
     /// </summary>
     /// <param name="tracks">A list of GPXTrack objects.</param>
     /// <returns>A list of SpotifyEntry objects that must be within the times of the GPXTrack object(s).</returns>
-    List<ISongEntry> GetFilteredSongs(List<GPXTrack> tracks)
+    List<ISongEntry> GetFilteredSongs(List<GpsTrack> tracks)
     {
         List<ISongEntry> AllSongs = GetAllSongs();
 

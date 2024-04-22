@@ -15,21 +15,21 @@ public partial interface IGpsInput
     /// Gets all tracks in the file.
     /// </summary>
     /// <returns>A list of GPXTrack objects.</returns>
-    List<GPXTrack> GetAllTracks();
+    List<GpsTrack> GetAllTracks();
 
     /// <summary>
     /// Gets tracks based on user-selection.
     /// </summary>
     /// <returns>A list of GPXTrack objects, based on user-selection</returns>
-    List<GPXTrack> GetSelectedTracks()
+    List<GpsTrack> GetSelectedTracks()
     {
-        List<GPXTrack> AllTracks = GetAllTracks();
+        List<GpsTrack> AllTracks = GetAllTracks();
 
         if (AllTracks.Count > 1)
         {
             // If the GPX contains more than one track, provide user parsing options:
 
-            GPXTrack combinedTrack = CombineTracks(AllTracks); // Generate a combined track (cohesive of all included tracks)
+            GpsTrack combinedTrack = CombineTracks(AllTracks); // Generate a combined track (cohesive of all included tracks)
             AllTracks = CalculateGaps(AllTracks); // Add gaps between tracks as track options
             AllTracks.Add(combinedTrack); // Add the combined track to the end of the list
 
@@ -44,13 +44,13 @@ public partial interface IGpsInput
     /// </summary>
     /// <param name="allTracks">The entire list of tracks.</param>
     /// <returns>A list of GPXTrack objects based on user selection.</returns>
-    private static List<GPXTrack> HandleMultipleTracks(List<GPXTrack> allTracks)
+    private static List<GpsTrack> HandleMultipleTracks(List<GpsTrack> allTracks)
     {
         int selectedTrackIndex; // Holds the user track selection index        
 
         Console.WriteLine("[INP] Multiple GPX tracks found:");
 
-        foreach (GPXTrack track in allTracks)
+        foreach (GpsTrack track in allTracks)
         {
             Console.WriteLine($"[INP] Index: {allTracks.IndexOf(track)} {track.ToString()}");
         }
@@ -80,7 +80,7 @@ public partial interface IGpsInput
         }
 
         // If the user selected a specific track index, return that
-        List<GPXTrack> selectedTracks = new()
+        List<GpsTrack> selectedTracks = new()
         {
             allTracks[selectedTrackIndex]
         };
@@ -93,7 +93,7 @@ public partial interface IGpsInput
     /// <param name="allTracks">A list of GPXTrack objects.</param>
     /// <returns>A single GPXTrack with data from each in the list.</returns>
     /// <exception cref="Exception">The list provided was null or contained no tracks.</exception>
-    private static GPXTrack CombineTracks(List<GPXTrack> allTracks)
+    private static GpsTrack CombineTracks(List<GpsTrack> allTracks)
     {
         if (allTracks == null || allTracks.Count == 0)
         {
@@ -104,7 +104,7 @@ public partial interface IGpsInput
         var combinedPoints = allTracks.SelectMany(track => track.Points);
 
         // Create a new GPXTrack with combined points
-        GPXTrack combinedTrack = new(allTracks.Count, CombinedOrGapTrackName(allTracks.First().Track, allTracks.Last().Track), TrackType.Combined, combinedPoints.ToList());
+        GpsTrack combinedTrack = new(allTracks.Count, CombinedOrGapTrackName(allTracks.First().Track, allTracks.Last().Track), TrackType.Combined, combinedPoints.ToList());
 
         return combinedTrack;
     }
@@ -114,22 +114,22 @@ public partial interface IGpsInput
     /// </summary>
     /// <param name="allTracks">A list of GPXTrack objects.</param>
     /// <returns>A list of GPXTrack objects, containing the original tracks as well as tracks created based on the gaps between each in the original list.</returns>
-    private static List<GPXTrack> CalculateGaps(List<GPXTrack> allTracks)
+    private static List<GpsTrack> CalculateGaps(List<GpsTrack> allTracks)
     {
         return allTracks
             .SelectMany((gpxTrack, index) => // For each track and its index
             {
                 if (index < allTracks.Count - 1)
                 {
-                    GPXTrack followingTrack = allTracks[index + 1]; // Get the track after the current track (next one)
-                    GPXPoint end = gpxTrack.Points.Last(); // Get the last point of the current track
-                    GPXPoint next = followingTrack.Points.First(); // Get the first point of the next track
+                    GpsTrack followingTrack = allTracks[index + 1]; // Get the track after the current track (next one)
+                    IGpsPoint end = gpxTrack.Points.Last(); // Get the last point of the current track
+                    IGpsPoint next = followingTrack.Points.First(); // Get the first point of the next track
                     string gapName = CombinedOrGapTrackName(gpxTrack.Track, followingTrack.Track); // Create a name for the gap track based on the name of the current track and next track
 
                     if (end.Time != next.Time)
                     {
                         // Create a gap track based on the index of this track, the name of the gap, and the two endpoints                        
-                        GPXTrack gapTrack = new(index, gapName, TrackType.Gap, new List<GPXPoint> { end, next });
+                        GpsTrack gapTrack = new(index, gapName, TrackType.Gap, new List<IGpsPoint> { end, next });
 
                         // Return this track, and the gap between it and the next track
                         return new[] { gpxTrack, gapTrack };

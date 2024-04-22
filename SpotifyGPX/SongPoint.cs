@@ -36,7 +36,7 @@ public readonly struct SongPoint
     /// <param name="point">The GPXPoint (containing geospatial data) of this pair's point.</param>
     /// <param name="origin">The TrackInfo (track information) about the track from which this pair was created.</param>
     [JsonConstructor]
-    public SongPoint(int index, ISongEntry song, GPXPoint point, TrackInfo origin)
+    public SongPoint(int index, ISongEntry song, IGpsPoint point, TrackInfo origin)
     {
         Index = index;
         Song = song;
@@ -54,7 +54,7 @@ public readonly struct SongPoint
     public SongPoint(SongPoint oldPair, Coordinate newCoord, int relIndex) // Used for prediction only
     {
         this = oldPair;
-        Point = new GPXPoint(oldPair.Point, newCoord); // Create a GPXPoint using an existing point, with a new coordinate
+        Point.Location = newCoord; // Create a GPXPoint using an existing point, with a new coordinate
         PredictedIndex = relIndex;
     }
 
@@ -71,7 +71,7 @@ public readonly struct SongPoint
     /// <summary>
     /// This song-point pair's point data.
     /// </summary>
-    public readonly GPXPoint Point { get; }
+    public readonly IGpsPoint Point { get; }
 
     /// <summary>
     /// Information about the track from which the point was created.
@@ -101,12 +101,12 @@ public readonly struct SongPoint
     /// <summary>
     /// The time and date the song ended, converted to the pair's UTC offset (NormalizedOffset).
     /// </summary>
-    public DateTimeOffset SongTime => Song.Time.ToOffset(NormalizedOffset);
+    public readonly DateTimeOffset SongTime => Song.Time.ToOffset(NormalizedOffset);
 
     /// <summary>
     /// The time and date the point was taken, converted to the pair's UTC offset (NormalizedOffset).
     /// </summary>
-    public DateTimeOffset PointTime => Point.Time.ToOffset(NormalizedOffset);
+    public readonly DateTimeOffset PointTime => Point.Time.ToOffset(NormalizedOffset);
 
     /// <summary>
     /// The index of this pair in a series of predictions (if it's point was predicted).
