@@ -9,7 +9,7 @@ namespace SpotifyGPX;
 /// <summary>
 /// A journey track, with a name, type, and series of points representing the path on Earth of the journey. 
 /// </summary>
-public readonly struct GPXTrack
+public readonly struct GpsTrack
 {
     /// <summary>
     /// Creates a GPXTrack, holding a series of points.
@@ -18,7 +18,7 @@ public readonly struct GPXTrack
     /// <param name="name">The friendly name of this track.</param>
     /// <param name="type">The type of this track (GPX, Gap, or Combined).</param>
     /// <param name="points">A list of the points comprising this track.</param>
-    public GPXTrack(int? index, string? name, TrackType type, List<GPXPoint> points)
+    public GpsTrack(int? index, string? name, TrackType type, List<IGpsPoint> points)
     {
         Track = new TrackInfo(index, name, type);
         Points = points;
@@ -40,7 +40,7 @@ public readonly struct GPXTrack
     /// <summary>
     /// A series of points that comprise this track (journey).
     /// </summary>
-    public readonly List<GPXPoint> Points { get; } // Where and when were all the points in this track taken?
+    public readonly List<IGpsPoint> Points { get; } // Where and when were all the points in this track taken?
 
     /// <summary>
     /// The time and date at which this track's earliest point was taken.
@@ -60,11 +60,11 @@ public readonly struct GPXTrack
     {
         StringBuilder builder = new();
 
-        builder.Append("   Name: {0}", Track.ToString());
-        builder.Append("   Points: {0}", Points.Count);
-        builder.Append("   Starts: {0}", Start.ToString(Options.ISO8601Offset));
-        builder.Append("   Ends: {0}", End.ToString(Options.ISO8601Offset));
-        builder.Append("   Type: {0}", Track.Type);
+        builder.AppendLine("   Name: {0}", Track.ToString());
+        builder.AppendLine("   Points: {0}", Points.Count);
+        builder.AppendLine("   Starts: {0}", Start.ToString(Options.ISO8601Offset));
+        builder.AppendLine("   Ends: {0}", End.ToString(Options.ISO8601Offset));
+        builder.AppendLine("   Type: {0}", Track.Type);
 
         return builder.ToString();
     }

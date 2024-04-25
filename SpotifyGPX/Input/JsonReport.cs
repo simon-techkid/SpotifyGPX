@@ -1,23 +1,24 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace SpotifyGPX.Input;
 
 public partial class JsonReport : PairInputBase, IHashVerifier
 {
-    private JsonDeserializer JsonDeserializer { get; }
-    private List<JObject> JsonObjects { get; }
-    private List<JObject> JsonTracksOnly { get; }
+    private JsonNetDeserializer JsonDeserializer { get; }
+    private List<JsonDocument> JsonObjects { get; }
+    private JsonElement Header => JsonObjects.First().RootElement;
+    private List<JsonDocument> JsonTracksOnly { get; }
     protected override List<SongPoint> AllPairs { get; }
 
     public JsonReport(string path)
     {
-        JsonDeserializer = new JsonDeserializer(path, JsonSettings);
-        JsonObjects = JsonDeserializer.Deserialize();
+        JsonDeserializer = new JsonNetDeserializer(path);
+        JsonObjects = JsonDeserializer.Deserialize<JsonDocument>();
         JsonTracksOnly = JsonObjects.Skip(1).ToList();
         List<SongPoint> pairs = GetFromJObject();
         AllPairs = pairs;
@@ -28,38 +29,81 @@ public partial class JsonReport : PairInputBase, IHashVerifier
         int alreadyParsed = 0; // The number of points already parsed
 
         // Get the header
-        JObject header = JsonObjects.First();
-        int expectedTotal = header.Value<int>("Total");
+        int expectedTotal = Header.TryGetProperty("Total", out JsonElement total) ? total.GetInt32() : throw new Exception($"Expected total required in header object of JsonReport!");
 
         List<SongPoint> allPairs = JsonTracksOnly
             .SelectMany((track, index) =>
             {
+                JsonElement root = track.RootElement;
+
                 // Get the Count item
-                int expectedPairCount = track.Value<int>("Count");
+                int expectedPairCount = root.TryGetProperty("Count", out JsonElement count) ? count.GetInt32() : throw new Exception($"No Count object found in track {index}");
 
                 // Get the TrackInfo item
-                JObject trackInfo = track.Value<JObject>("TrackInfo") ?? throw new Exception($"No TrackInfo object for track {index}");
-                TrackInfo tInfo = trackInfo.ToObject<TrackInfo>();
-
-                // Get the track pairs
-                JArray pairs = track.Value<JArray>(tInfo.Name) ?? throw new Exception($"No pairs tree found with track name '{tInfo.Name}'");
-
-                List<SongPoint> trackPairs = pairs
-                    .Select(pair => pair.ToObject<SongPoint>())
-                    .Where((pair, index) => pair.Origin == tInfo && pair.Index - alreadyParsed == index)
-                    .ToList();
-
-                List<int> indexes = trackPairs.Select(pair => pair.Index).ToList();
-
-                // Verify the quantity of pairs
-                if (trackPairs.Count != expectedPairCount)
+                if (!root.TryGetProperty("TrackInfo", out JsonElement trackInfo))
                 {
-                    VerifyQuantity(alreadyParsed, expectedPairCount, indexes, tInfo.Index);
+                    throw new Exception($"No TrackInfo object for track {index}");
                 }
 
-                alreadyParsed += trackPairs.Count; // Add the number of pairs in this track
+                int? trackIndex = trackInfo.TryGetProperty("Index", out JsonElement trIndex) ? trIndex.GetInt32() : throw new Exception($"No Index object found in TrackInfo for track {index}");
+                string? trackName = trackInfo.TryGetProperty("Name", out JsonElement name) ? name.GetString() : throw new Exception($"No Name object found in TrackInfo for track {index}");
+                int? trackType = trackInfo.TryGetProperty("Type", out JsonElement type) ? type.GetInt32() : throw new Exception($"No Type object found in TrackInfo for track {index}");
 
-                return trackPairs;
+                // Get the pairs tree
+                if (!root.TryGetProperty("Track", out JsonElement pairs))
+                {
+                    throw new Exception($"No pairs tree found with track name '{trackName}'");
+                }
+
+                return pairs.EnumerateArray().Select(pair =>
+                {
+                    JsonElement indexx = pair.GetProperty("Index");
+                    int pairIndex = indexx.GetInt32();
+
+                    JsonElement song = pair.GetProperty("Song");
+                    string songDescription = song.GetProperty("Description").GetString() ?? string.Empty;
+                    int songIndex = song.GetProperty("Index").GetInt32();
+                    DateTimeOffset songTime = song.GetProperty("Time").GetDateTimeOffset();
+                    string? songArtist = song.GetProperty("Song_Artist").GetString();
+                    string? songName = song.GetProperty("Song_Name").GetString();
+                    int songCurrentUsage = song.GetProperty("CurrentUsage").GetInt32();
+                    int songCurrentInterpretation = song.GetProperty("CurrentInterpretation").GetInt32();
+
+                    ISongEntry songEntry = new GenericEntry()
+                    {
+                        Description = songDescription,
+                        Index = songIndex,
+                        FriendlyTime = songTime,
+                        Song_Artist = songArtist,
+                        Song_Name = songName,
+                        CurrentUsage = (TimeUsage)songCurrentUsage,
+                        CurrentInterpretation = (TimeInterpretation)songCurrentInterpretation
+                    };
+
+                    JsonElement point = pair.GetProperty("Point");
+                    int pointIndex = point.GetProperty("Index").GetInt32();
+                    JsonElement pointLocation = point.GetProperty("Location");
+                    double pointLocationLatitude = pointLocation.GetProperty("Latitude").GetDouble();
+                    double pointLocationLongitude = pointLocation.GetProperty("Longitude").GetDouble();
+                    DateTimeOffset pointTime = point.GetProperty("Time").GetDateTimeOffset();
+
+                    IGpsPoint pointEntry = new GenericPoint()
+                    {
+                        Index = pointIndex,
+                        Location = new Coordinate(pointLocationLatitude, pointLocationLongitude),
+                        Time = pointTime
+                    };
+
+                    JsonElement origin = pair.GetProperty("Origin");
+                    int? originIndex = origin.GetProperty("Index").GetInt32();
+                    string? originName = origin.GetProperty("Name").GetString();
+                    int originType = origin.GetProperty("Type").GetInt32();
+
+                    TrackInfo trackEntry = new(originIndex, originName, (TrackType)originType);
+
+                    return new SongPoint(pairIndex, songEntry, pointEntry, trackEntry);
+                }).ToList();
+
             })
             .ToList();
 
@@ -86,18 +130,18 @@ public partial class JsonReport : PairInputBase, IHashVerifier
         throw new Exception($"Track {trackIndex} in JsonReport expected to have {expectedCount} pairs, but had {indexes.Count}");
     }
 
-    public override int SourceSongCount => JsonTracksOnly.Select(JObject => JObject.Value<int>("Count")).Sum();
+    public override int SourceSongCount => 0; //JsonTracksOnly.Select(JObject => JObject.Value<int>("Count")).Sum();
 
-    public override int SourcePointCount => JsonTracksOnly.Select(JObject => JObject.Value<int>("Count")).Sum();
+    public override int SourcePointCount => 0; // JsonTracksOnly.Select(JObject => JObject.Value<int>("Count")).Sum();
 
     public override int SourceTrackCount => JsonTracksOnly.Count;
 
-    public override int SourcePairCount => JsonTracksOnly.Select(JObject => JObject.Value<int>("Count")).Sum();
+    public override int SourcePairCount => 0; // JsonTracksOnly.Select(JObject => JObject.Value<int>("Count")).Sum();
 
     public bool VerifyHash()
     {
-        JsonHashProvider<IEnumerable<JObject>> hasher = new();
-        string? expectedHash = JsonObjects.First().Value<string>("SHA256Hash");
+        JsonHashProvider hasher = new();
+        string? expectedHash = Header.TryGetProperty("SHA256Hash", out JsonElement hash) ? hash.GetString() : null;
         return hasher.VerifyHash(JsonTracksOnly, expectedHash);
     }
 }

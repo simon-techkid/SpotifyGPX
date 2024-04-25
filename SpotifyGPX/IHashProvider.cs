@@ -1,11 +1,11 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Xml.Linq;
 
 namespace SpotifyGPX;
@@ -85,14 +85,10 @@ public class XmlHashProvider : FormatHashProviderBase<IEnumerable<XElement>>
     }
 }
 
-/// <summary>
-/// Serializes JSON data to a string for hashing.
-/// </summary>
-/// <typeparam name="T">The type of JSON object to be serialized.</typeparam>
-public class JsonHashProvider<T> : FormatHashProviderBase<T>
+public class JsonHashProvider : FormatHashProviderBase<IEnumerable<JsonDocument>>
 {
-    protected override string SerializeData(T data)
+    protected override string SerializeData(IEnumerable<JsonDocument> data)
     {
-        return JsonConvert.SerializeObject(data);
+        return string.Join("", data.Select(document => document.RootElement.ToString()));
     }
 }

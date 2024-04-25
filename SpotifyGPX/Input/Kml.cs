@@ -10,7 +10,7 @@ namespace SpotifyGPX.Input;
 public partial class Kml : GpsInputBase
 {
     private XDocument Document { get; }
-    protected override List<GPXTrack> Tracks { get; }
+    protected override List<GpsTrack> Tracks { get; }
 
     public Kml(string path)
     {
@@ -23,7 +23,7 @@ public partial class Kml : GpsInputBase
 
     public override int SourcePointCount => Document.Descendants(Gx + "coord").Count();
 
-    private List<GPXTrack> ParseTracks()
+    private List<GpsTrack> ParseTracks()
     {
         return Document
             .Descendants(Gx + "Track") // Find all the tracks in the KML
@@ -31,7 +31,7 @@ public partial class Kml : GpsInputBase
             {
                 var coords = track.Elements(Gx + "coord"); // Get the coordinates of all the track's points
 
-                List<GPXPoint> points = track
+                List<IGpsPoint> points = track
                 .Elements(InputNs + "when") // Get the timestamps of all the track's points
                 .Select((when, index) => // Select each time:
                 {
@@ -43,11 +43,11 @@ public partial class Kml : GpsInputBase
                     double latitude = double.Parse(coord[1]);
                     double altitude = double.Parse(coord[2]);
 
-                    return new GPXPoint(index, new Coordinate(latitude, longitude), time);
+                    return (IGpsPoint)new KmlPoint(index, new Coordinate(latitude, longitude), time);
 
                 }).ToList();
 
-                return new GPXTrack(null, null, TrackType.GPX, points);
+                return new GpsTrack(null, null, TrackType.GPX, points);
 
             }).ToList();
     }

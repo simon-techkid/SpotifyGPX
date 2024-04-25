@@ -16,16 +16,28 @@ public partial class Txt : TxtSaveable
     {
         // Below are some examples of arrays
         string?[] strings = GetVerbatim(Pairs, pair => pair.ToString()); // Full pair strings
-        string?[] Titles = GetVerbatim(Pairs, pair => pair.Song.ToString()); // Song names
-        string?[] URIs = GetVerbatim(Pairs, pair => pair.Song.Song_URI); // Song URIs (paste into Spotify desktop in a new playlist)
-        string?[] IPs = GetWithoutDuplicates(Pairs, pair => pair.Song.Spotify_IP); // IP Addresses
-        string?[] Platforms = GetWithoutDuplicates(Pairs, pair => pair.Song.Spotify_Platform); // Device platforms
-        string?[] Countries = GetWithoutDuplicates(Pairs, pair => pair.Song.Spotify_Country); // Countries
         string?[] Accuracies = GetWithoutDuplicates(Pairs, pair => pair.Accuracy.ToString()); // Accuracies
-        string?[] StartReasons = GetWithoutDuplicates(Pairs, pair => pair.Song.Song_StartReason); // Start reasons
-        string?[] EndReasons = GetWithoutDuplicates(Pairs, pair => pair.Song.Song_EndReason); // End reasons
+        string?[] Titles = GetVerbatim(Pairs, pair => pair.Song.ToString()); // Song names
 
-        return URIs; // Currently returns URI list, but can be changed to your specification
+        // Some SpotifyEntry specific objects to create your text file with:
+        Func<SpotifyEntry, object?> uris = spotifySong => spotifySong.Song_URI;
+        Func<SpotifyEntry, object?> ips = spotifySong => spotifySong.Spotify_IP;
+        Func<SpotifyEntry, object?> platform = spotifySong => spotifySong.Spotify_Platform;
+        Func<SpotifyEntry, object?> country = spotifySong => spotifySong.Spotify_Country;
+        Func<SpotifyEntry, object?> startReason = spotifySong => spotifySong.Song_StartReason;
+        Func<SpotifyEntry, object?> endReason = spotifySong => spotifySong.Song_EndReason;
+
+        string?[] lines = Pairs
+            .Select(pair => pair.Song
+                .GetPropertyValue(uris)?
+                .ToString())
+            .ToArray();
+
+        string?[] duplicateFiltered = GetWithoutDuplicates(lines); // Select this if you don't want any duplicate value lines in your text file.
+        string[] nullOrEmptyFiltered = GetWithoutNullOrEmpty(lines); // Select this if you don't want any null or empty lines in your text file.
+        string[] bothFiltered = GetWithoutNullOrEmpty(GetWithoutDuplicates(lines)); // Select this if you don't want any null, empty, or duplicate lines in your text file.
+
+        return lines; // Currently returns URI list, but can be changed to your specification
     }
 
     /// <summary>
@@ -37,8 +49,7 @@ public partial class Txt : TxtSaveable
     /// <returns>An array (without duplicates) of the specified type, each element of which contains a selected variable of a pair.</returns>
     private static T[] GetWithoutDuplicates<T>(IEnumerable<SongPoint> pairs, Func<SongPoint, T> selector)
     {
-        // Pass .Distinct() to ensure no duplicate values in returned array
-        return pairs.Select(selector).Distinct().ToArray();
+        return GetWithoutDuplicates(pairs.Select(selector).ToArray());
     }
 
     /// <summary>
@@ -50,8 +61,34 @@ public partial class Txt : TxtSaveable
     /// <returns>An array of the specified type, each element of which contains a selected variable of a pair.</returns>
     private static T[] GetVerbatim<T>(IEnumerable<SongPoint> pairs, Func<SongPoint, T> selector)
     {
-        // Return all pairs' selected (selector) object as an array
-        return pairs.Select(selector).ToArray();
+        return pairs
+            .Select(selector)
+            .ToArray();
+    }
+
+    /// <summary>
+    /// Get an array containing all unique values (no duplicate elements) from the provided array.
+    /// </summary>
+    /// <typeparam name="T">The type <typeparamref name="T"/> of the given array.</typeparam>
+    /// <param name="array">The array to filter for duplicates.</param>
+    /// <returns>An array of type <typeparamref name="T"/> containing no duplicate values.</returns>
+    private static T[] GetWithoutDuplicates<T>(T[] array)
+    {
+        return array
+            .Distinct()
+            .ToArray();
+    }
+
+    /// <summary>
+    /// Get an array containing all non-null and non-empty values from the provided array.
+    /// </summary>
+    /// <param name="array">An array containing possibly null elements.</param>
+    /// <returns>A string[] containing no null or empty values.</returns>
+    private static string[] GetWithoutNullOrEmpty(string?[] array)
+    {
+        return array
+            .Where(element => !string.IsNullOrEmpty(element))
+            .ToArray()!; // Explicitly convert to non-nullable array
     }
 
     public override int Count => Document.Length;

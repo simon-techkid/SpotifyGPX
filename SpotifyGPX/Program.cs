@@ -63,7 +63,6 @@ class Program
         try
         {
             InputHandler input;
-            EntryMatcher matcher;
 
             if (inputPairs != null)
             {
@@ -84,18 +83,15 @@ class Program
                 prefix = inputGps;
 
                 // Step 1: Get list of GPX tracks from the GPS file
-                List<GPXTrack> tracks = input.GetSelectedTracks();
+                List<GpsTrack> tracks = input.GetSelectedTracks();
 
                 // Step 2: Get list of songs played from the entries file
-                List<SpotifyEntry> songs = input.GetFilteredSongs(tracks);
-                //List<SpotifyEntry> songs = input.GetAllSongs(); // Unfiltered run
+                List<ISongEntry> songs = input.GetFilteredSongs(tracks);
+                //List<ISongEntry> songs = input.GetAllSongs(); // Unfiltered run
 
+                // Step 2.5: Get metadata for each song
                 if (grabApiData)
-                {
-                    // Step 2.5: Get metadata for each song
-                    matcher = new(songs);
-                    songs = matcher.MatchEntries();
-                }
+                    songs = new EntryMatcher(songs).MatchEntries();
 
                 // Step 3: Create list of songs and points paired as close as possible to one another
                 pairedEntries = new PairingsHandler(songs, tracks, silent, pointPredict, autoPredict);

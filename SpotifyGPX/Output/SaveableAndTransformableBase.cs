@@ -1,12 +1,11 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Xsl;
@@ -63,15 +62,22 @@ public abstract class SaveableAndTransformableBase<T> : SaveableBase<T>, ITransf
 }
 
 /// <summary>
-/// Provides instructions for serializing and transforming JSON data.
+/// Provides instructions for serializing and transforming JSON data using System.Text.Json.
 /// </summary>
-public abstract class JsonSaveable : SaveableAndTransformableBase<List<JObject>>
+public abstract class JsonSaveable : SaveableAndTransformableBase<List<JsonDocument>>
 {
-    protected abstract JsonSerializerSettings JsonSettings { get; }
+    protected abstract JsonSerializerOptions JsonOptions { get; }
 
     protected override byte[] ConvertToBytes()
     {
-        string doc = JsonConvert.SerializeObject(Document, JsonSettings.Formatting, JsonSettings);
+        string doc = string.Join(Environment.NewLine, Document.Select(json =>
+        {
+            JsonElement jsonObj = json.RootElement;
+            string formattedJson = System.Text.Json.JsonSerializer.Serialize(jsonObj, JsonOptions);
+
+            return json.RootElement.ToString();
+        }));
+
         return OutputEncoding.GetBytes(doc);
     }
 
@@ -79,12 +85,45 @@ public abstract class JsonSaveable : SaveableAndTransformableBase<List<JObject>>
     {
         XElement root = new("Root");
 
-        Document.Select(obj => JsonConvert.DeserializeXNode(obj.ToString(), "Root")?.Root)
-            .Where(element => element != null)
-            .ToList()
-            .ForEach(root.Add);
+        foreach (JsonDocument doc in Document)
+        {
+            JsonElement obj = doc.RootElement;
+            XElement element = JsonToXElement(obj);
+            root.Add(element);
+        }
 
         return new XDocument(root);
+    }
+
+    private static XElement JsonToXElement(JsonElement element)
+    {
+        XElement xElement;
+
+        switch (element.ValueKind)
+        {
+            case JsonValueKind.Object:
+                xElement = new XElement("object");
+                foreach (var property in element.EnumerateObject())
+                {
+                    var childElement = JsonToXElement(property.Value);
+                    childElement.Name = property.Name;
+                    xElement.Add(childElement);
+                }
+                break;
+            case JsonValueKind.Array:
+                xElement = new XElement("array");
+                foreach (var item in element.EnumerateArray())
+                {
+                    var childElement = JsonToXElement(item);
+                    xElement.Add(childElement);
+                }
+                break;
+            default:
+                xElement = new XElement("value", element.ToString());
+                break;
+        }
+
+        return xElement;
     }
 }
 

@@ -69,17 +69,12 @@ public partial class InputHandler
     /// Gets all song records from the given file.
     /// </summary>
     /// <returns>A list of SpotifyEntries, each representing a single song of playback.</returns>
-    public List<SpotifyEntry> GetAllSongs()
+    public List<ISongEntry> GetAllSongs()
     {
         return SongInput.GetAllSongs();
     }
 
-    /// <summary>
-    /// Get only the song records from the file that occur during the time range of the GPX tracks.
-    /// </summary>
-    /// <param name="tracks">A list of GPXTrack objects with which to confine the song search to.</param>
-    /// <returns>A list of SpotifyEntry objects, only the songs played between <see cref="GPXTrack.Start"/> and <see cref="GPXTrack.End"/>.</returns>
-    public List<SpotifyEntry> GetFilteredSongs(List<GPXTrack> tracks)
+    public List<ISongEntry> GetFilteredSongs(List<GpsTrack> tracks)
     {
         return SongInput.GetFilteredSongs(tracks);
     }
@@ -88,7 +83,7 @@ public partial class InputHandler
     /// Gets all journey tracks from the given file.
     /// </summary>
     /// <returns>A list of GPXTracks, each representing a collection of positions comprising a journey's path.</returns>
-    public List<GPXTrack> GetAllTracks()
+    public List<GpsTrack> GetAllTracks()
     {
         return GpsInput.GetAllTracks();
     }
@@ -97,7 +92,7 @@ public partial class InputHandler
     /// Gets user-selected journey track(s) from the given file.
     /// </summary>
     /// <returns>A list of GPXTrack(s) based on user selection, each representing a collection of positions comprising a journey's path</returns>
-    public List<GPXTrack> GetSelectedTracks()
+    public List<GpsTrack> GetSelectedTracks()
     {
         return GpsInput.GetSelectedTracks();
     }

@@ -4,7 +4,7 @@ using System;
 
 namespace SpotifyGPX;
 
-public struct GpxPoint : IGpsPoint
+public struct GenericPoint : IGpsPoint
 {
     public int Index { get; set; }
     public Coordinate Location { get; set; }

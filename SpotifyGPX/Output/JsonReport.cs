@@ -1,42 +1,48 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace SpotifyGPX.Output;
 
 public partial class JsonReport : JsonSaveable
 {
-    protected override List<JObject> Document { get; }
+    protected override List<JsonDocument> Document { get; }
 
     public JsonReport(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
 
-    private static List<JObject> GetDocument(IEnumerable<SongPoint> Pairs)
+    private List<JsonDocument> GetDocument(IEnumerable<SongPoint> Pairs)
     {
-        List<JObject> objects = Pairs
+        List<JsonDocument> objects = Pairs
             .GroupBy(pair => pair.Origin) // Group the pairs by track (JsonReport supports multiTrack)
             .Select(track =>
             {
-                return new JObject(
-                    new JProperty("Count", track.Count()), // Include # of pairs in this track
-                    new JProperty("TrackInfo", JToken.FromObject(track.Key)), // Include info about the GPX track
-                    new JProperty(track.Key.ToString(), JToken.FromObject(track.SelectMany(pair => new JArray(JToken.FromObject(pair))))) // Create a json report for each pair
-                );
+                var json = new
+                {
+                    Count = track.Count(), // Include # of pairs in this track
+                    TrackInfo = track.Key, // Include info about the GPX track
+                    Track = track.Select(pair => pair) // Create a json report for each pair
+                };
+
+                return JsonDocument.Parse(JsonSerializer.Serialize(json, JsonOptions));
             })
             .ToList();
 
-        JsonHashProvider<IEnumerable<JObject>> hasher = new();
+        JsonHashProvider hasher = new();
         string hash = hasher.ComputeHash(objects);
 
-        JObject header = new()
+        var header = new
         {
-            //new JProperty("Created", DateTimeOffset.Now.ToUniversalTime()),
-            new JProperty("Total", Pairs.Count()),
-            new JProperty("SHA256Hash", hash)
+            Created = DateTimeOffset.Now.ToUniversalTime(),
+            Total = Pairs.Count(),
+            SHA256Hash = hash
         };
 
-        objects.Insert(0, header);
+        JsonDocument headerDoc = JsonDocument.Parse(JsonSerializer.Serialize(header, JsonOptions));
+
+        objects.Insert(0, headerDoc);
 
         return objects;
     }
@@ -45,14 +51,14 @@ public partial class JsonReport : JsonSaveable
     {
         get
         {
-            // For each document (JObject) in Document (List<JObject>),
-            // Get that JObject's children
+            // For each document (JsonDocument) in Document (List<JsonDocument>),
+            // Get that JsonDocument's RootElement
             // Select the last child (in this case, the pair list)
             // Get the count of pairs within the pair list
-            // Get the sum of pairs in that JObject
-            // Get the sum of pairs in all selected JObjects of List<JObject>
+            // Get the sum of pairs in that JsonDocument
+            // Get the sum of pairs in all selected JsonDocuments of List<JsonDocument>
 
-            return Document.Select(JObject => JObject.Children().Last().Select(pair => pair.Count()).Sum()).Sum();
+            return Document.Skip(1).Select(JsonDocument => JsonDocument.RootElement.GetProperty("Count").GetInt32()).Sum();
         }
     }
 }
