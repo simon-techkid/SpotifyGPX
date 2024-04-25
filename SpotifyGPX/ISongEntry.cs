@@ -63,6 +63,11 @@ public interface ISongEntry
     public TimeUsage CurrentUsage { get; }
 
     /// <summary>
+    /// Determines whether <see cref="FriendlyTime"/> was interpreted as the start or end time of the song.
+    /// </summary>
+    public TimeInterpretation CurrentInterpretation { get; set; }
+
+    /// <summary>
     /// Provides the name of the song action time.
     /// </summary>
     public string TimeName => CurrentUsage switch

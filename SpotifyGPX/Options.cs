@@ -1,6 +1,5 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json;
 using SpotifyGPX.Input;
 using System;
 using System.Collections.Generic;
@@ -8,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Xml.Linq;
 
 namespace SpotifyGPX
@@ -48,22 +48,17 @@ namespace SpotifyGPX
         /// </summary>
         public const string TimeSpan = @"hh\:mm\:ss\.fff";
 
-        public static JsonSerializerSettings JsonSettings => new()
+        public static JsonSerializerOptions JsonOptions => new()
         {
-            DateParseHandling = DateParseHandling.DateTime,
-            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-            DateFormatString = Options.SpotifyTimeFormat,
-            NullValueHandling = NullValueHandling.Include,
-            Formatting = Formatting.Indented
+            PropertyNameCaseInsensitive = true,
+            WriteIndented = true
         };
 
-        public static JsonSerializerSettings JsonReportSettings => new()
+        public static JsonSerializerOptions JsonReportOptions => new()
         {
-            DateParseHandling = DateParseHandling.DateTimeOffset,
-            DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
-            DateFormatString = $"yyyy-MM-ddTHH:mm:ss.ffffffK",
-            NullValueHandling = NullValueHandling.Include,
-            Formatting = Formatting.Indented
+            PropertyNameCaseInsensitive = true,
+            WriteIndented = true,
+            IncludeFields = true
         };
     }
 
@@ -164,7 +159,7 @@ namespace SpotifyGPX.Input
 
     public partial class Json
     {
-        private static JsonSerializerSettings JsonSettings => Options.JsonSettings;
+
         private const TimeInterpretation Interpretation = TimeInterpretation.End;
         private static TimeSpan MinimumPlaytime => new(0, 0, 0); // Minimum accepted song playback time (0,0,0 for all songs)
         private const bool ExcludeSkipped = false; // Ignore songs skipped by the user, as defined by Spotify JSON (false for all songs)
@@ -172,7 +167,7 @@ namespace SpotifyGPX.Input
 
     public partial class JsonReport
     {
-        private static JsonSerializerSettings JsonSettings => Options.JsonReportSettings;
+
     }
 
     public partial class Kml
@@ -253,14 +248,15 @@ namespace SpotifyGPX.Output
 
     public partial class Json
     {
-        protected override JsonSerializerSettings JsonSettings => Options.JsonSettings;
+        protected override JsonSerializerOptions JsonOptions => Options.JsonOptions;
         protected override SaveOptions OutputOptions => SaveOptions.None;
         protected override Encoding OutputEncoding => Encoding.UTF8;
     }
 
     public partial class JsonReport
     {
-        protected override JsonSerializerSettings JsonSettings => Options.JsonReportSettings;
+        //protected override JsonSerializerSettings JsonSettings => Options.JsonReportSettings;
+        protected override JsonSerializerOptions JsonOptions => Options.JsonReportOptions;
         protected override SaveOptions OutputOptions => SaveOptions.None;
         protected override Encoding OutputEncoding => Encoding.UTF8;
     }

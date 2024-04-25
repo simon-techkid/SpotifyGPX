@@ -1,6 +1,5 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json;
 using System;
 
 namespace SpotifyGPX;
@@ -35,7 +34,6 @@ public readonly struct SongPoint
     /// <param name="song">The SpotifyEntry (containing song data) of this pair's song.</param>
     /// <param name="point">The GPXPoint (containing geospatial data) of this pair's point.</param>
     /// <param name="origin">The TrackInfo (track information) about the track from which this pair was created.</param>
-    [JsonConstructor]
     public SongPoint(int index, ISongEntry song, IGpsPoint point, TrackInfo origin)
     {
         Index = index;

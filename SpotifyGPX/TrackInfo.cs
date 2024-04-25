@@ -1,6 +1,5 @@
 ﻿// SpotifyGPX by Simon Field
 
-using Newtonsoft.Json;
 using System;
 
 namespace SpotifyGPX;
@@ -16,7 +15,6 @@ public readonly struct TrackInfo
     /// <param name="index">The index of this track (in a series of tracks).</param>
     /// <param name="name">The friendly name of this track.</param>
     /// <param name="type">The type of this track (GPX, Gap, or Combined).</param>
-    [JsonConstructor]
     public TrackInfo(int? index, string? name, TrackType type)
     {
         Indexx = index;
