@@ -65,7 +65,7 @@ public partial class PairingsHandler
         .Where(spotifyEntry => spotifyEntry.WithinTimeFrame(track.Start, track.End)) // If the SpotifyEntry falls within the boundaries of the track
         .Select(spotifyEntry => // Select the Spotify entry if it falls in range of the GPX track
             {
-                SongPoint pair = track.Points
+                SongPoint pair = track
                 .Select(point => new SongPoint(index, spotifyEntry, point, track.Track)) // For each point in the track's point list,
                 .OrderBy(pair => pair.AbsAccuracy) // Order the points by proximity between point and song
                 .First(); // Closest accuracy wins

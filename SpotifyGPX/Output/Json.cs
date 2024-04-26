@@ -12,13 +12,10 @@ public partial class Json : JsonSaveable
 
     public Json(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
 
-    private List<JsonDocument> GetDocument(IEnumerable<SongPoint> Pairs)
+    private static List<JsonDocument> GetDocument(IEnumerable<SongPoint> Pairs)
     {
         List<JsonDocument> objects = Pairs
-            .Select(pair =>
-            {
-                return JsonDocument.Parse(JsonSerializer.Serialize(pair.Song, JsonOptions));
-            })
+            .Select(pair => JsonDocument.Parse(JsonSerializer.Serialize(pair.Song)))
             .ToList();
 
         return objects;

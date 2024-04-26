@@ -1,7 +1,8 @@
 [
   {
+    "Created": "2024-04-28T22:46:18.7329387\u002B00:00",
     "Total": 6,
-    "SHA256Hash": "cab02c862b7a7aaf11f6d6906e27402bdfc40c98386c3ff373137d6391fd3656"
+    "SHA256Hash": "9751a02a14ae4f7c53f6548c2f9fa06bc6e29ef6570f222104818e0504890c37"
   },
   {
     "Count": 6,
@@ -10,40 +11,20 @@
       "Name": "20230709",
       "Type": 0
     },
-    "20230709": [
+    "Track": [
       {
-        "Description": "At this position: 2023-07-09 17:43:56 +02:00\r\nSong started (est): 2023-07-09 17:44:01 +02:00\r\nPlayed for 00:03:36.093\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
+        "Description": "At this position: 2023-07-09 17:43:56 \u002B02:00\r\nSong started: 2023-07-09 17:44:01 \u002B02:00\r\nSong Details:\r\nPlayed for 00:03:36.093\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
         "Index": 0,
         "Song": {
-          "SGPX_Index": 2,
-          "SGPX_Time": "2023-07-09T15:44:01.907000+00:00",
-          "SGPX_UseEstStartTime": true,
-          "ts": "2023-07-09T15:47:38.000000+00:00",
-          "SGPX_TimeStartedEst": "2023-07-09T15:44:01.907000+00:00",
-          "username": null,
-          "platform": "android",
-          "msPlayed": 216093,
-          "SGPX_TimePlayed": "00:03:36.0930000",
-          "conn_country": "FR",
-          "ip_addr_decrypted": null,
-          "user_agent_decrypted": null,
-          "master_metadata_track_name": "On A Midnight Street",
-          "master_metadata_album_artist_name": "Matthew And The Atlas",
-          "master_metadata_album_album_name": "Temple",
-          "spotify_track_uri": "spotify:track:4AIzqWgbH94S0cNid1f3mT",
-          "SGPX_Song_ID": "4AIzqWgbH94S0cNid1f3mT",
-          "SGPX_Song_URL": "http://open.spotify.com/track/4AIzqWgbH94S0cNid1f3mT",
-          "episode_name": null,
-          "episode_show_name": null,
-          "spotify_episode_uri": null,
-          "reason_start": "trackdone",
-          "reason_end": "trackdone",
-          "shuffle": false,
-          "skipped": false,
-          "offline": false,
-          "offline_timestamp": 1688917442,
-          "SGPX_OfflineTimestamp": "2023-07-09T15:44:02.000000+00:00",
-          "incognito_mode": null
+          "Description": "Played for 00:03:36.093\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
+          "Index": 2,
+          "FriendlyTime": "2023-07-09T15:47:38\u002B00:00",
+          "Time": "2023-07-09T15:44:01.907\u002B00:00",
+          "Song_Artist": "Matthew And The Atlas",
+          "Song_Name": "On A Midnight Street",
+          "CurrentUsage": 0,
+          "CurrentInterpretation": 1,
+          "TimeName": "started"
         },
         "Point": {
           "Index": 7,
@@ -51,7 +32,7 @@
             "Latitude": 44.96196068713781,
             "Longitude": -0.3619575231220995
           },
-          "Time": "2023-07-09T17:43:56.999000+02:00"
+          "Time": "2023-07-09T17:43:56.999\u002B02:00"
         },
         "Origin": {
           "Index": 0,
@@ -61,43 +42,23 @@
         "Accuracy": 4.908,
         "AbsAccuracy": 4.908,
         "NormalizedOffset": "02:00:00",
-        "SongTime": "2023-07-09T17:44:01.907000+02:00",
-        "PointTime": "2023-07-09T17:43:56.999000+02:00",
+        "SongTime": "2023-07-09T17:44:01.907\u002B02:00",
+        "PointTime": "2023-07-09T17:43:56.999\u002B02:00",
         "PredictedIndex": null
       },
       {
-        "Description": "At this position: 2023-07-09 17:47:32 +02:00\r\nSong started (est): 2023-07-09 17:47:38 +02:00\r\nPlayed for 00:03:22.164\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
+        "Description": "At this position: 2023-07-09 17:47:32 \u002B02:00\r\nSong started: 2023-07-09 17:47:38 \u002B02:00\r\nSong Details:\r\nPlayed for 00:03:22.164\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
         "Index": 1,
         "Song": {
-          "SGPX_Index": 3,
-          "SGPX_Time": "2023-07-09T15:47:38.836000+00:00",
-          "SGPX_UseEstStartTime": true,
-          "ts": "2023-07-09T15:51:01.000000+00:00",
-          "SGPX_TimeStartedEst": "2023-07-09T15:47:38.836000+00:00",
-          "username": null,
-          "platform": "android",
-          "msPlayed": 202164,
-          "SGPX_TimePlayed": "00:03:22.1640000",
-          "conn_country": "FR",
-          "ip_addr_decrypted": null,
-          "user_agent_decrypted": null,
-          "master_metadata_track_name": "Watching the Wires",
-          "master_metadata_album_artist_name": "Hiss Golden Messenger",
-          "master_metadata_album_album_name": "Watching the Wires",
-          "spotify_track_uri": "spotify:track:7M9OysBhaeVEEOZW0sl4IN",
-          "SGPX_Song_ID": "7M9OysBhaeVEEOZW0sl4IN",
-          "SGPX_Song_URL": "http://open.spotify.com/track/7M9OysBhaeVEEOZW0sl4IN",
-          "episode_name": null,
-          "episode_show_name": null,
-          "spotify_episode_uri": null,
-          "reason_start": "trackdone",
-          "reason_end": "trackdone",
-          "shuffle": false,
-          "skipped": false,
-          "offline": false,
-          "offline_timestamp": 1688917659,
-          "SGPX_OfflineTimestamp": "2023-07-09T15:47:39.000000+00:00",
-          "incognito_mode": null
+          "Description": "Played for 00:03:22.164\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
+          "Index": 3,
+          "FriendlyTime": "2023-07-09T15:51:01\u002B00:00",
+          "Time": "2023-07-09T15:47:38.836\u002B00:00",
+          "Song_Artist": "Hiss Golden Messenger",
+          "Song_Name": "Watching the Wires",
+          "CurrentUsage": 0,
+          "CurrentInterpretation": 1,
+          "TimeName": "started"
         },
         "Point": {
           "Index": 14,
@@ -105,7 +66,7 @@
             "Latitude": 44.94663761172837,
             "Longitude": -0.32882642308137994
           },
-          "Time": "2023-07-09T17:47:32.999000+02:00"
+          "Time": "2023-07-09T17:47:32.999\u002B02:00"
         },
         "Origin": {
           "Index": 0,
@@ -115,43 +76,23 @@
         "Accuracy": 5.837,
         "AbsAccuracy": 5.837,
         "NormalizedOffset": "02:00:00",
-        "SongTime": "2023-07-09T17:47:38.836000+02:00",
-        "PointTime": "2023-07-09T17:47:32.999000+02:00",
+        "SongTime": "2023-07-09T17:47:38.836\u002B02:00",
+        "PointTime": "2023-07-09T17:47:32.999\u002B02:00",
         "PredictedIndex": null
       },
       {
-        "Description": "At this position: 2023-07-09 17:51:09 +02:00\r\nSong started (est): 2023-07-09 17:51:01 +02:00\r\nPlayed for 00:03:55.871\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
+        "Description": "At this position: 2023-07-09 17:51:09 \u002B02:00\r\nSong started: 2023-07-09 17:51:01 \u002B02:00\r\nSong Details:\r\nPlayed for 00:03:55.871\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
         "Index": 2,
         "Song": {
-          "SGPX_Index": 4,
-          "SGPX_Time": "2023-07-09T15:51:01.129000+00:00",
-          "SGPX_UseEstStartTime": true,
-          "ts": "2023-07-09T15:54:57.000000+00:00",
-          "SGPX_TimeStartedEst": "2023-07-09T15:51:01.129000+00:00",
-          "username": null,
-          "platform": "android",
-          "msPlayed": 235871,
-          "SGPX_TimePlayed": "00:03:55.8710000",
-          "conn_country": "FR",
-          "ip_addr_decrypted": null,
-          "user_agent_decrypted": null,
-          "master_metadata_track_name": "Thought You'd Never Ask",
-          "master_metadata_album_artist_name": "Folk Road Show",
-          "master_metadata_album_album_name": "Thought You'd Never Ask",
-          "spotify_track_uri": "spotify:track:05cmKMGYCSpcs0WBA0nMjX",
-          "SGPX_Song_ID": "05cmKMGYCSpcs0WBA0nMjX",
-          "SGPX_Song_URL": "http://open.spotify.com/track/05cmKMGYCSpcs0WBA0nMjX",
-          "episode_name": null,
-          "episode_show_name": null,
-          "spotify_episode_uri": null,
-          "reason_start": "trackdone",
-          "reason_end": "trackdone",
-          "shuffle": false,
-          "skipped": false,
-          "offline": false,
-          "offline_timestamp": 1688917862,
-          "SGPX_OfflineTimestamp": "2023-07-09T15:51:02.000000+00:00",
-          "incognito_mode": null
+          "Description": "Played for 00:03:55.871\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
+          "Index": 4,
+          "FriendlyTime": "2023-07-09T15:54:57\u002B00:00",
+          "Time": "2023-07-09T15:51:01.129\u002B00:00",
+          "Song_Artist": "Folk Road Show",
+          "Song_Name": "Thought You\u0027d Never Ask",
+          "CurrentUsage": 0,
+          "CurrentInterpretation": 1,
+          "TimeName": "started"
         },
         "Point": {
           "Index": 21,
@@ -159,7 +100,7 @@
             "Latitude": 44.92381299086086,
             "Longitude": -0.30094199633638036
           },
-          "Time": "2023-07-09T17:51:09.999000+02:00"
+          "Time": "2023-07-09T17:51:09.999\u002B02:00"
         },
         "Origin": {
           "Index": 0,
@@ -169,43 +110,23 @@
         "Accuracy": -8.87,
         "AbsAccuracy": 8.87,
         "NormalizedOffset": "02:00:00",
-        "SongTime": "2023-07-09T17:51:01.129000+02:00",
-        "PointTime": "2023-07-09T17:51:09.999000+02:00",
+        "SongTime": "2023-07-09T17:51:01.129\u002B02:00",
+        "PointTime": "2023-07-09T17:51:09.999\u002B02:00",
         "PredictedIndex": null
       },
       {
-        "Description": "At this position: 2023-07-09 17:54:45 +02:00\r\nSong started (est): 2023-07-09 17:54:57 +02:00\r\nPlayed for 00:01:55.960\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
+        "Description": "At this position: 2023-07-09 17:54:45 \u002B02:00\r\nSong started: 2023-07-09 17:54:57 \u002B02:00\r\nSong Details:\r\nPlayed for 00:01:55.960\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
         "Index": 3,
         "Song": {
-          "SGPX_Index": 5,
-          "SGPX_Time": "2023-07-09T15:54:57.040000+00:00",
-          "SGPX_UseEstStartTime": true,
-          "ts": "2023-07-09T15:56:53.000000+00:00",
-          "SGPX_TimeStartedEst": "2023-07-09T15:54:57.040000+00:00",
-          "username": null,
-          "platform": "android",
-          "msPlayed": 115960,
-          "SGPX_TimePlayed": "00:01:55.9600000",
-          "conn_country": "FR",
-          "ip_addr_decrypted": null,
-          "user_agent_decrypted": null,
-          "master_metadata_track_name": "Not Every River",
-          "master_metadata_album_artist_name": "Bear's Den",
-          "master_metadata_album_album_name": "So that you might hear me",
-          "spotify_track_uri": "spotify:track:6vpVRpTK1r4FuZb8FtEjYb",
-          "SGPX_Song_ID": "6vpVRpTK1r4FuZb8FtEjYb",
-          "SGPX_Song_URL": "http://open.spotify.com/track/6vpVRpTK1r4FuZb8FtEjYb",
-          "episode_name": null,
-          "episode_show_name": null,
-          "spotify_episode_uri": null,
-          "reason_start": "trackdone",
-          "reason_end": "trackdone",
-          "shuffle": false,
-          "skipped": false,
-          "offline": false,
-          "offline_timestamp": 1688918098,
-          "SGPX_OfflineTimestamp": "2023-07-09T15:54:58.000000+00:00",
-          "incognito_mode": null
+          "Description": "Played for 00:01:55.960\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
+          "Index": 5,
+          "FriendlyTime": "2023-07-09T15:56:53\u002B00:00",
+          "Time": "2023-07-09T15:54:57.04\u002B00:00",
+          "Song_Artist": "Bear\u0027s Den",
+          "Song_Name": "Not Every River",
+          "CurrentUsage": 0,
+          "CurrentInterpretation": 1,
+          "TimeName": "started"
         },
         "Point": {
           "Index": 28,
@@ -213,7 +134,7 @@
             "Latitude": 44.9207163,
             "Longitude": -0.2637063
           },
-          "Time": "2023-07-09T17:54:45.164000+02:00"
+          "Time": "2023-07-09T17:54:45.164\u002B02:00"
         },
         "Origin": {
           "Index": 0,
@@ -223,43 +144,23 @@
         "Accuracy": 11.876,
         "AbsAccuracy": 11.876,
         "NormalizedOffset": "02:00:00",
-        "SongTime": "2023-07-09T17:54:57.040000+02:00",
-        "PointTime": "2023-07-09T17:54:45.164000+02:00",
+        "SongTime": "2023-07-09T17:54:57.04\u002B02:00",
+        "PointTime": "2023-07-09T17:54:45.164\u002B02:00",
         "PredictedIndex": null
       },
       {
-        "Description": "At this position: 2023-07-09 17:56:48 +02:00\r\nSong started (est): 2023-07-09 17:56:54 +02:00\r\nPlayed for 00:03:25.742\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
+        "Description": "At this position: 2023-07-09 17:56:48 \u002B02:00\r\nSong started: 2023-07-09 17:56:54 \u002B02:00\r\nSong Details:\r\nPlayed for 00:03:25.742\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
         "Index": 4,
         "Song": {
-          "SGPX_Index": 6,
-          "SGPX_Time": "2023-07-09T15:56:54.258000+00:00",
-          "SGPX_UseEstStartTime": true,
-          "ts": "2023-07-09T16:00:20.000000+00:00",
-          "SGPX_TimeStartedEst": "2023-07-09T15:56:54.258000+00:00",
-          "username": null,
-          "platform": "android",
-          "msPlayed": 205742,
-          "SGPX_TimePlayed": "00:03:25.7420000",
-          "conn_country": "FR",
-          "ip_addr_decrypted": null,
-          "user_agent_decrypted": null,
-          "master_metadata_track_name": "Won't Happen - Stripped-Back",
-          "master_metadata_album_artist_name": "Ten Fé",
-          "master_metadata_album_album_name": "Won't Happen",
-          "spotify_track_uri": "spotify:track:70Rz9c3gY6QNxqBrxCmJJa",
-          "SGPX_Song_ID": "70Rz9c3gY6QNxqBrxCmJJa",
-          "SGPX_Song_URL": "http://open.spotify.com/track/70Rz9c3gY6QNxqBrxCmJJa",
-          "episode_name": null,
-          "episode_show_name": null,
-          "spotify_episode_uri": null,
-          "reason_start": "trackdone",
-          "reason_end": "trackdone",
-          "shuffle": false,
-          "skipped": false,
-          "offline": false,
-          "offline_timestamp": 1688918214,
-          "SGPX_OfflineTimestamp": "2023-07-09T15:56:54.000000+00:00",
-          "incognito_mode": null
+          "Description": "Played for 00:03:25.742\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
+          "Index": 6,
+          "FriendlyTime": "2023-07-09T16:00:20\u002B00:00",
+          "Time": "2023-07-09T15:56:54.258\u002B00:00",
+          "Song_Artist": "Ten F\u00E9",
+          "Song_Name": "Won\u0027t Happen - Stripped-Back",
+          "CurrentUsage": 0,
+          "CurrentInterpretation": 1,
+          "TimeName": "started"
         },
         "Point": {
           "Index": 32,
@@ -267,7 +168,7 @@
             "Latitude": 44.9190012,
             "Longitude": -0.2437124
           },
-          "Time": "2023-07-09T17:56:48.152000+02:00"
+          "Time": "2023-07-09T17:56:48.152\u002B02:00"
         },
         "Origin": {
           "Index": 0,
@@ -277,43 +178,23 @@
         "Accuracy": 6.106,
         "AbsAccuracy": 6.106,
         "NormalizedOffset": "02:00:00",
-        "SongTime": "2023-07-09T17:56:54.258000+02:00",
-        "PointTime": "2023-07-09T17:56:48.152000+02:00",
+        "SongTime": "2023-07-09T17:56:54.258\u002B02:00",
+        "PointTime": "2023-07-09T17:56:48.152\u002B02:00",
         "PredictedIndex": null
       },
       {
-        "Description": "At this position: 2023-07-09 18:00:23 +02:00\r\nSong started (est): 2023-07-09 18:00:20 +02:00\r\nPlayed for 00:02:21.653\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
+        "Description": "At this position: 2023-07-09 18:00:23 \u002B02:00\r\nSong started: 2023-07-09 18:00:20 \u002B02:00\r\nSong Details:\r\nPlayed for 00:02:21.653\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
         "Index": 5,
         "Song": {
-          "SGPX_Index": 7,
-          "SGPX_Time": "2023-07-09T16:00:20.347000+00:00",
-          "SGPX_UseEstStartTime": true,
-          "ts": "2023-07-09T16:02:42.000000+00:00",
-          "SGPX_TimeStartedEst": "2023-07-09T16:00:20.347000+00:00",
-          "username": null,
-          "platform": "android",
-          "msPlayed": 141653,
-          "SGPX_TimePlayed": "00:02:21.6530000",
-          "conn_country": "FR",
-          "ip_addr_decrypted": null,
-          "user_agent_decrypted": null,
-          "master_metadata_track_name": "Sea so Blue",
-          "master_metadata_album_artist_name": "Austin Basham",
-          "master_metadata_album_album_name": "You and Me for Now",
-          "spotify_track_uri": "spotify:track:4YI7bOKyyPnCxhltKmrU9P",
-          "SGPX_Song_ID": "4YI7bOKyyPnCxhltKmrU9P",
-          "SGPX_Song_URL": "http://open.spotify.com/track/4YI7bOKyyPnCxhltKmrU9P",
-          "episode_name": null,
-          "episode_show_name": null,
-          "spotify_episode_uri": null,
-          "reason_start": "trackdone",
-          "reason_end": "trackdone",
-          "shuffle": false,
-          "skipped": false,
-          "offline": false,
-          "offline_timestamp": 1688918420,
-          "SGPX_OfflineTimestamp": "2023-07-09T16:00:20.000000+00:00",
-          "incognito_mode": null
+          "Description": "Played for 00:02:21.653\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
+          "Index": 7,
+          "FriendlyTime": "2023-07-09T16:02:42\u002B00:00",
+          "Time": "2023-07-09T16:00:20.347\u002B00:00",
+          "Song_Artist": "Austin Basham",
+          "Song_Name": "Sea so Blue",
+          "CurrentUsage": 0,
+          "CurrentInterpretation": 1,
+          "TimeName": "started"
         },
         "Point": {
           "Index": 39,
@@ -321,7 +202,7 @@
             "Latitude": 44.90750014910081,
             "Longitude": -0.23220191613252472
           },
-          "Time": "2023-07-09T18:00:23.000000+02:00"
+          "Time": "2023-07-09T18:00:23\u002B02:00"
         },
         "Origin": {
           "Index": 0,
@@ -331,8 +212,8 @@
         "Accuracy": -2.653,
         "AbsAccuracy": 2.653,
         "NormalizedOffset": "02:00:00",
-        "SongTime": "2023-07-09T18:00:20.347000+02:00",
-        "PointTime": "2023-07-09T18:00:23.000000+02:00",
+        "SongTime": "2023-07-09T18:00:20.347\u002B02:00",
+        "PointTime": "2023-07-09T18:00:23\u002B02:00",
         "PredictedIndex": null
       }
     ]

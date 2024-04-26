@@ -3,7 +3,7 @@
     "ts": "2023-07-09T15:41:04Z",
     "username": null,
     "platform": "android",
-    "ms_played": "247880",
+    "ms_played": 247880,
     "conn_country": "FR",
     "ip_addr_decrypted": null,
     "user_agent_decrypted": null,
@@ -19,14 +19,14 @@
     "shuffle": false,
     "skipped": false,
     "offline": false,
-    "offline_timestamp": "1688917016",
-    "incognito": null
+    "offline_timestamp": 1688917016,
+    "incognito_mode": false
   },
   {
     "ts": "2023-07-09T15:44:01Z",
     "username": null,
     "platform": "android",
-    "ms_played": "176496",
+    "ms_played": 176496,
     "conn_country": "FR",
     "ip_addr_decrypted": null,
     "user_agent_decrypted": null,
@@ -42,14 +42,14 @@
     "shuffle": false,
     "skipped": false,
     "offline": false,
-    "offline_timestamp": "1688917265",
-    "incognito": null
+    "offline_timestamp": 1688917265,
+    "incognito_mode": false
   },
   {
     "ts": "2023-07-09T15:47:38Z",
     "username": null,
     "platform": "android",
-    "ms_played": "216093",
+    "ms_played": 216093,
     "conn_country": "FR",
     "ip_addr_decrypted": null,
     "user_agent_decrypted": null,
@@ -65,14 +65,14 @@
     "shuffle": false,
     "skipped": false,
     "offline": false,
-    "offline_timestamp": "1688917442",
-    "incognito": null
+    "offline_timestamp": 1688917442,
+    "incognito_mode": false
   },
   {
     "ts": "2023-07-09T15:51:01Z",
     "username": null,
     "platform": "android",
-    "ms_played": "202164",
+    "ms_played": 202164,
     "conn_country": "FR",
     "ip_addr_decrypted": null,
     "user_agent_decrypted": null,
@@ -88,14 +88,14 @@
     "shuffle": false,
     "skipped": false,
     "offline": false,
-    "offline_timestamp": "1688917659",
-    "incognito": null
+    "offline_timestamp": 1688917659,
+    "incognito_mode": false
   },
   {
     "ts": "2023-07-09T15:54:57Z",
     "username": null,
     "platform": "android",
-    "ms_played": "235871",
+    "ms_played": 235871,
     "conn_country": "FR",
     "ip_addr_decrypted": null,
     "user_agent_decrypted": null,
@@ -111,14 +111,14 @@
     "shuffle": false,
     "skipped": false,
     "offline": false,
-    "offline_timestamp": "1688917862",
-    "incognito": null
+    "offline_timestamp": 1688917862,
+    "incognito_mode": false
   },
   {
     "ts": "2023-07-09T15:56:53Z",
     "username": null,
     "platform": "android",
-    "ms_played": "115960",
+    "ms_played": 115960,
     "conn_country": "FR",
     "ip_addr_decrypted": null,
     "user_agent_decrypted": null,
@@ -134,14 +134,14 @@
     "shuffle": false,
     "skipped": false,
     "offline": false,
-    "offline_timestamp": "1688918098",
-    "incognito": null
+    "offline_timestamp": 1688918098,
+    "incognito_mode": false
   },
   {
     "ts": "2023-07-09T16:00:20Z",
     "username": null,
     "platform": "android",
-    "ms_played": "205742",
+    "ms_played": 205742,
     "conn_country": "FR",
     "ip_addr_decrypted": null,
     "user_agent_decrypted": null,
@@ -157,14 +157,14 @@
     "shuffle": false,
     "skipped": false,
     "offline": false,
-    "offline_timestamp": "1688918214",
-    "incognito": null
+    "offline_timestamp": 1688918214,
+    "incognito_mode": false
   },
   {
     "ts": "2023-07-09T16:02:42Z",
     "username": null,
     "platform": "android",
-    "ms_played": "141653",
+    "ms_played": 141653,
     "conn_country": "FR",
     "ip_addr_decrypted": null,
     "user_agent_decrypted": null,
@@ -180,7 +180,7 @@
     "shuffle": false,
     "skipped": false,
     "offline": false,
-    "offline_timestamp": "1688918420",
-    "incognito": null
+    "offline_timestamp": 1688918420,
+    "incognito_mode": false
   }
 ]

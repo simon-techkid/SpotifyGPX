@@ -74,7 +74,7 @@ public interface ISongEntry
     {
         TimeUsage.Start => "started",
         TimeUsage.End => "ended",
-        _ => "unknown"
+        _ => "started OR ended"
     };
 
     /// <summary>

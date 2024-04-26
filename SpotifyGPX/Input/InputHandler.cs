@@ -74,6 +74,11 @@ public partial class InputHandler
         return SongInput.GetAllSongs();
     }
 
+    /// <summary>
+    /// Filters the songs in the file by ensuring the returned songs' <see cref="ISongEntry.Time"/> fall within the provided <see cref="GpsTrack"/> objects.
+    /// </summary>
+    /// <param name="tracks">The tracks whose <see cref="GpsTrack.Start"/> and <see cref="GpsTrack.End"/> will filter the <see cref="ISongEntry.Time"/>.</param>
+    /// <returns></returns>
     public List<ISongEntry> GetFilteredSongs(List<GpsTrack> tracks)
     {
         return SongInput.GetFilteredSongs(tracks);

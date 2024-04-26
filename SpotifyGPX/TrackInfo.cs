@@ -5,12 +5,12 @@ using System;
 namespace SpotifyGPX;
 
 /// <summary>
-/// Metadata for a journey track.
+/// Metadata for a <see cref="GpsTrack"/> object.
 /// </summary>
-public readonly struct TrackInfo
+public readonly struct TrackInfo : IEquatable<TrackInfo>
 {
     /// <summary>
-    /// Creates a TrackInfo object for holding track information.
+    /// Creates a TrackInfo object for holding <see cref="GpsTrack"/> information.
     /// </summary>
     /// <param name="index">The index of this track (in a series of tracks).</param>
     /// <param name="name">The friendly name of this track.</param>
@@ -29,7 +29,7 @@ public readonly struct TrackInfo
 
     /// <summary>
     /// The index of this track in a series of tracks.
-    /// If no index, a generic index (based on track type) will be used.
+    /// If no index, a generic index (based on <see cref="Type"/>) will be used.
     /// </summary>
     public readonly int Index => Indexx == null ? (int)Type : (int)Indexx;
 

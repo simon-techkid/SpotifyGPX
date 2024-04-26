@@ -40,6 +40,11 @@ public partial class Xspf : SongInputBase, IHashVerifier
         }).ToList();
     }
 
+    protected override List<ISongEntry> FilterSongs()
+    {
+        return AllSongs.OfType<XspfEntry>().Where(song => filter(song)).Select(song => (ISongEntry)song).ToList();
+    }
+
     public override int SourceSongCount => Document.Descendants(InputNs + Track).Count();
 
     public bool VerifyHash()

@@ -26,7 +26,7 @@ public partial class JsonReport : JsonSaveable
                     Track = track.Select(pair => pair) // Create a json report for each pair
                 };
 
-                return JsonDocument.Parse(JsonSerializer.Serialize(json, JsonOptions));
+                return JsonDocument.Parse(JsonSerializer.Serialize(json));
             })
             .ToList();
 
@@ -40,7 +40,7 @@ public partial class JsonReport : JsonSaveable
             SHA256Hash = hash
         };
 
-        JsonDocument headerDoc = JsonDocument.Parse(JsonSerializer.Serialize(header, JsonOptions));
+        JsonDocument headerDoc = JsonDocument.Parse(JsonSerializer.Serialize(header));
 
         objects.Insert(0, headerDoc);
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace SpotifyGPX.Output;
 
@@ -41,17 +42,21 @@ public partial class OutputHandler
         {
             // If the desired format doesn't support multiple tracks, split each track into its own file:
             files
-                .AddRange(Pairs
-                .GroupBy(pair => pair.Origin) // One track per file
+                .AddRange(Pairs.GroupBy(pair => pair.Origin) // One track per file
                 .Select(track => new OutFile(track, format, sourceGpxName, track.Key.ToString())));
         }
 
         files.ForEach(file => file.Save(transform)); // Save each file to the disk
 
         // Print the individual track results (number of pairs):
+        LogExportResults(files, format);
+    }
+
+    private static void LogExportResults(List<OutFile> files, Formats format)
+    {
         string joinedExports = string.Join(", ", files.Select(file => file.Result));
-        double totalExported = files.Select(file => file.ExportCount).Sum(); // Sum of all files' exported pairs
-        double totalPairs = files.Select(file => file.OriginalCount).Sum(); // Sum of all tracks' pairs
+        int totalExported = files.Sum(file => file.ExportCount);
+        int totalPairs = files.Sum(file => file.OriginalCount);
         Console.WriteLine($"[OUT] [{format.ToString().ToUpper()} {totalExported}/{totalPairs}]: {joinedExports}");
     }
 
@@ -88,33 +93,43 @@ public partial class OutputHandler
 
         public void Save(bool transform)
         {
-            int retryCount = 0;
+            AttemptSave(transform, FinalName);
+        }
 
-            while (retryCount < MaxRetries)
+        private void AttemptSave(bool transform, string fileName, int attempt = 0)
+        {
+            try
             {
-                try
+                Handler.Save(GetUniqueFilePath(fileName));
+                AttemptTransform(transform, fileName);
+            }
+            catch (Exception ex)
+            {
+                if (attempt < MaxRetries)
                 {
-                    Handler?.Save(GetUniqueFilePath(FinalName));
-
-                    if (transform && Handler is ITransformableOutput)
-                    {
-                        (Handler as ITransformableOutput)?.TransformAndSave(GetUniqueFilePath(FinalName), $"{Extension}.xslt");
-                    }
-
-                    break; // If save is successful, exit the loop
+                    Console.WriteLine($"Error writing {fileName}: {ex.Message}. Retrying...");
+                    Thread.Sleep(RetryDelayMs);
+                    AttemptSave(transform, fileName, ++attempt);
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"Error writing {FinalName}: {ex.Message}");
-                    Console.WriteLine($"Retrying in {RetryDelayMs / 1000} seconds...");
-                    System.Threading.Thread.Sleep(RetryDelayMs);
-                    retryCount++;
+                    Console.WriteLine($"Failed to save {fileName} after {MaxRetries} attempts.");
                 }
             }
+        }
 
-            if (retryCount == MaxRetries)
+        private void AttemptTransform(bool transform, string fileName)
+        {
+            try
             {
-                Console.WriteLine("Max retry count reached. File could not be saved.");
+                if (transform && Handler is ITransformableOutput transformable)
+                {
+                    transformable.TransformAndSave(GetUniqueFilePath(fileName), $"{Extension}.xslt");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error transforming {fileName} to XML: {ex}");
             }
         }
     }

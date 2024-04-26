@@ -1,32 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
+    <xsl:include href="extensions.xsl"/>
     <xsl:output method="html" indent="yes" encoding="UTF-8"/>
 
     <!-- Match the root element and start creating HTML structure -->
     <xsl:template match="/">
         <xsl:variable name="type" select="'Pairs Listing'"/>
-        <xsl:variable name="stylesheet" select="'styles.css'"/>
+
+        <xsl:call-template name="doctype"/>
         <html>
             <xsl:call-template name="html_head_template">
                 <xsl:with-param name="title" select="$type"/>
-                <xsl:with-param name="stylesheet" select="$stylesheet"/>
             </xsl:call-template>
             <xsl:call-template name="html_body_template">
                 <xsl:with-param name="header" select="$type"/>
                 <xsl:with-param name="lines" select="Root/Line"/>
             </xsl:call-template>
         </html>
-    </xsl:template>
-
-    <!-- Template to create the head section of the HTML -->
-    <xsl:template name="html_head_template">
-        <xsl:param name="title"/>
-        <xsl:param name="stylesheet"/>
-        <head>
-            <title><xsl:value-of select="$title"/></title>
-            <link rel="stylesheet" href="{$stylesheet}" />
-        </head>
     </xsl:template>
 
     <!-- Template to create the body section of the HTML -->

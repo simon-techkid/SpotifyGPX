@@ -29,6 +29,7 @@ public partial class Json : SongInputBase
             string? time1 = root.TryGetProperty("endTime", out JsonElement smallTime) ? smallTime.GetString() : null;
             string? time2 = root.TryGetProperty("ts", out JsonElement largeTime) ? largeTime.GetString() : null;
             string time = time1 ?? time2 ?? throw new Exception($"Song timestamp missing from JSON entry {index}");
+            DateTimeOffset dto = DateTimeOffset.ParseExact(time, SpotifyTimeFormat, null, TimeStyle);
 
             string? username = root.TryGetProperty("username", out JsonElement un) ? un.GetString() : null;
             string? platform = root.TryGetProperty("platform", out JsonElement plat) ? plat.GetString() : null;
@@ -60,13 +61,13 @@ public partial class Json : SongInputBase
             bool? skipped = root.TryGetProperty("skipped", out JsonElement skip) ? skip.GetBoolean() : null;
             bool? offline = root.TryGetProperty("offline", out JsonElement off) ? off.GetBoolean() : null;
             long? offlineTimestamp = root.TryGetProperty("offline_timestamp", out JsonElement offTs) ? offTs.GetInt64() : null;
-            bool? incognito = root.TryGetProperty("incognito", out JsonElement incog) ? incog.GetBoolean() : null;
+            bool? incognito = root.TryGetProperty("incognito_mode", out JsonElement incog) ? incog.GetBoolean() : null;
 
-            return (ISongEntry)new SpotifyEntry
+            return (ISongEntry)new SpotifyEntry()
             {
                 Index = index,
                 CurrentInterpretation = Interpretation,
-                FriendlyTime = DateTimeOffset.Parse(time),
+                FriendlyTime = dto,
                 Spotify_Username = username,
                 Spotify_Platform = platform,
                 Time_Played = duration,
@@ -88,13 +89,12 @@ public partial class Json : SongInputBase
                 Spotify_OfflineTS = offlineTimestamp,
                 Spotify_Incognito = incognito
             };
-        }).ToList();
+        }).ToList()!;
     }
 
-    public List<SpotifyEntry> FilterSongs(List<SpotifyEntry> songs)
+    protected override List<ISongEntry> FilterSongs()
     {
-        return songs
-            .Where(song => !(song.TimePlayed >= MinimumPlaytime) || !ExcludeSkipped || song.Song_Skipped != true).ToList();
+        return AllSongs.OfType<SpotifyEntry>().Where(song => filter(song)).Select(song => (ISongEntry)song).ToList();
     }
 
     public override int SourceSongCount => AllEntries.Count;

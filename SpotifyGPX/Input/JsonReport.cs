@@ -45,6 +45,7 @@ public partial class JsonReport : PairInputBase, IHashVerifier
                     throw new Exception($"No TrackInfo object for track {index}");
                 }
 
+                // TrackInfo
                 int? trackIndex = trackInfo.TryGetProperty("Index", out JsonElement trIndex) ? trIndex.GetInt32() : throw new Exception($"No Index object found in TrackInfo for track {index}");
                 string? trackName = trackInfo.TryGetProperty("Name", out JsonElement name) ? name.GetString() : throw new Exception($"No Name object found in TrackInfo for track {index}");
                 int? trackType = trackInfo.TryGetProperty("Type", out JsonElement type) ? type.GetInt32() : throw new Exception($"No Type object found in TrackInfo for track {index}");
@@ -57,9 +58,11 @@ public partial class JsonReport : PairInputBase, IHashVerifier
 
                 return pairs.EnumerateArray().Select(pair =>
                 {
+                    // Index
                     JsonElement indexx = pair.GetProperty("Index");
                     int pairIndex = indexx.GetInt32();
 
+                    // Song
                     JsonElement song = pair.GetProperty("Song");
                     string songDescription = song.GetProperty("Description").GetString() ?? string.Empty;
                     int songIndex = song.GetProperty("Index").GetInt32();
@@ -80,6 +83,7 @@ public partial class JsonReport : PairInputBase, IHashVerifier
                         CurrentInterpretation = (TimeInterpretation)songCurrentInterpretation
                     };
 
+                    // Point
                     JsonElement point = pair.GetProperty("Point");
                     int pointIndex = point.GetProperty("Index").GetInt32();
                     JsonElement pointLocation = point.GetProperty("Location");
@@ -94,11 +98,11 @@ public partial class JsonReport : PairInputBase, IHashVerifier
                         Time = pointTime
                     };
 
+                    // Origin (TrackInfo)
                     JsonElement origin = pair.GetProperty("Origin");
                     int? originIndex = origin.GetProperty("Index").GetInt32();
                     string? originName = origin.GetProperty("Name").GetString();
                     int originType = origin.GetProperty("Type").GetInt32();
-
                     TrackInfo trackEntry = new(originIndex, originName, (TrackType)originType);
 
                     return new SongPoint(pairIndex, songEntry, pointEntry, trackEntry);
@@ -110,14 +114,11 @@ public partial class JsonReport : PairInputBase, IHashVerifier
         return allPairs;
     }
 
-    /// <summary>
-    /// Verifies per-track pair quantities match JSON metadata fields.
-    /// </summary>
-    /// <param name="start">The index of the first pair in this track.</param>
-    /// <param name="expectedCount">The expected number of pairs in this track.</param>
-    /// <param name="indexes">The list of pair indexes represented in the JsonReport.</param>
-    /// <param name="trackIndex">The index of this track in the entire JsonReport file.</param>
-    /// <exception cref="Exception"></exception>
+    protected override List<ISongEntry> FilterSongs()
+    {
+        return AllPairs.Select(pair => pair.Song).Where(pair => songFilter(pair) == true).ToList();
+    }
+
     private static void VerifyQuantity(int start, int expectedCount, List<int> indexes, int trackIndex)
     {
         // Find missing indexes
@@ -130,13 +131,13 @@ public partial class JsonReport : PairInputBase, IHashVerifier
         throw new Exception($"Track {trackIndex} in JsonReport expected to have {expectedCount} pairs, but had {indexes.Count}");
     }
 
-    public override int SourceSongCount => 0; //JsonTracksOnly.Select(JObject => JObject.Value<int>("Count")).Sum();
+    public override int SourceSongCount => JsonTracksOnly.Select(track => track.RootElement.GetProperty("Track").EnumerateArray().Select(pair => pair.GetProperty("Song")).Count()).Sum();
 
-    public override int SourcePointCount => 0; // JsonTracksOnly.Select(JObject => JObject.Value<int>("Count")).Sum();
+    public override int SourcePointCount => JsonTracksOnly.Select(track => track.RootElement.GetProperty("Track").EnumerateArray().Select(pair => pair.GetProperty("Point")).Count()).Sum();
 
-    public override int SourceTrackCount => JsonTracksOnly.Count;
+    public override int SourceTrackCount => JsonTracksOnly.Select(track => track).Count();
 
-    public override int SourcePairCount => 0; // JsonTracksOnly.Select(JObject => JObject.Value<int>("Count")).Sum();
+    public override int SourcePairCount => JsonTracksOnly.Select(track => track.RootElement.GetProperty("Track").EnumerateArray().Count()).Sum();
 
     public bool VerifyHash()
     {

@@ -1,32 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
+    <xsl:include href="extensions.xsl"/>
     <xsl:output method="html" indent="yes" encoding="UTF-8"/>
 
     <!-- Template for the root element -->
     <xsl:template match="/">
         <xsl:variable name="type" select="'Pairs Table'"/>
         <xsl:variable name="header" select="$type"/>
-        <xsl:variable name="stylesheet" select="'styles.css'"/>
+
+        <xsl:call-template name="doctype"/>
         <html>
             <xsl:call-template name="html_head_template">
                 <xsl:with-param name="title" select="$header"/>
-                <xsl:with-param name="stylesheet" select="$stylesheet"/>
             </xsl:call-template>
             <xsl:call-template name="html_body_template">
                 <xsl:with-param name="header" select="$header"/>
                 <xsl:with-param name="lines" select="//Line"/>
             </xsl:call-template>
         </html>
-    </xsl:template>
-
-    <xsl:template name="html_head_template">
-        <xsl:param name="title"/>
-        <xsl:param name="stylesheet"/>
-        <head>
-            <title><xsl:value-of select="$title"/></title>
-            <link rel="stylesheet" href="{$stylesheet}"/>
-        </head>
     </xsl:template>
 
     <xsl:template name="html_body_template">

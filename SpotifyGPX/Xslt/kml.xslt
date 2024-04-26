@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:kml="http://www.opengis.net/kml/2.2" exclude-result-prefixes="kml">
 
+    <xsl:include href="extensions.xsl"/>
     <xsl:output method="html" indent="yes" encoding="UTF-8"/>
 
     <!-- Match the root element and start creating HTML structure -->
@@ -8,11 +9,11 @@
         <xsl:variable name="name" select="kml:kml/kml:Document/kml:name"/>
         <xsl:variable name="type" select="'Pairs Table'"/>
         <xsl:variable name="header" select="concat($type, ' - ', $name)"/>
-        <xsl:variable name="stylesheet" select="'styles.css'"/>
+
+        <xsl:call-template name="doctype"/>
         <html>
             <xsl:call-template name="html_head_template">
                 <xsl:with-param name="title" select="$header"/>
-                <xsl:with-param name="stylesheet" select="$stylesheet"/>
             </xsl:call-template>
             <xsl:call-template name="html_body_template">
                 <xsl:with-param name="header" select="$header"/>
@@ -22,16 +23,6 @@
                 <xsl:with-param name="waypoints" select="//kml:Placemark"/>
             </xsl:call-template>
         </html>
-    </xsl:template>
-
-    <!-- Template to create the head section of the HTML -->
-    <xsl:template name="html_head_template">
-        <xsl:param name="title" />
-        <xsl:param name="stylesheet" />
-        <head>
-            <title><xsl:value-of select="$title" /></title>
-            <link rel="stylesheet" href="{$stylesheet}" />
-        </head>
     </xsl:template>
 
     <!-- Template to create the body section of the HTML -->
@@ -53,7 +44,7 @@
             <hr />
         </body>
     </xsl:template>
-    
+
     <!-- Template to create the table structure -->
     <xsl:template name="table">
         <xsl:param name="waypoints" />
@@ -112,23 +103,6 @@
         <xsl:call-template name="replace-newline">
             <xsl:with-param name="text" select="."/>
         </xsl:call-template>
-    </xsl:template>
-
-    <!-- Template to recursively replace CRLF with <br> -->
-    <xsl:template name="replace-newline">
-        <xsl:param name="text"/>
-        <xsl:choose>
-            <xsl:when test="contains($text, '&#xA;')">
-                <xsl:value-of select="substring-before($text, '&#xA;')"/>
-                <br/>
-                <xsl:call-template name="replace-newline">
-                    <xsl:with-param name="text" select="substring-after($text, '&#xA;')"/>
-                </xsl:call-template>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:value-of select="$text"/>
-            </xsl:otherwise>
-        </xsl:choose>
     </xsl:template>
 
 </xsl:stylesheet>

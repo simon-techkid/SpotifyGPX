@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Xsl;
@@ -19,6 +20,11 @@ namespace SpotifyGPX.Output;
 public abstract class SaveableBase<T> : IFileOutput
 {
     /// <summary>
+    /// The byte encoding of the exported document.
+    /// </summary>
+    protected abstract Encoding OutputEncoding { get; }
+
+    /// <summary>
     /// The document in the associated format that will be serialized and saved to the disk.
     /// </summary>
     protected abstract T Document { get; }
@@ -27,7 +33,12 @@ public abstract class SaveableBase<T> : IFileOutput
     public void Save(string path)
     {
         byte[] doc = ConvertToBytes();
-        File.WriteAllBytes(path, doc);
+        Save(path, doc);
+    }
+
+    protected void Save(string path, byte[] bytes)
+    {
+        File.WriteAllBytes(path, bytes);
     }
 
     /// <summary>
@@ -43,16 +54,56 @@ public abstract class SaveableBase<T> : IFileOutput
 /// <typeparam name="T">The source format type.</typeparam>
 public abstract class SaveableAndTransformableBase<T> : SaveableBase<T>, ITransformableOutput
 {
-    protected abstract SaveOptions OutputOptions { get; }
-    protected abstract Encoding OutputEncoding { get; }
+    protected abstract SaveOptions XmlOptions { get; }
 
+    /// <summary>
+    /// Transforms the document to the target format and saves it to the disk.
+    /// </summary>
+    /// <param name="name">The file name of the target transformed document.</param>
+    /// <param name="xsltPath">The path to an XSLT stylesheet that, if it exists, will be used for transformation.</param>
     public void TransformAndSave(string name, string xsltPath)
     {
-        TransformationResult transformation = TransformationResult.Transform(TransformToXml(), xsltPath);
-        string doc = transformation.TransformedDocument.ToString(OutputOptions);
-        string outputPath = $"{name}.{transformation.Format}";
-        File.WriteAllText(outputPath, doc, transformation.TargetEncoding ?? OutputEncoding);
+        string transformation;
+        string outputPath;
+
+        if (File.Exists(xsltPath))
+        {
+            XslCompiledTransform xslt = new();
+            XsltSettings sets = new(true, true);
+            XmlUrlResolver resolver = new();
+            xslt.Load(xsltPath, sets, resolver);
+            transformation = XsltTransform(xslt);
+
+            outputPath = $"{name}.{GetFormat(xslt.OutputSettings?.OutputMethod)}";
+        }
+        else
+        {
+            transformation = TransformToXml().ToString(XmlOptions);
+            outputPath = $"{name}.xml";
+        }
+
+        Save(outputPath, OutputEncoding.GetBytes(transformation));
     }
+
+    private string XsltTransform(XslCompiledTransform xslt)
+    {
+        XDocument document = TransformToXml();
+        using var ms = new MemoryStream();
+        using var xw = XmlWriter.Create(ms, xslt.OutputSettings);
+        xslt.Transform(document.CreateReader(), xw);
+        ms.Seek(0, SeekOrigin.Begin);
+        using var sr = new StreamReader(ms);
+        string result = sr.ReadToEnd();
+        return result;
+    }
+
+    private static string GetFormat(XmlOutputMethod? method) => method switch
+    {
+        XmlOutputMethod.Xml => "xml",
+        XmlOutputMethod.Text => "txt",
+        XmlOutputMethod.Html => "html",
+        _ => "xml"
+    };
 
     /// <summary>
     /// Converts the format document to XML.
@@ -70,15 +121,12 @@ public abstract class JsonSaveable : SaveableAndTransformableBase<List<JsonDocum
 
     protected override byte[] ConvertToBytes()
     {
-        string doc = string.Join(Environment.NewLine, Document.Select(json =>
-        {
-            JsonElement jsonObj = json.RootElement;
-            string formattedJson = System.Text.Json.JsonSerializer.Serialize(jsonObj, JsonOptions);
+        JsonArray allTracks = new();
+        Document.ForEach(doc => allTracks.Add(doc.RootElement));
+        JsonElement encapsulatedTracks = JsonDocument.Parse(allTracks.ToJsonString()).RootElement;
+        string document = JsonSerializer.Serialize(encapsulatedTracks, JsonOptions);
 
-            return json.RootElement.ToString();
-        }));
-
-        return OutputEncoding.GetBytes(doc);
+        return OutputEncoding.GetBytes(document);
     }
 
     protected override XDocument TransformToXml()
@@ -102,24 +150,24 @@ public abstract class JsonSaveable : SaveableAndTransformableBase<List<JsonDocum
         switch (element.ValueKind)
         {
             case JsonValueKind.Object:
-                xElement = new XElement("object");
-                foreach (var property in element.EnumerateObject())
+                xElement = new XElement("Object");
+                foreach (JsonProperty property in element.EnumerateObject())
                 {
-                    var childElement = JsonToXElement(property.Value);
+                    XElement childElement = JsonToXElement(property.Value);
                     childElement.Name = property.Name;
                     xElement.Add(childElement);
                 }
                 break;
             case JsonValueKind.Array:
-                xElement = new XElement("array");
-                foreach (var item in element.EnumerateArray())
+                xElement = new XElement("Array");
+                foreach (JsonElement item in element.EnumerateArray())
                 {
-                    var childElement = JsonToXElement(item);
+                    XElement childElement = JsonToXElement(item);
                     xElement.Add(childElement);
                 }
                 break;
             default:
-                xElement = new XElement("value", element.ToString());
+                xElement = new XElement("Value", element.ToString());
                 break;
         }
 
@@ -134,7 +182,7 @@ public abstract class XmlSaveable : SaveableAndTransformableBase<XDocument>
 {
     protected override byte[] ConvertToBytes()
     {
-        string doc = Document.ToString(OutputOptions);
+        string doc = Document.ToString(XmlOptions);
         return OutputEncoding.GetBytes(doc);
     }
 
@@ -175,59 +223,5 @@ public abstract class ByteSaveable : SaveableBase<byte[]>
     protected override byte[] ConvertToBytes()
     {
         return Document;
-    }
-}
-
-/// <summary>
-/// Provides access to the resulting document and settings of the transformation.
-/// </summary>
-public class TransformationResult
-{
-    public XDocument TransformedDocument { get; }
-    public XmlWriterSettings? TransformationSettings { get; }
-    public Encoding? TargetEncoding => TransformationSettings?.Encoding;
-    public XmlOutputMethod? TargetOutputMethod => TransformationSettings?.OutputMethod;
-
-    public TransformationResult(XDocument document, XmlWriterSettings? settings)
-    {
-        TransformedDocument = document;
-        TransformationSettings = settings;
-    }
-
-    public string Format
-    {
-        get
-        {
-            return TargetOutputMethod switch
-            {
-                XmlOutputMethod.Xml => "xml",
-                XmlOutputMethod.Text => "txt",
-                XmlOutputMethod.Html => "html",
-                XmlOutputMethod.AutoDetect => "xml",
-                _ => "xml"
-            };
-        }
-    }
-
-    public static TransformationResult Transform(XDocument serializedData, string xsltPath)
-    {
-        if (!File.Exists(xsltPath))
-        {
-            return new TransformationResult(serializedData, null);
-        }
-
-        XDocument transformedDocument = new();
-
-        XslCompiledTransform xslt = new();
-        xslt.Load(xsltPath);
-
-        // Create an XmlWriter to write the transformed XML directly to the XDocument
-        using (XmlWriter xw = transformedDocument.CreateWriter())
-        {
-            // Perform the transformation
-            xslt.Transform(serializedData.CreateReader(), xw);
-        }
-
-        return new TransformationResult(transformedDocument, xslt.OutputSettings);
     }
 }

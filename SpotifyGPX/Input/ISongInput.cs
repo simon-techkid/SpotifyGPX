@@ -1,8 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SpotifyGPX.Input;
 
@@ -14,35 +12,21 @@ public partial interface ISongInput
     /// <summary>
     /// Gets all songs in the file.
     /// </summary>
-    /// <returns>A list of SpotifyEntry objects.</returns>
+    /// <returns>A list of <see cref="ISongEntry"/> objects, each representing the playback record of a song.</returns>
     List<ISongEntry> GetAllSongs();
 
     /// <summary>
-    /// Get songs based on an existing list of track times.
+    /// Filters the songs in the file by the song format's specified filter parameters.
     /// </summary>
-    /// <param name="tracks">A list of GPXTrack objects.</param>
-    /// <returns>A list of SpotifyEntry objects that must be within the times of the GPXTrack object(s).</returns>
-    List<ISongEntry> GetFilteredSongs(List<GpsTrack> tracks)
-    {
-        List<ISongEntry> AllSongs = GetAllSongs();
+    /// <returns>A list of <see cref="ISongEntry"/> objects, each representing the playback record of a song.</returns>
+    List<ISongEntry> GetFilteredSongs();
 
-        var trackRange = tracks.Select(track => (track.Start, track.End)).ToList();
-
-        // FilterEntries() differs from AllSongs because it filters the entire JSON file by the following parameters:
-        // The song must have been played during the GPS tracking timeframe (but PairingsHandler.PairPoints() filters this too)
-        // The song must have been played for longer than the MinimumPlaytime TimeSpan (beginning of this file)
-        // The song must have not been skipped during playback by the user (if ExcludeSkipped is true)
-
-        // You may add other filtration options below, within the .Any() statement:
-
-        List<ISongEntry> FilteredSongs = AllSongs.Where(spotifyEntry => // If the spotify entry
-            trackRange.Any(trackTimes => spotifyEntry.WithinTimeFrame(trackTimes.Start, trackTimes.End))) // Within the time range of tracks
-            .ToList(); // Send the songs passing the filter to a list
-
-        Console.WriteLine($"[INP] {FilteredSongs.Count} songs filtered from {AllSongs.Count} total");
-
-        return FilteredSongs;
-    }
+    /// <summary>
+    /// Filters the songs in the file by ensuring the returned songs' <see cref="ISongEntry.Time"/> fall within the provided <see cref="GpsTrack"/> objects.
+    /// </summary>
+    /// <param name="gpsTrack">The tracks whose <see cref="GpsTrack.Start"/> and <see cref="GpsTrack.End"/> will filter the <see cref="ISongEntry.Time"/>.</param>
+    /// <returns>A list of <see cref="ISongEntry"/> objects, each representing the playback record of a song.</returns>
+    List<ISongEntry> GetFilteredSongs(List<GpsTrack> gpsTrack);
 
     /// <summary>
     /// The total number of songs in the given file.

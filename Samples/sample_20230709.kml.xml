@@ -1,12 +1,13 @@
-﻿<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
   <Document>
     <name>20230709</name>
-    <description>3a97521128faa49906745bd20cb580c713011642c4e338b2bc963b3f301d278c</description>
-    <snippet>2024-04-09T02:12:34Z</snippet>
+    <description>a1f3391f93768e4f43c3d89ca2743aba851030ac237df81b5d8b1acbe11be808</description>
+    <snippet>2024-04-28T22:47:14Z</snippet>
     <Placemark>
       <name>Matthew And The Atlas - On A Midnight Street</name>
       <description>At this position: 2023-07-09 17:43:56 +02:00
-Song started (est): 2023-07-09 17:44:01 +02:00
+Song started: 2023-07-09 17:44:01 +02:00
+Song Details:
 Played for 00:03:36.093
 Skipped: False
 Shuffle: False
@@ -22,7 +23,8 @@ Country: FR
     <Placemark>
       <name>Hiss Golden Messenger - Watching the Wires</name>
       <description>At this position: 2023-07-09 17:47:32 +02:00
-Song started (est): 2023-07-09 17:47:38 +02:00
+Song started: 2023-07-09 17:47:38 +02:00
+Song Details:
 Played for 00:03:22.164
 Skipped: False
 Shuffle: False
@@ -38,7 +40,8 @@ Country: FR
     <Placemark>
       <name>Folk Road Show - Thought You'd Never Ask</name>
       <description>At this position: 2023-07-09 17:51:09 +02:00
-Song started (est): 2023-07-09 17:51:01 +02:00
+Song started: 2023-07-09 17:51:01 +02:00
+Song Details:
 Played for 00:03:55.871
 Skipped: False
 Shuffle: False
@@ -54,7 +57,8 @@ Country: FR
     <Placemark>
       <name>Bear's Den - Not Every River</name>
       <description>At this position: 2023-07-09 17:54:45 +02:00
-Song started (est): 2023-07-09 17:54:57 +02:00
+Song started: 2023-07-09 17:54:57 +02:00
+Song Details:
 Played for 00:01:55.960
 Skipped: False
 Shuffle: False
@@ -70,7 +74,8 @@ Country: FR
     <Placemark>
       <name>Ten Fé - Won't Happen - Stripped-Back</name>
       <description>At this position: 2023-07-09 17:56:48 +02:00
-Song started (est): 2023-07-09 17:56:54 +02:00
+Song started: 2023-07-09 17:56:54 +02:00
+Song Details:
 Played for 00:03:25.742
 Skipped: False
 Shuffle: False
@@ -86,7 +91,8 @@ Country: FR
     <Placemark>
       <name>Austin Basham - Sea so Blue</name>
       <description>At this position: 2023-07-09 18:00:23 +02:00
-Song started (est): 2023-07-09 18:00:20 +02:00
+Song started: 2023-07-09 18:00:20 +02:00
+Song Details:
 Played for 00:02:21.653
 Skipped: False
 Shuffle: False
