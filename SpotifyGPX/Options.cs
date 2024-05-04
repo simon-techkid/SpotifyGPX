@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace SpotifyGPX
@@ -55,6 +56,22 @@ namespace SpotifyGPX
             PropertyNameCaseInsensitive = true,
             WriteIndented = true,
             IncludeFields = true
+        };
+
+        public static XmlWriterSettings XmlSettings => new()
+        {
+            Encoding = Encoding.UTF8,
+            OmitXmlDeclaration = false,
+            NewLineOnAttributes = false,
+            CheckCharacters = true,
+            CloseOutput = false,
+            WriteEndDocumentOnClose = true,
+            Indent = true,
+            IndentChars = "\t",
+            NewLineChars = Environment.NewLine,
+            NewLineHandling = NewLineHandling.None,
+            ConformanceLevel = ConformanceLevel.Document,
+            NamespaceHandling = NamespaceHandling.Default
         };
     }
 
@@ -159,6 +176,7 @@ namespace SpotifyGPX.Input
 
     public partial class Gpx
     {
+        private const LoadOptions loadOptions = LoadOptions.None;
         private static XNamespace InputNs => "http://www.topografix.com/GPX/1/0";
         private const string Track = "trk";
         private const string TrackPoint = "trkpt";
@@ -193,6 +211,7 @@ namespace SpotifyGPX.Input
 
     public partial class Kml
     {
+        private const LoadOptions loadOptions = LoadOptions.None;
         private static XNamespace InputNs => "http://www.opengis.net/kml/2.2";
         private static XNamespace Gx => "http://www.google.com/kml/ext/2.2";
         private const string TimeFormat = $"yyyy-MM-ddTHH:mm:ss.fffZ";
@@ -201,6 +220,7 @@ namespace SpotifyGPX.Input
 
     public partial class Xspf
     {
+        private const LoadOptions loadOptions = LoadOptions.None;
         private static XNamespace InputNs => "http://xspf.org/ns/0/";
         private const string Track = "track";
         private const DateTimeStyles TimeStyle = DateTimeStyles.AssumeUniversal;
@@ -258,61 +278,90 @@ namespace SpotifyGPX.Output
         }
     }
 
+    public partial class SaveableAndTransformableBase<T>
+    {
+        private const bool EnableDebugXsltTransformations = false;
+        private const bool EnableXsltDocumentFunction = true;
+        private const bool EnableXsltScript = true;
+    }
+
     public partial class Csv
     {
         private const string Delimiter = ",";
-        protected override SaveOptions XmlOptions => SaveOptions.None;
+        protected override bool IncludeStylesheetHref => true;
+        protected override string StylesheetPath => $"{FormatName}.xslt";
+        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
         protected override Encoding OutputEncoding => Encoding.UTF8;
+        protected override bool ForceUseOfSpecifiedSettings => false;
+        protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
     public partial class Gpx
     {
         private static XNamespace Namespace => "http://www.topografix.com/GPX/1/0";
-        private const string DocumentEncoding = "utf-8";
         private static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance";
         private const string Schema = "http://www.topografix.com/GPX/1/0 http://wwwtopografix.com/GPX/1/0/gpx.xsd";
         private const string Waypoint = "wpt";
-        protected override SaveOptions XmlOptions => SaveOptions.None;
-        protected override Encoding OutputEncoding => Encoding.UTF8;
+        protected override bool IncludeStylesheetHref => true;
+        protected override string StylesheetPath => $"{FormatName}.xslt";
+        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
+        protected override bool ForceUseOfSpecifiedSettings => false;
+        protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
     public partial class Json
     {
+        protected override bool IncludeStylesheetHref => true;
+        protected override string StylesheetPath => $"{FormatName}.xslt";
         protected override JsonSerializerOptions JsonOptions => Options.JsonOptions;
-        protected override SaveOptions XmlOptions => SaveOptions.None;
+        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
         protected override Encoding OutputEncoding => Encoding.UTF8;
+        protected override bool ForceUseOfSpecifiedSettings => false;
+        protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
     public partial class JsonReport
     {
+        protected override bool IncludeStylesheetHref => true;
+        protected override string StylesheetPath => $"{FormatName}.xslt";
         protected override JsonSerializerOptions JsonOptions => Options.JsonReportOptions;
-        protected override SaveOptions XmlOptions => SaveOptions.None;
+        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
         protected override Encoding OutputEncoding => Encoding.UTF8;
+        protected override bool ForceUseOfSpecifiedSettings => false;
+        protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
     public partial class Kml
     {
         private static XNamespace Namespace => "http://www.opengis.net/kml/2.2";
-        private const string DocumentEncoding = "utf-8";
         private static XNamespace Gx => "http://www.google.com/kml/ext/2.2";
         private const string Placemark = "Placemark";
-        protected override SaveOptions XmlOptions => SaveOptions.None;
-        protected override Encoding OutputEncoding => Encoding.UTF8;
+        protected override bool IncludeStylesheetHref => true;
+        protected override string StylesheetPath => $"{FormatName}.xslt";
+        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
+        protected override bool ForceUseOfSpecifiedSettings => false;
+        protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
     public partial class Txt
     {
-        protected override SaveOptions XmlOptions => SaveOptions.None;
+        protected override bool IncludeStylesheetHref => true;
+        protected override string StylesheetPath => $"{FormatName}.xslt";
+        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
         protected override Encoding OutputEncoding => Encoding.UTF8;
+        protected override bool ForceUseOfSpecifiedSettings => false;
+        protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
     public partial class Xspf
     {
         private static XNamespace Namespace => "http://xspf.org/ns/0/";
-        private const string DocumentEncoding = "utf-8";
         private const string Track = "track";
         private const string Comment = "";
-        protected override SaveOptions XmlOptions => SaveOptions.None;
-        protected override Encoding OutputEncoding => Encoding.UTF8;
+        protected override bool IncludeStylesheetHref => true;
+        protected override string StylesheetPath => $"{FormatName}.xslt";
+        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
+        protected override bool ForceUseOfSpecifiedSettings => false;
+        protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 }

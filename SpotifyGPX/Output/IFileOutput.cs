@@ -8,6 +8,11 @@ namespace SpotifyGPX.Output;
 public interface IFileOutput
 {
     /// <summary>
+    /// The name of this document's format, used in exported files' extensions.
+    /// </summary>
+    string FormatName { get; }
+
+    /// <summary>
     /// Save this file to the disk.
     /// </summary>
     /// <param name="path">The path on the disk where the file should be saved.</param>

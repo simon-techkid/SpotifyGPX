@@ -7,8 +7,9 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Output;
 
-public partial class Gpx : XmlSaveable
+public sealed partial class Gpx : XmlSaveable
 {
+    public override string FormatName => nameof(Gpx).ToLower();
     protected override XDocument Document { get; }
 
     public Gpx(IEnumerable<SongPoint> pairs, string trackName) => Document = GetDocument(pairs, trackName);
@@ -29,7 +30,6 @@ public partial class Gpx : XmlSaveable
         string hash = hasher.ComputeHash(gpxPairs);
 
         return new XDocument(
-            new XDeclaration("1.0", DocumentEncoding, null),
             new XElement(Namespace + "gpx",
                 new XAttribute("version", "1.0"),
                 new XAttribute("creator", "SpotifyGPX"),

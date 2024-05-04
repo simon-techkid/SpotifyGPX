@@ -8,14 +8,14 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Input;
 
-public partial class Xspf : SongInputBase, IHashVerifier
+public sealed partial class Xspf : SongInputBase, IHashVerifier
 {
     private XDocument Document { get; }
     protected override List<ISongEntry> AllSongs { get; }
 
     public Xspf(string path)
     {
-        Document = XDocument.Load(path);
+        Document = XDocument.Load(path, loadOptions);
 
         if (SourceSongCount == 0)
         {

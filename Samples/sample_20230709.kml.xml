@@ -1,109 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="kml.xslt" type="text/xsl"?>
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
-  <Document>
-    <name>20230709</name>
-    <description>a1f3391f93768e4f43c3d89ca2743aba851030ac237df81b5d8b1acbe11be808</description>
-    <snippet>2024-04-28T22:47:14Z</snippet>
-    <Placemark>
-      <name>Matthew And The Atlas - On A Midnight Street</name>
-      <description>At this position: 2023-07-09 17:43:56 +02:00
-Song started: 2023-07-09 17:44:01 +02:00
+	<Document>
+		<name>20230709</name>
+		<description>e23e953e1de583a7e9a772067a945680fcbf8a063c972590204582b9a82fc6bc</description>
+		<snippet>2024-05-04T23:49:19Z</snippet>
+		<Placemark>
+			<name>Matthew And The Atlas - On A Midnight Street</name>
+			<description>At this position: 2023-07-09 17:43:56 +02:00
+Song started (est): 2023-07-09 17:44:01 +02:00
 Song Details:
 Played for 00:03:36.093
 Skipped: False
 Shuffle: False
 Country: FR
 </description>
-      <Point>
-        <coordinates>-0.3619575231220995,44.96196068713781</coordinates>
-      </Point>
-      <TimeStamp>
-        <when>2023-07-09T15:43:56Z</when>
-      </TimeStamp>
-    </Placemark>
-    <Placemark>
-      <name>Hiss Golden Messenger - Watching the Wires</name>
-      <description>At this position: 2023-07-09 17:47:32 +02:00
-Song started: 2023-07-09 17:47:38 +02:00
+			<Point>
+				<coordinates>-0.3619575231220995,44.96196068713781</coordinates>
+			</Point>
+			<TimeStamp>
+				<when>2023-07-09T15:43:56Z</when>
+			</TimeStamp>
+		</Placemark>
+		<Placemark>
+			<name>Hiss Golden Messenger - Watching the Wires</name>
+			<description>At this position: 2023-07-09 17:47:32 +02:00
+Song started (est): 2023-07-09 17:47:38 +02:00
 Song Details:
 Played for 00:03:22.164
 Skipped: False
 Shuffle: False
 Country: FR
 </description>
-      <Point>
-        <coordinates>-0.32882642308137994,44.94663761172837</coordinates>
-      </Point>
-      <TimeStamp>
-        <when>2023-07-09T15:47:32Z</when>
-      </TimeStamp>
-    </Placemark>
-    <Placemark>
-      <name>Folk Road Show - Thought You'd Never Ask</name>
-      <description>At this position: 2023-07-09 17:51:09 +02:00
-Song started: 2023-07-09 17:51:01 +02:00
+			<Point>
+				<coordinates>-0.32882642308137994,44.94663761172837</coordinates>
+			</Point>
+			<TimeStamp>
+				<when>2023-07-09T15:47:32Z</when>
+			</TimeStamp>
+		</Placemark>
+		<Placemark>
+			<name>Folk Road Show - Thought You'd Never Ask</name>
+			<description>At this position: 2023-07-09 17:51:09 +02:00
+Song started (est): 2023-07-09 17:51:01 +02:00
 Song Details:
 Played for 00:03:55.871
 Skipped: False
 Shuffle: False
 Country: FR
 </description>
-      <Point>
-        <coordinates>-0.30094199633638036,44.92381299086086</coordinates>
-      </Point>
-      <TimeStamp>
-        <when>2023-07-09T15:51:09Z</when>
-      </TimeStamp>
-    </Placemark>
-    <Placemark>
-      <name>Bear's Den - Not Every River</name>
-      <description>At this position: 2023-07-09 17:54:45 +02:00
-Song started: 2023-07-09 17:54:57 +02:00
+			<Point>
+				<coordinates>-0.30094199633638036,44.92381299086086</coordinates>
+			</Point>
+			<TimeStamp>
+				<when>2023-07-09T15:51:09Z</when>
+			</TimeStamp>
+		</Placemark>
+		<Placemark>
+			<name>Bear's Den - Not Every River</name>
+			<description>At this position: 2023-07-09 17:54:45 +02:00
+Song started (est): 2023-07-09 17:54:57 +02:00
 Song Details:
 Played for 00:01:55.960
 Skipped: False
 Shuffle: False
 Country: FR
 </description>
-      <Point>
-        <coordinates>-0.2637063,44.9207163</coordinates>
-      </Point>
-      <TimeStamp>
-        <when>2023-07-09T15:54:45Z</when>
-      </TimeStamp>
-    </Placemark>
-    <Placemark>
-      <name>Ten Fé - Won't Happen - Stripped-Back</name>
-      <description>At this position: 2023-07-09 17:56:48 +02:00
-Song started: 2023-07-09 17:56:54 +02:00
+			<Point>
+				<coordinates>-0.2637063,44.9207163</coordinates>
+			</Point>
+			<TimeStamp>
+				<when>2023-07-09T15:54:45Z</when>
+			</TimeStamp>
+		</Placemark>
+		<Placemark>
+			<name>Ten Fé - Won't Happen - Stripped-Back</name>
+			<description>At this position: 2023-07-09 17:56:48 +02:00
+Song started (est): 2023-07-09 17:56:54 +02:00
 Song Details:
 Played for 00:03:25.742
 Skipped: False
 Shuffle: False
 Country: FR
 </description>
-      <Point>
-        <coordinates>-0.2437124,44.9190012</coordinates>
-      </Point>
-      <TimeStamp>
-        <when>2023-07-09T15:56:48Z</when>
-      </TimeStamp>
-    </Placemark>
-    <Placemark>
-      <name>Austin Basham - Sea so Blue</name>
-      <description>At this position: 2023-07-09 18:00:23 +02:00
-Song started: 2023-07-09 18:00:20 +02:00
+			<Point>
+				<coordinates>-0.2437124,44.9190012</coordinates>
+			</Point>
+			<TimeStamp>
+				<when>2023-07-09T15:56:48Z</when>
+			</TimeStamp>
+		</Placemark>
+		<Placemark>
+			<name>Austin Basham - Sea so Blue</name>
+			<description>At this position: 2023-07-09 18:00:23 +02:00
+Song started (est): 2023-07-09 18:00:20 +02:00
 Song Details:
 Played for 00:02:21.653
 Skipped: False
 Shuffle: False
 Country: FR
 </description>
-      <Point>
-        <coordinates>-0.23220191613252472,44.90750014910081</coordinates>
-      </Point>
-      <TimeStamp>
-        <when>2023-07-09T16:00:23Z</when>
-      </TimeStamp>
-    </Placemark>
-  </Document>
+			<Point>
+				<coordinates>-0.23220191613252472,44.90750014910081</coordinates>
+			</Point>
+			<TimeStamp>
+				<when>2023-07-09T16:00:23Z</when>
+			</TimeStamp>
+		</Placemark>
+	</Document>
 </kml>

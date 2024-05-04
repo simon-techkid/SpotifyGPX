@@ -8,7 +8,8 @@
     "Song_Name": "On A Midnight Street",
     "CurrentUsage": 0,
     "CurrentInterpretation": 1,
-    "TimeName": "started"
+    "TimeName": "started (est)",
+    "IsEstimated": true
   },
   {
     "Description": "Played for 00:03:22.164\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
@@ -19,7 +20,8 @@
     "Song_Name": "Watching the Wires",
     "CurrentUsage": 0,
     "CurrentInterpretation": 1,
-    "TimeName": "started"
+    "TimeName": "started (est)",
+    "IsEstimated": true
   },
   {
     "Description": "Played for 00:03:55.871\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
@@ -30,7 +32,8 @@
     "Song_Name": "Thought You\u0027d Never Ask",
     "CurrentUsage": 0,
     "CurrentInterpretation": 1,
-    "TimeName": "started"
+    "TimeName": "started (est)",
+    "IsEstimated": true
   },
   {
     "Description": "Played for 00:01:55.960\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
@@ -41,7 +44,8 @@
     "Song_Name": "Not Every River",
     "CurrentUsage": 0,
     "CurrentInterpretation": 1,
-    "TimeName": "started"
+    "TimeName": "started (est)",
+    "IsEstimated": true
   },
   {
     "Description": "Played for 00:03:25.742\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
@@ -52,7 +56,8 @@
     "Song_Name": "Won\u0027t Happen - Stripped-Back",
     "CurrentUsage": 0,
     "CurrentInterpretation": 1,
-    "TimeName": "started"
+    "TimeName": "started (est)",
+    "IsEstimated": true
   },
   {
     "Description": "Played for 00:02:21.653\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
@@ -63,6 +68,7 @@
     "Song_Name": "Sea so Blue",
     "CurrentUsage": 0,
     "CurrentInterpretation": 1,
-    "TimeName": "started"
+    "TimeName": "started (est)",
+    "IsEstimated": true
   }
 ]

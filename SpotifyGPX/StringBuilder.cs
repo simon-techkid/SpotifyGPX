@@ -1,11 +1,13 @@
 ﻿// SpotifyGPX by Simon Field
 
+using System;
+
 namespace SpotifyGPX;
 
 /// <summary>
 /// The StringBuilder used to add non-null objects as lines to a pair's description.
 /// </summary>
-public class StringBuilder
+public class StringBuilder : IFormatProvider, ICustomFormatter
 {
     private readonly System.Text.StringBuilder builder;
 
@@ -46,4 +48,29 @@ public class StringBuilder
     /// </summary>
     /// <returns>This StringBuilder, as a string.</returns>
     public override string ToString() => builder.ToString();
+
+    public object? GetFormat(Type? formatType)
+    {
+        if (formatType == typeof(ICustomFormatter))
+        {
+            return this;
+        }
+        return null;
+    }
+
+    public string Format(string? format, object? arg, IFormatProvider? formatProvider)
+    {
+        if (arg == null) return string.Empty;
+
+        if (formatProvider != this)
+        {
+            if (arg is IFormattable formattable)
+            {
+                return formattable.ToString(format, formatProvider);
+            }
+            return arg.ToString() ?? string.Empty;
+        }
+
+        return string.Format(format ?? string.Empty, arg);
+    }
 }

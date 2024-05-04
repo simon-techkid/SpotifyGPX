@@ -75,20 +75,17 @@ public partial class OutputHandler
         public OutFile(IEnumerable<SongPoint> pairs, Formats format, string sourceGpxName, string trackName)
         {
             Handler = CreateFileOutput(format, pairs, trackName);
-            Format = format;
             SourceName = sourceGpxName;
             TrackName = trackName;
             OriginalCount = pairs.Count();
         }
 
         private IFileOutput Handler { get; }
-        private Formats Format { get; }
         private string SourceName { get; }
         private string TrackName { get; }
         public int OriginalCount { get; }
         public int ExportCount => Handler.Count;
-        private string FinalName => $"{SourceName}_{TrackName}.{Extension}";
-        private string Extension => Format.ToString().ToLower();
+        private string FinalName => $"{SourceName}_{TrackName}.{Handler.FormatName}";
         public string Result => $"{ExportCount}/{OriginalCount} ({TrackName})";
 
         public void Save(bool transform)
@@ -124,7 +121,7 @@ public partial class OutputHandler
             {
                 if (transform && Handler is ITransformableOutput transformable)
                 {
-                    transformable.TransformAndSave(GetUniqueFilePath(fileName), $"{Extension}.xslt");
+                    transformable.TransformAndSave(GetUniqueFilePath(fileName));
                 }
             }
             catch (Exception ex)

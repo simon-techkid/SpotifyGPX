@@ -1,8 +1,8 @@
 [
   {
-    "Created": "2024-04-28T22:46:18.7329387\u002B00:00",
+    "Created": "2024-05-04T23:50:11.6945603\u002B00:00",
     "Total": 6,
-    "SHA256Hash": "9751a02a14ae4f7c53f6548c2f9fa06bc6e29ef6570f222104818e0504890c37"
+    "SHA256Hash": "71cf793eb826958cf561bc72725fe8aea468ff957621ee67e272ff9d145a7611"
   },
   {
     "Count": 6,
@@ -13,7 +13,7 @@
     },
     "Track": [
       {
-        "Description": "At this position: 2023-07-09 17:43:56 \u002B02:00\r\nSong started: 2023-07-09 17:44:01 \u002B02:00\r\nSong Details:\r\nPlayed for 00:03:36.093\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
+        "Description": "At this position: 2023-07-09 17:43:56 \u002B02:00\r\nSong started (est): 2023-07-09 17:44:01 \u002B02:00\r\nSong Details:\r\nPlayed for 00:03:36.093\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
         "Index": 0,
         "Song": {
           "Description": "Played for 00:03:36.093\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
@@ -24,7 +24,8 @@
           "Song_Name": "On A Midnight Street",
           "CurrentUsage": 0,
           "CurrentInterpretation": 1,
-          "TimeName": "started"
+          "TimeName": "started (est)",
+          "IsEstimated": true
         },
         "Point": {
           "Index": 7,
@@ -47,7 +48,7 @@
         "PredictedIndex": null
       },
       {
-        "Description": "At this position: 2023-07-09 17:47:32 \u002B02:00\r\nSong started: 2023-07-09 17:47:38 \u002B02:00\r\nSong Details:\r\nPlayed for 00:03:22.164\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
+        "Description": "At this position: 2023-07-09 17:47:32 \u002B02:00\r\nSong started (est): 2023-07-09 17:47:38 \u002B02:00\r\nSong Details:\r\nPlayed for 00:03:22.164\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
         "Index": 1,
         "Song": {
           "Description": "Played for 00:03:22.164\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
@@ -58,7 +59,8 @@
           "Song_Name": "Watching the Wires",
           "CurrentUsage": 0,
           "CurrentInterpretation": 1,
-          "TimeName": "started"
+          "TimeName": "started (est)",
+          "IsEstimated": true
         },
         "Point": {
           "Index": 14,
@@ -81,7 +83,7 @@
         "PredictedIndex": null
       },
       {
-        "Description": "At this position: 2023-07-09 17:51:09 \u002B02:00\r\nSong started: 2023-07-09 17:51:01 \u002B02:00\r\nSong Details:\r\nPlayed for 00:03:55.871\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
+        "Description": "At this position: 2023-07-09 17:51:09 \u002B02:00\r\nSong started (est): 2023-07-09 17:51:01 \u002B02:00\r\nSong Details:\r\nPlayed for 00:03:55.871\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
         "Index": 2,
         "Song": {
           "Description": "Played for 00:03:55.871\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
@@ -92,7 +94,8 @@
           "Song_Name": "Thought You\u0027d Never Ask",
           "CurrentUsage": 0,
           "CurrentInterpretation": 1,
-          "TimeName": "started"
+          "TimeName": "started (est)",
+          "IsEstimated": true
         },
         "Point": {
           "Index": 21,
@@ -115,7 +118,7 @@
         "PredictedIndex": null
       },
       {
-        "Description": "At this position: 2023-07-09 17:54:45 \u002B02:00\r\nSong started: 2023-07-09 17:54:57 \u002B02:00\r\nSong Details:\r\nPlayed for 00:01:55.960\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
+        "Description": "At this position: 2023-07-09 17:54:45 \u002B02:00\r\nSong started (est): 2023-07-09 17:54:57 \u002B02:00\r\nSong Details:\r\nPlayed for 00:01:55.960\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
         "Index": 3,
         "Song": {
           "Description": "Played for 00:01:55.960\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
@@ -126,7 +129,8 @@
           "Song_Name": "Not Every River",
           "CurrentUsage": 0,
           "CurrentInterpretation": 1,
-          "TimeName": "started"
+          "TimeName": "started (est)",
+          "IsEstimated": true
         },
         "Point": {
           "Index": 28,
@@ -149,7 +153,7 @@
         "PredictedIndex": null
       },
       {
-        "Description": "At this position: 2023-07-09 17:56:48 \u002B02:00\r\nSong started: 2023-07-09 17:56:54 \u002B02:00\r\nSong Details:\r\nPlayed for 00:03:25.742\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
+        "Description": "At this position: 2023-07-09 17:56:48 \u002B02:00\r\nSong started (est): 2023-07-09 17:56:54 \u002B02:00\r\nSong Details:\r\nPlayed for 00:03:25.742\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
         "Index": 4,
         "Song": {
           "Description": "Played for 00:03:25.742\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
@@ -160,7 +164,8 @@
           "Song_Name": "Won\u0027t Happen - Stripped-Back",
           "CurrentUsage": 0,
           "CurrentInterpretation": 1,
-          "TimeName": "started"
+          "TimeName": "started (est)",
+          "IsEstimated": true
         },
         "Point": {
           "Index": 32,
@@ -183,7 +188,7 @@
         "PredictedIndex": null
       },
       {
-        "Description": "At this position: 2023-07-09 18:00:23 \u002B02:00\r\nSong started: 2023-07-09 18:00:20 \u002B02:00\r\nSong Details:\r\nPlayed for 00:02:21.653\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
+        "Description": "At this position: 2023-07-09 18:00:23 \u002B02:00\r\nSong started (est): 2023-07-09 18:00:20 \u002B02:00\r\nSong Details:\r\nPlayed for 00:02:21.653\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR\r\n",
         "Index": 5,
         "Song": {
           "Description": "Played for 00:02:21.653\r\nSkipped: False\r\nShuffle: False\r\nCountry: FR",
@@ -194,7 +199,8 @@
           "Song_Name": "Sea so Blue",
           "CurrentUsage": 0,
           "CurrentInterpretation": 1,
-          "TimeName": "started"
+          "TimeName": "started (est)",
+          "IsEstimated": true
         },
         "Point": {
           "Index": 39,

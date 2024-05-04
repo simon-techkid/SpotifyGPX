@@ -1,77 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="gpx.xslt" type="text/xsl"?>
 <gpx version="1.0" creator="SpotifyGPX" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/0" xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://wwwtopografix.com/GPX/1/0/gpx.xsd">
-  <name>20230709</name>
-  <desc>c36d4dfde0e6b62b5bb0a16fa3eb5e13a3ddd76a777c4802a84abc0ad0a7c55b</desc>
-  <time>2024-04-28T22:47:14Z</time>
-  <wpt lat="44.96196068713781" lon="-0.3619575231220995">
-    <name>Matthew And The Atlas - On A Midnight Street</name>
-    <time>2023-07-09T15:43:56Z</time>
-    <desc>At this position: 2023-07-09 17:43:56 +02:00
-Song started: 2023-07-09 17:44:01 +02:00
+	<name>20230709</name>
+	<desc>09f1bdbe64b81e9c0ec530c090de0105b635d733571c1889fc4a671b5f5c98f1</desc>
+	<time>2024-05-04T23:49:19Z</time>
+	<wpt lat="44.96196068713781" lon="-0.3619575231220995">
+		<name>Matthew And The Atlas - On A Midnight Street</name>
+		<time>2023-07-09T15:43:56Z</time>
+		<desc>At this position: 2023-07-09 17:43:56 +02:00
+Song started (est): 2023-07-09 17:44:01 +02:00
 Song Details:
 Played for 00:03:36.093
 Skipped: False
 Shuffle: False
 Country: FR
 </desc>
-  </wpt>
-  <wpt lat="44.94663761172837" lon="-0.32882642308137994">
-    <name>Hiss Golden Messenger - Watching the Wires</name>
-    <time>2023-07-09T15:47:32Z</time>
-    <desc>At this position: 2023-07-09 17:47:32 +02:00
-Song started: 2023-07-09 17:47:38 +02:00
+	</wpt>
+	<wpt lat="44.94663761172837" lon="-0.32882642308137994">
+		<name>Hiss Golden Messenger - Watching the Wires</name>
+		<time>2023-07-09T15:47:32Z</time>
+		<desc>At this position: 2023-07-09 17:47:32 +02:00
+Song started (est): 2023-07-09 17:47:38 +02:00
 Song Details:
 Played for 00:03:22.164
 Skipped: False
 Shuffle: False
 Country: FR
 </desc>
-  </wpt>
-  <wpt lat="44.92381299086086" lon="-0.30094199633638036">
-    <name>Folk Road Show - Thought You'd Never Ask</name>
-    <time>2023-07-09T15:51:09Z</time>
-    <desc>At this position: 2023-07-09 17:51:09 +02:00
-Song started: 2023-07-09 17:51:01 +02:00
+	</wpt>
+	<wpt lat="44.92381299086086" lon="-0.30094199633638036">
+		<name>Folk Road Show - Thought You'd Never Ask</name>
+		<time>2023-07-09T15:51:09Z</time>
+		<desc>At this position: 2023-07-09 17:51:09 +02:00
+Song started (est): 2023-07-09 17:51:01 +02:00
 Song Details:
 Played for 00:03:55.871
 Skipped: False
 Shuffle: False
 Country: FR
 </desc>
-  </wpt>
-  <wpt lat="44.9207163" lon="-0.2637063">
-    <name>Bear's Den - Not Every River</name>
-    <time>2023-07-09T15:54:45Z</time>
-    <desc>At this position: 2023-07-09 17:54:45 +02:00
-Song started: 2023-07-09 17:54:57 +02:00
+	</wpt>
+	<wpt lat="44.9207163" lon="-0.2637063">
+		<name>Bear's Den - Not Every River</name>
+		<time>2023-07-09T15:54:45Z</time>
+		<desc>At this position: 2023-07-09 17:54:45 +02:00
+Song started (est): 2023-07-09 17:54:57 +02:00
 Song Details:
 Played for 00:01:55.960
 Skipped: False
 Shuffle: False
 Country: FR
 </desc>
-  </wpt>
-  <wpt lat="44.9190012" lon="-0.2437124">
-    <name>Ten Fé - Won't Happen - Stripped-Back</name>
-    <time>2023-07-09T15:56:48Z</time>
-    <desc>At this position: 2023-07-09 17:56:48 +02:00
-Song started: 2023-07-09 17:56:54 +02:00
+	</wpt>
+	<wpt lat="44.9190012" lon="-0.2437124">
+		<name>Ten Fé - Won't Happen - Stripped-Back</name>
+		<time>2023-07-09T15:56:48Z</time>
+		<desc>At this position: 2023-07-09 17:56:48 +02:00
+Song started (est): 2023-07-09 17:56:54 +02:00
 Song Details:
 Played for 00:03:25.742
 Skipped: False
 Shuffle: False
 Country: FR
 </desc>
-  </wpt>
-  <wpt lat="44.90750014910081" lon="-0.23220191613252472">
-    <name>Austin Basham - Sea so Blue</name>
-    <time>2023-07-09T16:00:23Z</time>
-    <desc>At this position: 2023-07-09 18:00:23 +02:00
-Song started: 2023-07-09 18:00:20 +02:00
+	</wpt>
+	<wpt lat="44.90750014910081" lon="-0.23220191613252472">
+		<name>Austin Basham - Sea so Blue</name>
+		<time>2023-07-09T16:00:23Z</time>
+		<desc>At this position: 2023-07-09 18:00:23 +02:00
+Song started (est): 2023-07-09 18:00:20 +02:00
 Song Details:
 Played for 00:02:21.653
 Skipped: False
 Shuffle: False
 Country: FR
 </desc>
-  </wpt>
+	</wpt>
 </gpx>

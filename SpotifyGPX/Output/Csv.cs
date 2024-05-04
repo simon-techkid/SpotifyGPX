@@ -6,8 +6,9 @@ using System.Linq;
 
 namespace SpotifyGPX.Output;
 
-public partial class Csv : TxtSaveable
+public sealed partial class Csv : TxtSaveable
 {
+    public override string FormatName => nameof(Csv).ToLower();
     protected override string?[] Document { get; }
 
     public Csv(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);

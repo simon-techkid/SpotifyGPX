@@ -1,281 +1,289 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="jsonreport.xslt" type="text/xsl"?>
 <Root>
-  <Object>
-    <Created>2024-04-28T22:47:14.592273+00:00</Created>
-    <Total>6</Total>
-    <SHA256Hash>9751a02a14ae4f7c53f6548c2f9fa06bc6e29ef6570f222104818e0504890c37</SHA256Hash>
-  </Object>
-  <Object>
-    <Count>6</Count>
-    <TrackInfo>
-      <Index>0</Index>
-      <Name>20230709</Name>
-      <Type>0</Type>
-    </TrackInfo>
-    <Track>
-      <Object>
-        <Description>At this position: 2023-07-09 17:43:56 +02:00
-Song started: 2023-07-09 17:44:01 +02:00
+	<Object>
+		<Created>2024-05-04T23:49:19.8394918+00:00</Created>
+		<Total>6</Total>
+		<SHA256Hash>71cf793eb826958cf561bc72725fe8aea468ff957621ee67e272ff9d145a7611</SHA256Hash>
+	</Object>
+	<Object>
+		<Count>6</Count>
+		<TrackInfo>
+			<Index>0</Index>
+			<Name>20230709</Name>
+			<Type>0</Type>
+		</TrackInfo>
+		<Track>
+			<Object>
+				<Description>At this position: 2023-07-09 17:43:56 +02:00
+Song started (est): 2023-07-09 17:44:01 +02:00
 Song Details:
 Played for 00:03:36.093
 Skipped: False
 Shuffle: False
 Country: FR
 </Description>
-        <Index>0</Index>
-        <Song>
-          <Description>Played for 00:03:36.093
+				<Index>0</Index>
+				<Song>
+					<Description>Played for 00:03:36.093
 Skipped: False
 Shuffle: False
 Country: FR</Description>
-          <Index>2</Index>
-          <FriendlyTime>2023-07-09T15:47:38+00:00</FriendlyTime>
-          <Time>2023-07-09T15:44:01.907+00:00</Time>
-          <Song_Artist>Matthew And The Atlas</Song_Artist>
-          <Song_Name>On A Midnight Street</Song_Name>
-          <CurrentUsage>0</CurrentUsage>
-          <CurrentInterpretation>1</CurrentInterpretation>
-          <TimeName>started</TimeName>
-        </Song>
-        <Point>
-          <Index>7</Index>
-          <Location>
-            <Latitude>44.96196068713781</Latitude>
-            <Longitude>-0.3619575231220995</Longitude>
-          </Location>
-          <Time>2023-07-09T17:43:56.999+02:00</Time>
-        </Point>
-        <Origin>
-          <Index>0</Index>
-          <Name>20230709</Name>
-          <Type>0</Type>
-        </Origin>
-        <Accuracy>4.908</Accuracy>
-        <AbsAccuracy>4.908</AbsAccuracy>
-        <NormalizedOffset>02:00:00</NormalizedOffset>
-        <SongTime>2023-07-09T17:44:01.907+02:00</SongTime>
-        <PointTime>2023-07-09T17:43:56.999+02:00</PointTime>
-        <PredictedIndex></PredictedIndex>
-      </Object>
-      <Object>
-        <Description>At this position: 2023-07-09 17:47:32 +02:00
-Song started: 2023-07-09 17:47:38 +02:00
+					<Index>2</Index>
+					<FriendlyTime>2023-07-09T15:47:38+00:00</FriendlyTime>
+					<Time>2023-07-09T15:44:01.907+00:00</Time>
+					<Song_Artist>Matthew And The Atlas</Song_Artist>
+					<Song_Name>On A Midnight Street</Song_Name>
+					<CurrentUsage>0</CurrentUsage>
+					<CurrentInterpretation>1</CurrentInterpretation>
+					<TimeName>started (est)</TimeName>
+					<IsEstimated>True</IsEstimated>
+				</Song>
+				<Point>
+					<Index>7</Index>
+					<Location>
+						<Latitude>44.96196068713781</Latitude>
+						<Longitude>-0.3619575231220995</Longitude>
+					</Location>
+					<Time>2023-07-09T17:43:56.999+02:00</Time>
+				</Point>
+				<Origin>
+					<Index>0</Index>
+					<Name>20230709</Name>
+					<Type>0</Type>
+				</Origin>
+				<Accuracy>4.908</Accuracy>
+				<AbsAccuracy>4.908</AbsAccuracy>
+				<NormalizedOffset>02:00:00</NormalizedOffset>
+				<SongTime>2023-07-09T17:44:01.907+02:00</SongTime>
+				<PointTime>2023-07-09T17:43:56.999+02:00</PointTime>
+				<PredictedIndex></PredictedIndex>
+			</Object>
+			<Object>
+				<Description>At this position: 2023-07-09 17:47:32 +02:00
+Song started (est): 2023-07-09 17:47:38 +02:00
 Song Details:
 Played for 00:03:22.164
 Skipped: False
 Shuffle: False
 Country: FR
 </Description>
-        <Index>1</Index>
-        <Song>
-          <Description>Played for 00:03:22.164
+				<Index>1</Index>
+				<Song>
+					<Description>Played for 00:03:22.164
 Skipped: False
 Shuffle: False
 Country: FR</Description>
-          <Index>3</Index>
-          <FriendlyTime>2023-07-09T15:51:01+00:00</FriendlyTime>
-          <Time>2023-07-09T15:47:38.836+00:00</Time>
-          <Song_Artist>Hiss Golden Messenger</Song_Artist>
-          <Song_Name>Watching the Wires</Song_Name>
-          <CurrentUsage>0</CurrentUsage>
-          <CurrentInterpretation>1</CurrentInterpretation>
-          <TimeName>started</TimeName>
-        </Song>
-        <Point>
-          <Index>14</Index>
-          <Location>
-            <Latitude>44.94663761172837</Latitude>
-            <Longitude>-0.32882642308137994</Longitude>
-          </Location>
-          <Time>2023-07-09T17:47:32.999+02:00</Time>
-        </Point>
-        <Origin>
-          <Index>0</Index>
-          <Name>20230709</Name>
-          <Type>0</Type>
-        </Origin>
-        <Accuracy>5.837</Accuracy>
-        <AbsAccuracy>5.837</AbsAccuracy>
-        <NormalizedOffset>02:00:00</NormalizedOffset>
-        <SongTime>2023-07-09T17:47:38.836+02:00</SongTime>
-        <PointTime>2023-07-09T17:47:32.999+02:00</PointTime>
-        <PredictedIndex></PredictedIndex>
-      </Object>
-      <Object>
-        <Description>At this position: 2023-07-09 17:51:09 +02:00
-Song started: 2023-07-09 17:51:01 +02:00
+					<Index>3</Index>
+					<FriendlyTime>2023-07-09T15:51:01+00:00</FriendlyTime>
+					<Time>2023-07-09T15:47:38.836+00:00</Time>
+					<Song_Artist>Hiss Golden Messenger</Song_Artist>
+					<Song_Name>Watching the Wires</Song_Name>
+					<CurrentUsage>0</CurrentUsage>
+					<CurrentInterpretation>1</CurrentInterpretation>
+					<TimeName>started (est)</TimeName>
+					<IsEstimated>True</IsEstimated>
+				</Song>
+				<Point>
+					<Index>14</Index>
+					<Location>
+						<Latitude>44.94663761172837</Latitude>
+						<Longitude>-0.32882642308137994</Longitude>
+					</Location>
+					<Time>2023-07-09T17:47:32.999+02:00</Time>
+				</Point>
+				<Origin>
+					<Index>0</Index>
+					<Name>20230709</Name>
+					<Type>0</Type>
+				</Origin>
+				<Accuracy>5.837</Accuracy>
+				<AbsAccuracy>5.837</AbsAccuracy>
+				<NormalizedOffset>02:00:00</NormalizedOffset>
+				<SongTime>2023-07-09T17:47:38.836+02:00</SongTime>
+				<PointTime>2023-07-09T17:47:32.999+02:00</PointTime>
+				<PredictedIndex></PredictedIndex>
+			</Object>
+			<Object>
+				<Description>At this position: 2023-07-09 17:51:09 +02:00
+Song started (est): 2023-07-09 17:51:01 +02:00
 Song Details:
 Played for 00:03:55.871
 Skipped: False
 Shuffle: False
 Country: FR
 </Description>
-        <Index>2</Index>
-        <Song>
-          <Description>Played for 00:03:55.871
+				<Index>2</Index>
+				<Song>
+					<Description>Played for 00:03:55.871
 Skipped: False
 Shuffle: False
 Country: FR</Description>
-          <Index>4</Index>
-          <FriendlyTime>2023-07-09T15:54:57+00:00</FriendlyTime>
-          <Time>2023-07-09T15:51:01.129+00:00</Time>
-          <Song_Artist>Folk Road Show</Song_Artist>
-          <Song_Name>Thought You'd Never Ask</Song_Name>
-          <CurrentUsage>0</CurrentUsage>
-          <CurrentInterpretation>1</CurrentInterpretation>
-          <TimeName>started</TimeName>
-        </Song>
-        <Point>
-          <Index>21</Index>
-          <Location>
-            <Latitude>44.92381299086086</Latitude>
-            <Longitude>-0.30094199633638036</Longitude>
-          </Location>
-          <Time>2023-07-09T17:51:09.999+02:00</Time>
-        </Point>
-        <Origin>
-          <Index>0</Index>
-          <Name>20230709</Name>
-          <Type>0</Type>
-        </Origin>
-        <Accuracy>-8.87</Accuracy>
-        <AbsAccuracy>8.87</AbsAccuracy>
-        <NormalizedOffset>02:00:00</NormalizedOffset>
-        <SongTime>2023-07-09T17:51:01.129+02:00</SongTime>
-        <PointTime>2023-07-09T17:51:09.999+02:00</PointTime>
-        <PredictedIndex></PredictedIndex>
-      </Object>
-      <Object>
-        <Description>At this position: 2023-07-09 17:54:45 +02:00
-Song started: 2023-07-09 17:54:57 +02:00
+					<Index>4</Index>
+					<FriendlyTime>2023-07-09T15:54:57+00:00</FriendlyTime>
+					<Time>2023-07-09T15:51:01.129+00:00</Time>
+					<Song_Artist>Folk Road Show</Song_Artist>
+					<Song_Name>Thought You'd Never Ask</Song_Name>
+					<CurrentUsage>0</CurrentUsage>
+					<CurrentInterpretation>1</CurrentInterpretation>
+					<TimeName>started (est)</TimeName>
+					<IsEstimated>True</IsEstimated>
+				</Song>
+				<Point>
+					<Index>21</Index>
+					<Location>
+						<Latitude>44.92381299086086</Latitude>
+						<Longitude>-0.30094199633638036</Longitude>
+					</Location>
+					<Time>2023-07-09T17:51:09.999+02:00</Time>
+				</Point>
+				<Origin>
+					<Index>0</Index>
+					<Name>20230709</Name>
+					<Type>0</Type>
+				</Origin>
+				<Accuracy>-8.87</Accuracy>
+				<AbsAccuracy>8.87</AbsAccuracy>
+				<NormalizedOffset>02:00:00</NormalizedOffset>
+				<SongTime>2023-07-09T17:51:01.129+02:00</SongTime>
+				<PointTime>2023-07-09T17:51:09.999+02:00</PointTime>
+				<PredictedIndex></PredictedIndex>
+			</Object>
+			<Object>
+				<Description>At this position: 2023-07-09 17:54:45 +02:00
+Song started (est): 2023-07-09 17:54:57 +02:00
 Song Details:
 Played for 00:01:55.960
 Skipped: False
 Shuffle: False
 Country: FR
 </Description>
-        <Index>3</Index>
-        <Song>
-          <Description>Played for 00:01:55.960
+				<Index>3</Index>
+				<Song>
+					<Description>Played for 00:01:55.960
 Skipped: False
 Shuffle: False
 Country: FR</Description>
-          <Index>5</Index>
-          <FriendlyTime>2023-07-09T15:56:53+00:00</FriendlyTime>
-          <Time>2023-07-09T15:54:57.04+00:00</Time>
-          <Song_Artist>Bear's Den</Song_Artist>
-          <Song_Name>Not Every River</Song_Name>
-          <CurrentUsage>0</CurrentUsage>
-          <CurrentInterpretation>1</CurrentInterpretation>
-          <TimeName>started</TimeName>
-        </Song>
-        <Point>
-          <Index>28</Index>
-          <Location>
-            <Latitude>44.9207163</Latitude>
-            <Longitude>-0.2637063</Longitude>
-          </Location>
-          <Time>2023-07-09T17:54:45.164+02:00</Time>
-        </Point>
-        <Origin>
-          <Index>0</Index>
-          <Name>20230709</Name>
-          <Type>0</Type>
-        </Origin>
-        <Accuracy>11.876</Accuracy>
-        <AbsAccuracy>11.876</AbsAccuracy>
-        <NormalizedOffset>02:00:00</NormalizedOffset>
-        <SongTime>2023-07-09T17:54:57.04+02:00</SongTime>
-        <PointTime>2023-07-09T17:54:45.164+02:00</PointTime>
-        <PredictedIndex></PredictedIndex>
-      </Object>
-      <Object>
-        <Description>At this position: 2023-07-09 17:56:48 +02:00
-Song started: 2023-07-09 17:56:54 +02:00
+					<Index>5</Index>
+					<FriendlyTime>2023-07-09T15:56:53+00:00</FriendlyTime>
+					<Time>2023-07-09T15:54:57.04+00:00</Time>
+					<Song_Artist>Bear's Den</Song_Artist>
+					<Song_Name>Not Every River</Song_Name>
+					<CurrentUsage>0</CurrentUsage>
+					<CurrentInterpretation>1</CurrentInterpretation>
+					<TimeName>started (est)</TimeName>
+					<IsEstimated>True</IsEstimated>
+				</Song>
+				<Point>
+					<Index>28</Index>
+					<Location>
+						<Latitude>44.9207163</Latitude>
+						<Longitude>-0.2637063</Longitude>
+					</Location>
+					<Time>2023-07-09T17:54:45.164+02:00</Time>
+				</Point>
+				<Origin>
+					<Index>0</Index>
+					<Name>20230709</Name>
+					<Type>0</Type>
+				</Origin>
+				<Accuracy>11.876</Accuracy>
+				<AbsAccuracy>11.876</AbsAccuracy>
+				<NormalizedOffset>02:00:00</NormalizedOffset>
+				<SongTime>2023-07-09T17:54:57.04+02:00</SongTime>
+				<PointTime>2023-07-09T17:54:45.164+02:00</PointTime>
+				<PredictedIndex></PredictedIndex>
+			</Object>
+			<Object>
+				<Description>At this position: 2023-07-09 17:56:48 +02:00
+Song started (est): 2023-07-09 17:56:54 +02:00
 Song Details:
 Played for 00:03:25.742
 Skipped: False
 Shuffle: False
 Country: FR
 </Description>
-        <Index>4</Index>
-        <Song>
-          <Description>Played for 00:03:25.742
+				<Index>4</Index>
+				<Song>
+					<Description>Played for 00:03:25.742
 Skipped: False
 Shuffle: False
 Country: FR</Description>
-          <Index>6</Index>
-          <FriendlyTime>2023-07-09T16:00:20+00:00</FriendlyTime>
-          <Time>2023-07-09T15:56:54.258+00:00</Time>
-          <Song_Artist>Ten Fé</Song_Artist>
-          <Song_Name>Won't Happen - Stripped-Back</Song_Name>
-          <CurrentUsage>0</CurrentUsage>
-          <CurrentInterpretation>1</CurrentInterpretation>
-          <TimeName>started</TimeName>
-        </Song>
-        <Point>
-          <Index>32</Index>
-          <Location>
-            <Latitude>44.9190012</Latitude>
-            <Longitude>-0.2437124</Longitude>
-          </Location>
-          <Time>2023-07-09T17:56:48.152+02:00</Time>
-        </Point>
-        <Origin>
-          <Index>0</Index>
-          <Name>20230709</Name>
-          <Type>0</Type>
-        </Origin>
-        <Accuracy>6.106</Accuracy>
-        <AbsAccuracy>6.106</AbsAccuracy>
-        <NormalizedOffset>02:00:00</NormalizedOffset>
-        <SongTime>2023-07-09T17:56:54.258+02:00</SongTime>
-        <PointTime>2023-07-09T17:56:48.152+02:00</PointTime>
-        <PredictedIndex></PredictedIndex>
-      </Object>
-      <Object>
-        <Description>At this position: 2023-07-09 18:00:23 +02:00
-Song started: 2023-07-09 18:00:20 +02:00
+					<Index>6</Index>
+					<FriendlyTime>2023-07-09T16:00:20+00:00</FriendlyTime>
+					<Time>2023-07-09T15:56:54.258+00:00</Time>
+					<Song_Artist>Ten Fé</Song_Artist>
+					<Song_Name>Won't Happen - Stripped-Back</Song_Name>
+					<CurrentUsage>0</CurrentUsage>
+					<CurrentInterpretation>1</CurrentInterpretation>
+					<TimeName>started (est)</TimeName>
+					<IsEstimated>True</IsEstimated>
+				</Song>
+				<Point>
+					<Index>32</Index>
+					<Location>
+						<Latitude>44.9190012</Latitude>
+						<Longitude>-0.2437124</Longitude>
+					</Location>
+					<Time>2023-07-09T17:56:48.152+02:00</Time>
+				</Point>
+				<Origin>
+					<Index>0</Index>
+					<Name>20230709</Name>
+					<Type>0</Type>
+				</Origin>
+				<Accuracy>6.106</Accuracy>
+				<AbsAccuracy>6.106</AbsAccuracy>
+				<NormalizedOffset>02:00:00</NormalizedOffset>
+				<SongTime>2023-07-09T17:56:54.258+02:00</SongTime>
+				<PointTime>2023-07-09T17:56:48.152+02:00</PointTime>
+				<PredictedIndex></PredictedIndex>
+			</Object>
+			<Object>
+				<Description>At this position: 2023-07-09 18:00:23 +02:00
+Song started (est): 2023-07-09 18:00:20 +02:00
 Song Details:
 Played for 00:02:21.653
 Skipped: False
 Shuffle: False
 Country: FR
 </Description>
-        <Index>5</Index>
-        <Song>
-          <Description>Played for 00:02:21.653
+				<Index>5</Index>
+				<Song>
+					<Description>Played for 00:02:21.653
 Skipped: False
 Shuffle: False
 Country: FR</Description>
-          <Index>7</Index>
-          <FriendlyTime>2023-07-09T16:02:42+00:00</FriendlyTime>
-          <Time>2023-07-09T16:00:20.347+00:00</Time>
-          <Song_Artist>Austin Basham</Song_Artist>
-          <Song_Name>Sea so Blue</Song_Name>
-          <CurrentUsage>0</CurrentUsage>
-          <CurrentInterpretation>1</CurrentInterpretation>
-          <TimeName>started</TimeName>
-        </Song>
-        <Point>
-          <Index>39</Index>
-          <Location>
-            <Latitude>44.90750014910081</Latitude>
-            <Longitude>-0.23220191613252472</Longitude>
-          </Location>
-          <Time>2023-07-09T18:00:23+02:00</Time>
-        </Point>
-        <Origin>
-          <Index>0</Index>
-          <Name>20230709</Name>
-          <Type>0</Type>
-        </Origin>
-        <Accuracy>-2.653</Accuracy>
-        <AbsAccuracy>2.653</AbsAccuracy>
-        <NormalizedOffset>02:00:00</NormalizedOffset>
-        <SongTime>2023-07-09T18:00:20.347+02:00</SongTime>
-        <PointTime>2023-07-09T18:00:23+02:00</PointTime>
-        <PredictedIndex></PredictedIndex>
-      </Object>
-    </Track>
-  </Object>
+					<Index>7</Index>
+					<FriendlyTime>2023-07-09T16:02:42+00:00</FriendlyTime>
+					<Time>2023-07-09T16:00:20.347+00:00</Time>
+					<Song_Artist>Austin Basham</Song_Artist>
+					<Song_Name>Sea so Blue</Song_Name>
+					<CurrentUsage>0</CurrentUsage>
+					<CurrentInterpretation>1</CurrentInterpretation>
+					<TimeName>started (est)</TimeName>
+					<IsEstimated>True</IsEstimated>
+				</Song>
+				<Point>
+					<Index>39</Index>
+					<Location>
+						<Latitude>44.90750014910081</Latitude>
+						<Longitude>-0.23220191613252472</Longitude>
+					</Location>
+					<Time>2023-07-09T18:00:23+02:00</Time>
+				</Point>
+				<Origin>
+					<Index>0</Index>
+					<Name>20230709</Name>
+					<Type>0</Type>
+				</Origin>
+				<Accuracy>-2.653</Accuracy>
+				<AbsAccuracy>2.653</AbsAccuracy>
+				<NormalizedOffset>02:00:00</NormalizedOffset>
+				<SongTime>2023-07-09T18:00:20.347+02:00</SongTime>
+				<PointTime>2023-07-09T18:00:23+02:00</PointTime>
+				<PredictedIndex></PredictedIndex>
+			</Object>
+		</Track>
+	</Object>
 </Root>

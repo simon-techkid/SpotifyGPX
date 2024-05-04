@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace SpotifyGPX.Input;
 
-public partial class Csv : SongInputBase
+public sealed partial class Csv : SongInputBase
 {
     private string[] Document { get; }
     protected override List<ISongEntry> AllSongs { get; }

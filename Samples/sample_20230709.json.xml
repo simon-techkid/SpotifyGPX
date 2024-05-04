@@ -1,86 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="json.xslt" type="text/xsl"?>
 <Root>
-  <Object>
-    <Description>Played for 00:03:36.093
+	<Object>
+		<Description>Played for 00:03:36.093
 Skipped: False
 Shuffle: False
 Country: FR</Description>
-    <Index>2</Index>
-    <FriendlyTime>2023-07-09T15:47:38+00:00</FriendlyTime>
-    <Time>2023-07-09T15:44:01.907+00:00</Time>
-    <Song_Artist>Matthew And The Atlas</Song_Artist>
-    <Song_Name>On A Midnight Street</Song_Name>
-    <CurrentUsage>0</CurrentUsage>
-    <CurrentInterpretation>1</CurrentInterpretation>
-    <TimeName>started</TimeName>
-  </Object>
-  <Object>
-    <Description>Played for 00:03:22.164
+		<Index>2</Index>
+		<FriendlyTime>2023-07-09T15:47:38+00:00</FriendlyTime>
+		<Time>2023-07-09T15:44:01.907+00:00</Time>
+		<Song_Artist>Matthew And The Atlas</Song_Artist>
+		<Song_Name>On A Midnight Street</Song_Name>
+		<CurrentUsage>0</CurrentUsage>
+		<CurrentInterpretation>1</CurrentInterpretation>
+		<TimeName>started (est)</TimeName>
+		<IsEstimated>True</IsEstimated>
+	</Object>
+	<Object>
+		<Description>Played for 00:03:22.164
 Skipped: False
 Shuffle: False
 Country: FR</Description>
-    <Index>3</Index>
-    <FriendlyTime>2023-07-09T15:51:01+00:00</FriendlyTime>
-    <Time>2023-07-09T15:47:38.836+00:00</Time>
-    <Song_Artist>Hiss Golden Messenger</Song_Artist>
-    <Song_Name>Watching the Wires</Song_Name>
-    <CurrentUsage>0</CurrentUsage>
-    <CurrentInterpretation>1</CurrentInterpretation>
-    <TimeName>started</TimeName>
-  </Object>
-  <Object>
-    <Description>Played for 00:03:55.871
+		<Index>3</Index>
+		<FriendlyTime>2023-07-09T15:51:01+00:00</FriendlyTime>
+		<Time>2023-07-09T15:47:38.836+00:00</Time>
+		<Song_Artist>Hiss Golden Messenger</Song_Artist>
+		<Song_Name>Watching the Wires</Song_Name>
+		<CurrentUsage>0</CurrentUsage>
+		<CurrentInterpretation>1</CurrentInterpretation>
+		<TimeName>started (est)</TimeName>
+		<IsEstimated>True</IsEstimated>
+	</Object>
+	<Object>
+		<Description>Played for 00:03:55.871
 Skipped: False
 Shuffle: False
 Country: FR</Description>
-    <Index>4</Index>
-    <FriendlyTime>2023-07-09T15:54:57+00:00</FriendlyTime>
-    <Time>2023-07-09T15:51:01.129+00:00</Time>
-    <Song_Artist>Folk Road Show</Song_Artist>
-    <Song_Name>Thought You'd Never Ask</Song_Name>
-    <CurrentUsage>0</CurrentUsage>
-    <CurrentInterpretation>1</CurrentInterpretation>
-    <TimeName>started</TimeName>
-  </Object>
-  <Object>
-    <Description>Played for 00:01:55.960
+		<Index>4</Index>
+		<FriendlyTime>2023-07-09T15:54:57+00:00</FriendlyTime>
+		<Time>2023-07-09T15:51:01.129+00:00</Time>
+		<Song_Artist>Folk Road Show</Song_Artist>
+		<Song_Name>Thought You'd Never Ask</Song_Name>
+		<CurrentUsage>0</CurrentUsage>
+		<CurrentInterpretation>1</CurrentInterpretation>
+		<TimeName>started (est)</TimeName>
+		<IsEstimated>True</IsEstimated>
+	</Object>
+	<Object>
+		<Description>Played for 00:01:55.960
 Skipped: False
 Shuffle: False
 Country: FR</Description>
-    <Index>5</Index>
-    <FriendlyTime>2023-07-09T15:56:53+00:00</FriendlyTime>
-    <Time>2023-07-09T15:54:57.04+00:00</Time>
-    <Song_Artist>Bear's Den</Song_Artist>
-    <Song_Name>Not Every River</Song_Name>
-    <CurrentUsage>0</CurrentUsage>
-    <CurrentInterpretation>1</CurrentInterpretation>
-    <TimeName>started</TimeName>
-  </Object>
-  <Object>
-    <Description>Played for 00:03:25.742
+		<Index>5</Index>
+		<FriendlyTime>2023-07-09T15:56:53+00:00</FriendlyTime>
+		<Time>2023-07-09T15:54:57.04+00:00</Time>
+		<Song_Artist>Bear's Den</Song_Artist>
+		<Song_Name>Not Every River</Song_Name>
+		<CurrentUsage>0</CurrentUsage>
+		<CurrentInterpretation>1</CurrentInterpretation>
+		<TimeName>started (est)</TimeName>
+		<IsEstimated>True</IsEstimated>
+	</Object>
+	<Object>
+		<Description>Played for 00:03:25.742
 Skipped: False
 Shuffle: False
 Country: FR</Description>
-    <Index>6</Index>
-    <FriendlyTime>2023-07-09T16:00:20+00:00</FriendlyTime>
-    <Time>2023-07-09T15:56:54.258+00:00</Time>
-    <Song_Artist>Ten Fé</Song_Artist>
-    <Song_Name>Won't Happen - Stripped-Back</Song_Name>
-    <CurrentUsage>0</CurrentUsage>
-    <CurrentInterpretation>1</CurrentInterpretation>
-    <TimeName>started</TimeName>
-  </Object>
-  <Object>
-    <Description>Played for 00:02:21.653
+		<Index>6</Index>
+		<FriendlyTime>2023-07-09T16:00:20+00:00</FriendlyTime>
+		<Time>2023-07-09T15:56:54.258+00:00</Time>
+		<Song_Artist>Ten Fé</Song_Artist>
+		<Song_Name>Won't Happen - Stripped-Back</Song_Name>
+		<CurrentUsage>0</CurrentUsage>
+		<CurrentInterpretation>1</CurrentInterpretation>
+		<TimeName>started (est)</TimeName>
+		<IsEstimated>True</IsEstimated>
+	</Object>
+	<Object>
+		<Description>Played for 00:02:21.653
 Skipped: False
 Shuffle: False
 Country: FR</Description>
-    <Index>7</Index>
-    <FriendlyTime>2023-07-09T16:02:42+00:00</FriendlyTime>
-    <Time>2023-07-09T16:00:20.347+00:00</Time>
-    <Song_Artist>Austin Basham</Song_Artist>
-    <Song_Name>Sea so Blue</Song_Name>
-    <CurrentUsage>0</CurrentUsage>
-    <CurrentInterpretation>1</CurrentInterpretation>
-    <TimeName>started</TimeName>
-  </Object>
+		<Index>7</Index>
+		<FriendlyTime>2023-07-09T16:02:42+00:00</FriendlyTime>
+		<Time>2023-07-09T16:00:20.347+00:00</Time>
+		<Song_Artist>Austin Basham</Song_Artist>
+		<Song_Name>Sea so Blue</Song_Name>
+		<CurrentUsage>0</CurrentUsage>
+		<CurrentInterpretation>1</CurrentInterpretation>
+		<TimeName>started (est)</TimeName>
+		<IsEstimated>True</IsEstimated>
+	</Object>
 </Root>

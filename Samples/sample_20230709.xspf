@@ -1,57 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="xspf.xslt" type="text/xsl"?>
 <playlist version="1.0" xmlns="http://xspf.org/ns/0/">
-  <title>20230709</title>
-  <creator>SpotifyGPX</creator>
-  <annotation></annotation>
-  <identifier>c7cf362a4b6a3bf515861d2c933d04b2152b2174cb1bcc9985aaf86eee9e8927</identifier>
-  <date>2024-04-28T22:46:18Z</date>
-  <trackList>
-    <track>
-      <title>On A Midnight Street</title>
-      <creator>Matthew And The Atlas</creator>
-      <annotation>2023-07-09T15:44:01Z</annotation>
-      <album>Temple</album>
-      <duration>216093</duration>
-      <link>http://open.spotify.com/track/4AIzqWgbH94S0cNid1f3mT</link>
-    </track>
-    <track>
-      <title>Watching the Wires</title>
-      <creator>Hiss Golden Messenger</creator>
-      <annotation>2023-07-09T15:47:38Z</annotation>
-      <album>Watching the Wires</album>
-      <duration>202164</duration>
-      <link>http://open.spotify.com/track/7M9OysBhaeVEEOZW0sl4IN</link>
-    </track>
-    <track>
-      <title>Thought You'd Never Ask</title>
-      <creator>Folk Road Show</creator>
-      <annotation>2023-07-09T15:51:01Z</annotation>
-      <album>Thought You'd Never Ask</album>
-      <duration>235871</duration>
-      <link>http://open.spotify.com/track/05cmKMGYCSpcs0WBA0nMjX</link>
-    </track>
-    <track>
-      <title>Not Every River</title>
-      <creator>Bear's Den</creator>
-      <annotation>2023-07-09T15:54:57Z</annotation>
-      <album>So that you might hear me</album>
-      <duration>115960</duration>
-      <link>http://open.spotify.com/track/6vpVRpTK1r4FuZb8FtEjYb</link>
-    </track>
-    <track>
-      <title>Won't Happen - Stripped-Back</title>
-      <creator>Ten Fé</creator>
-      <annotation>2023-07-09T15:56:54Z</annotation>
-      <album>Won't Happen</album>
-      <duration>205742</duration>
-      <link>http://open.spotify.com/track/70Rz9c3gY6QNxqBrxCmJJa</link>
-    </track>
-    <track>
-      <title>Sea so Blue</title>
-      <creator>Austin Basham</creator>
-      <annotation>2023-07-09T16:00:20Z</annotation>
-      <album>You and Me for Now</album>
-      <duration>141653</duration>
-      <link>http://open.spotify.com/track/4YI7bOKyyPnCxhltKmrU9P</link>
-    </track>
-  </trackList>
+	<title>20230709</title>
+	<creator>SpotifyGPX</creator>
+	<annotation></annotation>
+	<identifier>c7cf362a4b6a3bf515861d2c933d04b2152b2174cb1bcc9985aaf86eee9e8927</identifier>
+	<date>2024-05-04T23:50:11Z</date>
+	<trackList>
+		<track>
+			<title>On A Midnight Street</title>
+			<creator>Matthew And The Atlas</creator>
+			<annotation>2023-07-09T15:44:01Z</annotation>
+			<album>Temple</album>
+			<duration>216093</duration>
+			<link>http://open.spotify.com/track/4AIzqWgbH94S0cNid1f3mT</link>
+		</track>
+		<track>
+			<title>Watching the Wires</title>
+			<creator>Hiss Golden Messenger</creator>
+			<annotation>2023-07-09T15:47:38Z</annotation>
+			<album>Watching the Wires</album>
+			<duration>202164</duration>
+			<link>http://open.spotify.com/track/7M9OysBhaeVEEOZW0sl4IN</link>
+		</track>
+		<track>
+			<title>Thought You'd Never Ask</title>
+			<creator>Folk Road Show</creator>
+			<annotation>2023-07-09T15:51:01Z</annotation>
+			<album>Thought You'd Never Ask</album>
+			<duration>235871</duration>
+			<link>http://open.spotify.com/track/05cmKMGYCSpcs0WBA0nMjX</link>
+		</track>
+		<track>
+			<title>Not Every River</title>
+			<creator>Bear's Den</creator>
+			<annotation>2023-07-09T15:54:57Z</annotation>
+			<album>So that you might hear me</album>
+			<duration>115960</duration>
+			<link>http://open.spotify.com/track/6vpVRpTK1r4FuZb8FtEjYb</link>
+		</track>
+		<track>
+			<title>Won't Happen - Stripped-Back</title>
+			<creator>Ten Fé</creator>
+			<annotation>2023-07-09T15:56:54Z</annotation>
+			<album>Won't Happen</album>
+			<duration>205742</duration>
+			<link>http://open.spotify.com/track/70Rz9c3gY6QNxqBrxCmJJa</link>
+		</track>
+		<track>
+			<title>Sea so Blue</title>
+			<creator>Austin Basham</creator>
+			<annotation>2023-07-09T16:00:20Z</annotation>
+			<album>You and Me for Now</album>
+			<duration>141653</duration>
+			<link>http://open.spotify.com/track/4YI7bOKyyPnCxhltKmrU9P</link>
+		</track>
+	</trackList>
 </playlist>

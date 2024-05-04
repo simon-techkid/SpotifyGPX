@@ -70,12 +70,19 @@ public interface ISongEntry
     /// <summary>
     /// Provides the name of the song action time.
     /// </summary>
-    public string TimeName => CurrentUsage switch
+    public string TimeName => $"{TimeAction}{(IsEstimated ? " (est)" : string.Empty)}";
+
+    private string TimeAction => CurrentUsage switch
     {
         TimeUsage.Start => "started",
         TimeUsage.End => "ended",
         _ => "started OR ended"
     };
+
+    /// <summary>
+    /// Determines whether this <see cref="ISongEntry"/>'s <see cref="Time"/> was estimated or exact.
+    /// </summary>
+    public bool IsEstimated => (int)CurrentUsage != (int)CurrentInterpretation;
 
     /// <summary>
     /// The name of this song, as printed to name fields. Also includes artist.

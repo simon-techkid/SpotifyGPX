@@ -6,8 +6,9 @@ using System.Text.Json;
 
 namespace SpotifyGPX.Output;
 
-public partial class Json : JsonSaveable
+public sealed partial class Json : JsonSaveable
 {
+    public override string FormatName => nameof(Json).ToLower();
     protected override List<JsonDocument> Document { get; }
 
     public Json(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);

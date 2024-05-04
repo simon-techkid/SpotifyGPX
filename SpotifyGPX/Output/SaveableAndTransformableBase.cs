@@ -14,7 +14,7 @@ using System.Xml.Xsl;
 namespace SpotifyGPX.Output;
 
 /// <summary>
-/// Provides instructions for serializing data in the source format to a byte array and saving it in the target format.
+/// Provides instructions for serializing <typeparamref name="T"/> data to <see langword="byte"/>[] and saving it in the target format.
 /// </summary>
 /// <typeparam name="T">The source format type</typeparam>
 public abstract class SaveableBase<T> : IFileOutput
@@ -24,8 +24,10 @@ public abstract class SaveableBase<T> : IFileOutput
     /// </summary>
     protected abstract Encoding OutputEncoding { get; }
 
+    public abstract string FormatName { get; }
+
     /// <summary>
-    /// The document in the associated format that will be serialized and saved to the disk.
+    /// The document in format <typeparamref name="T"/> that will be serialized and saved to the disk.
     /// </summary>
     protected abstract T Document { get; }
     public abstract int Count { get; }
@@ -42,59 +44,96 @@ public abstract class SaveableBase<T> : IFileOutput
     }
 
     /// <summary>
-    /// Converts the format document to bytes.
+    /// Converts <typeparamref name="T"/> to <see langword="byte"/>[].
     /// </summary>
-    /// <returns>This document, as a byte array.</returns>
+    /// <returns>This <see cref="Document"/>, as <see langword="byte"/>[].</returns>
     protected abstract byte[] ConvertToBytes();
 }
 
 /// <summary>
-/// Provides instructions for serializing data in the source format to a byte array and saving and/or transforming data in the target format.
+/// Provides instructions for serializing <typeparamref name="T"/> data to <see langword="byte"/>[] and transforming and/or saving it in the target format.
 /// </summary>
 /// <typeparam name="T">The source format type.</typeparam>
-public abstract class SaveableAndTransformableBase<T> : SaveableBase<T>, ITransformableOutput
+public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>, ITransformableOutput
 {
-    protected abstract SaveOptions XmlOptions { get; }
+    /// <summary>
+    /// The <see cref="ReaderOptions"/> when reading the converted XML before transformation.
+    /// </summary>
+    protected abstract ReaderOptions XmlReaderOptions { get; }
 
     /// <summary>
-    /// Transforms the document to the target format and saves it to the disk.
+    /// If true, and if an XSLT stylesheet doesn't exist, include a stylesheet reference in the exported XML conversion.
+    /// </summary>
+    protected abstract bool IncludeStylesheetHref { get; }
+
+    /// <summary>
+    /// Force the using of defined <see cref="XmlWriterSettings"/> <see cref="XmlSettings"/> for this transformation,
+    /// instead of using <see cref="XmlWriterSettings"/> parsed from the XSLT stylesheet output tag.
+    /// </summary>
+    protected abstract bool ForceUseOfSpecifiedSettings { get; }
+
+    /// <summary>
+    /// The reference to the XSLT stylesheet, if <see cref="IncludeStylesheetHref"/> is <see langword="true"/>.
+    /// </summary>
+    protected XProcessingInstruction? StylesheetReference => IncludeStylesheetHref ? new("xml-stylesheet", $"href=\"{StylesheetPath}\" type=\"text/xsl\"") : null;
+
+    /// <summary>
+    /// The path to the target XSLT stylesheet for this XML (if <typeparamref name="T"/> is <see cref="XDocument"/>)
+    /// or for this file in its XML transformed (<see cref="TransformToXml"/>) form.
+    /// </summary>
+    protected abstract string StylesheetPath { get; }
+
+    /// <summary>
+    /// The settings for the writing of this XML document or XML transformation.
+    /// </summary>
+    protected abstract XmlWriterSettings XmlSettings { get; }
+
+    /// <summary>
+    /// Transforms the document, in format <typeparamref name="T"/>, to XML and saves it to the disk.
     /// </summary>
     /// <param name="name">The file name of the target transformed document.</param>
     /// <param name="xsltPath">The path to an XSLT stylesheet that, if it exists, will be used for transformation.</param>
-    public void TransformAndSave(string name, string xsltPath)
+    public void TransformAndSave(string name)
     {
         string transformation;
         string outputPath;
 
-        if (File.Exists(xsltPath))
+        if (File.Exists(StylesheetPath))
         {
-            XslCompiledTransform xslt = new();
-            XsltSettings sets = new(true, true);
-            XmlUrlResolver resolver = new();
-            xslt.Load(xsltPath, sets, resolver);
-            transformation = XsltTransform(xslt);
-
-            outputPath = $"{name}.{GetFormat(xslt.OutputSettings?.OutputMethod)}";
+            // Built in XSL transformer
+            XslCompiledTransform transformer = CreateTransformer(StylesheetPath);
+            transformation = TransformToXmlToStringWithXslt(transformer);
+            outputPath = $"{name}.{GetFormat(transformer.OutputSettings?.OutputMethod)}";
         }
         else
         {
-            transformation = TransformToXml().ToString(XmlOptions);
+            transformation = TransformToXmlToString();
             outputPath = $"{name}.xml";
         }
 
         Save(outputPath, OutputEncoding.GetBytes(transformation));
     }
 
-    private string XsltTransform(XslCompiledTransform xslt)
+    private static XslCompiledTransform CreateTransformer(string xsltPath)
     {
-        XDocument document = TransformToXml();
-        using var ms = new MemoryStream();
-        using var xw = XmlWriter.Create(ms, xslt.OutputSettings);
-        xslt.Transform(document.CreateReader(), xw);
-        ms.Seek(0, SeekOrigin.Begin);
-        using var sr = new StreamReader(ms);
-        string result = sr.ReadToEnd();
-        return result;
+        XslCompiledTransform xslt = new(EnableDebugXsltTransformations);
+        XsltSettings settings = new(EnableXsltDocumentFunction, EnableXsltScript);
+        XmlUrlResolver resolver = new();
+        xslt.Load(xsltPath, settings, resolver);
+        return xslt;
+    }
+
+    private string TransformToXmlToStringWithXslt(XslCompiledTransform transformer)
+    {
+        XDocument document = TransformToXml(); // Create the XML document
+        XmlWriterSettings? settings = ForceUseOfSpecifiedSettings == true ? XmlSettings : transformer.OutputSettings; // Use the specified settings if forced
+        using MemoryStream ms = new(); // Stream for the transformed document
+        using XmlWriter xw = XmlWriter.Create(ms, settings); // Writer for the transformed document
+        transformer.Transform(document.CreateReader(XmlReaderOptions), xw); // Transform the document
+        ms.Seek(0, SeekOrigin.Begin); // Reset the stream position
+        using StreamReader sr = new(ms); // Reader for the transformed document
+        string result = sr.ReadToEnd(); // Read the transformed document
+        return result; // Return the transformed document
     }
 
     private static string GetFormat(XmlOutputMethod? method) => method switch
@@ -102,14 +141,30 @@ public abstract class SaveableAndTransformableBase<T> : SaveableBase<T>, ITransf
         XmlOutputMethod.Xml => "xml",
         XmlOutputMethod.Text => "txt",
         XmlOutputMethod.Html => "html",
-        _ => "xml"
+        _ => "txt" // Force plain text if unknown format
     };
 
     /// <summary>
-    /// Converts the format document to XML.
+    /// Converts <typeparamref name="T"/> to <see cref="XDocument"/>.
     /// </summary>
-    /// <returns>This document, as an XML document.</returns>
+    /// <returns><typeparamref name="T"/> as an XML document, <see cref="XDocument"/>.</returns>
     protected abstract XDocument TransformToXml();
+
+    /// <summary>
+    /// Converts <typeparamref name="T"/> to <see cref="XDocument"/> and then converts it to <see langword="string"/>.
+    /// </summary>
+    /// <returns>A <see langword="string"/>, representing the string representation of the XML <see cref="XDocument"/> of this file.</returns>.
+    protected string TransformToXmlToString()
+    {
+        using MemoryStream ms = new();
+        using (XmlWriter xmlWriter = XmlWriter.Create(ms, XmlSettings))
+        {
+            new XDocument(StylesheetReference, TransformToXml().Root).Save(xmlWriter);
+            xmlWriter.Flush();
+        }
+
+        return OutputEncoding.GetString(ms.ToArray());
+    }
 }
 
 /// <summary>
@@ -117,6 +172,9 @@ public abstract class SaveableAndTransformableBase<T> : SaveableBase<T>, ITransf
 /// </summary>
 public abstract class JsonSaveable : SaveableAndTransformableBase<List<JsonDocument>>
 {
+    /// <summary>
+    /// The <see cref="JsonSerializerOptions"/> for the exported contents of this JSON document.
+    /// </summary>
     protected abstract JsonSerializerOptions JsonOptions { get; }
 
     protected override byte[] ConvertToBytes()
@@ -180,10 +238,12 @@ public abstract class JsonSaveable : SaveableAndTransformableBase<List<JsonDocum
 /// </summary>
 public abstract class XmlSaveable : SaveableAndTransformableBase<XDocument>
 {
+    protected override Encoding OutputEncoding => XmlSettings.Encoding;
+
     protected override byte[] ConvertToBytes()
     {
-        string doc = Document.ToString(XmlOptions);
-        return OutputEncoding.GetBytes(doc);
+        string xmlString = TransformToXmlToString();
+        return OutputEncoding.GetBytes(xmlString);
     }
 
     protected override XDocument TransformToXml()

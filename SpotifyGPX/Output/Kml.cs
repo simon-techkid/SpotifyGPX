@@ -7,8 +7,9 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Output;
 
-public partial class Kml : XmlSaveable
+public sealed partial class Kml : XmlSaveable
 {
+    public override string FormatName => nameof(Kml).ToLower();
     protected override XDocument Document { get; }
 
     public Kml(IEnumerable<SongPoint> pairs, string trackName)
@@ -35,7 +36,6 @@ public partial class Kml : XmlSaveable
         string hash = hasher.ComputeHash(kmlPairs);
 
         return new XDocument(
-            new XDeclaration("1.0", DocumentEncoding, null),
             new XElement(Namespace + "kml",
                 new XAttribute("xmlns", Namespace),
                 new XAttribute(XNamespace.Xmlns + "gx", Gx),

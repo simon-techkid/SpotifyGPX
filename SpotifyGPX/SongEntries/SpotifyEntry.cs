@@ -10,7 +10,7 @@ namespace SpotifyGPX;
 /// <summary>
 /// A record of a Spotify song played by the user. Contains metadata about the song itself as well as the time it was played.
 /// </summary>
-public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, ISpotifyApiCompat, ISpotifyApiProportionable, IUrlLinkable
+public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, ISpotifyApiCompat, ISpotifyApiProportionable, IUrlLinkableSong, IAlbumableSong
 {
     public readonly override string ToString() => $"{Song_Artist} - {Song_Name}";
 
@@ -84,7 +84,7 @@ public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, ISpotifyApiCo
     /// <summary>
     /// This field is the name of the album of the track.
     /// </summary>
-    public string? Song_Album { get; set; }
+    public string Song_Album { get; set; }
 
     /// <summary>
     /// A Spotify URI, uniquely identifying the track in the form of “spotify:track:base-62 string”

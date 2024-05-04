@@ -7,8 +7,9 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Output;
 
-public partial class Xspf : XmlSaveable
+public sealed partial class Xspf : XmlSaveable
 {
+    public override string FormatName => nameof(Xspf).ToLower();
     protected override XDocument Document { get; }
 
     public Xspf(IEnumerable<SongPoint> pairs, string trackName) => Document = GetDocument(pairs, trackName);
@@ -20,16 +21,15 @@ public partial class Xspf : XmlSaveable
             CheckNullNode(Namespace + "title", pair.Song.Song_Name),
             CheckNullNode(Namespace + "creator", pair.Song.Song_Artist),
             CheckNullNode(Namespace + "annotation", pair.Song.Time.UtcDateTime.ToString(Options.ISO8601UTC)),
-            CheckNullNode(Namespace + "album", pair.Song.GetPropertyValue<SpotifyEntry>(song => song.Song_Album)),
+            CheckNullNode(Namespace + "album", pair.Song.GetPropertyValue<IAlbumableSong>(song => song.Song_Album)),
             CheckNullNode(Namespace + "duration", pair.Song.GetPropertyValue<IDuratableSong>(song => song.TimePlayed.TotalMilliseconds)),
-            CheckNullNode(Namespace + "link", pair.Song.GetPropertyValue<IUrlLinkable>(song => song.Song_URL))
+            CheckNullNode(Namespace + "link", pair.Song.GetPropertyValue<IUrlLinkableSong>(song => song.Song_URL))
         ));
 
         XmlHashProvider hasher = new();
         string hash = hasher.ComputeHash(xspfPairs);
 
         return new XDocument(
-            new XDeclaration("1.0", DocumentEncoding, null),
             new XElement(Namespace + "playlist",
                 new XAttribute("version", "1.0"),
                 new XAttribute("xmlns", Namespace),

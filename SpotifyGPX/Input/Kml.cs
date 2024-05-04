@@ -7,14 +7,14 @@ using System.Xml.Linq;
 
 namespace SpotifyGPX.Input;
 
-public partial class Kml : GpsInputBase
+public sealed partial class Kml : GpsInputBase
 {
     private XDocument Document { get; }
     protected override List<GpsTrack> Tracks { get; }
 
     public Kml(string path)
     {
-        Document = XDocument.Load(path);
+        Document = XDocument.Load(path, loadOptions);
 
         Tracks = ParseTracks();
     }

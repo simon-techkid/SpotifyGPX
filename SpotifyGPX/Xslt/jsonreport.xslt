@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
     <xsl:include href="extensions.xsl"/>
-    <xsl:output method="html" indent="yes" encoding="UTF-8"/>
+    <xsl:output method="html" version="1.0" encoding="UTF-8" omit-xml-declaration="no" indent="yes" media-type="text/html"/>
 
     <!-- The position of the header amongst the JsonReport objects -->
     <xsl:variable name="headerPosition" select="number(1)"/>

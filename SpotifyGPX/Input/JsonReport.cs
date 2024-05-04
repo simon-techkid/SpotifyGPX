@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace SpotifyGPX.Input;
 
-public partial class JsonReport : PairInputBase, IHashVerifier
+public sealed partial class JsonReport : PairInputBase, IHashVerifier
 {
     private JsonNetDeserializer JsonDeserializer { get; }
     private List<JsonDocument> JsonObjects { get; }
