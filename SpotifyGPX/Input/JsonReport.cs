@@ -13,15 +13,14 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
     private List<JsonDocument> JsonObjects { get; }
     private JsonElement Header => JsonObjects.First().RootElement;
     private List<JsonDocument> JsonTracksOnly { get; }
-    protected override List<SongPoint> AllPairs { get; }
+    protected override ParsePairsDelegate ParsePairsMethod => GetFromJObject;
+    protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
 
     public JsonReport(string path)
     {
         JsonDeserializer = new JsonNetDeserializer(path);
         JsonObjects = JsonDeserializer.Deserialize<JsonDocument>(JsonOptions);
         JsonTracksOnly = JsonObjects.Skip(1).ToList();
-        List<SongPoint> pairs = GetFromJObject();
-        AllPairs = pairs;
     }
 
     private List<SongPoint> GetFromJObject()
@@ -112,7 +111,7 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
         return allPairs;
     }
 
-    protected override List<ISongEntry> FilterSongs()
+    private List<ISongEntry> FilterSongs()
     {
         return AllPairs.Select(pair => pair.Song).Where(pair => songFilter(pair) == true).ToList();
     }

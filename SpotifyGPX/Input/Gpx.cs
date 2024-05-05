@@ -10,13 +10,11 @@ namespace SpotifyGPX.Input;
 public sealed partial class Gpx : GpsInputBase
 {
     private XDocument Document { get; }
-    protected override List<GpsTrack> Tracks { get; }
+    protected override ParseTracksDelegate ParseTracksMethod => ParseTracks;
 
     public Gpx(string path)
     {
         Document = XDocument.Load(path, loadOptions);
-
-        Tracks = ParseTracks();
     }
 
     public override int SourceTrackCount => Document.Descendants(InputNs + Track).Count();

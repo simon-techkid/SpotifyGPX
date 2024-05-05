@@ -10,12 +10,12 @@ namespace SpotifyGPX.Input;
 public sealed partial class Csv : SongInputBase
 {
     private string[] Document { get; }
-    protected override List<ISongEntry> AllSongs { get; }
+    protected override ParseSongsDelegate ParseSongsMethod => ParseSongs;
+    protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
 
     public Csv(string path)
     {
         Document = File.ReadAllLines(path);
-        AllSongs = ParseSongs();
     }
 
     private List<ISongEntry> ParseSongs()
@@ -40,11 +40,10 @@ public sealed partial class Csv : SongInputBase
         }).ToList();
     }
 
-    protected override List<ISongEntry> FilterSongs()
+    private List<ISongEntry> FilterSongs()
     {
         return AllSongs.OfType<LastFmEntry>().Where(song => filter(song)).Select(song => (ISongEntry)song).ToList();
     }
 
     public override int SourceSongCount => Document.Length - 1;
-
 }

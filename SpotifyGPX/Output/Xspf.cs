@@ -10,12 +10,16 @@ namespace SpotifyGPX.Output;
 public sealed partial class Xspf : XmlSaveable
 {
     public override string FormatName => nameof(Xspf).ToLower();
-    protected override XDocument Document { get; }
+    protected override DocumentAccessor SaveAction => GetDocument;
 
-    public Xspf(IEnumerable<SongPoint> pairs, string trackName) => Document = GetDocument(pairs, trackName);
-
-    private static XDocument GetDocument(IEnumerable<SongPoint> pairs, string trackName)
+    public Xspf(Func<IEnumerable<SongPoint>> pairs, string trackName) : base(pairs, trackName)
     {
+    }
+
+    private XDocument GetDocument(string? trackName)
+    {
+        IEnumerable<SongPoint> pairs = DataProvider();
+
         var xspfPairs = pairs.Select(pair =>
         new XElement(Namespace + Track,
             CheckNullNode(Namespace + "title", pair.Song.Song_Name),

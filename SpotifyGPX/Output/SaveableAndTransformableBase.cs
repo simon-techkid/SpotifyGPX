@@ -29,8 +29,35 @@ public abstract class SaveableBase<T> : IFileOutput
     /// <summary>
     /// The document in format <typeparamref name="T"/> that will be serialized and saved to the disk.
     /// </summary>
-    protected abstract T Document { get; }
+    protected T Document => SaveAction(TrackName);
     public abstract int Count { get; }
+
+    /// <summary>
+    /// Provides access to the collection of <see cref="SongPoint"/> pairs to be saved to the document in format <typeparamref name="T"/>.
+    /// </summary>
+    protected Func<IEnumerable<SongPoint>> DataProvider { get; }
+
+    /// <summary>
+    /// Provides access to the name of the track to be saved to the document in format <typeparamref name="T"/>.
+    /// </summary>
+    private string? TrackName { get; }
+
+    /// <summary>
+    /// A delegate to access the contents of the document in format <typeparamref name="T"/>.
+    /// </summary>
+    /// <returns></returns>
+    protected delegate T DocumentAccessor(string? trackName);
+
+    /// <summary>
+    /// Provides access to the document in format <typeparamref name="T"/> that will be serialized and saved to the disk.
+    /// </summary>
+    protected abstract DocumentAccessor SaveAction { get; }
+
+    protected SaveableBase(Func<IEnumerable<SongPoint>> pairs, string? trackName)
+    {
+        DataProvider = pairs;
+        TrackName = trackName;
+    }
 
     public void Save(string path)
     {
@@ -38,7 +65,7 @@ public abstract class SaveableBase<T> : IFileOutput
         Save(path, doc);
     }
 
-    protected void Save(string path, byte[] bytes)
+    protected virtual void Save(string path, byte[] bytes)
     {
         File.WriteAllBytes(path, bytes);
     }
@@ -93,7 +120,7 @@ public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>,
     /// </summary>
     /// <param name="name">The file name of the target transformed document.</param>
     /// <param name="xsltPath">The path to an XSLT stylesheet that, if it exists, will be used for transformation.</param>
-    public void TransformAndSave(string name)
+    public virtual void TransformAndSave(string name)
     {
         string transformation;
         string outputPath;
@@ -123,7 +150,11 @@ public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>,
         return xslt;
     }
 
-    private string TransformToXmlToStringWithXslt(XslCompiledTransform transformer)
+    protected SaveableAndTransformableBase(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
+    {
+    }
+
+    protected virtual string TransformToXmlToStringWithXslt(XslCompiledTransform transformer)
     {
         XDocument document = TransformToXml(); // Create the XML document
         XmlWriterSettings? settings = ForceUseOfSpecifiedSettings == true ? XmlSettings : transformer.OutputSettings; // Use the specified settings if forced
@@ -136,7 +167,7 @@ public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>,
         return result; // Return the transformed document
     }
 
-    private static string GetFormat(XmlOutputMethod? method) => method switch
+    protected virtual string GetFormat(XmlOutputMethod? method) => method switch
     {
         XmlOutputMethod.Xml => "xml",
         XmlOutputMethod.Text => "txt",
@@ -154,7 +185,7 @@ public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>,
     /// Converts <typeparamref name="T"/> to <see cref="XDocument"/> and then converts it to <see langword="string"/>.
     /// </summary>
     /// <returns>A <see langword="string"/>, representing the string representation of the XML <see cref="XDocument"/> of this file.</returns>.
-    protected string TransformToXmlToString()
+    protected virtual string TransformToXmlToString()
     {
         using MemoryStream ms = new();
         using (XmlWriter xmlWriter = XmlWriter.Create(ms, XmlSettings))
@@ -176,6 +207,10 @@ public abstract class JsonSaveable : SaveableAndTransformableBase<List<JsonDocum
     /// The <see cref="JsonSerializerOptions"/> for the exported contents of this JSON document.
     /// </summary>
     protected abstract JsonSerializerOptions JsonOptions { get; }
+
+    protected JsonSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
+    {
+    }
 
     protected override byte[] ConvertToBytes()
     {
@@ -240,6 +275,10 @@ public abstract class XmlSaveable : SaveableAndTransformableBase<XDocument>
 {
     protected override Encoding OutputEncoding => XmlSettings.Encoding;
 
+    protected XmlSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
+    {
+    }
+
     protected override byte[] ConvertToBytes()
     {
         string xmlString = TransformToXmlToString();
@@ -257,6 +296,10 @@ public abstract class XmlSaveable : SaveableAndTransformableBase<XDocument>
 /// </summary>
 public abstract class TxtSaveable : SaveableAndTransformableBase<string?[]>
 {
+    protected TxtSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
+    {
+    }
+
     protected override byte[] ConvertToBytes()
     {
         string doc = string.Join(Environment.NewLine, Document);
@@ -280,6 +323,10 @@ public abstract class TxtSaveable : SaveableAndTransformableBase<string?[]>
 /// </summary>
 public abstract class ByteSaveable : SaveableBase<byte[]>
 {
+    protected ByteSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
+    {
+    }
+
     protected override byte[] ConvertToBytes()
     {
         return Document;

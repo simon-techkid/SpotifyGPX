@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -9,12 +10,16 @@ namespace SpotifyGPX.Output;
 public sealed partial class Json : JsonSaveable
 {
     public override string FormatName => nameof(Json).ToLower();
-    protected override List<JsonDocument> Document { get; }
+    protected override DocumentAccessor SaveAction => GetDocument;
 
-    public Json(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
-
-    private static List<JsonDocument> GetDocument(IEnumerable<SongPoint> Pairs)
+    public Json(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
     {
+    }
+
+    private List<JsonDocument> GetDocument(string? trackName)
+    {
+        IEnumerable<SongPoint> Pairs = DataProvider();
+
         List<JsonDocument> objects = Pairs
             .Select(pair => JsonDocument.Parse(JsonSerializer.Serialize(pair.Song)))
             .ToList();

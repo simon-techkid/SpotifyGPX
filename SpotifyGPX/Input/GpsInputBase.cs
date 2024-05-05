@@ -10,10 +10,12 @@ namespace SpotifyGPX.Input;
 /// </summary>
 public abstract class GpsInputBase : IGpsInput
 {
-    protected abstract List<GpsTrack> Tracks { get; }
+    protected delegate List<GpsTrack> ParseTracksDelegate();
+    protected abstract ParseTracksDelegate ParseTracksMethod { get; }
+    protected List<GpsTrack> Tracks => ParseTracksMethod();
+    public List<GpsTrack> GetAllTracks() => Tracks;
     public abstract int SourceTrackCount { get; }
     public int ParsedTrackCount => Tracks.Count;
     public abstract int SourcePointCount { get; }
     public int ParsedPointCount => Tracks.Select(track => track.Points.Count).Sum();
-    public List<GpsTrack> GetAllTracks() => Tracks;
 }

@@ -9,12 +9,16 @@ namespace SpotifyGPX.Output;
 public sealed partial class Txt : TxtSaveable
 {
     public override string FormatName => nameof(Txt).ToLower();
-    protected override string?[] Document { get; }
+    protected override DocumentAccessor SaveAction => GetDocument;
 
-    public Txt(IEnumerable<SongPoint> pairs) => Document = GetDocument(pairs);
-
-    private static string?[] GetDocument(IEnumerable<SongPoint> Pairs)
+    public Txt(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
     {
+    }
+
+    private string?[] GetDocument(string? trackName)
+    {
+        IEnumerable<SongPoint> Pairs = DataProvider();
+
         // Below are some examples of arrays
         string?[] strings = GetVerbatim(Pairs, pair => pair.ToString()); // Full pair strings
         string?[] Accuracies = GetWithoutDuplicates(Pairs, pair => pair.Accuracy.ToString()); // Accuracies

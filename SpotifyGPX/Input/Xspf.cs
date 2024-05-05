@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -11,19 +10,12 @@ namespace SpotifyGPX.Input;
 public sealed partial class Xspf : SongInputBase, IHashVerifier
 {
     private XDocument Document { get; }
-    protected override List<ISongEntry> AllSongs { get; }
+    protected override ParseSongsDelegate ParseSongsMethod => ParseSongs;
+    protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
 
     public Xspf(string path)
     {
         Document = XDocument.Load(path, loadOptions);
-
-        if (SourceSongCount == 0)
-        {
-            // If there are no tracks in the GPX, throw error
-            throw new Exception($"No track elements found in '{Path.GetFileName(path)}'!");
-        }
-
-        AllSongs = ParseSongs();
     }
 
     private List<ISongEntry> ParseSongs()
@@ -40,7 +32,7 @@ public sealed partial class Xspf : SongInputBase, IHashVerifier
         }).ToList();
     }
 
-    protected override List<ISongEntry> FilterSongs()
+    private List<ISongEntry> FilterSongs()
     {
         return AllSongs.OfType<XspfEntry>().Where(song => filter(song)).Select(song => (ISongEntry)song).ToList();
     }

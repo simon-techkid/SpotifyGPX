@@ -10,15 +10,16 @@ namespace SpotifyGPX.Output;
 public sealed partial class Kml : XmlSaveable
 {
     public override string FormatName => nameof(Kml).ToLower();
-    protected override XDocument Document { get; }
+    protected override DocumentAccessor SaveAction => GetDocument;
 
-    public Kml(IEnumerable<SongPoint> pairs, string trackName)
+    public Kml(Func<IEnumerable<SongPoint>> pairs, string trackName) : base(pairs, trackName)
     {
-        Document = GetDocument(pairs, trackName);
     }
 
-    private static XDocument GetDocument(IEnumerable<SongPoint> pairs, string trackName)
+    private XDocument GetDocument(string? trackName)
     {
+        IEnumerable<SongPoint> pairs = DataProvider();
+
         var kmlPairs = pairs.Select(pair =>
             new XElement(Namespace + Placemark,
                 new XElement(Namespace + "name", pair.Song.ToString()),

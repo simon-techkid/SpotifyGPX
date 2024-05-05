@@ -74,7 +74,8 @@ public partial class OutputHandler
         /// <param name="trackName">The name of the track represented in this file (if this file only has one track).</param>
         public OutFile(IEnumerable<SongPoint> pairs, Formats format, string sourceGpxName, string trackName)
         {
-            Handler = CreateFileOutput(format, pairs, trackName);
+            var factory = new FileOutputFactory();
+            Handler = factory.CreateFileOutput(format, () => pairs, trackName);
             SourceName = sourceGpxName;
             TrackName = trackName;
             OriginalCount = pairs.Count();

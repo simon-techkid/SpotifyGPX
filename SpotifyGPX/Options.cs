@@ -249,21 +249,6 @@ namespace SpotifyGPX.Output
         private const int MaxRetries = 3;
         private const int RetryDelayMs = 10000;
 
-        private static IFileOutput CreateFileOutput(Formats format, IEnumerable<SongPoint> pairs, string trackName)
-        {
-            return format switch
-            {
-                Formats.Csv => new Csv(pairs),
-                Formats.Gpx => new Gpx(pairs, trackName),
-                Formats.Json => new Json(pairs),
-                Formats.JsonReport => new JsonReport(pairs),
-                Formats.Kml => new Kml(pairs, trackName),
-                Formats.Txt => new Txt(pairs),
-                Formats.Xspf => new Xspf(pairs, trackName),
-                _ => throw new Exception($"Unsupported file export format: {format}")
-            };
-        }
-
         private static bool AllowsMultiTrack(Formats format)
         {
             return format switch

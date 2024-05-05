@@ -11,13 +11,13 @@ public sealed partial class Json : SongInputBase
 {
     private JsonNetDeserializer JsonDeserializer { get; }
     private List<JsonDocument> AllEntries { get; }
-    protected override List<ISongEntry> AllSongs { get; }
+    protected override ParseSongsDelegate ParseSongsMethod => ParseSongs;
+    protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
 
     public Json(string path)
     {
         JsonDeserializer = new JsonNetDeserializer(path);
         AllEntries = JsonDeserializer.Deserialize<JsonDocument>(JsonOptions);
-        AllSongs = ParseSongs();
     }
 
     private List<ISongEntry> ParseSongs()
@@ -92,7 +92,7 @@ public sealed partial class Json : SongInputBase
         }).ToList()!;
     }
 
-    protected override List<ISongEntry> FilterSongs()
+    private List<ISongEntry> FilterSongs()
     {
         return AllSongs.OfType<SpotifyEntry>().Where(song => filter(song)).Select(song => (ISongEntry)song).ToList();
     }

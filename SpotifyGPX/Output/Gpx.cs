@@ -10,12 +10,16 @@ namespace SpotifyGPX.Output;
 public sealed partial class Gpx : XmlSaveable
 {
     public override string FormatName => nameof(Gpx).ToLower();
-    protected override XDocument Document { get; }
+    protected override DocumentAccessor SaveAction => GetDocument;
 
-    public Gpx(IEnumerable<SongPoint> pairs, string trackName) => Document = GetDocument(pairs, trackName);
-
-    private static XDocument GetDocument(IEnumerable<SongPoint> pairs, string trackName)
+    public Gpx(Func<IEnumerable<SongPoint>> pairs, string trackName) : base(pairs, trackName)
     {
+    }
+
+    private XDocument GetDocument(string? trackName)
+    {
+        IEnumerable<SongPoint> pairs = DataProvider();
+
         var gpxPairs = pairs.Select(pair =>
             new XElement(Namespace + Waypoint,
                 new XAttribute("lat", pair.Point.Location.Latitude),

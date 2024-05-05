@@ -12,17 +12,21 @@ namespace SpotifyGPX.Input;
 public abstract class PairInputBase : ISongInput, IGpsInput, IPairInput
 {
     // Pairs
-    protected abstract List<SongPoint> AllPairs { get; } // All pairs in the file
+    protected delegate List<SongPoint> ParsePairsDelegate();
+    protected abstract ParsePairsDelegate ParsePairsMethod { get; }
+    protected List<SongPoint> AllPairs => ParsePairsMethod();
     public List<SongPoint> GetAllPairs() => AllPairs;
     public abstract int SourcePairCount { get; }
     public int ParsedPairCount => AllPairs.Count;
 
     // Songs
     public List<ISongEntry> GetAllSongs() => AllPairs.Select(pair => pair.Song).ToList();
-    public List<ISongEntry> GetFilteredSongs() => FilterSongs();
+    protected delegate List<ISongEntry> FilterSongsDelegate();
+    protected abstract FilterSongsDelegate FilterSongsMethod { get; }
+    public List<ISongEntry> GetFilteredSongs() => FilterSongsMethod();
     public List<ISongEntry> GetFilteredSongs(List<GpsTrack> gpsTracks)
     {
-        List<ISongEntry> FilteredSongs = FilterSongs(); // Filter songs based on file-specific filters first
+        List<ISongEntry> FilteredSongs = GetFilteredSongs(); // Filter songs based on file-specific filters first
 
         var trackRange = gpsTracks.Select(track => (track.Start, track.End)).ToList();
 
@@ -36,7 +40,7 @@ public abstract class PairInputBase : ISongInput, IGpsInput, IPairInput
 
         return FilteredSongs;
     }
-    protected abstract List<ISongEntry> FilterSongs();
+
     public abstract int SourceSongCount { get; }
     public int ParsedSongCount => AllPairs.Select(pair => pair.Song).Count();
 
