@@ -7,5 +7,6 @@ namespace SpotifyGPX;
 /// </summary>
 public interface IUrlLinkableSong
 {
-    public string Song_URL { get; }
+    public string? Song_URL { get; }
+    public string SongURL => Song_URL ?? string.Empty;
 }

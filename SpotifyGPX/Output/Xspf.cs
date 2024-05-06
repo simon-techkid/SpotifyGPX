@@ -21,9 +21,9 @@ public sealed partial class Xspf : XmlSaveable
             CheckNullNode(Namespace + "title", pair.Song.Song_Name),
             CheckNullNode(Namespace + "creator", pair.Song.Song_Artist),
             CheckNullNode(Namespace + "annotation", pair.Song.Time.UtcDateTime.ToString(Options.ISO8601UTC)),
-            CheckNullNode(Namespace + "album", pair.Song.GetPropertyValue<IAlbumableSong>(song => song.Song_Album)),
+            CheckNullNode(Namespace + "album", pair.Song.GetPropertyValue<IAlbumableSong>(song => song.SongAlbum)),
             CheckNullNode(Namespace + "duration", pair.Song.GetPropertyValue<IDuratableSong>(song => song.TimePlayed.TotalMilliseconds)),
-            CheckNullNode(Namespace + "link", pair.Song.GetPropertyValue<IUrlLinkableSong>(song => song.Song_URL))
+            CheckNullNode(Namespace + "link", pair.Song.GetPropertyValue<IUrlLinkableSong>(song => song.SongURL))
         ));
 
         XmlHashProvider hasher = new();

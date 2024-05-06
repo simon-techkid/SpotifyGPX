@@ -16,7 +16,7 @@ public sealed partial class Json : SongInputBase
     public Json(string path)
     {
         JsonDeserializer = new JsonNetDeserializer(path);
-        AllEntries = JsonDeserializer.Deserialize<JsonDocument>();
+        AllEntries = JsonDeserializer.Deserialize<JsonDocument>(JsonOptions);
         AllSongs = ParseSongs();
     }
 

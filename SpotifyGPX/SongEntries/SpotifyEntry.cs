@@ -84,7 +84,7 @@ public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, ISpotifyApiCo
     /// <summary>
     /// This field is the name of the album of the track.
     /// </summary>
-    public string Song_Album { get; set; }
+    public string? Song_Album { get; set; }
 
     /// <summary>
     /// A Spotify URI, uniquely identifying the track in the form of “spotify:track:base-62 string”

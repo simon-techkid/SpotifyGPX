@@ -7,5 +7,6 @@ namespace SpotifyGPX;
 /// </summary>
 public interface IAlbumableSong
 {
-    string Song_Album { get; }
+    string? Song_Album { get; }
+    string SongAlbum => Song_Album ?? string.Empty;
 }

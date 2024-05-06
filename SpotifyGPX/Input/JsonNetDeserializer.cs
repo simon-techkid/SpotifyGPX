@@ -15,19 +15,13 @@ public class JsonNetDeserializer
         JsonPath = path;
     }
 
-    public List<T> Deserialize<T>()
+    public List<T> Deserialize<T>(JsonSerializerOptions options)
     {
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            WriteIndented = true
-        };
-
         using FileStream fs = new(JsonPath, FileMode.Open);
         using StreamReader sr = new(fs);
         string jsonString = sr.ReadToEnd();
 
-        List<T> objects = JsonSerializer.Deserialize<List<T>>(jsonString, options);
+        List<T> objects = JsonSerializer.Deserialize<List<T>>(jsonString, options) ?? new List<T>();
 
         return objects;
     }

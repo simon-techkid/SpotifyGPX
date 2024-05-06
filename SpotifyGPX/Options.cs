@@ -191,6 +191,7 @@ namespace SpotifyGPX.Input
         private const string SpotifyTimeFormat = IsMiniSpotify ? Options.DateTimeOnly : Options.ISO8601UTC;
         private const DateTimeStyles TimeStyle = DateTimeStyles.AssumeUniversal;
         private const TimeInterpretation Interpretation = TimeInterpretation.End;
+        private static JsonSerializerOptions JsonOptions => Options.JsonOptions;
 
         // Tolerance filters
         private static TimeSpan MinimumPlaytime => new(0, 0, 0); // Minimum accepted song playback time (0,0,0 for all songs)
@@ -204,6 +205,8 @@ namespace SpotifyGPX.Input
 
     public partial class JsonReport
     {
+        private static JsonSerializerOptions JsonOptions => Options.JsonReportOptions;
+
         // Tolerance filters
         private static readonly Func<ISongEntry, bool> songFilter = song => true; // No filtering for JsonReport song-only data
         private static readonly Func<GenericPoint, bool> pointFilter = pair => true; // No filtering for JsonReport song-point data

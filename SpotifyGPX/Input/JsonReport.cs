@@ -18,7 +18,7 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
     public JsonReport(string path)
     {
         JsonDeserializer = new JsonNetDeserializer(path);
-        JsonObjects = JsonDeserializer.Deserialize<JsonDocument>();
+        JsonObjects = JsonDeserializer.Deserialize<JsonDocument>(JsonOptions);
         JsonTracksOnly = JsonObjects.Skip(1).ToList();
         List<SongPoint> pairs = GetFromJObject();
         AllPairs = pairs;
@@ -26,8 +26,6 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
 
     private List<SongPoint> GetFromJObject()
     {
-        int alreadyParsed = 0; // The number of points already parsed
-
         // Get the header
         int expectedTotal = Header.TryGetProperty("Total", out JsonElement total) ? total.GetInt32() : throw new Exception($"Expected total required in header object of JsonReport!");
 
