@@ -9,7 +9,7 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Handle various input file formats for taking in song and GPS information.
 /// </summary>
-public partial class InputHandler
+public partial class InputHandler : IDisposable
 {
     private ISongInput SongInput { get; }
     private IGpsInput GpsInput { get; }
@@ -129,6 +129,14 @@ public partial class InputHandler
         {
             RunHashVerificationForInput(PairInput);
         }
+    }
+
+    public void Dispose()
+    {
+        SongInput.Dispose();
+        GpsInput.Dispose();
+        PairInput?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>

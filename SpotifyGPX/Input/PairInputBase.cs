@@ -9,8 +9,12 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// The base class for all classes supporting the parsing of song-point pairing files. All classes that handle song-point pairing files must inherit this class.
 /// </summary>
-public abstract class PairInputBase : ISongInput, IGpsInput, IPairInput
+public abstract class PairInputBase : FileInputBase, ISongInput, IGpsInput, IPairInput
 {
+    protected PairInputBase(string path) : base(path)
+    {
+    }
+
     // Pairs
     protected delegate List<SongPoint> ParsePairsDelegate();
     protected abstract ParsePairsDelegate ParsePairsMethod { get; }

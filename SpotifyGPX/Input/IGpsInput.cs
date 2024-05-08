@@ -9,7 +9,7 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Interfaces with GPS input classes, unifying all formats accepting GPS journeys.
 /// </summary>
-public partial interface IGpsInput
+public partial interface IGpsInput : IFileInput
 {
     /// <summary>
     /// Gets all tracks in the file.

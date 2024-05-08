@@ -7,7 +7,7 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Interfaces with song input classes, unifying all formats accepting song records.
 /// </summary>
-public partial interface ISongInput
+public partial interface ISongInput : IFileInput
 {
     /// <summary>
     /// Gets all songs in the file.

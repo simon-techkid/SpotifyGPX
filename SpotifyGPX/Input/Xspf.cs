@@ -13,9 +13,9 @@ public sealed partial class Xspf : SongInputBase, IHashVerifier
     protected override ParseSongsDelegate ParseSongsMethod => ParseSongs;
     protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
 
-    public Xspf(string path)
+    public Xspf(string path) : base(path)
     {
-        Document = XDocument.Load(path, loadOptions);
+        Document = XDocument.Load(StreamReader, loadOptions);
     }
 
     private List<ISongEntry> ParseSongs()
@@ -38,6 +38,11 @@ public sealed partial class Xspf : SongInputBase, IHashVerifier
     }
 
     public override int SourceSongCount => Document.Descendants(InputNs + Track).Count();
+
+    protected override void ClearDocument()
+    {
+        Document.Root?.RemoveAll();
+    }
 
     public bool VerifyHash()
     {

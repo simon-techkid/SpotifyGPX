@@ -7,7 +7,7 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Interfaces with pair input classes, unifying all formats accepting pairs.
 /// </summary>
-public interface IPairInput
+public interface IPairInput : IFileInput
 {
     /// <summary>
     /// Gets all pairs in the file.

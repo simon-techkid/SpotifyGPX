@@ -67,7 +67,8 @@ public abstract class SaveableBase<T> : IFileOutput
 
     protected virtual void Save(string path, byte[] bytes)
     {
-        File.WriteAllBytes(path, bytes);
+        using FileStream fileStream = new(path, FileMode.Create, FileAccess.Write);
+        fileStream.Write(bytes, 0, bytes.Length);
     }
 
     /// <summary>

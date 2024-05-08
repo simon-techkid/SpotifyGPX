@@ -9,15 +9,15 @@ namespace SpotifyGPX.Input;
 
 public sealed partial class Json : SongInputBase
 {
-    private JsonNetDeserializer JsonDeserializer { get; }
     private List<JsonDocument> AllEntries { get; }
     protected override ParseSongsDelegate ParseSongsMethod => ParseSongs;
     protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
 
-    public Json(string path)
+    public Json(string path) : base(path)
     {
-        JsonDeserializer = new JsonNetDeserializer(path);
-        AllEntries = JsonDeserializer.Deserialize<JsonDocument>(JsonOptions);
+        using JsonNetDeserializer deserializer = new(path);
+        AllEntries = deserializer.Deserialize<JsonDocument>(JsonOptions);
+        deserializer.Dispose();
     }
 
     private List<ISongEntry> ParseSongs()
@@ -95,6 +95,11 @@ public sealed partial class Json : SongInputBase
     private List<ISongEntry> FilterSongs()
     {
         return AllSongs.OfType<SpotifyEntry>().Where(song => filter(song)).Select(song => (ISongEntry)song).ToList();
+    }
+
+    protected override void ClearDocument()
+    {
+        AllEntries.ForEach(entry => entry.Dispose());
     }
 
     public override int SourceSongCount => AllEntries.Count;

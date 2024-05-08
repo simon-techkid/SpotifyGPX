@@ -9,12 +9,16 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// The base class for all classes supporting the parsing song playback records files. All classes that handle song playback records files must inherit this class.
 /// </summary>
-public abstract class SongInputBase : ISongInput
+public abstract class SongInputBase : FileInputBase, ISongInput
 {
     protected delegate List<ISongEntry> ParseSongsDelegate();
     protected delegate List<ISongEntry> FilterSongsDelegate();
     protected abstract ParseSongsDelegate ParseSongsMethod { get; }
     protected abstract FilterSongsDelegate FilterSongsMethod { get; }
+
+    protected SongInputBase(string path) : base(path)
+    {
+    }
 
     // All Songs
     protected List<ISongEntry> AllSongs => ParseSongsMethod();

@@ -4,25 +4,41 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace SpotifyGPX.Input;
 
-public sealed partial class Csv : SongInputBase
+public sealed partial class Csv : SongInputBase, IDisposable
 {
-    private string[] Document { get; }
+    private static readonly Regex CSVRegex = MyRegex();
+    private string[] Document { get; set; }
     protected override ParseSongsDelegate ParseSongsMethod => ParseSongs;
     protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
 
-    public Csv(string path)
+    public Csv(string path) : base(path)
     {
-        Document = File.ReadAllLines(path);
+        Document = ReadAllLines();
+    }
+
+    private string[] ReadAllLines()
+    {
+        var lines = new List<string>();
+        string line;
+        while ((line = StreamReader.ReadLine()!) != null)
+        {
+            lines.Add(line);
+        }
+        return lines.ToArray();
     }
 
     private List<ISongEntry> ParseSongs()
     {
         return Document.Skip(1).Select((entry, index) =>
         {
-            string[] parts = entry.Split("\",\"");
+            string[] parts = CSVRegex
+            .Split(entry)
+            .Select(field => field.Trim('"'))
+            .ToArray();
 
             return (ISongEntry)new LastFmEntry()
             {
@@ -42,8 +58,20 @@ public sealed partial class Csv : SongInputBase
 
     private List<ISongEntry> FilterSongs()
     {
-        return AllSongs.OfType<LastFmEntry>().Where(song => filter(song)).Select(song => (ISongEntry)song).ToList();
+        return AllSongs
+            .OfType<LastFmEntry>()
+            .Where(song => filter(song))
+            .Select(song => (ISongEntry)song)
+            .ToList();
+    }
+
+    protected override void ClearDocument()
+    {
+        Document = Array.Empty<string>();
     }
 
     public override int SourceSongCount => Document.Length - 1;
+
+    [GeneratedRegex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))")]
+    private static partial Regex MyRegex();
 }

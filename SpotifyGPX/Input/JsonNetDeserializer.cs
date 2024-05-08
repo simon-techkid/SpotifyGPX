@@ -6,24 +6,40 @@ using System.Text.Json;
 
 namespace SpotifyGPX.Input;
 
-public class JsonNetDeserializer
+public class JsonNetDeserializer : FileInputBase
 {
-    private string JsonPath { get; }
+    private string? Document { get; set; }
 
-    public JsonNetDeserializer(string path)
+    public JsonNetDeserializer(string path) : base(path)
     {
-        JsonPath = path;
+        Document = StreamReader.ReadToEnd();
     }
 
     public List<T> Deserialize<T>(JsonSerializerOptions options)
     {
-        using FileStream fs = new(JsonPath, FileMode.Open);
-        using StreamReader sr = new(fs);
-        string jsonString = sr.ReadToEnd();
+        if (Document != null)
+        {
+            List<T> objects = JsonSerializer.Deserialize<List<T>>(Document, options) ?? new List<T>();
 
-        List<T> objects = JsonSerializer.Deserialize<List<T>>(jsonString, options) ?? new List<T>();
+            return objects;
+        }
 
-        return objects;
+        return new List<T>();
+    }
+
+    public JsonDocument GetDocument()
+    {
+        if (Document != null)
+        {
+            return JsonDocument.Parse(Document);
+        }
+
+        return JsonDocument.Parse("{}");
+    }
+
+    protected override void ClearDocument()
+    {
+        Document = null;
     }
 
 }

@@ -12,9 +12,9 @@ public sealed partial class Kml : GpsInputBase
     private XDocument Document { get; }
     protected override ParseTracksDelegate ParseTracksMethod => ParseTracks;
 
-    public Kml(string path)
+    public Kml(string path) : base(path)
     {
-        Document = XDocument.Load(path, loadOptions);
+        Document = XDocument.Load(StreamReader, loadOptions);
     }
 
     public override int SourceTrackCount => Document.Descendants(Gx + "Track").Count();
@@ -48,5 +48,10 @@ public sealed partial class Kml : GpsInputBase
                 return new GpsTrack(null, null, TrackType.GPX, points);
 
             }).ToList();
+    }
+
+    protected override void ClearDocument()
+    {
+        Document.Root?.RemoveAll();
     }
 }

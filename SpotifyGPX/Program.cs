@@ -62,16 +62,17 @@ class Program
 
         try
         {
-            InputHandler input;
-
             if (inputPairs != null)
             {
-                // Step 0: Get input handler based on file path
-                input = new(inputPairs);
-                prefix = inputPairs;
+                List<SongPoint> pairs = new();
 
-                // Step 1: Get list of pairs from the pairs file
-                List<SongPoint> pairs = input.GetAllPairs();
+                using (InputHandler input = new(inputPairs))
+                {
+                    pairs = input.GetAllPairs();
+                    input.Dispose();
+                }
+
+                prefix = inputPairs;
 
                 // Step 2: Create list of songs and points paired based on the given pairs file
                 pairedEntries = new PairingsHandler(pairs);
@@ -79,15 +80,22 @@ class Program
             else if (inputSpotify != null && inputGps != null)
             {
                 // Step 0: Get input handler based on file paths
-                input = new(inputSpotify, inputGps);
+                List<GpsTrack> tracks = new();
+                List<ISongEntry> songs = new();
+
+                using (InputHandler input = new(inputSpotify, inputGps))
+                {
+                    // Step 1: Get list of GPX tracks from the GPS file
+                    tracks = input.GetSelectedTracks();
+
+                    // Step 2: Get list of songs played from the entries file
+                    songs = input.GetFilteredSongs(tracks);
+                    //songs = input.GetAllSongs(); // Unfiltered run
+
+                    input.Dispose();
+                }
+
                 prefix = inputGps;
-
-                // Step 1: Get list of GPX tracks from the GPS file
-                List<GpsTrack> tracks = input.GetSelectedTracks();
-
-                // Step 2: Get list of songs played from the entries file
-                List<ISongEntry> songs = input.GetFilteredSongs(tracks);
-                //List<ISongEntry> songs = input.GetAllSongs(); // Unfiltered run
 
                 // Step 2.5: Get metadata for each song
                 if (grabApiData)

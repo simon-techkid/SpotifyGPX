@@ -9,17 +9,17 @@ namespace SpotifyGPX.Input;
 
 public sealed partial class JsonReport : PairInputBase, IHashVerifier
 {
-    private JsonNetDeserializer JsonDeserializer { get; }
     private List<JsonDocument> JsonObjects { get; }
     private JsonElement Header => JsonObjects.First().RootElement;
     private List<JsonDocument> JsonTracksOnly { get; }
     protected override ParsePairsDelegate ParsePairsMethod => GetFromJObject;
     protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
 
-    public JsonReport(string path)
+    public JsonReport(string path) : base(path)
     {
-        JsonDeserializer = new JsonNetDeserializer(path);
-        JsonObjects = JsonDeserializer.Deserialize<JsonDocument>(JsonOptions);
+        using JsonNetDeserializer deserializer = new(path);
+        JsonObjects = deserializer.Deserialize<JsonDocument>(JsonOptions);
+        deserializer.Dispose();
         JsonTracksOnly = JsonObjects.Skip(1).ToList();
     }
 
@@ -135,6 +135,12 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
     public override int SourceTrackCount => JsonTracksOnly.Select(track => track).Count();
 
     public override int SourcePairCount => JsonTracksOnly.Select(track => track.RootElement.GetProperty("Track").EnumerateArray().Count()).Sum();
+
+    protected override void ClearDocument()
+    {
+        JsonObjects.ForEach(obj => obj.Dispose());
+        JsonTracksOnly.ForEach(obj => obj.Dispose());
+    }
 
     public bool VerifyHash()
     {
