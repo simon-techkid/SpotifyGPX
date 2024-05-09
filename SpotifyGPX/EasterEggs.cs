@@ -1,13 +1,18 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SpotifyGPX;
 
-public abstract class EasterEggs<T>
+public abstract class EasterEggs<T> : BroadcasterBase
 {
+    protected EasterEggs(Broadcaster bcast) : base(bcast) { }
+
+    protected override string BroadcasterPrefix => "EGG";
+
     /// <summary>
     /// Defines the conditions for Easter eggs of type <typeparamref name="T"/>.
     /// </summary>
@@ -44,7 +49,7 @@ public abstract class EasterEggs<T>
                 var eggString = EggAsString(point);
                 if (foundEggs.Add(eggString))
                 {
-                    Console.WriteLine($"[EGG] You found an egg: {eggString}. You've got a great taste in {Taste}!");
+                    BCaster.Broadcast($"You found an egg: {eggString}. You've got a great taste in {Taste}!");
                 }
             }
         }
@@ -65,6 +70,8 @@ public abstract class EasterEggs<T>
 
 public class SongEasterEggs : EasterEggs<ISongEntry>
 {
+    public SongEasterEggs(Broadcaster bcast) : base(bcast) { }
+
     protected override Func<ISongEntry, bool>[] EggParameters => new Func<ISongEntry, bool>[]
     {
         song => song.Song_Name == "Hello" && song.Song_Artist == "Adele",

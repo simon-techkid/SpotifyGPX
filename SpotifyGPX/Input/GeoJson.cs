@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,12 +11,13 @@ namespace SpotifyGPX.Input;
 public sealed partial class GeoJson : GpsInputBase
 {
     private JsonDocument Document { get; }
+    protected override string FormatName => nameof(GeoJson);
     public override List<GpsTrack> ParseTracksMethod() => ParseTracks();
     public override List<GpsTrack> FilterTracksMethod() => FilterTracks();
 
-    public GeoJson(string path) : base(path)
+    public GeoJson(string path, Broadcaster bcast) : base(path, bcast)
     {
-        using JsonNetDeserializer deserializer = new(path);
+        using JsonNetDeserializer deserializer = new(path, bcast);
         Document = deserializer.GetDocument();
     }
 

@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,9 +11,9 @@ namespace SpotifyGPX;
 /// <summary>
 /// Handle SongPoint pairings, including list calculation, generation, operations, and exporting.
 /// </summary>
-public partial class PairingsHandler : IEnumerable<SongPoint>
+public partial class PairingsHandler : BroadcasterBase, IEnumerable<SongPoint>
 {
-    private List<SongPoint> Pairs { get; }
+    private List<SongPoint> Pairs { get; set; }
 
     /// <summary>
     /// The name of this set of pairings.
@@ -22,26 +23,9 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
     /// <summary>
     /// Create a handler for pairing GPS information with Song information.
     /// </summary>
-    /// <param name="s">A series of <see cref="ISongEntry"/> objects, used to associate a song with a point.</param>
-    /// <param name="t">A list of <see cref="GpsTrack"/> objects, used to associate songs with a track and position on Earth.</param>
-    /// <param name="name">The name of this set of pairs.</param>
-    /// <param name="silent">If true, do not print each pairing to the console upon creation.</param>
-    /// <param name="predict">If true, create a DupeHandler for predicting duplicates in the resulting pair list.</param>
-    /// <param name="autoPredict">If true, and predict is true, automatically predict all duplicate positions.</param>
-    public PairingsHandler(List<ISongEntry> s, List<GpsTrack> t, string name, bool silent, bool predict, bool autoPredict)
+    public PairingsHandler(string name, Broadcaster bcast) : base(bcast)
     {
-        if (predict == true)
-        {
-            // Let's predict some points!
-            DupeHandler dupes = new(PairPoints(silent, s, t));
-            Pairs = dupes.GetDupes(autoPredict);
-        }
-        else
-        {
-            // Nah, just use the verbatim points
-            Pairs = PairPoints(silent, s, t);
-        }
-
+        Pairs = new();
         Name = name;
     }
 
@@ -50,13 +34,40 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
     /// </summary>
     /// <param name="pairs">An existing pairs list.</param>
     /// <param name="name">The name of this set of pairs.</param>
-    public PairingsHandler(List<SongPoint> pairs, string name)
+    public PairingsHandler(List<SongPoint> pairs, string name, Broadcaster bcast) : base(bcast)
     {
         Pairs = pairs;
         Name = name;
     }
 
-    private static List<SongPoint> PairPoints(bool silent, List<ISongEntry> songs, List<GpsTrack> tracks)
+    public void CalculatePairings(List<ISongEntry> s, List<GpsTrack> t, bool predict, bool autoPredict)
+    {
+        if (predict == true)
+        {
+            // Let's predict some points!
+            DupeHandler dupes = new(PairPoints(s, t), BCaster);
+            Pairs = dupes.GetDupes(autoPredict);
+        }
+        else
+        {
+            // Nah, just use the verbatim points
+            Pairs = PairPoints(s, t);
+        }
+    }
+
+    public void CalculatePairings(List<SongPoint> pairs)
+    {
+        Pairs = pairs;
+    }
+
+    /// <summary>
+    /// Pair songs with points (positions on Earth), by finding the closest gap of time between each.
+    /// </summary>
+    /// <param name="silent">If true, do not print each pairing to the console upon creation.</param>
+    /// <param name="songs">A series of Spotify playback records, used to associate a song with a point.</param>
+    /// <param name="tracks">A list of GPXTrack objects, used to associate songs with a track and position on Earth.</param>
+    /// <returns>A list of Song-Point pairs, each song and its point (on Earth), in a list.</returns>
+    private List<SongPoint> PairPoints(List<ISongEntry> songs, List<GpsTrack> tracks)
     {
         // Correlate Spotify entries with the nearest GPS points
 
@@ -73,10 +84,7 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
 
                 SongPoint pair = new(index, spotifyEntry, bestPoint, track.Track);
 
-                if (!silent)
-                {
-                    Console.WriteLine(pair.ToString());
-                }
+                BCaster.Broadcast(pair.ToString()); // Notify observers when a pair is created
 
                 index++; // Add to the index of all pairings regardless of track
 
@@ -104,7 +112,7 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
         int groupCount = groupedPairs.Count();
         string objName = groupCount == 1 ? nameSingular : nameMultiple;
 
-        Console.WriteLine($"[PAIR] Paired {Pairs.Count} songs and points from {groupCount} {objName}: {countsJoined}");
+        BCaster.Broadcast($"Paired {Pairs.Count} songs and points from {groupCount} {objName}: {countsJoined}");
     }
 
     /// <summary>
@@ -123,7 +131,7 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
         int groupCount = groupedPairs.Count();
         string objName = groupCount == 1 ? nameSingular : nameMultiple;
 
-        Console.WriteLine($"[PAIR] Average Accuracy for {groupCount} {objName}: {accuraciesJoined}");
+        BCaster.Broadcast($"Average Accuracy for {groupCount} {objName}: {accuraciesJoined}");
     }
 
     /// <summary>
@@ -131,7 +139,7 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
     /// </summary>
     public void CheckEasterEggs()
     {
-        WriteEggs(new SongEasterEggs());
+        WriteEggs(new SongEasterEggs(BCaster));
     }
 
     private void WriteEggs<T>(EasterEggs<T> egg)

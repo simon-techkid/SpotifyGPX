@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 
@@ -7,10 +8,17 @@ namespace SpotifyGPX.Input;
 
 public abstract class RandomInputBase<T> : DisposableBase
 {
-    protected RandomInputBase()
+    protected RandomInputBase(Broadcaster bcast) : base(bcast)
     {
         RandomGen = RandomSeed.HasValue ? new Random(RandomSeed.Value) : new Random();
     }
+
+    /// <summary>
+    /// The name of the randomizer.
+    /// </summary>
+    protected abstract string RandomizerName { get; }
+
+    protected override string BroadcasterPrefix => $"RAND, {RandomizerName}";
 
     /// <summary>
     /// The random number generator for the <typeparamref name="T"/> generator.

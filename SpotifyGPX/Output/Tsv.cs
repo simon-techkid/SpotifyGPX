@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ public sealed partial class Tsv : TxtSaveable
 {
     public override string FormatName => "tsv";
 
-    public Tsv(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
+    public Tsv(Func<IEnumerable<SongPoint>> pairs, string? trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
     {
     }
 

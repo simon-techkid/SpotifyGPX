@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ namespace SpotifyGPX.Input;
 
 public abstract class RandomPointBase : RandomInputBase<RandomPoint>, IGpsInput
 {
-    protected RandomPointBase() : base()
+    protected RandomPointBase(Broadcaster bcast) : base(bcast)
     {
     }
 

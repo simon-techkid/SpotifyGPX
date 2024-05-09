@@ -1,11 +1,14 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 
 namespace SpotifyGPX;
 
-public abstract class DisposableBase : IDisposable
+public abstract class DisposableBase : BroadcasterBase, IDisposable
 {
+    protected DisposableBase(Broadcaster bcast) : base(bcast) { }
+
     /// <summary>
     /// Indicates whether the class has been disposed of.
     /// </summary>

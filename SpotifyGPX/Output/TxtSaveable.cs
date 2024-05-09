@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace SpotifyGPX.Output;
 /// </summary>
 public abstract class TxtSaveable : SaveableAndTransformableBase<string?[], string?[]>
 {
-    protected TxtSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
+    protected TxtSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName, Broadcaster bcast) : base(pairs, bcast, trackName)
     {
     }
 

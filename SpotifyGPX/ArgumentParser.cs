@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 
@@ -39,8 +40,9 @@ public partial class ArgumentParser
         return (options, flags);
     }
 
-    public static void PrintHelp()
+    public static void PrintHelp(Broadcaster bcast)
     {
-        Console.WriteLine(Help);
+        bcast.Type = "HELP";
+        bcast.Broadcast(Help);
     }
 }

@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,11 @@ namespace SpotifyGPX.Input;
 public sealed partial class Xspf : SongInputBase, IHashVerifier
 {
     private XDocument Document { get; }
+    protected override string FormatName => nameof(Xspf);
     public override List<ISongEntry> ParseSongsMethod() => ParseSongs();
     public override List<ISongEntry> FilterSongsMethod() => FilterSongs();
 
-    public Xspf(string path) : base(path)
+    public Xspf(string path, Broadcaster bcast) : base(path, bcast)
     {
         Document = XDocument.Load(StreamReader, loadOptions);
     }

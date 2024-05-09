@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,14 +14,15 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
     private List<JsonDocument> JsonObjects { get; }
     private JsonElement Header => JsonObjects.First().RootElement;
     private List<JsonDocument> JsonTracksOnly { get; }
+    protected override string FormatName => nameof(JsonReport);
     public override List<SongPoint> ParsePairsMethod() => GetFromJObject();
     public override List<SongPoint> FilterPairsMethod() => FilterPairs();
     public override List<ISongEntry> FilterSongsMethod() => FilterSongs();
     public override List<GpsTrack> FilterTracksMethod() => FilterTracks();
 
-    public JsonReport(string path) : base(path)
+    public JsonReport(string path, Broadcaster bcast) : base(path, bcast)
     {
-        using JsonNetDeserializer deserializer = new(path);
+        using JsonNetDeserializer deserializer = new(path, bcast);
         JsonObjects = deserializer.Deserialize<JsonDocument>(JsonOptions);
         JsonTracksOnly = JsonObjects.Skip(1).ToList();
     }
@@ -167,7 +169,7 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
         return AllPairs.Where(pair => pairFilter(pair) == true).ToList();
     }
 
-    private static void VerifyQuantity(int start, int expectedCount, List<int> indexes, int trackIndex)
+    private void VerifyQuantity(int start, int expectedCount, List<int> indexes, int trackIndex)
     {
         // Find missing indexes
         List<int> expectedIndexes = Enumerable.Range(start, expectedCount).ToList();
@@ -175,7 +177,7 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
 
         // Output missing indexes
         string missing = string.Join(", ", missingIndexes.Select(index => index.ToString()));
-        Console.WriteLine($"Missing indexes: {missing}");
+        BCaster.Broadcast($"Missing indexes: {missing}");
         throw new Exception($"Track {trackIndex} in JsonReport expected to have {expectedCount} pairs, but had {indexes.Count}");
     }
 

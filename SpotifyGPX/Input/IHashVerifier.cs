@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 
 namespace SpotifyGPX.Input;
@@ -9,6 +10,8 @@ namespace SpotifyGPX.Input;
 /// </summary>
 public interface IHashVerifier
 {
+    public Broadcaster BCaster { get; }
+
     /// <summary>
     /// Verifies whether checksum included in the document matches the document's contents.
     /// </summary>
@@ -27,11 +30,11 @@ public interface IHashVerifier
 
         if (hashVerified)
         {
-            Console.WriteLine($"[SHA] Hash verification successful for {GetType().FullName}.");
+            BCaster.Broadcast($"Hash verification successful for {GetType().FullName}.");
         }
         else
         {
-            Console.WriteLine($"[SHA] Hash verification failed for {GetType().FullName}.");
+            BCaster.Broadcast($"Hash verification failed for {GetType().FullName}.");
         }
     }
 

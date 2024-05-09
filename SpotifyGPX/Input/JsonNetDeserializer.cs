@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -9,8 +10,9 @@ namespace SpotifyGPX.Input;
 public class JsonNetDeserializer : FileInputBase
 {
     private string? Document { get; set; }
+    protected override string FormatName => nameof(JsonNetDeserializer);
 
-    public JsonNetDeserializer(string path) : base(path)
+    public JsonNetDeserializer(string path, Broadcaster bcast) : base(path, bcast)
     {
         Document = StreamReader.ReadToEnd();
     }

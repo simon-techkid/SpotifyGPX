@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ namespace SpotifyGPX.Input;
 
 public sealed partial class SongTest : RandomSongBase
 {
+    protected override string RandomizerName => nameof(SongTest);
     public override List<ISongEntry> ParseSongsMethod() => ParseSongs();
     public override List<ISongEntry> FilterSongsMethod() => FilterSongs();
     protected override DateOnly GeneratorStartDate => DateOnly.FromDateTime(DateTime.Now - TimeSpan.FromDays(DaysPriorToTodayToGenerate));
@@ -24,7 +26,7 @@ public sealed partial class SongTest : RandomSongBase
     protected override int UniqueArtistsCount => ArtistsCount; // simulate 10 unique artists
     protected override int UniqueSongsCount => SongsCount; // simulate 100 unique songs across 10 artists
 
-    public SongTest() : base()
+    public SongTest(Broadcaster bcast) : base(bcast)
     {
     }
 

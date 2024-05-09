@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ public sealed partial class FolderedKml : XmlSaveable
 {
     public override string FormatName => "kml";
 
-    public FolderedKml(Func<IEnumerable<SongPoint>> pairs, string trackName) : base(pairs, trackName)
+    public FolderedKml(Func<IEnumerable<SongPoint>> pairs, string trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
     {
     }
 

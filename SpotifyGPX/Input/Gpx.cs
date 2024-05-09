@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,11 @@ namespace SpotifyGPX.Input;
 public sealed partial class Gpx : GpsInputBase
 {
     private XDocument Document { get; set; }
+    protected override string FormatName => nameof(Gpx);
     public override List<GpsTrack> ParseTracksMethod() => ParseTracks();
     public override List<GpsTrack> FilterTracksMethod() => FilterTracks();
 
-    public Gpx(string path) : base(path)
+    public Gpx(string path, Broadcaster bcast) : base(path, bcast)
     {
         Document = XDocument.Load(StreamReader, loadOptions);
     }

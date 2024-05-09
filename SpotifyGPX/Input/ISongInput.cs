@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace SpotifyGPX.Input;
 /// </summary>
 public partial interface ISongInput : IDisposable
 {
+    public Broadcaster BCaster { get; }
+
     /// <summary>
     /// Provides access to the method that parses the <see cref="ISongEntry"/> objects from the file.
     /// </summary>
@@ -50,7 +53,7 @@ public partial interface ISongInput : IDisposable
             trackRange.Any(trackTimes => spotifyEntry.WithinTimeFrame(trackTimes.Start, trackTimes.End))) // Within the time range of tracks
             .ToList(); // Send the songs passing the filter to a list
 
-        Console.WriteLine($"[INP] {filtered.Count} songs filtered from {ParsedSongCount} total");
+        BCaster.Broadcast($"{filtered.Count} songs filtered from {ParsedSongCount} total");
 
         return filtered;
     }

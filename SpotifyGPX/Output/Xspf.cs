@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ public sealed partial class Xspf : XmlSaveable
 {
     public override string FormatName => nameof(Xspf).ToLower();
 
-    public Xspf(Func<IEnumerable<SongPoint>> pairs, string trackName) : base(pairs, trackName)
+    public Xspf(Func<IEnumerable<SongPoint>> pairs, string trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
     {
     }
 

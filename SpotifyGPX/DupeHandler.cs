@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace SpotifyGPX;
 /// <summary>
 /// Handle duplicate coordinate placements by shifting them to other locations.
 /// </summary>
-public partial class DupeHandler
+public partial class DupeHandler : BroadcasterBase
 {
     private List<SongPoint> Pairs { get; }
 
@@ -17,7 +18,10 @@ public partial class DupeHandler
     /// Create a handler for duplicate positions.
     /// </summary>
     /// <param name="pairs">A list of pairs to be searched for duplicate positions.</param>
-    public DupeHandler(List<SongPoint> pairs) => Pairs = pairs;
+    public DupeHandler(List<SongPoint> pairs, Broadcaster bcast) : base(bcast)
+    {
+        Pairs = pairs;
+    }
 
     /// <summary>
     /// Run prediction (dupe calculation) using the pairs list this DupeHandler was initialized with.
@@ -28,11 +32,11 @@ public partial class DupeHandler
     {
         if (Pairs.Count < MinimumMatchingCoords)
         {
-            Console.WriteLine($"[PRED] Point prediction cannot be run when there are less than {MinimumMatchingCoords} pairs");
+            BCaster.Broadcast($"Point prediction cannot be run when there are less than {MinimumMatchingCoords} pairs");
             return Pairs;
         }
 
-        Console.WriteLine($"[PRED] Autopredict is {(autoPredict == true ? "enabled, automatically predicting" : "disabled, you will be prompted")}");
+        BCaster.Broadcast($"Autopredict is {(autoPredict == true ? "enabled, automatically predicting" : "disabled, you will be prompted")}");
         return PredictPoints(autoPredict);
     }
 
@@ -43,7 +47,7 @@ public partial class DupeHandler
     /// <returns>The original pairs list, with duplicate coordinates shifted.</returns>
     private List<SongPoint> PredictPoints(bool autoPredict)
     {
-        Console.WriteLine("[PRED] Scanning for duplicate entries:");
+        BCaster.Broadcast("Scanning for duplicate entries:");
         var dupes = GroupDuplicates();
         PrintDuplicates(dupes);
 
@@ -93,7 +97,7 @@ public partial class DupeHandler
 
         bool isValidInput = false;
 
-        Console.Write("[DUPE] Write the start and end indexes (separated by a dash) of each of your dupes, with dupes separated by commas: ");
+        BCaster.Broadcast("Write the start and end indexes (separated by a dash) of each of your dupes, with dupes separated by commas: ");
         while (!isValidInput)
         {
             string dupeDefinition = Console.ReadLine() ?? string.Empty;
@@ -110,19 +114,19 @@ public partial class DupeHandler
                 {
                     if (startIndex < 0 || startIndex >= Pairs.Count)
                     {
-                        Console.WriteLine($"Invalid startIndex: {startIndex}. Must be between 0 and {maximumAllowedIndex}.");
+                        BCaster.Broadcast($"Invalid startIndex: {startIndex}. Must be between 0 and {maximumAllowedIndex}.");
                         isValidInput = false;
                         break;
                     }
                     else if (endIndex < 0 || endIndex >= Pairs.Count)
                     {
-                        Console.WriteLine($"Invalid endIndex: {endIndex}. Must be between 0 and {maximumAllowedIndex}.");
+                        BCaster.Broadcast($"Invalid endIndex: {endIndex}. Must be between 0 and {maximumAllowedIndex}.");
                         isValidInput = false;
                         break;
                     }
                     else if (endIndex - startIndex == 0)
                     {
-                        Console.WriteLine($"Invalid range: {startIndex}-{endIndex}. Range must include at least one element.");
+                        BCaster.Broadcast($"Invalid range: {startIndex}-{endIndex}. Range must include at least one element.");
                         isValidInput = false;
                         break;
                     }
@@ -132,7 +136,7 @@ public partial class DupeHandler
                 }
                 else
                 {
-                    Console.WriteLine($"Invalid input: '{dupe}'. Please enter start and end indexes separated by a dash.");
+                    BCaster.Broadcast($"Invalid input: '{dupe}'. Please enter start and end indexes separated by a dash.");
                     isValidInput = false;
                     break;
                 }
@@ -262,12 +266,12 @@ public partial class DupeHandler
     /// Prints each group of shared-coordinate pairs to the console.
     /// </summary>
     /// <param name="dupes">An IGrouping, with TKey as Coordinate (the shared coordinate), and TElement as SongPoint (the SongPoint implicated).</param>
-    private static void PrintDuplicates(List<IGrouping<Coordinate, SongPoint>> dupes)
+    private void PrintDuplicates(List<IGrouping<Coordinate, SongPoint>> dupes)
     {
         foreach (var dupe in dupes)
         {
             string g = string.Join(", ", dupe.Select(s => $"{s.Song.Song_Name} ({s.Index})"));
-            Console.WriteLine($"[DUPE {dupes.IndexOf(dupe)}] {g}");
+            BCaster.Broadcast($"[{dupes.IndexOf(dupe)}] {g}");
         }
     }
 

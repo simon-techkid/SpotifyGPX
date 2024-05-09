@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,13 +15,15 @@ namespace SpotifyGPX.Output;
 /// <typeparam name="THashed">The format type of the hashable portion of this document.</typeparam>
 public abstract class SaveableBase<TDocument, THashed> : DisposableBase, IFileOutput
 {
-    protected SaveableBase(Func<IEnumerable<SongPoint>> pairs, string? trackName = null)
+    protected SaveableBase(Func<IEnumerable<SongPoint>> pairs, Broadcaster bcast, string? trackName = null) : base(bcast)
     {
         DataProvider = pairs;
         Document = GetDocument(trackName);
     }
 
     public abstract string FormatName { get; }
+
+    protected override string BroadcasterPrefix => $"OUT, {FormatName.ToUpper()}";
 
     /// <summary>
     /// The document in format <typeparamref name="TDocument"/> that will be serialized and saved to the disk.

@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +12,7 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Handle various output file formats for exporting pairs
 /// </summary>
-public partial class OutputHandler
+public partial class OutputHandler : BroadcasterBase
 {
     private IEnumerable<SongPoint> Pairs { get; } // Hold the pairs list that will be exported
 
@@ -19,7 +20,10 @@ public partial class OutputHandler
     /// Creates a handler for exporting output files
     /// </summary>
     /// <param name="pairs">A list of pairs to send to a file.</param>
-    public OutputHandler(IEnumerable<SongPoint> pairs) => Pairs = pairs;
+    public OutputHandler(IEnumerable<SongPoint> pairs, Broadcaster bcast) : base(bcast)
+    {
+        Pairs = pairs;
+    }
 
     /// <summary>
     /// Saves the pairs contained in this handler to a file in the given format.
@@ -36,14 +40,14 @@ public partial class OutputHandler
         if (supportsMulti)
         {
             // If the desired format supports multiple tracks, provide the entire pair list:
-            files.Add(new OutFile(Pairs, format, name, AllTracksName));
+            files.Add(new OutFile(Pairs, format, name, AllTracksName, BCaster));
         }
         else
         {
             // If the desired format doesn't support multiple tracks, split each track into its own file:
             files
                 .AddRange(Pairs.GroupBy(pair => pair.Origin) // One track per file
-                .Select(track => new OutFile(track, format, name, track.Key.ToString())));
+                .Select(track => new OutFile(track, format, name, track.Key.ToString(), BCaster)));
         }
 
         foreach (var file in files)
@@ -58,12 +62,12 @@ public partial class OutputHandler
         LogExportResults(files, format);
     }
 
-    private static void LogExportResults(List<OutFile> files, Formats format)
+    private void LogExportResults(List<OutFile> files, Formats format)
     {
         string joinedExports = string.Join(", ", files.Select(file => file.Result));
         int totalExported = files.Sum(file => file.ExportCount);
         int totalPairs = files.Sum(file => file.OriginalCount);
-        Console.WriteLine($"[OUT] [{format.ToString().ToUpper()} {totalExported}/{totalPairs}]: {joinedExports}");
+        BCaster.Broadcast($"[{format.ToString().ToUpper()} {totalExported}/{totalPairs}]: {joinedExports}");
     }
 
     /// <summary>
@@ -78,10 +82,10 @@ public partial class OutputHandler
         /// <param name="format">The format of the output file.</param>
         /// <param name="name">The prefix of the output file name.</param>
         /// <param name="trackName">The name of the track represented in this file (if this file only has one track).</param>
-        public OutFile(IEnumerable<SongPoint> pairs, Formats format, string name, string trackName)
+        public OutFile(IEnumerable<SongPoint> pairs, Formats format, string name, string trackName, Broadcaster bcast)
         {
             var factory = new FileOutputFactory();
-            Handler = factory.CreateFileOutput(format, () => pairs, trackName);
+            Handler = factory.CreateFileOutput(format, () => pairs, trackName, bcast);
             SourceName = name;
             TrackName = trackName;
             ExportCount = Handler.Count;
@@ -112,13 +116,13 @@ public partial class OutputHandler
             {
                 if (attempt <= MaxRetries)
                 {
-                    Console.WriteLine($"Error writing {fileName}: {ex.Message}. Retrying...");
+                    Handler.BCaster.Broadcast($"Error writing {fileName}: {ex.Message}. Retrying...");
                     Thread.Sleep(RetryDelayMs);
                     AttemptSave(transform, fileName, ++attempt);
                 }
                 else
                 {
-                    Console.WriteLine($"Failed to save {fileName} after {MaxRetries} attempts.");
+                    Handler.BCaster.Broadcast($"Failed to save {fileName} after {MaxRetries} attempts.");
                 }
             }
         }

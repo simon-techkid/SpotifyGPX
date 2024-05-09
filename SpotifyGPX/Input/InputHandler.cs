@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,7 +22,7 @@ public partial class InputHandler : DisposableBase
     /// <param name="songPath">The path to a file containing Spotify playback records.</param>
     /// <param name="gpsPath">The path to a file containing GPS journey data.</param>
     /// <exception cref="Exception">A provided file does not exist.</exception>
-    public InputHandler(string? songPath, string? gpsPath)
+    public InputHandler(string? songPath, string? gpsPath, Broadcaster bcast) : base(bcast)
     {
         if (!File.Exists(songPath) || songPath == null)
         {
@@ -33,14 +34,14 @@ public partial class InputHandler : DisposableBase
             throw new Exception($"The specified file, '{gpsPath}', does not exist!");
         }
 
-        SongInput = CreateSongInput(songPath);
-        GpsInput = CreateGpsInput(gpsPath);
+        SongInput = CreateSongInput(songPath, bcast);
+        GpsInput = CreateGpsInput(gpsPath, bcast);
 
         // If the song and/or GPS format support hash checking, verify their hashes.
         VerifyAllHashes();
 
-        Console.WriteLine($"[INP] Parsed {GpsInput.ParsedTrackCount}/{GpsInput.SourceTrackCount} tracks and {GpsInput.ParsedPointCount}/{GpsInput.SourcePointCount} points from '{Path.GetFileName(gpsPath)}'");
-        Console.WriteLine($"[INP] Parsed {SongInput.ParsedSongCount}/{SongInput.SourceSongCount} songs from '{Path.GetFileName(songPath)}'");
+        BCaster.Broadcast($"Parsed {GpsInput.ParsedTrackCount}/{GpsInput.SourceTrackCount} tracks and {GpsInput.ParsedPointCount}/{GpsInput.SourcePointCount} points from '{Path.GetFileName(gpsPath)}'");
+        BCaster.Broadcast($"Parsed {SongInput.ParsedSongCount}/{SongInput.SourceSongCount} songs from '{Path.GetFileName(songPath)}'");
     }
 
     /// <summary>
@@ -48,22 +49,24 @@ public partial class InputHandler : DisposableBase
     /// </summary>
     /// <param name="pairPath">The path to a file containing pairing data</param>
     /// <exception cref="Exception">A provided file does not exist.</exception>
-    public InputHandler(string? pairPath)
+    public InputHandler(string? pairPath, Broadcaster bcast) : base(bcast)
     {
         if (!File.Exists(pairPath) || pairPath == null)
         {
             throw new Exception($"The specified file, '{pairPath}', does not exist!");
         }
 
-        SongInput = CreateSongInput(pairPath);
-        GpsInput = CreateGpsInput(pairPath);
-        PairInput = CreatePairInput(pairPath);
+        SongInput = CreateSongInput(pairPath, bcast);
+        GpsInput = CreateGpsInput(pairPath, bcast);
+        PairInput = CreatePairInput(pairPath, bcast);
 
         // If the pairings format supports hash checking, verify their hashes.
         VerifyAllHashes();
 
-        Console.WriteLine($"[INP] Parsed {PairInput.ParsedPairCount}/{PairInput.SourcePairCount} pairs from '{Path.GetFileName(pairPath)}'");
+        BCaster.Broadcast($"Parsed {PairInput.ParsedPairCount}/{PairInput.SourcePairCount} pairs from '{Path.GetFileName(pairPath)}'");
     }
+
+    protected override string BroadcasterPrefix => "INP";
 
     /// <summary>
     /// Gets all song records from the given file.

@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace SpotifyGPX.Input;
 /// </summary>
 public abstract class PairInputBase : FileInputBase, ISongInput, IGpsInput, IPairInput
 {
-    protected PairInputBase(string path) : base(path)
+    protected PairInputBase(string path, Broadcaster bcast) : base(path, bcast)
     {
     }
 

@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,10 +13,11 @@ public sealed partial class Csv : SongInputBase
 {
     private static readonly Regex CSVRegex = MyRegex();
     private string[] Document { get; set; }
+    protected override string FormatName => nameof(Csv);
     public override List<ISongEntry> ParseSongsMethod() => ParseSongs();
     public override List<ISongEntry> FilterSongsMethod() => FilterSongs();
 
-    public Csv(string path) : base(path)
+    public Csv(string path, Broadcaster bcast) : base(path, bcast)
     {
         Document = ReadAllLines();
     }

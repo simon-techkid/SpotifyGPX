@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ public sealed partial class Txt : TxtSaveable
 {
     public override string FormatName => nameof(Txt).ToLower();
 
-    public Txt(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
+    public Txt(Func<IEnumerable<SongPoint>> pairs, string? trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
     {
     }
 

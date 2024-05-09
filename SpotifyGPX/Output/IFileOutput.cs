@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 
 namespace SpotifyGPX.Output;
@@ -9,6 +10,8 @@ namespace SpotifyGPX.Output;
 /// </summary>
 public interface IFileOutput : IDisposable
 {
+    Broadcaster BCaster { get; }
+
     /// <summary>
     /// The name of this document's format, used in exported files' extensions.
     /// </summary>

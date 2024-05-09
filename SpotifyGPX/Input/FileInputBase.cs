@@ -1,16 +1,24 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System.IO;
 
 namespace SpotifyGPX.Input;
 
 public abstract class FileInputBase : DisposableBase
 {
-    protected FileInputBase(string path)
+    protected FileInputBase(string path, Broadcaster bcaster) : base(bcaster)
     {
         FileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
         StreamReader = new StreamReader(FileStream);
     }
+
+    /// <summary>
+    /// The name of the file format.
+    /// </summary>
+    protected abstract string FormatName { get; }
+
+    protected override string BroadcasterPrefix => $"INP, {FormatName.ToUpper()}";
 
     /// <summary>
     /// Serves as the reading stream for a file on the disk.

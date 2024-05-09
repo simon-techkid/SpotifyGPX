@@ -1,6 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
 using OfficeOpenXml.Table;
+using SpotifyGPX.Broadcasting;
 using SpotifyGPX.Input;
 using SpotifyGPX.Output;
 using System;
@@ -142,11 +143,13 @@ namespace SpotifyGPX
 
     public partial class PairingsHandler
     {
+        protected override string BroadcasterPrefix => "PAIR";
         private static double? MaximumAbsAccuracy => null; // Greatest accepted error (in seconds) between song and point time (null = allow all pairings regardless of accuracy)
     }
 
     public partial class DupeHandler
     {
+        protected override string BroadcasterPrefix => "DUPE";
         private const int MinimumMatchingCoords = 2; // Minimum number of matching coordinates to be considered a duplicate
     }
 }
@@ -155,43 +158,43 @@ namespace SpotifyGPX.Input
 {
     public partial class InputHandler
     {
-        private static ISongInput CreateSongInput(string path)
+        private static ISongInput CreateSongInput(string path, Broadcaster bcaster)
         {
             string extension = Path.GetExtension(path).ToLower();
 
             return extension switch
             {
-                ".csv" => new Csv(path),
-                ".json" => new Json(path),
-                ".jsonreport" => new JsonReport(path),
-                ".random" => new SongTest(),
-                ".xspf" => new Xspf(path),
+                ".csv" => new Csv(path, bcaster),
+                ".json" => new Json(path, bcaster),
+                ".jsonreport" => new JsonReport(path, bcaster),
+                ".random" => new SongTest(bcaster),
+                ".xspf" => new Xspf(path, bcaster),
                 _ => throw new Exception($"Unsupported song file format: {extension}"),
             };
         }
 
-        private static IGpsInput CreateGpsInput(string path)
+        private static IGpsInput CreateGpsInput(string path, Broadcaster bcaster)
         {
             string extension = Path.GetExtension(path).ToLower();
 
             return extension switch
             {
-                ".geojson" => new GeoJson(path),
-                ".gpx" => new Gpx(path),
-                ".kml" => new Kml(path),
-                ".jsonreport" => new JsonReport(path),
-                ".random" => new PointTest(),
+                ".geojson" => new GeoJson(path, bcaster),
+                ".gpx" => new Gpx(path, bcaster),
+                ".kml" => new Kml(path, bcaster),
+                ".jsonreport" => new JsonReport(path, bcaster),
+                ".random" => new PointTest(bcaster),
                 _ => throw new Exception($"Unsupported GPS file format: {extension}"),
             };
         }
 
-        private static IPairInput CreatePairInput(string path)
+        private static IPairInput CreatePairInput(string path, Broadcaster bcaster)
         {
             string extension = Path.GetExtension(path).ToLower();
 
             return extension switch
             {
-                ".jsonreport" => new JsonReport(path),
+                ".jsonreport" => new JsonReport(path, bcaster),
                 _ => throw new Exception($"Unsupported pairs file format: {extension}")
             };
         }
@@ -382,6 +385,7 @@ namespace SpotifyGPX.Output
 {
     public partial class OutputHandler
     {
+        protected override string BroadcasterPrefix => "OUT";
         private const bool ReplaceFiles = true;
         private const string AllTracksName = "All";
         private const int MaxRetries = 3;
@@ -410,16 +414,16 @@ namespace SpotifyGPX.Output
     {
         private readonly Dictionary<Formats, FileOutputCreator> creators = new()
         {
-            { Formats.Csv, (pairs, trackName) => new Csv(pairs, trackName) },
-            { Formats.FolderedKml, (pairs, trackName) => new FolderedKml(pairs, trackName) },
-            { Formats.Gpx, (pairs, trackName) => new Gpx(pairs, trackName) },
-            { Formats.Json, (pairs, trackName) => new Json(pairs, trackName) },
-            { Formats.JsonReport, (pairs, trackName) => new JsonReport(pairs, trackName) },
-            { Formats.Kml, (pairs, trackName) => new Kml(pairs, trackName) },
-            { Formats.Tsv, (pairs, trackName) => new Tsv(pairs, trackName) },
-            { Formats.Txt, (pairs, trackName) => new Txt(pairs, trackName) },
-            { Formats.Xlsx, (pairs, trackName) => new Xlsx(pairs, trackName) },
-            { Formats.Xspf, (pairs, trackName) => new Xspf(pairs, trackName) }
+            { Formats.Csv, (pairs, trackName, bcast) => new Csv(pairs, trackName, bcast) },
+            { Formats.FolderedKml, (pairs, trackName, bcast) => new FolderedKml(pairs, trackName, bcast) },
+            { Formats.Gpx, (pairs, trackName, bcast) => new Gpx(pairs, trackName, bcast) },
+            { Formats.Json, (pairs, trackName, bcast) => new Json(pairs, trackName, bcast) },
+            { Formats.JsonReport, (pairs, trackName, bcast) => new JsonReport(pairs, trackName, bcast) },
+            { Formats.Kml, (pairs, trackName, bcast) => new Kml(pairs, trackName, bcast) },
+            { Formats.Tsv, (pairs, trackName, bcast) => new Tsv(pairs, trackName, bcast) },
+            { Formats.Txt, (pairs, trackName, bcast) => new Txt(pairs, trackName, bcast) },
+            { Formats.Xlsx, (pairs, trackName, bcast) => new Xlsx(pairs, trackName, bcast) },
+            { Formats.Xspf, (pairs, trackName, bcast) => new Xspf(pairs, trackName, bcast) }
         };
     }
 

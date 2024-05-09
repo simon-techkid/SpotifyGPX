@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Broadcasting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace SpotifyGPX.Input;
 /// </summary>
 public partial interface IGpsInput : IDisposable
 {
+    public Broadcaster BCaster { get; }
+
     /// <summary>
     /// Provides access to a method that parses the <see cref="GpsTrack"/> objects from the file.
     /// </summary>
@@ -60,23 +63,23 @@ public partial interface IGpsInput : IDisposable
     /// </summary>
     /// <param name="allTracks">The entire list of tracks.</param>
     /// <returns>A list of GPXTrack objects based on user selection.</returns>
-    private static List<GpsTrack> HandleMultipleTracks(List<GpsTrack> allTracks)
+    private List<GpsTrack> HandleMultipleTracks(List<GpsTrack> allTracks)
     {
         int selectedTrackIndex; // Holds the user track selection index        
 
-        Console.WriteLine("[INP] Multiple GPS tracks found:");
+        BCaster.Broadcast("Multiple GPS tracks found:");
 
         foreach (GpsTrack track in allTracks)
         {
-            Console.WriteLine($"[INP] Index: {allTracks.IndexOf(track)} {track.ToString()}");
+            BCaster.Broadcast($"Index: {allTracks.IndexOf(track)} {track.ToString()}");
         }
 
         foreach (var filter in FilterDefinitions)
         {
-            Console.WriteLine($"[INP] [{filter.Key}] {filter.Value}");
+            BCaster.Broadcast($"[{filter.Key}] {filter.Value}");
         }
 
-        Console.Write("[INP] Please enter the index of the track you want to use: ");
+        BCaster.Broadcast("Please enter the index of the track you want to use: ");
 
         // Loop the user input request until a valid option is selected
         while (true)
@@ -92,7 +95,7 @@ public partial interface IGpsInput : IDisposable
                 return FilterFunc(allTracks).ToList();
             }
 
-            Console.WriteLine("Invalid input. Please enter a valid track number.");
+            BCaster.Broadcast("Invalid input. Please enter a valid track number.");
         }
 
         // If the user selected a specific track index, return that
