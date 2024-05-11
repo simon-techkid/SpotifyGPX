@@ -11,6 +11,7 @@ public partial class GeoJson : GpsInputBase, IDisposable
 {
     private JsonDocument Document { get; }
     protected override ParseTracksDelegate ParseTracksMethod => ParseTracks;
+    protected override FilterTracksDelegate FilterTracksMethod => FilterTracks;
 
     public GeoJson(string path) : base(path)
     {
@@ -69,7 +70,12 @@ public partial class GeoJson : GpsInputBase, IDisposable
             .ToList()
             .AddRange(featureCollection.Features);
 
-        return featureCollection.Features.Select((feature, index) => new GpsTrack(null, null, TrackType.GPX, featureCollection.Features)).ToList();
+        return featureCollection.Features.Select((feature, index) => new GpsTrack(null, null, TrackType.Gps, featureCollection.Features)).ToList();
+    }
+
+    private List<GpsTrack> FilterTracks()
+    {
+        return AllTracks.Where(track => track.OfType<GeoJsonPoint>().All(point => filter(point))).ToList();
     }
 
     public override int SourcePointCount => 1;

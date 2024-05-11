@@ -73,9 +73,8 @@ public abstract class PairInputBase : GpsInputSelection, ISongInput, IGpsInput, 
     protected delegate List<GpsTrack> FilterTracksDelegate();
     protected abstract FilterTracksDelegate FilterTracksMethod { get; }
     protected List<GpsTrack> AllTracks => AllPairs.GroupBy(pair => pair.Origin).Select(type => new GpsTrack(type.Key.Index, type.Key.Name, type.Key.Type, type.Select(pair => pair.Point).ToList())).ToList();
-    public List<GpsTrack> GetAllTracks() => AllTracks;
+    public override List<GpsTrack> GetAllTracks() => AllTracks;
     public List<GpsTrack> GetFilteredTracks() => FilterTracksMethod();
-    public override List<GpsTrack> GetAllTracks() => AllPairs.GroupBy(pair => pair.Origin).Select(type => new GpsTrack(type.Key.Index, type.Key.Name, type.Key.Type, type.Select(pair => pair.Point).ToList())).ToList();
     public abstract int SourcePointCount { get; }
     public int ParsedPointCount => AllPairs.Select(pair => pair.Point).Count();
     public abstract int SourceTrackCount { get; }

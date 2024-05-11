@@ -229,7 +229,7 @@ namespace SpotifyGPX.Input
 
     public partial class GeoJson
     {
-        private static JsonSerializerOptions JsonOptions => Options.JsonOptions;
+        private static readonly Func<GeoJsonPoint, bool> filter = point => true; // No filtering
     }
 
     public partial class Gpx

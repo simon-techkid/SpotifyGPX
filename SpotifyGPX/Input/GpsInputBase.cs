@@ -19,13 +19,18 @@ public abstract class GpsInputBase : GpsInputSelection, IGpsInput
     /// </summary>
     /// <returns>A list of <see cref="GpsTrack"/> objects, each <see cref="GpsTrack"/> representing a series of GPS points (<see cref="IGpsPoint"/>).</returns>
     protected delegate List<GpsTrack> ParseTracksDelegate();
-    protected delegate List<GpsTrack> FilterTracksDelegate();
-    protected abstract ParseTracksDelegate ParseTracksMethod { get; }
-    protected abstract FilterTracksDelegate FilterTracksMethod { get; }
-    protected List<GpsTrack> AllTracks => ParseTracksMethod();
-    public List<GpsTrack> GetAllTracks() => AllTracks;
-    public List<GpsTrack> GetFilteredTracks() => FilterTracksMethod();
 
+    /// <summary>
+    /// A delegate providing access to all tracks within this GPS input file class, filtered according to file-specific criteria.
+    /// </summary>
+    /// <returns>A list of <see cref="GpsTrack"/> objects, each <see cref="GpsTrack"/> representing a series of GPS points (<see cref="IGpsPoint"/>).</returns>
+    protected delegate List<GpsTrack> FilterTracksDelegate();
+    
+    /// <summary>
+    /// Provides access to the tracks within this GPS input file, filtered according to file-specific criteria.
+    /// </summary>
+    protected abstract FilterTracksDelegate FilterTracksMethod { get; }
+    
     /// <summary>
     /// Provides access to all tracks within this GPS input file.
     /// </summary>
@@ -34,9 +39,10 @@ public abstract class GpsInputBase : GpsInputSelection, IGpsInput
     /// <summary>
     /// Access all tracks in this GPS data file.
     /// </summary>
-    protected virtual List<GpsTrack> Tracks => ParseTracksMethod();
+    protected virtual List<GpsTrack> AllTracks => ParseTracksMethod();
 
-    public override List<GpsTrack> GetAllTracks() => Tracks;
+    public override List<GpsTrack> GetAllTracks() => AllTracks;
+    public List<GpsTrack> GetFilteredTracks() => FilterTracksMethod();
     public abstract int SourceTrackCount { get; }
     public int ParsedTrackCount => AllTracks.Count;
     public abstract int SourcePointCount { get; }
