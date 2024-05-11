@@ -26,42 +26,47 @@ public sealed partial class Json : SongInputBase
         {
             JsonElement root = entry.RootElement;
 
-            string? time1 = root.TryGetProperty("endTime", out JsonElement smallTime) ? smallTime.GetString() : null;
-            string? time2 = root.TryGetProperty("ts", out JsonElement largeTime) ? largeTime.GetString() : null;
+            string? time1 = JsonTools.TryGetProperty("endTime", root)?.GetString();
+            string? time2 = JsonTools.TryGetProperty("ts", root)?.GetString();
             string time = time1 ?? time2 ?? throw new Exception($"Song timestamp missing from JSON entry {index}");
             DateTimeOffset dto = DateTimeOffset.ParseExact(time, SpotifyTimeFormat, null, TimeStyle);
 
-            string? username = root.TryGetProperty("username", out JsonElement un) ? un.GetString() : null;
-            string? platform = root.TryGetProperty("platform", out JsonElement plat) ? plat.GetString() : null;
+            string? username = JsonTools.TryGetProperty("username", root)?.GetString();
+            string? platform = JsonTools.TryGetProperty("platform", root)?.GetString();
 
-            int? duration1 = root.TryGetProperty("msPlayed", out JsonElement smallDuration) ? smallTime.GetInt32() : null;
-            int? duration2 = root.TryGetProperty("ms_played", out JsonElement largeDuration) ? largeDuration.GetInt32() : null;
+            int? duration1 = JsonTools.TryGetProperty("msPlayed", root)?.GetInt32();
+            int? duration2 = JsonTools.TryGetProperty("ms_played", root)?.GetInt32();
             int duration = duration1 ?? duration2 ?? throw new Exception($"Song duration missing from JSON entry {index}");
 
-            string? country = root.TryGetProperty("conn_country", out JsonElement coun) ? coun.GetString() : null;
-            string? ipAddress = root.TryGetProperty("ip_addr_decrypted", out JsonElement ipAddr) ? ipAddr.GetString() : null;
-            string? userAgent = root.TryGetProperty("user_agent_decrypted", out JsonElement ua) ? ua.GetString() : null;
+            string? country = JsonTools.TryGetProperty("conn_country", root)?.GetString();
+            string? ipAddress = JsonTools.TryGetProperty("ip_addr_decrypted", root)?.GetString();
+            string? userAgent = JsonTools.TryGetProperty("user_agent_decrypted", root)?.GetString();
 
-            string? name1 = root.TryGetProperty("trackName", out JsonElement smallName) ? smallName.GetString() : null;
-            string? name2 = root.TryGetProperty("master_metadata_track_name", out JsonElement largeName) ? largeName.GetString() : null;
+            string? name1 = JsonTools.TryGetProperty("trackName", root)?.GetString();
+            string? name2 = JsonTools.TryGetProperty("master_metadata_track_name", root)?.GetString();
             string? name = name1 ?? name2;
 
-            string? artist1 = root.TryGetProperty("artistName", out JsonElement smallArtist) ? smallArtist.GetString() : null;
-            string? artist2 = root.TryGetProperty("master_metadata_album_artist_name", out JsonElement largeArtist) ? largeArtist.GetString() : null;
+            string? artist1 = JsonTools.TryGetProperty("artistName", root)?.GetString();
+            string? artist2 = JsonTools.TryGetProperty("master_metadata_album_artist_name", root)?.GetString();
             string? artist = artist1 ?? artist2;
 
-            string? album = root.TryGetProperty("master_metadata_album_album_name", out JsonElement al) ? al.GetString() : null;
-            string? uri = root.TryGetProperty("spotify_track_uri", out JsonElement ur) ? ur.GetString() : null;
-            string? episodeName = root.TryGetProperty("episode_name", out JsonElement episode) ? episode.GetString() : null;
-            string? episodeShow = root.TryGetProperty("episode_show_name", out JsonElement show) ? show.GetString() : null;
-            string? episodeUri = root.TryGetProperty("spotify_episode_uri", out JsonElement epUri) ? epUri.GetString() : null;
-            string? startReason = root.TryGetProperty("reason_start", out JsonElement sReason) ? sReason.GetString() : null;
-            string? endReason = root.TryGetProperty("reason_end", out JsonElement eReason) ? eReason.GetString() : null;
-            bool? shuffled = root.TryGetProperty("shuffle", out JsonElement shuffle) ? shuffle.GetBoolean() : null;
-            bool? skipped = root.TryGetProperty("skipped", out JsonElement skip) ? skip.GetBoolean() : null;
-            bool? offline = root.TryGetProperty("offline", out JsonElement off) ? off.GetBoolean() : null;
-            long? offlineTimestamp = root.TryGetProperty("offline_timestamp", out JsonElement offTs) ? offTs.GetInt64() : null;
-            bool? incognito = root.TryGetProperty("incognito_mode", out JsonElement incog) ? incog.GetBoolean() : null;
+            string? album = JsonTools.TryGetProperty("master_metadata_album_album_name", root)?.GetString();
+            string? uri = JsonTools.TryGetProperty("spotify_track_uri", root)?.GetString();
+            string? episodeName = JsonTools.TryGetProperty("episode_name", root)?.GetString();
+            string? episodeShow = JsonTools.TryGetProperty("episode_show_name", root)?.GetString();
+            string? episodeUri = JsonTools.TryGetProperty("spotify_episode_uri", root)?.GetString();
+            string? startReason = JsonTools.TryGetProperty("reason_start", root)?.GetString();
+            string? endReason = JsonTools.TryGetProperty("reason_end", root)?.GetString();
+            bool? shuffle = JsonTools.TryGetProperty("shuffle", root)?.GetBoolean();
+            bool? skipped = JsonTools.TryGetProperty("skipped", root)?.GetBoolean();
+            bool? offline = JsonTools.TryGetProperty("offline", root)?.GetBoolean();
+            long? offlineTimestamp = JsonTools.TryGetProperty("offline_timestamp", root)?.GetInt64();
+            bool? incognito = JsonTools.TryGetProperty("incognito_mode", root)?.GetBoolean();
+
+            string? time11 = JsonTools.TryGetProperty("endTime", root)?.GetString();
+            string? time22 = JsonTools.TryGetProperty("ts", root)?.GetString();
+            string timee = time11 ?? time22 ?? throw new Exception($"Song timestamp missing from JSON entry {index}");
+            DateTimeOffset dtoo = DateTimeOffset.ParseExact(timee, SpotifyTimeFormat, null, TimeStyle);
 
             return (ISongEntry)new SpotifyEntry()
             {
@@ -83,7 +88,7 @@ public sealed partial class Json : SongInputBase
                 Episode_URI = episodeUri,
                 Song_StartReason = startReason,
                 Song_EndReason = endReason,
-                Song_Shuffle = shuffled,
+                Song_Shuffle = shuffle,
                 Song_Skipped = skipped,
                 Spotify_Offline = offline,
                 Spotify_OfflineTS = offlineTimestamp,
@@ -92,12 +97,22 @@ public sealed partial class Json : SongInputBase
         }).ToList()!;
     }
 
+    private static JsonElement? TryGetProperty(string name, JsonElement parent)
+    {
+        return parent.TryGetProperty(name, out JsonElement property) ? property : null;
+    }
+
+    private static JsonElement ForceGetProperty(string name, JsonElement parent)
+    {
+        return parent.TryGetProperty(name, out JsonElement property) ? property : throw new Exception($"No {name} object found in {parent}");
+    }
+
     private List<ISongEntry> FilterSongs()
     {
         return AllSongs.OfType<SpotifyEntry>().Where(song => filter(song)).Select(song => (ISongEntry)song).ToList();
     }
 
-    protected override void ClearDocument()
+    protected override void DisposeDocument()
     {
         AllEntries.ForEach(entry => entry.Dispose());
     }

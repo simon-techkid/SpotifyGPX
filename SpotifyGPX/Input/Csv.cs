@@ -65,7 +65,7 @@ public sealed partial class Csv : SongInputBase, IDisposable
             .ToList();
     }
 
-    protected override void ClearDocument()
+    protected override void DisposeDocument()
     {
         Document = Array.Empty<string>();
     }

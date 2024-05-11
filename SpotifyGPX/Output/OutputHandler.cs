@@ -103,7 +103,7 @@ public partial class OutputHandler
             }
             catch (Exception ex)
             {
-                if (attempt < MaxRetries)
+                if (attempt <= MaxRetries)
                 {
                     Console.WriteLine($"Error writing {fileName}: {ex.Message}. Retrying...");
                     Thread.Sleep(RetryDelayMs);
@@ -160,7 +160,8 @@ public partial class OutputHandler
             // Unique file placed in directory of original file path, with numeric suffix to distinguish
             uniqueFileName = Path.Combine(directory ?? string.Empty, $"{fileNameWithoutExtension}_{count}{fileExtension}");
             count++;
-        } while (File.Exists(uniqueFileName)); // Until non-existing file path found, repeat iteration
+        }
+        while (File.Exists(uniqueFileName)); // Until non-existing file path found, repeat iteration
 
         return uniqueFileName;
     }

@@ -7,7 +7,12 @@ namespace SpotifyGPX;
 /// <summary>
 /// A latitude/longitude pair.
 /// </summary>
-public readonly struct Coordinate
+public readonly struct Coordinate :
+    ICloneable,
+    IEquatable<Coordinate>,
+    IComparable,
+    IComparable<Coordinate>,
+    IFormattable
 {
     /// <summary>
     /// Creates a coordinate object with a latitude and longitude.
@@ -37,7 +42,11 @@ public readonly struct Coordinate
             return false;
         }
 
-        Coordinate other = (Coordinate)obj;
+        return Equals((Coordinate)obj);
+    }
+
+    public bool Equals(Coordinate other)
+    {
         return Latitude == other.Latitude && Longitude == other.Longitude;
     }
 
@@ -100,5 +109,53 @@ public readonly struct Coordinate
         double distance = Math.Sqrt(latDiff * latDiff + lonDiff * lonDiff);
 
         return distance;
+    }
+
+    public object Clone()
+    {
+        return new Coordinate(Latitude, Longitude);
+    }
+
+    public int CompareTo(object? obj)
+    {
+        if (obj == null) return 1;
+
+        if (obj is Coordinate other)
+            return CompareTo(other);
+
+        throw new ArgumentException("Object is not a Coordinate");
+    }
+
+    public int CompareTo(Coordinate other)
+    {
+        var latComparison = Latitude.CompareTo(other.Latitude);
+        if (latComparison != 0) return latComparison;
+        return Longitude.CompareTo(other.Longitude);
+    }
+
+    public string ToString(string? format, IFormatProvider? formatProvider)
+    {
+        return $"Latitude: {Latitude.ToString(format, formatProvider)}, Longitude: {Longitude.ToString(format, formatProvider)}";
+    }
+
+    public double CalculateDistance(Coordinate other)
+    {
+        const double R = 6371; // Radius of the Earth in km
+        double lat1Rad = ToRadians(Latitude);
+        double lat2Rad = ToRadians(other.Latitude);
+        double deltaLat = ToRadians(other.Latitude - Latitude);
+        double deltaLon = ToRadians(other.Longitude - Longitude);
+
+        double a = Math.Sin(deltaLat / 2) * Math.Sin(deltaLat / 2) +
+                    Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
+                    Math.Sin(deltaLon / 2) * Math.Sin(deltaLon / 2);
+        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+        return R * c; // Distance in km
+    }
+
+    public static double ToRadians(double angle)
+    {
+        return Math.PI * angle / 180.0;
     }
 }

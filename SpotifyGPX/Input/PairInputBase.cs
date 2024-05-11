@@ -9,26 +9,47 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// The base class for all classes supporting the parsing of song-point pairing files. All classes that handle song-point pairing files must inherit this class.
 /// </summary>
-public abstract class PairInputBase : FileInputBase, ISongInput, IGpsInput, IPairInput
+public abstract class PairInputBase : GpsInputSelection, ISongInput, IGpsInput, IPairInput
 {
     protected PairInputBase(string path) : base(path)
     {
     }
 
     // Pairs
+    /// <summary>
+    /// A delegate for the method that parses the pairs from the file.
+    /// </summary>
+    /// <returns>A list of <see cref="SongPoint"/> objects, each <see cref="SongPoint"/> representing a paired <see cref="ISongEntry"/> and <see cref="IGpsPoint"/>.</returns>
     protected delegate List<SongPoint> ParsePairsDelegate();
+
+    /// <summary>
+    /// Provides the method that parses the <see cref="SongPoint"/> pairs from the file.
+    /// </summary>
     protected abstract ParsePairsDelegate ParsePairsMethod { get; }
-    protected List<SongPoint> AllPairs => ParsePairsMethod();
-    public List<SongPoint> GetAllPairs() => AllPairs;
+
+    /// <summary>
+    /// Access all pairs in this song-point pairing data file.
+    /// </summary>
+    protected virtual List<SongPoint> AllPairs => ParsePairsMethod();
+    public virtual List<SongPoint> GetAllPairs() => AllPairs;
     public abstract int SourcePairCount { get; }
-    public int ParsedPairCount => AllPairs.Count;
+    public virtual int ParsedPairCount => AllPairs.Count;
 
     // Songs
-    public List<ISongEntry> GetAllSongs() => AllPairs.Select(pair => pair.Song).ToList();
+    /// <summary>
+    /// A delegate for the method that filters the songs based on the file-specific filters.
+    /// </summary>
+    /// <returns></returns>
     protected delegate List<ISongEntry> FilterSongsDelegate();
+
+    /// <summary>
+    /// Provides the method that filters the songs based on the file-specific filters.
+    /// </summary>
     protected abstract FilterSongsDelegate FilterSongsMethod { get; }
-    public List<ISongEntry> GetFilteredSongs() => FilterSongsMethod();
-    public List<ISongEntry> GetFilteredSongs(List<GpsTrack> gpsTracks)
+
+    public virtual List<ISongEntry> GetAllSongs() => AllPairs.Select(pair => pair.Song).ToList();
+    public virtual List<ISongEntry> GetFilteredSongs() => FilterSongsMethod();
+    public virtual List<ISongEntry> GetFilteredSongs(List<GpsTrack> gpsTracks)
     {
         List<ISongEntry> FilteredSongs = GetFilteredSongs(); // Filter songs based on file-specific filters first
 
@@ -54,6 +75,7 @@ public abstract class PairInputBase : FileInputBase, ISongInput, IGpsInput, IPai
     protected List<GpsTrack> AllTracks => AllPairs.GroupBy(pair => pair.Origin).Select(type => new GpsTrack(type.Key.Index, type.Key.Name, type.Key.Type, type.Select(pair => pair.Point).ToList())).ToList();
     public List<GpsTrack> GetAllTracks() => AllTracks;
     public List<GpsTrack> GetFilteredTracks() => FilterTracksMethod();
+    public override List<GpsTrack> GetAllTracks() => AllPairs.GroupBy(pair => pair.Origin).Select(type => new GpsTrack(type.Key.Index, type.Key.Name, type.Key.Type, type.Select(pair => pair.Point).ToList())).ToList();
     public abstract int SourcePointCount { get; }
     public int ParsedPointCount => AllPairs.Select(pair => pair.Point).Count();
     public abstract int SourceTrackCount { get; }

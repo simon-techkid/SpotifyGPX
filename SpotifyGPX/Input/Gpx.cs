@@ -18,10 +18,6 @@ public sealed partial class Gpx : GpsInputBase
         Document = XDocument.Load(StreamReader, loadOptions);
     }
 
-    public override int SourceTrackCount => Document.Descendants(InputNs + Track).Count();
-
-    public override int SourcePointCount => Document.Descendants(InputNs + TrackPoint).Count();
-
     private List<GpsTrack> ParseTracks()
     {
         return Document.Descendants(InputNs + Track)
@@ -48,8 +44,12 @@ public sealed partial class Gpx : GpsInputBase
         return AllTracks.Where(track => track.OfType<GpxPoint>().All(point => filter(point))).ToList();
     }
 
-    protected override void ClearDocument()
+    protected override void DisposeDocument()
     {
         Document.Root?.RemoveAll();
     }
+
+    public override int SourceTrackCount => Document.Descendants(InputNs + Track).Count();
+
+    public override int SourcePointCount => Document.Descendants(InputNs + TrackPoint).Count();
 }

@@ -39,7 +39,7 @@ public sealed partial class Xspf : SongInputBase, IHashVerifier
 
     public override int SourceSongCount => Document.Descendants(InputNs + Track).Count();
 
-    protected override void ClearDocument()
+    protected override void DisposeDocument()
     {
         Document.Root?.RemoveAll();
     }
