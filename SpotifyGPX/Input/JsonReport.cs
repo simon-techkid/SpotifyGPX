@@ -14,6 +14,7 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
     private List<JsonDocument> JsonTracksOnly { get; }
     protected override ParsePairsDelegate ParsePairsMethod => GetFromJObject;
     protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
+    protected override FilterTracksDelegate FilterTracksMethod => FilterTracks;
 
     public JsonReport(string path) : base(path)
     {
@@ -114,6 +115,11 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
     private List<ISongEntry> FilterSongs()
     {
         return AllPairs.Select(pair => pair.Song).Where(pair => songFilter(pair) == true).ToList();
+    }
+
+    private List<GpsTrack> FilterTracks()
+    {
+        return AllTracks.Where(track => track.OfType<GenericPoint>().All(point => pointFilter(point))).ToList();
     }
 
     private static void VerifyQuantity(int start, int expectedCount, List<int> indexes, int trackIndex)

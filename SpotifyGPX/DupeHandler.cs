@@ -252,7 +252,7 @@ public partial class DupeHandler
     {
         // Create list of grouped duplicate coordinate values from final points list
         return Pairs
-            .Where(pair => pair.Origin.Type == TrackType.GPX) // Filter out non-GPX journey dupes
+            .Where(pair => pair.Origin.Type == TrackType.Gps) // Filter out non-GPX journey dupes
             .GroupBy(p => p.Point.Location) // Group them by matching locations
             .Where(group => group.Count() >= MinimumMatchingCoords) // Filter out groups not having enough matching coords
             .ToList(); // Send the resulting dupes to a list

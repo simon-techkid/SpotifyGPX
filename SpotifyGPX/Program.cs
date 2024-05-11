@@ -9,15 +9,11 @@ using System.IO;
 
 namespace SpotifyGPX;
 
-class Program
+public partial class Program
 {
     static void Main(string[] args)
     {
         var (options, flags) = ArgumentParser.Parse(args);
-
-        string? inputPairs = null;
-        string? inputSpotify = null;
-        string? inputGps = null;
 
         if (args.Length == 0 || flags.Contains("h"))
         {
@@ -25,89 +21,23 @@ class Program
             return;
         }
 
-        if (options.ContainsKey("spotify"))
-        {
-            inputSpotify = options["spotify"];
-        }
-
-        if (options.ContainsKey("gps"))
-        {
-            inputGps = options["gps"];
-        }
-
-        if (options.ContainsKey("pairs"))
-        {
-            inputPairs = options["pairs"];
-        }
-
-        bool exportCsv = flags.Contains("c");
-        bool exportGpx = flags.Contains("g");
-        bool exportJson = flags.Contains("j");
-        bool exportPlist = flags.Contains("p");
-        bool exportTxt = flags.Contains("t");
-        bool exportJsonReport = flags.Contains("r");
-        bool exportKml = flags.Contains("k");
-        bool exportExcel = flags.Contains("e");
-        bool grabApiData = flags.Contains("a");
+        string? inputPairs = options.GetValueOrDefault("pairs");
+        string? inputSpotify = options.GetValueOrDefault("spotify");
+        string? inputGps = options.GetValueOrDefault("gps");
         bool pointPredict = flags.Contains("pp");
         bool autoPredict = flags.Contains("pa");
+        bool grabApiData = flags.Contains("a");
         bool silent = flags.Contains("s");
         bool transform = flags.Contains("x");
+
+        Dictionary<Formats, bool> exportOptions = GetExportOptions(flags);
 
         // Create a list of paired songs and points
         PairingsHandler pairedEntries;
 
-        // Prefix for output files
-        string prefix;
-
         try
         {
-            if (inputPairs != null)
-            {
-                List<SongPoint> pairs = new();
-
-                using (InputHandler input = new(inputPairs))
-                {
-                    pairs = input.GetAllPairs();
-                    input.Dispose();
-                }
-
-                prefix = inputPairs;
-
-                // Step 2: Create list of songs and points paired based on the given pairs file
-                pairedEntries = new PairingsHandler(pairs);
-            }
-            else if (inputSpotify != null && inputGps != null)
-            {
-                // Step 0: Get input handler based on file paths
-                List<GpsTrack> tracks = new();
-                List<ISongEntry> songs = new();
-
-                using (InputHandler input = new(inputSpotify, inputGps))
-                {
-                    // Step 1: Get list of GPX tracks from the GPS file
-                    tracks = input.GetSelectedTracks();
-
-                    // Step 2: Get list of songs played from the entries file
-                    songs = input.GetFilteredSongs(tracks);
-                    //songs = input.GetAllSongs(); // Unfiltered run
-
-                    input.Dispose();
-                }
-
-                prefix = inputGps;
-
-                // Step 2.5: Get metadata for each song
-                if (grabApiData)
-                    songs = new EntryMatcher(songs).MatchEntries();
-
-                // Step 3: Create list of songs and points paired as close as possible to one another
-                pairedEntries = new PairingsHandler(songs, tracks, silent, pointPredict, autoPredict);
-            }
-            else
-            {
-                throw new Exception($"Neither song and GPS nor pairings files provided!");
-            }
+            pairedEntries = GetPairedEntries(inputPairs, inputSpotify, inputGps, grabApiData, silent, pointPredict, autoPredict);
 
             // Step 4: Write the pairing job's pair counts and averages
             pairedEntries.WriteCounts();
@@ -121,31 +51,14 @@ class Program
 
         try
         {
-            string startingPrefix = Path.GetFileNameWithoutExtension(prefix);
-
-            if (exportCsv)
-                pairedEntries.Save(Formats.Csv, startingPrefix, transform);
-
-            if (exportGpx)
-                pairedEntries.Save(Formats.Gpx, startingPrefix, transform);
-
-            if (exportJson)
-                pairedEntries.Save(Formats.Json, startingPrefix, transform);
-
-            if (exportJsonReport)
-                pairedEntries.Save(Formats.JsonReport, startingPrefix, transform);
-
-            if (exportKml)
-                pairedEntries.Save(Formats.Kml, startingPrefix, transform);
-
-            if (exportTxt)
-                pairedEntries.Save(Formats.Txt, startingPrefix, transform);
-
-            if (exportExcel)
-                pairedEntries.Save(Formats.Xlsx, startingPrefix, transform);
-
-            if (exportPlist)
-                pairedEntries.Save(Formats.Xspf, startingPrefix, transform);
+            foreach (var option in exportOptions)
+            {
+                if (option.Value == true)
+                {
+                    OutputHandler fmat = new(pairedEntries);
+                    fmat.Save(option.Key, pairedEntries.Name, transform);
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -155,58 +68,53 @@ class Program
 
         return;
     }
-}
 
-public class ArgumentParser
-{
-    public static (Dictionary<string, string> options, HashSet<string> flags) Parse(string[] args)
+    private static PairingsHandler GetPairedEntries(string? inputPairs, string? inputSpotify, string? inputGps, bool grabApiData, bool silent, bool predictPoints, bool autoPredictPoints)
     {
-        var options = new Dictionary<string, string>();
-        var flags = new HashSet<string>();
-
-        for (int i = 0; i < args.Length; i++)
-        {
-            string arg = args[i];
-            if (arg.StartsWith("--"))
-            {
-                if (i + 1 < args.Length)
-                {
-                    string key = arg[2..];
-                    string value = args[i + 1];
-                    options[key] = value;
-                    i++;
-                }
-                else
-                {
-                    throw new ArgumentException($"Expected value after {arg}");
-                }
-            }
-            else if (arg.StartsWith('-'))
-            {
-                string flag = arg[1..];
-                flags.Add(flag);
-            }
-        }
-
-        return (options, flags);
+        if (inputPairs != null)
+            return PairFromPairs(inputPairs);
+        else if (inputSpotify != null && inputGps != null)
+            return PairFromSongsAndPoints(inputSpotify, inputGps, grabApiData, silent, predictPoints, autoPredictPoints);
+        else
+            throw new Exception("Neither song and GPS nor pairings files provided!");
     }
 
-    public static void PrintHelp()
+    private static PairingsHandler PairFromPairs(string inputPairs)
     {
-        Console.WriteLine("Usage: SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-c] [-g] [-j] [-k] [-p] [-t] [-r] [-e] [-x] [-pp [-pa]] [-s] [-h]");
-        Console.WriteLine("--spotify <spotify> --gps <gps> - Path to a Spotify playback history and GPS journey file");
-        Console.WriteLine("--pairs <pairs> - Path to a pairs file");
-        Console.WriteLine("-c - Export a CSV table of all the pairs");
-        Console.WriteLine("-g - Export a GPX from the calculated points");
-        Console.WriteLine("-j - Save off the relevant part of the Spotify json");
-        Console.WriteLine("-k - Export a KML from the calculated points");
-        Console.WriteLine("-p - Export a XSPF playlist of the songs");
-        Console.WriteLine("-t - Export a plain text list of pairs");
-        Console.WriteLine("-r - Export a JsonReport of all the data used to compile the resulting pairings");
-        Console.WriteLine("-e - Export an Excel workbook of all pairings, grouped into worksheets for each track");
-        Console.WriteLine("-x - Export an XML conversion of each file exported (combine this with other format export flags)");
-        Console.WriteLine("-pp - Predict new positions for duplicate points (use with -pa for automatic prediction of all duplicate positions)");
-        Console.WriteLine("-s - Do not print out each newly created Song-Point pairing upon creation");
-        Console.WriteLine("-h - Print the help instructions");
+        List<SongPoint> pairs = new();
+
+        using (InputHandler input = new(inputPairs))
+        {
+            pairs = input.GetAllPairs();
+            input.Dispose();
+        }
+
+        return new PairingsHandler(pairs, Path.GetFileNameWithoutExtension(inputPairs));
+    }
+
+    private static PairingsHandler PairFromSongsAndPoints(string inputSongs, string inputGps, bool grabApiData, bool silent, bool pointPredict, bool autoPredictPoints)
+    {
+        // Step 0: Get input handler based on file paths
+        List<GpsTrack> tracks = new();
+        List<ISongEntry> songs = new();
+
+        using (InputHandler input = new(inputSongs, inputGps))
+        {
+            // Step 1: Get list of GPS tracks from the GPS file
+            tracks = input.GetSelectedTracks();
+
+            // Step 2: Get list of songs played from the entries file
+            songs = input.GetFilteredSongs(tracks);
+            //songs = input.GetAllSongs(); // Unfiltered run
+
+            input.Dispose();
+        }
+
+        // Step 2.5: Get metadata for each song
+        if (grabApiData)
+            songs = new EntryMatcher(songs).MatchEntries();
+
+        // Step 3: Create list of songs and points paired as close as possible to one another
+        return new PairingsHandler(songs, tracks, inputGps, silent, pointPredict, autoPredictPoints);
     }
 }

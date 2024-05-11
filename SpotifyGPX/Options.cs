@@ -1,6 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
 using SpotifyGPX.Input;
+using SpotifyGPX.Output;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -75,6 +76,51 @@ namespace SpotifyGPX
         };
     }
 
+    public partial class Program
+    {
+        private static Dictionary<Formats, bool> GetExportOptions(HashSet<string>? flags)
+        {
+            return new Dictionary<Formats, bool>
+            {
+                { Formats.Csv, flags?.Contains("c") ?? false },
+                { Formats.Gpx, flags?.Contains("g") ?? false },
+                { Formats.Json, flags?.Contains("j") ?? false },
+                { Formats.JsonReport, flags?.Contains("r") ?? false },
+                { Formats.Kml, flags?.Contains("k") ?? false },
+                { Formats.Txt, flags?.Contains("t") ?? false },
+                { Formats.Xlsx, flags?.Contains("e") ?? false },
+                { Formats.Xspf, flags?.Contains("p") ?? false }
+            };
+        }
+    }
+
+    public partial class ArgumentParser
+    {
+        private static string Help
+        {
+            get
+            {
+                System.Text.StringBuilder builder = new();
+                builder.AppendLine("Usage: SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-c] [-g] [-j] [-k] [-p] [-t] [-r] [-e] [-x] [-pp [-pa]] [-s] [-h]");
+                builder.AppendLine("--spotify <spotify> --gps <gps> - Path to a Spotify playback history and GPS journey file");
+                builder.AppendLine("--pairs <pairs> - Path to a pairs file");
+                builder.AppendLine("-c - Export a CSV table of all the pairs");
+                builder.AppendLine("-g - Export a GPX from the calculated points");
+                builder.AppendLine("-j - Save off the relevant part of the Spotify json");
+                builder.AppendLine("-k - Export a KML from the calculated points");
+                builder.AppendLine("-p - Export a XSPF playlist of the songs");
+                builder.AppendLine("-t - Export a plain text list of pairs");
+                builder.AppendLine("-r - Export a JsonReport of all the data used to compile the resulting pairings");
+                builder.AppendLine("-e - Export an Excel workbook of all pairings, grouped into worksheets for each track");
+                builder.AppendLine("-x - Export an XML conversion of each file exported (combine this with other format export flags)");
+                builder.AppendLine("-pp - Predict new positions for duplicate points (use with -pa for automatic prediction of all duplicate positions)");
+                builder.AppendLine("-s - Do not print out each newly created Song-Point pairing upon creation");
+                builder.AppendLine("-h - Print the help instructions");
+                return builder.ToString();
+            }
+        }
+    }
+
     public partial struct LastFmEntry
     {
         private const TimeUsage timeUsage = TimeUsage.Start;
@@ -147,11 +193,11 @@ namespace SpotifyGPX.Input
     {
         private static Dictionary<string, Func<IEnumerable<GpsTrack>, IEnumerable<GpsTrack>>> MultiTrackFilters => new()
         {
-            { "A", allTracks => allTracks.Where(track => track.Track.Type == TrackType.GPX) },
+            { "A", allTracks => allTracks.Where(track => track.Track.Type == TrackType.Gps) },
             { "B", allTracks => allTracks.Where(track => track.Track.Type != TrackType.Combined) },
             { "C", allTracks => allTracks.Where(track => track.Track.Type == TrackType.Gap) },
             { "D", allTracks => allTracks.Where(track => track.Track.Type != TrackType.Gap) },
-            { "E", allTracks => allTracks.Where(track => track.Track.Type != TrackType.GPX) },
+            { "E", allTracks => allTracks.Where(track => track.Track.Type != TrackType.Gps) },
             { "F", allTracks => allTracks }
         };
 
@@ -182,6 +228,9 @@ namespace SpotifyGPX.Input
         private const string TrackPoint = "trkpt";
         private const string TimeFormat = $"yyyy-MM-ddTHH:mm:ss.fffzzz";
         private const DateTimeStyles TimeStyle = DateTimeStyles.None;
+
+        // Tolerance filters
+        private static readonly Func<GpxPoint, bool> filter = point => true; // No filtering
     }
 
     public partial class Json
@@ -219,6 +268,9 @@ namespace SpotifyGPX.Input
         private static XNamespace Gx => "http://www.google.com/kml/ext/2.2";
         private const string TimeFormat = $"yyyy-MM-ddTHH:mm:ss.fffZ";
         private const DateTimeStyles TimeStyle = DateTimeStyles.None;
+
+        // Tolerance filters
+        private static readonly Func<KmlPoint, bool> filter = point => true; // No filtering
     }
 
     public partial class Xspf

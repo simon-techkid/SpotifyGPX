@@ -15,11 +15,14 @@ public abstract class GpsInputBase : FileInputBase, IGpsInput
     }
 
     protected delegate List<GpsTrack> ParseTracksDelegate();
+    protected delegate List<GpsTrack> FilterTracksDelegate();
     protected abstract ParseTracksDelegate ParseTracksMethod { get; }
-    protected List<GpsTrack> Tracks => ParseTracksMethod();
-    public List<GpsTrack> GetAllTracks() => Tracks;
+    protected abstract FilterTracksDelegate FilterTracksMethod { get; }
+    protected List<GpsTrack> AllTracks => ParseTracksMethod();
+    public List<GpsTrack> GetAllTracks() => AllTracks;
+    public List<GpsTrack> GetFilteredTracks() => FilterTracksMethod();
     public abstract int SourceTrackCount { get; }
-    public int ParsedTrackCount => Tracks.Count;
+    public int ParsedTrackCount => AllTracks.Count;
     public abstract int SourcePointCount { get; }
-    public int ParsedPointCount => Tracks.Select(track => track.Points.Count).Sum();
+    public int ParsedPointCount => AllTracks.Select(track => track.Points.Count).Sum();
 }

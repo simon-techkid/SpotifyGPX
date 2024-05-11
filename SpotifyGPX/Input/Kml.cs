@@ -11,6 +11,7 @@ public sealed partial class Kml : GpsInputBase
 {
     private XDocument Document { get; }
     protected override ParseTracksDelegate ParseTracksMethod => ParseTracks;
+    protected override FilterTracksDelegate FilterTracksMethod => FilterTracks;
 
     public Kml(string path) : base(path)
     {
@@ -45,9 +46,14 @@ public sealed partial class Kml : GpsInputBase
 
                 }).ToList();
 
-                return new GpsTrack(null, null, TrackType.GPX, points);
+                return new GpsTrack(null, null, TrackType.Gps, points);
 
             }).ToList();
+    }
+
+    private List<GpsTrack> FilterTracks()
+    {
+        return AllTracks.Where(track => track.OfType<KmlPoint>().All(point => filter(point))).ToList();
     }
 
     protected override void ClearDocument()

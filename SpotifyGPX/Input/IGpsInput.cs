@@ -14,13 +14,19 @@ public partial interface IGpsInput : IFileInput
     /// <summary>
     /// Gets all tracks in the file.
     /// </summary>
-    /// <returns>A list of GPXTrack objects.</returns>
+    /// <returns>A list of <see cref="GpsTrack"/> objects.</returns>
     List<GpsTrack> GetAllTracks();
+
+    /// <summary>
+    /// Gets filtered tracks based file-specific filters.
+    /// </summary>
+    /// <returns>A list of <see cref="GpsTrack"/> objects.</returns>
+    List<GpsTrack> GetFilteredTracks();
 
     /// <summary>
     /// Gets tracks based on user-selection.
     /// </summary>
-    /// <returns>A list of GPXTrack objects, based on user-selection</returns>
+    /// <returns>A list of <see cref="GpsTrack"/> objects, based on user selection parameters.</returns>
     List<GpsTrack> GetSelectedTracks()
     {
         List<GpsTrack> AllTracks = GetAllTracks();
@@ -39,11 +45,6 @@ public partial interface IGpsInput : IFileInput
         return AllTracks;
     }
 
-    /// <summary>
-    /// Gets input from the user about which tracks to intake.
-    /// </summary>
-    /// <param name="allTracks">The entire list of tracks.</param>
-    /// <returns>A list of GPXTrack objects based on user selection.</returns>
     private static List<GpsTrack> HandleMultipleTracks(List<GpsTrack> allTracks)
     {
         int selectedTrackIndex; // Holds the user track selection index        
@@ -87,12 +88,6 @@ public partial interface IGpsInput : IFileInput
         return selectedTracks;
     }
 
-    /// <summary>
-    /// Combine a list of tracks into a single track.
-    /// </summary>
-    /// <param name="allTracks">A list of GPXTrack objects.</param>
-    /// <returns>A single GPXTrack with data from each in the list.</returns>
-    /// <exception cref="Exception">The list provided was null or contained no tracks.</exception>
     private static GpsTrack CombineTracks(List<GpsTrack> allTracks)
     {
         if (allTracks == null || allTracks.Count == 0)
@@ -109,11 +104,6 @@ public partial interface IGpsInput : IFileInput
         return combinedTrack;
     }
 
-    /// <summary>
-    /// Calculate all the gaps between tracks.
-    /// </summary>
-    /// <param name="allTracks">A list of GPXTrack objects.</param>
-    /// <returns>A list of GPXTrack objects, containing the original tracks as well as tracks created based on the gaps between each in the original list.</returns>
     private static List<GpsTrack> CalculateGaps(List<GpsTrack> allTracks)
     {
         return allTracks
@@ -142,20 +132,8 @@ public partial interface IGpsInput : IFileInput
             .ToList();
     }
 
-    /// <summary>
-    /// Creates a friendly name for a bridge track (combination or gap track) between GPXTrack objects.
-    /// </summary>
-    /// <param name="track1">The track before the break.</param>
-    /// <param name="track2">The track after the break.</param>
-    /// <returns>A name combining the names of the two given tracks.</returns>
     private static string CombinedOrGapTrackName(TrackInfo track1, TrackInfo track2) => $"{track1.ToString()}-{track2.ToString()}";
 
-    /// <summary>
-    /// Determines whether a user-input track selection is valid.
-    /// </summary>
-    /// <param name="index">The user-provided index of a GPXTrack.</param>
-    /// <param name="totalTracks">The total number of tracks available for selection.</param>
-    /// <returns>True, if the user-provided index is an existing GPXTrack.</returns>
     private static bool IsValidTrackIndex(int index, int totalTracks) => index >= 0 && index < totalTracks;
 
     /// <summary>

@@ -1,6 +1,5 @@
 ﻿// SpotifyGPX by Simon Field
 
-using SpotifyGPX.Output;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,19 +10,25 @@ namespace SpotifyGPX;
 /// <summary>
 /// Handle SongPoint pairings, including list calculation, generation, operations, and exporting.
 /// </summary>
-public partial class PairingsHandler
+public partial class PairingsHandler : IEnumerable<SongPoint>
 {
     private List<SongPoint> Pairs { get; }
+
+    /// <summary>
+    /// The name of this set of pairings.
+    /// </summary>
+    public string Name { get; }
 
     /// <summary>
     /// Create a handler for pairing GPS information with Song information.
     /// </summary>
     /// <param name="s">A series of Spotify playback records, used to associate a song with a point.</param>
     /// <param name="t">A list of GPXTrack objects, used to associate songs with a track and position on Earth.</param>
+    /// <param name="name">The name of this set of pairs.</param>
     /// <param name="silent">If true, do not print each pairing to the console upon creation.</param>
     /// <param name="predict">If true, create a DupeHandler for predicting duplicates in the resulting pair list.</param>
     /// <param name="autoPredict">If true, and predict is true, automatically predict all duplicate positions.</param>
-    public PairingsHandler(List<ISongEntry> s, List<GpsTrack> t, bool silent, bool predict, bool autoPredict)
+    public PairingsHandler(List<ISongEntry> s, List<GpsTrack> t, string name, bool silent, bool predict, bool autoPredict)
     {
         if (predict == true)
         {
@@ -36,15 +41,19 @@ public partial class PairingsHandler
             // Nah, just use the verbatim points
             Pairs = PairPoints(silent, s, t);
         }
+
+        Name = name;
     }
 
     /// <summary>
     /// Explicitly create a PairingsHandler using an existing pairs list.
     /// </summary>
     /// <param name="pairs">An existing pairs list.</param>
-    public PairingsHandler(List<SongPoint> pairs)
+    /// <param name="name">The name of this set of pairs.</param>
+    public PairingsHandler(List<SongPoint> pairs, string name)
     {
         Pairs = pairs;
+        Name = name;
     }
 
     /// <summary>
@@ -70,7 +79,7 @@ public partial class PairingsHandler
                 .First();
 
                 SongPoint pair = new(index, spotifyEntry, bestPoint, track.Track);
-                
+
                 if (!silent)
                 {
                     Console.WriteLine(pair.ToString());
@@ -83,20 +92,6 @@ public partial class PairingsHandler
         )
         .Where(pair => MaximumAbsAccuracy == null || pair.AbsAccuracy <= MaximumAbsAccuracy) // Only create pairings with accuracy equal to or below max allowed accuracy
         .ToList();
-    }
-
-    /// <summary>
-    /// Save the paired songs and points to a file.
-    /// </summary>
-    /// <param name="format">The file format in which the pairs will be saved.</param>
-    /// <param name="sourceGpxName">The name of the original GPX file.</param>
-    public void Save(Formats format, string sourceGpxName, bool transform)
-    {
-        // Parse the Pairs in this Pairings object to the specified format, according to user-provided arguments
-        OutputHandler fmat = new(Pairs);
-
-        // Save the handled format as specified by the provided file name prefix
-        fmat.Save(format, sourceGpxName, transform);
     }
 
     /// <summary>
@@ -150,5 +145,15 @@ public partial class PairingsHandler
         string objName = groupCount == 1 ? nameSingular : nameMultiple;
 
         Console.WriteLine($"[PAIR] Average Accuracy for {groupCount} {objName}: {accuraciesJoined}");
+    }
+
+    public IEnumerator<SongPoint> GetEnumerator()
+    {
+        return Pairs.GetEnumerator();
+    }
+
+    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

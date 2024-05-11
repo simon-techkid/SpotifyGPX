@@ -10,7 +10,7 @@ public enum TrackType
     /// <summary>
     /// A track created from original GPS data.
     /// </summary>
-    GPX,
+    Gps,
 
     /// <summary>
     /// A track created from gaps between GPS tracks.

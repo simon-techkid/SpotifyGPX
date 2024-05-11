@@ -11,6 +11,7 @@ public sealed partial class Gpx : GpsInputBase
 {
     private XDocument Document { get; set; }
     protected override ParseTracksDelegate ParseTracksMethod => ParseTracks;
+    protected override FilterTracksDelegate FilterTracksMethod => FilterTracks;
 
     public Gpx(string path) : base(path)
     {
@@ -27,7 +28,7 @@ public sealed partial class Gpx : GpsInputBase
             .Select((trk, index) => new GpsTrack( // For each track and its index, create a new GPXTrack
                 index,
                 trk.Element(InputNs + "name")?.Value,
-                TrackType.GPX,
+                TrackType.Gps,
                 trk.Descendants(InputNs + TrackPoint)
                     .Select((trkpt, pointIndex) => (IGpsPoint)new GpxPoint
                     {
@@ -40,6 +41,11 @@ public sealed partial class Gpx : GpsInputBase
                     }).ToList() // Send all points to List<GPXPoint>
             ))
             .ToList(); // Send all tracks to List<GPXTrack>
+    }
+
+    private List<GpsTrack> FilterTracks()
+    {
+        return AllTracks.Where(track => track.OfType<GpxPoint>().All(point => filter(point))).ToList();
     }
 
     protected override void ClearDocument()

@@ -25,9 +25,9 @@ public partial class OutputHandler
     /// Saves the pairs contained in this handler to a file in the given format.
     /// </summary>
     /// <param name="format">The format to use for the exported file.</param>
-    /// <param name="sourceGpxName">The name of the original GPS file used.</param>
+    /// <param name="name">The name of the original GPS file used.</param>
     /// <param name="transform">Transform the created files based on XSLT stylesheets.</param>
-    public void Save(Formats format, string sourceGpxName, bool transform)
+    public void Save(Formats format, string name, bool transform)
     {
         List<OutFile> files = new();
 
@@ -36,14 +36,14 @@ public partial class OutputHandler
         if (supportsMulti)
         {
             // If the desired format supports multiple tracks, provide the entire pair list:
-            files.Add(new OutFile(Pairs, format, sourceGpxName, AllTracksName));
+            files.Add(new OutFile(Pairs, format, name, AllTracksName));
         }
         else
         {
             // If the desired format doesn't support multiple tracks, split each track into its own file:
             files
                 .AddRange(Pairs.GroupBy(pair => pair.Origin) // One track per file
-                .Select(track => new OutFile(track, format, sourceGpxName, track.Key.ToString())));
+                .Select(track => new OutFile(track, format, name, track.Key.ToString())));
         }
 
         files.ForEach(file => file.Save(transform)); // Save each file to the disk
@@ -70,13 +70,13 @@ public partial class OutputHandler
         /// </summary>
         /// <param name="pairs">The pairs to include in the output file.</param>
         /// <param name="format">The format of the output file.</param>
-        /// <param name="sourceGpxName">The prefix of the output file name.</param>
+        /// <param name="name">The prefix of the output file name.</param>
         /// <param name="trackName">The name of the track represented in this file (if this file only has one track).</param>
-        public OutFile(IEnumerable<SongPoint> pairs, Formats format, string sourceGpxName, string trackName)
+        public OutFile(IEnumerable<SongPoint> pairs, Formats format, string name, string trackName)
         {
             var factory = new FileOutputFactory();
             Handler = factory.CreateFileOutput(format, () => pairs, trackName);
-            SourceName = sourceGpxName;
+            SourceName = name;
             TrackName = trackName;
             OriginalCount = pairs.Count();
         }

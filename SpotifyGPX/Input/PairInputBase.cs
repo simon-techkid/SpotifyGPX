@@ -49,7 +49,11 @@ public abstract class PairInputBase : FileInputBase, ISongInput, IGpsInput, IPai
     public int ParsedSongCount => AllPairs.Select(pair => pair.Song).Count();
 
     // GPS
-    public List<GpsTrack> GetAllTracks() => AllPairs.GroupBy(pair => pair.Origin).Select(type => new GpsTrack(type.Key.Index, type.Key.Name, type.Key.Type, type.Select(pair => pair.Point).ToList())).ToList();
+    protected delegate List<GpsTrack> FilterTracksDelegate();
+    protected abstract FilterTracksDelegate FilterTracksMethod { get; }
+    protected List<GpsTrack> AllTracks => AllPairs.GroupBy(pair => pair.Origin).Select(type => new GpsTrack(type.Key.Index, type.Key.Name, type.Key.Type, type.Select(pair => pair.Point).ToList())).ToList();
+    public List<GpsTrack> GetAllTracks() => AllTracks;
+    public List<GpsTrack> GetFilteredTracks() => FilterTracksMethod();
     public abstract int SourcePointCount { get; }
     public int ParsedPointCount => AllPairs.Select(pair => pair.Point).Count();
     public abstract int SourceTrackCount { get; }
