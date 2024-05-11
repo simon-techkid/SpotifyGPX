@@ -37,7 +37,7 @@ public class JsonNetDeserializer : FileInputBase
         return JsonDocument.Parse("{}");
     }
 
-    protected override void ClearDocument()
+    protected override void DisposeDocument()
     {
         Document = null;
     }

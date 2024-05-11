@@ -111,6 +111,7 @@ namespace SpotifyGPX.Input
 
             return extension switch
             {
+                ".csv" => new Csv(path),
                 ".json" => new Json(path),
                 ".jsonreport" => new JsonReport(path),
                 ".xspf" => new Xspf(path),
@@ -124,6 +125,7 @@ namespace SpotifyGPX.Input
 
             return extension switch
             {
+                ".geojson" => new GeoJson(path),
                 ".gpx" => new Gpx(path),
                 ".kml" => new Kml(path),
                 ".jsonreport" => new JsonReport(path),
@@ -143,7 +145,12 @@ namespace SpotifyGPX.Input
         }
     }
 
-    public partial interface IGpsInput
+    public partial class SongInputBase
+    {
+        private const TimeInterpretation DefaultInterpretation = TimeInterpretation.Start;
+    }
+
+    public partial class GpsInputSelection
     {
         private static Dictionary<string, Func<IEnumerable<GpsTrack>, IEnumerable<GpsTrack>>> MultiTrackFilters => new()
         {
@@ -168,10 +175,15 @@ namespace SpotifyGPX.Input
 
     public partial class Csv
     {
-        private const TimeInterpretation Interpretation = TimeInterpretation.Start;
+        protected override TimeInterpretation Interpretation => TimeInterpretation.Start;
 
         // Tolerance filters
         private static readonly Func<LastFmEntry, bool> filter = song => true; // No filtering for CSV files
+    }
+
+    public partial class GeoJson
+    {
+        private static JsonSerializerOptions JsonOptions => Options.JsonOptions;
     }
 
     public partial class Gpx
@@ -190,7 +202,7 @@ namespace SpotifyGPX.Input
         private const bool IsMiniSpotify = false; // (true = "Account data", false = "Extended streaming history data")
         private const string SpotifyTimeFormat = IsMiniSpotify ? Options.DateTimeOnly : Options.ISO8601UTC;
         private const DateTimeStyles TimeStyle = DateTimeStyles.AssumeUniversal;
-        private const TimeInterpretation Interpretation = TimeInterpretation.End;
+        protected override TimeInterpretation Interpretation => TimeInterpretation.End;
         private static JsonSerializerOptions JsonOptions => Options.JsonOptions;
 
         // Tolerance filters
@@ -227,7 +239,7 @@ namespace SpotifyGPX.Input
         private static XNamespace InputNs => "http://xspf.org/ns/0/";
         private const string Track = "track";
         private const DateTimeStyles TimeStyle = DateTimeStyles.AssumeUniversal;
-        private const TimeInterpretation Interpretation = TimeInterpretation.End;
+        protected override TimeInterpretation Interpretation => TimeInterpretation.End;
 
         // Tolerance filters
         private static TimeSpan MinimumPlaytime => new(0, 0, 0); // Minimum accepted song playback time (0,0,0 for all songs)
@@ -264,6 +276,20 @@ namespace SpotifyGPX.Output
                 _ => throw new Exception($"Unsupported file export format: {format}")
             };
         }
+    }
+
+    public partial class FileOutputFactory
+    {
+        private readonly Dictionary<Formats, FileOutputCreator> creators = new()
+        {
+            { Formats.Csv, (pairs, trackName) => new Csv(pairs, trackName) },
+            { Formats.Gpx, (pairs, trackName) => new Gpx(pairs, trackName) },
+            { Formats.Json, (pairs, trackName) => new Json(pairs, trackName) },
+            { Formats.JsonReport, (pairs, trackName) => new JsonReport(pairs, trackName) },
+            { Formats.Kml, (pairs, trackName) => new Kml(pairs, trackName) },
+            { Formats.Txt, (pairs, trackName) => new Txt(pairs, trackName) },
+            { Formats.Xspf, (pairs, trackName) => new Xspf(pairs, trackName) }
+        };
     }
 
     public partial class SaveableAndTransformableBase<T>

@@ -17,10 +17,6 @@ public sealed partial class Kml : GpsInputBase
         Document = XDocument.Load(StreamReader, loadOptions);
     }
 
-    public override int SourceTrackCount => Document.Descendants(Gx + "Track").Count();
-
-    public override int SourcePointCount => Document.Descendants(Gx + "coord").Count();
-
     private List<GpsTrack> ParseTracks()
     {
         return Document
@@ -50,8 +46,12 @@ public sealed partial class Kml : GpsInputBase
             }).ToList();
     }
 
-    protected override void ClearDocument()
+    protected override void DisposeDocument()
     {
         Document.Root?.RemoveAll();
     }
+
+    public override int SourceTrackCount => Document.Descendants(Gx + "Track").Count();
+
+    public override int SourcePointCount => Document.Descendants(Gx + "coord").Count();
 }

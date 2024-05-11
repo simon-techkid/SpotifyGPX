@@ -20,7 +20,7 @@ public abstract class FileInputBase : IDisposable
     /// <summary>
     /// Clears this file's original document contents from memory.
     /// </summary>
-    protected abstract void ClearDocument();
+    protected abstract void DisposeDocument();
 
     protected FileInputBase(string path)
     {
@@ -32,7 +32,7 @@ public abstract class FileInputBase : IDisposable
     {
         StreamReader.Dispose();
         FileStream.Dispose();
-        ClearDocument();
+        DisposeDocument();
         GC.SuppressFinalize(this);
     }
 }

@@ -25,6 +25,8 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
 
     private List<SongPoint> GetFromJObject()
     {
+        int alreadyParsed = 0;
+
         // Get the header
         int expectedTotal = Header.TryGetProperty("Total", out JsonElement total) ? total.GetInt32() : throw new Exception($"Expected total required in header object of JsonReport!");
 
@@ -34,81 +36,100 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
                 JsonElement root = track.RootElement;
 
                 // Get the Count item
-                int expectedPairCount = root.TryGetProperty("Count", out JsonElement count) ? count.GetInt32() : throw new Exception($"No Count object found in track {index}");
-
-                // Get the TrackInfo item
-                if (!root.TryGetProperty("TrackInfo", out JsonElement trackInfo))
-                {
-                    throw new Exception($"No TrackInfo object for track {index}");
-                }
+                int expectedPairCount = JsonTools.ForceGetProperty("Count", root).GetInt32();
 
                 // TrackInfo
-                int? trackIndex = trackInfo.TryGetProperty("Index", out JsonElement trIndex) ? trIndex.GetInt32() : throw new Exception($"No Index object found in TrackInfo for track {index}");
-                string? trackName = trackInfo.TryGetProperty("Name", out JsonElement name) ? name.GetString() : throw new Exception($"No Name object found in TrackInfo for track {index}");
-                int? trackType = trackInfo.TryGetProperty("Type", out JsonElement type) ? type.GetInt32() : throw new Exception($"No Type object found in TrackInfo for track {index}");
+                TrackInfo trackInfo = GetTrackInfo(JsonTools.ForceGetProperty("TrackInfo", root));
 
                 // Get the pairs tree
-                if (!root.TryGetProperty("Track", out JsonElement pairs))
-                {
-                    throw new Exception($"No pairs tree found with track name '{trackName}'");
-                }
-
-                return pairs.EnumerateArray().Select(pair =>
+                JsonElement pairsTreeElement = JsonTools.ForceGetProperty("Track", root);
+                List<SongPoint> trackPairs = pairsTreeElement
+                .EnumerateArray()
+                .Select(pairElement =>
                 {
                     // Index
-                    JsonElement indexx = pair.GetProperty("Index");
-                    int pairIndex = indexx.GetInt32();
+                    int pairIndex = JsonTools.ForceGetProperty("Index", pairElement).GetInt32();
 
                     // Song
-                    JsonElement song = pair.GetProperty("Song");
-                    string songDescription = song.GetProperty("Description").GetString() ?? string.Empty;
-                    int songIndex = song.GetProperty("Index").GetInt32();
-                    DateTimeOffset songTime = song.GetProperty("Time").GetDateTimeOffset();
-                    string? songArtist = song.GetProperty("Song_Artist").GetString();
-                    string? songName = song.GetProperty("Song_Name").GetString();
-                    int songCurrentUsage = song.GetProperty("CurrentUsage").GetInt32();
-                    int songCurrentInterpretation = song.GetProperty("CurrentInterpretation").GetInt32();
-
-                    ISongEntry songEntry = new GenericEntry()
-                    {
-                        Description = songDescription,
-                        Index = songIndex,
-                        FriendlyTime = songTime,
-                        Song_Artist = songArtist,
-                        Song_Name = songName,
-                        CurrentUsage = (TimeUsage)songCurrentUsage,
-                        CurrentInterpretation = (TimeInterpretation)songCurrentInterpretation
-                    };
+                    ISongEntry songEntry = GetSongEntry(JsonTools.ForceGetProperty("Song", pairElement));
 
                     // Point
-                    JsonElement point = pair.GetProperty("Point");
-                    int pointIndex = point.GetProperty("Index").GetInt32();
-                    JsonElement pointLocation = point.GetProperty("Location");
-                    double pointLocationLatitude = pointLocation.GetProperty("Latitude").GetDouble();
-                    double pointLocationLongitude = pointLocation.GetProperty("Longitude").GetDouble();
-                    DateTimeOffset pointTime = point.GetProperty("Time").GetDateTimeOffset();
-
-                    IGpsPoint pointEntry = new GenericPoint()
-                    {
-                        Index = pointIndex,
-                        Location = new Coordinate(pointLocationLatitude, pointLocationLongitude),
-                        Time = pointTime
-                    };
+                    IGpsPoint pointEntry = GetGpsPoint(JsonTools.ForceGetProperty("Point", pairElement));
 
                     // Origin (TrackInfo)
-                    JsonElement origin = pair.GetProperty("Origin");
-                    int? originIndex = origin.GetProperty("Index").GetInt32();
-                    string? originName = origin.GetProperty("Name").GetString();
-                    int originType = origin.GetProperty("Type").GetInt32();
-                    TrackInfo trackEntry = new(originIndex, originName, (TrackType)originType);
+                    TrackInfo trackEntry = GetTrackInfo(JsonTools.ForceGetProperty("Origin", pairElement));
 
                     return new SongPoint(pairIndex, songEntry, pointEntry, trackEntry);
-                }).ToList();
+                })
+                .Where((pair, index) => pair.Origin == trackInfo && pair.Index - alreadyParsed == index)
+                .ToList();
+
+                List<int> indexes = trackPairs.Select(pair => pair.Index).ToList();
+
+                // Verify the quantity of pairs
+                if (trackPairs.Count != expectedPairCount)
+                {
+                    VerifyQuantity(alreadyParsed, expectedPairCount, indexes, trackInfo.Index);
+                }
+
+                alreadyParsed += trackPairs.Count; // Add the number of pairs in this track
+
+                return trackPairs;
 
             })
             .ToList();
 
         return allPairs;
+    }
+
+    private static TrackInfo GetTrackInfo(JsonElement origin)
+    {
+        int? originIndex = JsonTools.TryGetProperty("Index", origin)?.GetInt32();
+        string? originName = JsonTools.TryGetProperty("Name", origin)?.GetString();
+        int originType = JsonTools.ForceGetProperty("Type", origin).GetInt32();
+        return new TrackInfo(originIndex, originName, (TrackType)originType);
+    }
+
+    private static ISongEntry GetSongEntry(JsonElement song)
+    {
+        string songDescription = JsonTools.ForceGetProperty("Description", song).GetString() ?? string.Empty;
+        int songIndex = JsonTools.ForceGetProperty("Index", song).GetInt32();
+        DateTimeOffset songTime = JsonTools.ForceGetProperty("Time", song).GetDateTimeOffset();
+        string? songArtist = JsonTools.ForceGetProperty("Song_Artist", song).GetString();
+        string? songName = JsonTools.ForceGetProperty("Song_Name", song).GetString();
+        int songCurrentUsage = JsonTools.ForceGetProperty("CurrentUsage", song).GetInt32();
+        int songCurrentInterpretation = JsonTools.ForceGetProperty("CurrentInterpretation", song).GetInt32();
+
+        ISongEntry songEntry = new GenericEntry()
+        {
+            Description = songDescription,
+            Index = songIndex,
+            FriendlyTime = songTime,
+            Song_Artist = songArtist,
+            Song_Name = songName,
+            CurrentUsage = (TimeUsage)songCurrentUsage,
+            CurrentInterpretation = (TimeInterpretation)songCurrentInterpretation
+        };
+
+        return songEntry;
+    }
+
+    private static IGpsPoint GetGpsPoint(JsonElement point)
+    {
+        int pointIndex = JsonTools.ForceGetProperty("Index", point).GetInt32();
+        JsonElement pointLocation = JsonTools.ForceGetProperty("Location", point);
+        double pointLocationLatitude = JsonTools.ForceGetProperty("Latitude", pointLocation).GetDouble();
+        double pointLocationLongitude = JsonTools.ForceGetProperty("Longitude", pointLocation).GetDouble();
+        DateTimeOffset pointTime = JsonTools.ForceGetProperty("Time", point).GetDateTimeOffset();
+
+        IGpsPoint pointEntry = new GenericPoint()
+        {
+            Index = pointIndex,
+            Location = new Coordinate(pointLocationLatitude, pointLocationLongitude),
+            Time = pointTime
+        };
+
+        return pointEntry;
     }
 
     private List<ISongEntry> FilterSongs()
@@ -128,15 +149,15 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
         throw new Exception($"Track {trackIndex} in JsonReport expected to have {expectedCount} pairs, but had {indexes.Count}");
     }
 
-    public override int SourceSongCount => JsonTracksOnly.Select(track => track.RootElement.GetProperty("Track").EnumerateArray().Select(pair => pair.GetProperty("Song")).Count()).Sum();
+    public override int SourceSongCount => JsonTracksOnly.Select(track => track.RootElement.GetProperty("Track").EnumerateArray().Select(pair => JsonTools.ForceGetProperty("Song", pair)).Count()).Sum();
 
-    public override int SourcePointCount => JsonTracksOnly.Select(track => track.RootElement.GetProperty("Track").EnumerateArray().Select(pair => pair.GetProperty("Point")).Count()).Sum();
+    public override int SourcePointCount => JsonTracksOnly.Select(track => track.RootElement.GetProperty("Track").EnumerateArray().Select(pair => JsonTools.ForceGetProperty("Point", pair)).Count()).Sum();
 
     public override int SourceTrackCount => JsonTracksOnly.Select(track => track).Count();
 
     public override int SourcePairCount => JsonTracksOnly.Select(track => track.RootElement.GetProperty("Track").EnumerateArray().Count()).Sum();
 
-    protected override void ClearDocument()
+    protected override void DisposeDocument()
     {
         JsonObjects.ForEach(obj => obj.Dispose());
         JsonTracksOnly.ForEach(obj => obj.Dispose());
