@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using System;
 using System.Collections.Generic;
 
 namespace SpotifyGPX.Input;
@@ -7,7 +8,7 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Interfaces with song input classes, unifying all formats accepting song records.
 /// </summary>
-public partial interface ISongInput : IFileInput
+public partial interface ISongInput : IDisposable
 {
     /// <summary>
     /// Gets all songs in the file.

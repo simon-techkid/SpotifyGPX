@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace SpotifyGPX.Input;
 
-public partial class GeoJson : GpsInputBase, IDisposable
+public sealed partial class GeoJson : GpsInputBase
 {
     private JsonDocument Document { get; }
     protected override ParseTracksDelegate ParseTracksMethod => ParseTracks;

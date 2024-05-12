@@ -25,12 +25,12 @@ public abstract class GpsInputBase : GpsInputSelection, IGpsInput
     /// </summary>
     /// <returns>A list of <see cref="GpsTrack"/> objects, each <see cref="GpsTrack"/> representing a series of GPS points (<see cref="IGpsPoint"/>).</returns>
     protected delegate List<GpsTrack> FilterTracksDelegate();
-    
+
     /// <summary>
     /// Provides access to the tracks within this GPS input file, filtered according to file-specific criteria.
     /// </summary>
     protected abstract FilterTracksDelegate FilterTracksMethod { get; }
-    
+
     /// <summary>
     /// Provides access to all tracks within this GPS input file.
     /// </summary>

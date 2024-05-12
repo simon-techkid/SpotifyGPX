@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace SpotifyGPX.Input;
 
-public sealed partial class Csv : SongInputBase, IDisposable
+public sealed partial class Csv : SongInputBase
 {
     private static readonly Regex CSVRegex = MyRegex();
     private string[] Document { get; set; }

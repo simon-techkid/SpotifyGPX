@@ -1,5 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
+using System;
 using System.Collections.Generic;
 
 namespace SpotifyGPX.Input;
@@ -7,7 +8,7 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Interfaces with GPS input classes, unifying all formats accepting GPS journeys.
 /// </summary>
-public interface IGpsInput : IFileInput
+public interface IGpsInput : IDisposable
 {
     /// <summary>
     /// Gets all tracks in the file.

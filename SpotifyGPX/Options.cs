@@ -1,8 +1,8 @@
 ﻿// SpotifyGPX by Simon Field
 
+using OfficeOpenXml.Table;
 using SpotifyGPX.Input;
 using SpotifyGPX.Output;
-using OfficeOpenXml.Table;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -161,6 +161,7 @@ namespace SpotifyGPX.Input
                 ".csv" => new Csv(path),
                 ".json" => new Json(path),
                 ".jsonreport" => new JsonReport(path),
+                ".random" => new SongTest(),
                 ".xspf" => new Xspf(path),
                 _ => throw new Exception($"Unsupported song file format: {extension}"),
             };
@@ -176,6 +177,7 @@ namespace SpotifyGPX.Input
                 ".gpx" => new Gpx(path),
                 ".kml" => new Kml(path),
                 ".jsonreport" => new JsonReport(path),
+                ".random" => new PointTest(),
                 _ => throw new Exception($"Unsupported GPS file format: {extension}"),
             };
         }
