@@ -19,39 +19,22 @@ public sealed partial class Csv : TxtSaveable
     {
         IEnumerable<SongPoint> pairs = DataProvider();
 
-        string[] header = // The header line for the CSV file
-        {
-            "Title",
-            "Artist",
-            "Latitude",
-            "Longitude",
-            "Song Time",
-            "Point Time"
-        };
+        // Uncomment to include possibly null fields in the CSV
+        //string header = string.Join(Delimiter, columns.Select(column => $"\"{column.Heading}\""));
+        //string[] csvData = pairs.Select(pair => string.Join(Delimiter, columns.Select(column => $"\"{column.CellValue(pair)}\""))).ToArray();
 
-        // Convert the header to a CSV line
-        string headerString = string.Join(Delimiter, header.Select(heading => $"\"{heading}\""));
+        // Omit columns containing all null values
+        IEnumerable<ColumnDefinition> nonEmptyColumns = columns.Where(column => pairs.Any(pair => column.CellValue!(pair) != null));
+        string header = string.Join(Delimiter, nonEmptyColumns.Select(column => $"\"{column.Heading}\""));
+        string[] csvData = pairs.Select(pair => string.Join(Delimiter, nonEmptyColumns.Select(column => $"\"{column.CellValue!(pair) ?? ""}\""))).ToArray();
 
-        string[] csv = pairs.Select(pair => // Convert each pair to a CSV line
-        {
-            string?[] columns =
-            {
-                pair.Song.Song_Name,
-                pair.Song.Song_Artist,
-                pair.Point.Location.Latitude.ToString(),
-                pair.Point.Location.Longitude.ToString(),
-                pair.Song.Time.ToString(),
-                pair.Point.Time.ToString(),
-            };
+        return new[] { header }.Concat(csvData).ToArray();
+    }
 
-            return string.Join(Delimiter, columns.Select(column => $"\"{column}\""));
-        }).ToArray();
-
-        string[] csvWithHeader = new string[csv.Length + 1]; // Add one for the header line
-        csvWithHeader[0] = headerString; // Add the header line as the first element
-        Array.Copy(csv, 0, csvWithHeader, 1, csv.Length); // Copy the existing CSV lines after the header
-
-        return csvWithHeader;
+    private class ColumnDefinition
+    {
+        public string? Heading { get; set; }
+        public Func<SongPoint, object?>? CellValue { get; set; }
     }
 
     public override int Count => Document.Length - 1; // Subtract one for the header line

@@ -356,6 +356,17 @@ namespace SpotifyGPX.Output
     public partial class Csv
     {
         private const string Delimiter = ",";
+
+        private readonly List<ColumnDefinition> columns = new()
+        {
+                new() { Heading = "Title", CellValue = pair => pair.Song.Song_Name },
+                new() { Heading = "Artist", CellValue = pair => pair.Song.Song_Artist },
+                new() { Heading = "Latitude", CellValue = pair => pair.Point.Location.Latitude },
+                new() { Heading = "Longitude", CellValue = pair => pair.Point.Location.Longitude },
+                new() { Heading = "Song Time", CellValue = pair => pair.SongTime.ToString() },
+                new() { Heading = "Point Time", CellValue = pair => pair.PointTime.ToString() }
+        };
+
         protected override bool IncludeStylesheetHref => true;
         protected override string StylesheetPath => $"{FormatName}.xslt";
         protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
