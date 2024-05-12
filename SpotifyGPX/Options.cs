@@ -2,6 +2,7 @@
 
 using SpotifyGPX.Input;
 using SpotifyGPX.Output;
+using OfficeOpenXml.Table;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -340,6 +341,7 @@ namespace SpotifyGPX.Output
             { Formats.JsonReport, (pairs, trackName) => new JsonReport(pairs, trackName) },
             { Formats.Kml, (pairs, trackName) => new Kml(pairs, trackName) },
             { Formats.Txt, (pairs, trackName) => new Txt(pairs, trackName) },
+            { Formats.Xlsx, (pairs, trackName) => new Xlsx(pairs, trackName) },
             { Formats.Xspf, (pairs, trackName) => new Xspf(pairs, trackName) }
         };
     }
@@ -417,6 +419,44 @@ namespace SpotifyGPX.Output
         protected override Encoding OutputEncoding => Encoding.UTF8;
         protected override bool ForceUseOfSpecifiedSettings => false;
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
+    }
+
+    public partial class Xlsx
+    {
+        // TotalFormula Formatting:
+        // {0} = Column Letter
+        // {1} = Name of the column header
+        // {2} = Number of the first row in this column
+        // {3} = Number of the last row in this column
+
+        // Default table placement: top right corner of the table in cell A1, StartColumn = 0 and StartRow = 1
+
+        // Worksheet Settings
+        private const bool ColorSheets = true; // Add random colors to each track worksheet tab
+
+        // Table Settings
+        private const TableStyles TableStyle = TableStyles.Light1;
+        private const int StartColumn = 0; // The first column of each sheet on which to place the table
+        private const int StartRow = 1; // The first row of each sheet on which to place the table
+        private const bool CreateTotals = true; // Add total row to each track table
+
+        // TotalFormula
+        // Below commented are only compatible with Excel. They select the column by name.
+        private const string StringMode = "INDEX({0}{2}:{0}{3}, MODE.SNGL(MATCH({0}{2}:{0}{3}, {0}{2}:{0}{3}, 0)))";
+        private const string LastToFirstDiff = "INDEX({0}{2}:{0}{3}, COUNTA({0}{2}:{0}{3})) - INDEX({0}{2}:{0}{3}, 1)";
+        private const string Sum = "SUBTOTAL(109,{0}{2}:{0}{3})";
+        private const string Avg = "SUBTOTAL(101,{0}{2}:{0}{3})";
+        //private const string StringMode = "INDEX([{1}], MODE.SNGL(MATCH([{1}], [{1}], 0)))";
+        //private const string LastToFirstDiff = "INDEX([{1}], COUNTA([{1}])) - INDEX([{1}], 1)";
+        //private const string Sum = "SUBTOTAL(109,[{1}])";
+        //private const string Avg = "SUBTOTAL(101,[{1}])";
+
+        private const bool ConditionalFormatting = true;
+
+        // NumberFormat
+        private const string TimeSpan = "[h]:mm:ss";
+        private const string TimeFormat = "yyyy-mm-dd hh:mm:ss";
+        private const string Double = "0.00";
     }
 
     public partial class Xspf

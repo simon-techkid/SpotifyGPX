@@ -19,11 +19,6 @@ namespace SpotifyGPX.Output;
 /// <typeparam name="T">The source format type</typeparam>
 public abstract class SaveableBase<T> : IFileOutput
 {
-    /// <summary>
-    /// The byte encoding of the exported document.
-    /// </summary>
-    protected abstract Encoding OutputEncoding { get; }
-
     public abstract string FormatName { get; }
 
     /// <summary>
@@ -84,6 +79,11 @@ public abstract class SaveableBase<T> : IFileOutput
 /// <typeparam name="T">The source format type.</typeparam>
 public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>, ITransformableOutput
 {
+    /// <summary>
+    /// The byte encoding of the exported document.
+    /// </summary>
+    protected abstract Encoding OutputEncoding { get; }
+
     /// <summary>
     /// The <see cref="ReaderOptions"/> when reading the converted XML before transformation.
     /// </summary>
