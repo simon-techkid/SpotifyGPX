@@ -8,7 +8,7 @@ namespace SpotifyGPX;
 /// Interfaces with structs designated for GPS point records.
 /// All structs encapsulating GPS point records must implement this interface.
 /// </summary>
-public interface IGpsPoint
+public interface IGpsPoint : IInterfaceFront<IGpsPoint>
 {
     /// <summary>
     /// Unique identifier of this GPS point in a list.
