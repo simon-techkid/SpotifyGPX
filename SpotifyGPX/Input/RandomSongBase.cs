@@ -12,43 +12,25 @@ public abstract class RandomSongBase : RandomInputBase<RandomSong>, ISongInput
     {
     }
 
-    public List<ISongEntry> GetAllSongs()
-    {
-        return AllSongs;
-    }
-
-    public List<ISongEntry> GetFilteredSongs()
-    {
-        return FilteredSongs;
-    }
-
     public int SourceSongCount => 0;
     public int ParsedSongCount => AllSongs.Count;
 
-    protected delegate List<ISongEntry> ParseSongsDelegate();
-    protected delegate List<ISongEntry> FilterSongsDelegate();
-    protected abstract ParseSongsDelegate ParseSongsMethod { get; }
-    protected abstract FilterSongsDelegate FilterSongsMethod { get; }
+    public abstract ISongInput.ParseSongsDelegate ParseSongsMethod { get; }
+    public abstract ISongInput.FilterSongsDelegate FilterSongsMethod { get; }
     protected List<ISongEntry> AllSongs => ParseSongsMethod();
-    protected List<ISongEntry> FilteredSongs => FilterSongsMethod();
 
     protected override List<RandomSong> ZipAll()
     {
-        IEnumerable<DateTimeOffset> plays = GenerateDateTimeOffsets();
-        IEnumerable<DateTimeOffset> playDate = plays.Where(dt => dt.TimeOfDay >= TimeSpan.FromHours(8) && dt.TimeOfDay <= TimeSpan.FromHours(17)).ToList();
-        IEnumerable<string> songs = GenerateNumbers(UniqueSongsCount);
-        IEnumerable<string> artists = GenerateNumbers(UniqueArtistsCount);
+        List<DateTimeOffset> playDates = GenerateDateTimeOffsets()
+            .Where(TimeCheck)
+            .ToList();
 
-        var extendedSongs = ExtendCollection(songs, playDate.Count());
-        var extendedArtists = ExtendCollection(artists, playDate.Count());
-        var shuffledSongs = extendedSongs.OrderBy(x => RandomGen.Next()).ToList();
-        var shuffledArtists = extendedArtists.OrderBy(x => RandomGen.Next()).ToList();
+        IEnumerable<string> songs = ExtendCollection(GenerateNumbers(UniqueSongsCount), playDates.Count).Shuffle();
+        IEnumerable<string> artists = ExtendCollection(GenerateNumbers(UniqueArtistsCount), playDates.Count).Shuffle();
 
-        var zippedData = shuffledSongs
-            .Zip(shuffledArtists, (song, artist) => new { Song = song, Artist = artist })
-            .Zip(playDate, (pair, date) => new { pair.Song, pair.Artist, PlayDate = date });
-
-        return zippedData.Select(data => new RandomSong { Song = data.Song, Artist = data.Artist, Time = data.PlayDate }).ToList();
+        return songs.Zip(artists, (song, artist) => new { song, artist })
+            .Zip(playDates, (pair, date) => new RandomSong { Song = pair.song, Artist = pair.artist, Time = date })
+            .ToList();
     }
 
     /// <summary>
@@ -159,4 +141,14 @@ public struct RandomSong
     public string Artist { get; set; }
     public string Song { get; set; }
     public DateTimeOffset Time { get; set; }
+}
+
+public static class EnumerableExtensions
+{
+    private static readonly Random random = new();
+
+    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
+    {
+        return source.OrderBy(_ => random.Next());
+    }
 }

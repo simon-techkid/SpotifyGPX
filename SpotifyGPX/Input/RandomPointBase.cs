@@ -12,54 +12,57 @@ public abstract class RandomPointBase : RandomInputBase<RandomPoint>, IGpsInput
     {
     }
 
-    public List<GpsTrack> GetAllTracks()
-    {
-        return AllTracks;
-    }
-
+    /* Skip track selection for random tracks
     public List<GpsTrack> GetSelectedTracks()
     {
         return AllTracks;
     }
+    */
 
-    public List<GpsTrack> GetFilteredTracks()
-    {
-        return AllTracks;
-    }
-
-
-    public int SourceTrackCount => AllPoints.GroupBy(point => point.Time.Date).Count();
-    public int SourcePointCount => 0;
-    public int ParsedTrackCount => AllTracks.Count;
-    public int ParsedPointCount => AllPoints.Count;
+    private const double EarthRadiusKm = 6371.0;
 
     protected delegate List<IGpsPoint> ParsePointsDelegate();
     protected abstract ParsePointsDelegate ParsePointsMethod { get; }
-
-    protected delegate List<GpsTrack> ParseTracksDelegate();
-    protected abstract ParseTracksDelegate ParseTracksMethod { get; }
-    protected List<GpsTrack> AllTracks => ParseTracksMethod();
+    public abstract IGpsInput.ParseTracksDelegate ParseTracksMethod { get; }
+    public abstract IGpsInput.FilterTracksDelegate FilterTracksMethod { get; }
     protected List<IGpsPoint> AllPoints => ParsePointsMethod();
-    protected virtual double CenterLatitude => 44.918516; // Libourne, France
-    protected virtual double CenterLongitude => -0.245090; // Libourne, France
+    protected List<GpsTrack> AllTracks => ParseTracksMethod();
+
+    /// <summary>
+    /// The latitude of the center of the generated points.
+    /// </summary>
+    protected abstract double CenterLatitude { get; }
+
+    /// <summary>
+    /// The longitude of the center of the generated points.
+    /// </summary>
+    protected abstract double CenterLongitude { get; }
+
+    /// <summary>
+    /// The radius, in kilometers, from <see cref="CenterLatitude"/> and <see cref="CenterLongitude"/>, in point generation.
+    /// </summary>
+    protected abstract double GenerationRadius { get; }
+
+    /// <summary>
+    /// The interval in seconds between each randomly generated point.
+    /// </summary>
+    protected abstract int PointPlacementIntervalSeconds { get; }
+
+    
 
     protected override List<RandomPoint> ZipAll()
     {
-        IEnumerable<DateTimeOffset> timestamps = GenerateDateTimeOffsets();
-        Coordinate[] coordinates = GenerateRandomCoordinates(10, timestamps.Count());
+        IEnumerable<DateTimeOffset> timestamps = 
+            GenerateDateTimeOffsets()
+            .Where(TimeCheck);
+
+        IEnumerable<Coordinate> coordinates = GenerateRandomCoordinates(GenerationRadius, timestamps.Count());
 
         var zippedData = timestamps
             .Zip(coordinates, (time, location) => new { Time = time, Location = location });
 
         return zippedData.Select(data => new RandomPoint { Time = data.Time, Location = data.Location }).ToList();
     }
-
-    private const double EarthRadiusKm = 6371.0;
-
-    /// <summary>
-    /// The interval in seconds between each randomly generated point.
-    /// </summary>
-    protected abstract int PointPlacementIntervalSeconds { get; }
 
     protected override IEnumerable<DateTimeOffset> GenerateDateTimeOffsets()
     {
@@ -78,36 +81,45 @@ public abstract class RandomPointBase : RandomInputBase<RandomPoint>, IGpsInput
         }
     }
 
-    protected Coordinate[] GenerateRandomCoordinates(double radius, int count)
+    private IEnumerable<Coordinate> GenerateRandomCoordinates(double radiusKm, int count)
     {
-        Coordinate[] coordinates = new Coordinate[count];
-
         for (int i = 0; i < count; i++)
         {
-            double angle = RandomGen.NextDouble() * 2 * Math.PI;
-            double distance = Math.Sqrt(RandomGen.NextDouble()) * radius;
-
-            double latitudeOffset = distance / EarthRadiusKm * (180 / Math.PI);
-            double longitudeOffset = distance / (EarthRadiusKm * Math.Cos(Math.PI * CenterLatitude / 180)) * (180 / Math.PI);
-
-            double newLatitude = CenterLatitude + latitudeOffset * (RandomGen.Next(2) == 1 ? 1 : -1);
-            double newLongitude = CenterLongitude + longitudeOffset * (RandomGen.Next(2) == 1 ? 1 : -1);
-
-            coordinates[i] = new Coordinate(newLatitude, newLongitude);
+            yield return GenerateRandomCoordinate(radiusKm);
         }
-
-        return coordinates;
     }
 
-    protected static bool IsWithinBounds(double latitude, double longitude)
+    private Coordinate GenerateRandomCoordinate(double radiusKm)
     {
-        return latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
+        double distance = radiusKm * Math.Sqrt(RandomGen.NextDouble());
+        double angle = RandomGen.NextDouble() * 2 * Math.PI;
+        double distanceRadians = distance / EarthRadiusKm;
+
+        double centerLatRadians = Coordinate.ToRadians(CenterLatitude);
+        double centerLonRadians = Coordinate.ToRadians(CenterLongitude);
+
+        double newLat = Math.Asin(
+            Math.Sin(centerLatRadians) *
+            Math.Cos(distanceRadians) +
+            Math.Cos(centerLatRadians) *
+            Math.Sin(distanceRadians) *
+            Math.Cos(angle));
+
+        double newLon = centerLonRadians +
+                        Math.Atan2(Math.Sin(angle) *
+                        Math.Sin(distanceRadians) *
+                        Math.Cos(centerLatRadians),
+                                   Math.Cos(distanceRadians) -
+                                   Math.Sin(centerLatRadians) *
+                                   Math.Sin(newLat));
+
+        return new Coordinate(Coordinate.ToDegrees(newLat), Coordinate.ToDegrees(newLon));
     }
 
-    protected static bool IsWithinBounds(Coordinate coordinate)
-    {
-        return IsWithinBounds(coordinate.Latitude, coordinate.Longitude);
-    }
+    public int SourceTrackCount => AllPoints.GroupBy(point => point.Time.Date).Count();
+    public int SourcePointCount => 0;
+    public int ParsedTrackCount => AllTracks.Count;
+    public int ParsedPointCount => AllPoints.Count;
 }
 
 public struct RandomPoint

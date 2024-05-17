@@ -16,65 +16,28 @@ public abstract class PairInputBase : FileInputBase, ISongInput, IGpsInput, IPai
     }
 
     // Pairs
-    /// <summary>
-    /// A delegate for the method that parses the pairs from the file.
-    /// </summary>
-    /// <returns>A list of <see cref="SongPoint"/> objects, each <see cref="SongPoint"/> representing a paired <see cref="ISongEntry"/> and <see cref="IGpsPoint"/>.</returns>
-    protected delegate List<SongPoint> ParsePairsDelegate();
 
-    /// <summary>
-    /// Provides the method that parses the <see cref="SongPoint"/> pairs from the file.
-    /// </summary>
-    protected abstract ParsePairsDelegate ParsePairsMethod { get; }
-
-    /// <summary>
-    /// Access all pairs in this song-point pairing data file.
-    /// </summary>
-    protected virtual List<SongPoint> AllPairs => ParsePairsMethod();
-    public virtual List<SongPoint> GetAllPairs() => AllPairs;
+    public abstract IPairInput.ParsePairsDelegate ParsePairsMethod { get; }
+    public abstract IPairInput.FilterPairsDelegate FilterPairsMethod { get; }
+    protected List<SongPoint> AllPairs => ParsePairsMethod();
     public abstract int SourcePairCount { get; }
     public virtual int ParsedPairCount => AllPairs.Count;
 
     // Songs
-    /// <summary>
-    /// A delegate for the method that filters the songs based on the file-specific filters.
-    /// </summary>
-    /// <returns></returns>
-    protected delegate List<ISongEntry> FilterSongsDelegate();
 
-    /// <summary>
-    /// Provides the method that filters the songs based on the file-specific filters.
-    /// </summary>
-    protected abstract FilterSongsDelegate FilterSongsMethod { get; }
-
-    public virtual List<ISongEntry> GetAllSongs() => AllPairs.Select(pair => pair.Song).ToList();
-    public virtual List<ISongEntry> GetFilteredSongs() => FilterSongsMethod();
-    public virtual List<ISongEntry> GetFilteredSongs(List<GpsTrack> gpsTracks)
-    {
-        List<ISongEntry> FilteredSongs = GetFilteredSongs(); // Filter songs based on file-specific filters first
-
-        var trackRange = gpsTracks.Select(track => (track.Start, track.End)).ToList();
-
-        // You may add other filtration options below, within the .Any() statement:
-
-        FilteredSongs = AllPairs.Where(pair => // If the spotify entry
-            trackRange.Any(trackTimes => pair.Song.WithinTimeFrame(trackTimes.Start, trackTimes.End))).Select(pair => pair.Song) // Within the time range of tracks
-            .ToList(); // Send the songs passing the filter to a list
-
-        Console.WriteLine($"[INP] {FilteredSongs.Count} songs filtered from {ParsedSongCount} total");
-
-        return FilteredSongs;
-    }
-
+    public virtual ISongInput.ParseSongsDelegate ParseSongsMethod => GetAllSongs;
+    public abstract ISongInput.FilterSongsDelegate FilterSongsMethod { get; }
+    protected List<ISongEntry> AllSongs => AllPairs.Select(pair => pair.Song).ToList();
+    protected List<ISongEntry> GetAllSongs() => AllSongs;
     public abstract int SourceSongCount { get; }
     public int ParsedSongCount => AllPairs.Select(pair => pair.Song).Count();
 
-    // GPS
-    protected delegate List<GpsTrack> FilterTracksDelegate();
-    protected abstract FilterTracksDelegate FilterTracksMethod { get; }
+    // GPS Points
+
+    public virtual IGpsInput.ParseTracksDelegate ParseTracksMethod => GetAllTracks;
+    public abstract IGpsInput.FilterTracksDelegate FilterTracksMethod { get; }
     protected List<GpsTrack> AllTracks => AllPairs.GroupBy(pair => pair.Origin).Select(type => new GpsTrack(type.Key.Index, type.Key.Name, type.Key.Type, type.Select(pair => pair.Point).ToList())).ToList();
-    public List<GpsTrack> GetAllTracks() => AllTracks;
-    public List<GpsTrack> GetFilteredTracks() => FilterTracksMethod();
+    protected virtual List<GpsTrack> GetAllTracks() => AllTracks;
     public abstract int SourcePointCount { get; }
     public int ParsedPointCount => AllPairs.Select(pair => pair.Point).Count();
     public abstract int SourceTrackCount { get; }

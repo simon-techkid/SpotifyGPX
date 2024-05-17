@@ -199,11 +199,6 @@ namespace SpotifyGPX.Input
         private const TimeInterpretation DefaultInterpretation = TimeInterpretation.Start;
     }
 
-    public partial class GpsInputSelection
-    {
-        
-    }
-
     public partial interface IGpsInput
     {
         private static Dictionary<string, Func<IEnumerable<GpsTrack>, IEnumerable<GpsTrack>>> MultiTrackFilters => new()
@@ -277,6 +272,7 @@ namespace SpotifyGPX.Input
         private static JsonSerializerOptions JsonOptions => Options.JsonReportOptions;
 
         // Tolerance filters
+        private static readonly Func<SongPoint, bool> pairFilter = pair => true; // No filtering for JsonReport song-point data
         private static readonly Func<ISongEntry, bool> songFilter = song => true; // No filtering for JsonReport song-only data
         private static readonly Func<GenericPoint, bool> pointFilter = pair => true; // No filtering for JsonReport song-point data
     }

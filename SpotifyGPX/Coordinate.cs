@@ -154,8 +154,13 @@ public readonly struct Coordinate :
         return R * c; // Distance in km
     }
 
-    public static double ToRadians(double angle)
-    {
-        return Math.PI * angle / 180.0;
-    }
+    public static double ToRadians(double angle) => Math.PI * angle / 180.0;
+
+    public static double ToDegrees(double radians) => radians * 180.0 / Math.PI;
+
+    public static bool IsWithinBounds(double latitude, double longitude) =>
+        latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
+
+    public bool IsWithinBounds() => IsWithinBounds(Latitude, Longitude);
+
 }

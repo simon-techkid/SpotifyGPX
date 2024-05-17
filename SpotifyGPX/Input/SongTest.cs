@@ -8,9 +8,9 @@ namespace SpotifyGPX.Input;
 
 public sealed partial class SongTest : RandomSongBase
 {
-    protected override ParseSongsDelegate ParseSongsMethod => ParseSongs;
-    protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
-    protected override DateOnly GeneratorStartDate => DateOnly.FromDateTime(DateTime.Now - TimeSpan.FromDays(5));
+    public override ISongInput.ParseSongsDelegate ParseSongsMethod => ParseSongs;
+    public override ISongInput.FilterSongsDelegate FilterSongsMethod => FilterSongs;
+    protected override DateOnly GeneratorStartDate => DateOnly.FromDateTime(DateTime.Now - TimeSpan.FromDays(365));
     protected override DateOnly GeneratorEndDate => DateOnly.FromDateTime(DateTime.Now);
     protected override TimeOnly DayStartTime => new(PlaybackStartHour, 0);
     protected override TimeOnly DayEndTime => new(PlaybackEndHour, 0);
@@ -36,7 +36,9 @@ public sealed partial class SongTest : RandomSongBase
                 Index = index,
                 Song_Artist = $"Artist{random.Artist}",
                 Song_Name = $"Song{random.Song}",
-                FriendlyTime = random.Time
+                FriendlyTime = random.Time,
+                CurrentUsage = TimeUsage.Start,
+                CurrentInterpretation = TimeInterpretation.Start
             };
         }).ToList();
     }

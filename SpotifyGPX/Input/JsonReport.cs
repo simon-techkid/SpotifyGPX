@@ -12,9 +12,10 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
     private List<JsonDocument> JsonObjects { get; }
     private JsonElement Header => JsonObjects.First().RootElement;
     private List<JsonDocument> JsonTracksOnly { get; }
-    protected override ParsePairsDelegate ParsePairsMethod => GetFromJObject;
-    protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
-    protected override FilterTracksDelegate FilterTracksMethod => FilterTracks;
+    public override IPairInput.ParsePairsDelegate ParsePairsMethod => GetFromJObject;
+    public override IPairInput.FilterPairsDelegate FilterPairsMethod => FilterPairs;
+    public override ISongInput.FilterSongsDelegate FilterSongsMethod => FilterSongs;
+    public override IGpsInput.FilterTracksDelegate FilterTracksMethod => FilterTracks;
 
     public JsonReport(string path) : base(path)
     {
@@ -135,12 +136,17 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
 
     private List<ISongEntry> FilterSongs()
     {
-        return AllPairs.Select(pair => pair.Song).Where(pair => songFilter(pair) == true).ToList();
+        return AllPairs.Select(pair => pair.Song).Where(song => songFilter(song) == true).ToList();
     }
 
     private List<GpsTrack> FilterTracks()
     {
         return AllTracks.Where(track => track.OfType<GenericPoint>().All(point => pointFilter(point))).ToList();
+    }
+
+    private List<SongPoint> FilterPairs()
+    {
+        return AllPairs.Where(pair => pairFilter(pair) == true).ToList();
     }
 
     private static void VerifyQuantity(int start, int expectedCount, List<int> indexes, int trackIndex)

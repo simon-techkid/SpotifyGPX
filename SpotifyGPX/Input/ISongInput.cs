@@ -12,16 +12,38 @@ namespace SpotifyGPX.Input;
 public partial interface ISongInput : IDisposable
 {
     /// <summary>
-    /// Gets all songs in the file.
+    /// Gets all songs as <see cref="ISongEntry"/> objects from the file.
     /// </summary>
-    /// <returns>A list of <see cref="ISongEntry"/> objects, each representing the playback record of a song.</returns>
-    List<ISongEntry> GetAllSongs();
+    /// <returns>A <see cref="List{T}"/> of <see cref="ISongEntry"/> objects, each representing the playback record of a song.</returns>
+    List<ISongEntry> GetAllSongs() => ParseSongsMethod();
 
     /// <summary>
-    /// Filters the songs in the file by the song format's specified filter parameters.
+    /// Gets filtered songs as <see cref="ISongEntry"/> objects in the file using the song format's specified filter parameters.
     /// </summary>
-    /// <returns>A list of <see cref="ISongEntry"/> objects, each representing the playback record of a song.</returns>
-    List<ISongEntry> GetFilteredSongs();
+    /// <returns>A <see cref="List{T}"/> of <see cref="ISongEntry"/> objects, each representing the playback record of a song.</returns>
+    List<ISongEntry> GetFilteredSongs() => FilterSongsMethod();
+
+    /// <summary>
+    /// A <see langword="delegate"/> for the method that parses the <see cref="ISongEntry"/> objects from the file.
+    /// </summary>
+    /// <returns>A <see cref="List{T}"/> of <see cref="ISongEntry"/> objects.</returns>
+    public delegate List<ISongEntry> ParseSongsDelegate();
+
+    /// <summary>
+    /// A <see langword="delegate"/> for the method that parses and filters the <see cref="ISongEntry"/> objects based on the file-specific filters.
+    /// </summary>
+    /// <returns>A filtered <see cref="List{T}"/> of <see cref="ISongEntry"/> objects.</returns>
+    public delegate List<ISongEntry> FilterSongsDelegate();
+
+    /// <summary>
+    /// Provides access to the method that parses the <see cref="ISongEntry"/> objects from the file.
+    /// </summary>
+    ParseSongsDelegate ParseSongsMethod { get; }
+
+    /// <summary>
+    /// Provides access to the method that parses and filters the <see cref="ISongEntry"/> objects with file-specific filters.
+    /// </summary>
+    FilterSongsDelegate FilterSongsMethod { get; }
 
     /// <summary>
     /// Filters the songs in the file by ensuring the returned songs' <see cref="ISongEntry.Time"/> fall within the provided <see cref="GpsTrack"/> objects.

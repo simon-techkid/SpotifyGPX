@@ -12,8 +12,8 @@ public sealed partial class Csv : SongInputBase
 {
     private static readonly Regex CSVRegex = MyRegex();
     private string[] Document { get; set; }
-    protected override ParseSongsDelegate ParseSongsMethod => ParseSongs;
-    protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
+    public override ISongInput.ParseSongsDelegate ParseSongsMethod => ParseSongs;
+    public override ISongInput.FilterSongsDelegate FilterSongsMethod => FilterSongs;
 
     public Csv(string path) : base(path)
     {

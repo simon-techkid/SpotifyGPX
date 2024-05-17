@@ -16,12 +16,12 @@ public abstract class RandomInputBase<T> : IDisposable
     /// The random number generator for the <typeparamref name="T"/> generator.
     /// </summary>
     protected Random RandomGen { get; }
-    
+
     /// <summary>
     /// The seed value for the random number generator, <see cref="RandomGen"/>.
     /// </summary>
     protected virtual int? RandomSeed => new Random().Next();
-    
+
     /// <summary>
     /// The start date of the <typeparamref name="T"/> generator.
     /// This value represents the first date of the <typeparamref name="T"/> generator's range.
@@ -45,6 +45,11 @@ public abstract class RandomInputBase<T> : IDisposable
     /// This value represents the last time of the <typeparamref name="T"/> generator's range.
     /// </summary>
     protected abstract TimeOnly DayEndTime { get; }
+
+    /// <summary>
+    /// Ensure that the time of day is within the range of <see cref="DayStartTime"/> and <see cref="DayEndTime"/>.
+    /// </summary>
+    protected Func<DateTimeOffset, bool> TimeCheck => dt => dt.TimeOfDay >= TimeSpan.FromHours(DayStartTime.Hour) && dt.TimeOfDay <= TimeSpan.FromHours(DayEndTime.Hour);
 
     /// <summary>
     /// The first <see cref="DateTimeOffset"/> of the <typeparamref name="T"/> generator.

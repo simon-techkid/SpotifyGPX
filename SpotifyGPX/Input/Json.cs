@@ -10,8 +10,8 @@ namespace SpotifyGPX.Input;
 public sealed partial class Json : SongInputBase
 {
     private List<JsonDocument> AllEntries { get; }
-    protected override ParseSongsDelegate ParseSongsMethod => ParseSongs;
-    protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
+    public override ISongInput.ParseSongsDelegate ParseSongsMethod => ParseSongs;
+    public override ISongInput.FilterSongsDelegate FilterSongsMethod => FilterSongs;
 
     public Json(string path) : base(path)
     {
