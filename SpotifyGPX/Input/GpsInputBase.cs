@@ -8,7 +8,7 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// The base class for all classes supporting the parsing of GPS journey files. All classes that handle GPS journey files must inherit this class.
 /// </summary>
-public abstract class GpsInputBase : GpsInputSelection, IGpsInput
+public abstract class GpsInputBase : FileInputBase, IGpsInput
 {
     protected GpsInputBase(string path) : base(path)
     {
@@ -41,7 +41,7 @@ public abstract class GpsInputBase : GpsInputSelection, IGpsInput
     /// </summary>
     protected virtual List<GpsTrack> AllTracks => ParseTracksMethod();
 
-    public override List<GpsTrack> GetAllTracks() => AllTracks;
+    public List<GpsTrack> GetAllTracks() => AllTracks;
     public List<GpsTrack> GetFilteredTracks() => FilterTracksMethod();
     public abstract int SourceTrackCount { get; }
     public int ParsedTrackCount => AllTracks.Count;

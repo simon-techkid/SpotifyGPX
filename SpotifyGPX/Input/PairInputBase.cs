@@ -9,7 +9,7 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// The base class for all classes supporting the parsing of song-point pairing files. All classes that handle song-point pairing files must inherit this class.
 /// </summary>
-public abstract class PairInputBase : GpsInputSelection, ISongInput, IGpsInput, IPairInput
+public abstract class PairInputBase : FileInputBase, ISongInput, IGpsInput, IPairInput
 {
     protected PairInputBase(string path) : base(path)
     {
@@ -73,7 +73,7 @@ public abstract class PairInputBase : GpsInputSelection, ISongInput, IGpsInput, 
     protected delegate List<GpsTrack> FilterTracksDelegate();
     protected abstract FilterTracksDelegate FilterTracksMethod { get; }
     protected List<GpsTrack> AllTracks => AllPairs.GroupBy(pair => pair.Origin).Select(type => new GpsTrack(type.Key.Index, type.Key.Name, type.Key.Type, type.Select(pair => pair.Point).ToList())).ToList();
-    public override List<GpsTrack> GetAllTracks() => AllTracks;
+    public List<GpsTrack> GetAllTracks() => AllTracks;
     public List<GpsTrack> GetFilteredTracks() => FilterTracksMethod();
     public abstract int SourcePointCount { get; }
     public int ParsedPointCount => AllPairs.Select(pair => pair.Point).Count();

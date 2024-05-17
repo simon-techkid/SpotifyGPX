@@ -201,6 +201,11 @@ namespace SpotifyGPX.Input
 
     public partial class GpsInputSelection
     {
+        
+    }
+
+    public partial interface IGpsInput
+    {
         private static Dictionary<string, Func<IEnumerable<GpsTrack>, IEnumerable<GpsTrack>>> MultiTrackFilters => new()
         {
             { "A", allTracks => allTracks.Where(track => track.Track.Type == TrackType.Gps) },
@@ -286,6 +291,18 @@ namespace SpotifyGPX.Input
 
         // Tolerance filters
         private static readonly Func<KmlPoint, bool> filter = point => true; // No filtering
+    }
+
+    public partial class PointTest
+    {
+        private const int DriveStartHour = 8; // Drive simulated start time, 8am/08:00
+        private const int DriveEndHour = 17; // Drive simulated end time, 5pm/17:00
+    }
+
+    public partial class SongTest
+    {
+        private const int PlaybackStartHour = 7; // Music playback simulated start time, 7am/07:00
+        private const int PlaybackEndHour = 23; // Music playback simulated end time, 11pm/23:00
     }
 
     public partial class Xspf

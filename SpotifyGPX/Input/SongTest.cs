@@ -6,15 +6,14 @@ using System.Linq;
 
 namespace SpotifyGPX.Input;
 
-public sealed class SongTest : RandomSongBase
+public sealed partial class SongTest : RandomSongBase
 {
     protected override ParseSongsDelegate ParseSongsMethod => ParseSongs;
+    protected override FilterSongsDelegate FilterSongsMethod => FilterSongs;
     protected override DateOnly GeneratorStartDate => DateOnly.FromDateTime(DateTime.Now - TimeSpan.FromDays(5));
     protected override DateOnly GeneratorEndDate => DateOnly.FromDateTime(DateTime.Now);
     protected override TimeOnly DayStartTime => new(PlaybackStartHour, 0);
     protected override TimeOnly DayEndTime => new(PlaybackEndHour, 0);
-    private const int PlaybackStartHour = 7; // Music playback begin before drive
-    private const int PlaybackEndHour = 23; // Music playback end after drive
     protected override TimeSpan TimeZone => new(0, 0, 0); // simulate Spotify UTC timing
     protected override int IntervalSecondsMin => 120; // simulate 2 minute minimum song length
     protected override int IntervalSecondsMax => 330; // simulate 5.5 minute maximum song length
@@ -33,12 +32,17 @@ public sealed class SongTest : RandomSongBase
         {
             return (ISongEntry)new GenericEntry
             {
-                Description = "A random song",
+                Description = "A randomly generated song",
                 Index = index,
                 Song_Artist = $"Artist{random.Artist}",
                 Song_Name = $"Song{random.Song}",
                 FriendlyTime = random.Time
             };
         }).ToList();
+    }
+
+    private List<ISongEntry> FilterSongs()
+    {
+        return AllSongs;
     }
 }

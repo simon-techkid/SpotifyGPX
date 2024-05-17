@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace SpotifyGPX.Input;
 
-public sealed class PointTest : RandomPointBase
+public sealed partial class PointTest : RandomPointBase
 {
     protected override ParsePointsDelegate ParsePointsMethod => ParsePoints;
     protected override ParseTracksDelegate ParseTracksMethod => PointsToTracks;
@@ -14,8 +14,6 @@ public sealed class PointTest : RandomPointBase
     protected override DateOnly GeneratorEndDate => DateOnly.FromDateTime(DateTime.Now);
     protected override TimeOnly DayStartTime => new(DriveStartHour, 0);
     protected override TimeOnly DayEndTime => new(DriveEndHour, 0);
-    private const int DriveStartHour = 8; // Music playback begin before drive
-    private const int DriveEndHour = 17; // Music playback end after drive
     protected override TimeSpan TimeZone => new(2, 0, 0);
     protected override int PointPlacementIntervalSeconds => 15; // simulate 15 second GPS point interval
 
@@ -46,5 +44,4 @@ public sealed class PointTest : RandomPointBase
             return new GpsTrack(index, tn, TrackType.Gps, day.Select(point => (IGpsPoint)new GenericPoint { Location = point.Location, Time = point.Time }).ToList());
         }).ToList();
     }
-
 }

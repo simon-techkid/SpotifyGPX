@@ -7,13 +7,21 @@ namespace SpotifyGPX.Input;
 
 public abstract class RandomInputBase<T> : IDisposable
 {
+    protected RandomInputBase()
+    {
+        RandomGen = RandomSeed.HasValue ? new Random(RandomSeed.Value) : new Random();
+    }
+
+    /// <summary>
+    /// The random number generator for the <typeparamref name="T"/> generator.
+    /// </summary>
     protected Random RandomGen { get; }
+    
+    /// <summary>
+    /// The seed value for the random number generator, <see cref="RandomGen"/>.
+    /// </summary>
     protected virtual int? RandomSeed => new Random().Next();
-
-    protected virtual int MinTimesPerDay => 100;
-    protected virtual int MinRandomNumber => 0;
-    protected virtual int MaxRandomNumber => 100;
-
+    
     /// <summary>
     /// The start date of the <typeparamref name="T"/> generator.
     /// This value represents the first date of the <typeparamref name="T"/> generator's range.
@@ -58,11 +66,6 @@ public abstract class RandomInputBase<T> : IDisposable
     /// The time zone representing the zone of all <typeparamref name="T"/> objects' time values.
     /// </summary>
     protected abstract TimeSpan TimeZone { get; }
-
-    protected RandomInputBase()
-    {
-        RandomGen = RandomSeed.HasValue ? new Random(RandomSeed.Value) : new Random();
-    }
 
     /// <summary>
     /// Creates a list of type <typeparamref name="T"/> with a random count of elements.

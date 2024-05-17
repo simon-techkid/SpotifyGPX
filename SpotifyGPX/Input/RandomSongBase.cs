@@ -17,22 +17,20 @@ public abstract class RandomSongBase : RandomInputBase<RandomSong>, ISongInput
         return AllSongs;
     }
 
-    public List<ISongEntry> GetFilteredSongs(List<GpsTrack> gpsTrack)
-    {
-        return AllSongs;
-    }
-
     public List<ISongEntry> GetFilteredSongs()
     {
-        return AllSongs;
+        return FilteredSongs;
     }
 
     public int SourceSongCount => 0;
     public int ParsedSongCount => AllSongs.Count;
 
     protected delegate List<ISongEntry> ParseSongsDelegate();
+    protected delegate List<ISongEntry> FilterSongsDelegate();
     protected abstract ParseSongsDelegate ParseSongsMethod { get; }
+    protected abstract FilterSongsDelegate FilterSongsMethod { get; }
     protected List<ISongEntry> AllSongs => ParseSongsMethod();
+    protected List<ISongEntry> FilteredSongs => FilterSongsMethod();
 
     protected override List<RandomSong> ZipAll()
     {
@@ -59,6 +57,16 @@ public abstract class RandomSongBase : RandomInputBase<RandomSong>, ISongInput
     /// This value may be overriden, but the default value is 8.
     /// </summary>
     protected virtual int StringLength => 8;
+
+    /// <summary>
+    /// The floor (minimum) random number to generate.
+    /// </summary>
+    protected virtual int MinRandomNumber => 0;
+
+    /// <summary>
+    /// The ceiling (maximum) random number to generate.
+    /// </summary>
+    protected virtual int MaxRandomNumber => 100;
 
     /// <summary>
     /// The minimum length of a randomized song.

@@ -51,20 +51,4 @@ public abstract partial class SongInputBase : FileInputBase, ISongInput
     // Filtered Songs
     protected virtual List<ISongEntry> FilteredSongs => FilterSongsMethod();
     public virtual List<ISongEntry> GetFilteredSongs() => FilteredSongs;
-    public virtual List<ISongEntry> GetFilteredSongs(List<GpsTrack> gpsTracks)
-    {
-        List<ISongEntry> filtered = FilteredSongs; // Filter songs based on file-specific filters first
-
-        var trackRange = gpsTracks.Select(track => (track.Start, track.End)).ToList();
-
-        // You may add other filtration options below, within the .Any() statement:
-
-        filtered = AllSongs.Where(spotifyEntry => // If the spotify entry
-            trackRange.Any(trackTimes => spotifyEntry.WithinTimeFrame(trackTimes.Start, trackTimes.End))) // Within the time range of tracks
-            .ToList(); // Send the songs passing the filter to a list
-
-        Console.WriteLine($"[INP] {filtered.Count} songs filtered from {AllSongs.Count} total");
-
-        return filtered;
-    }
 }
