@@ -9,7 +9,7 @@ namespace SpotifyGPX;
 /// Interfaces with structs designated for song playback records.
 /// All structs encapsulating song playback records must implement this interface.
 /// </summary>
-public interface ISongEntry
+public interface ISongEntry : IInterfaceFront<ISongEntry>
 {
     /// <summary>
     /// The description of this song, as printed to description fields.
@@ -97,20 +97,4 @@ public interface ISongEntry
     /// <param name="End">The end of the time frame.</param>
     /// <returns>True, if this song is between the given start and end times. False, if this song is outside the provided time frame.</returns>
     public bool WithinTimeFrame(DateTimeOffset Start, DateTimeOffset End) => (Time >= Start) && (Time <= End);
-
-    /// <summary>
-    /// Get a property value from this <see cref="ISongEntry"/>, assuming it is of the specified type <typeparamref name="T"/>.
-    /// </summary>
-    /// <typeparam name="T">The type of object the targeted property belongs to. <see cref="ISongEntry"/> must implement <typeparamref name="T"/></typeparam>
-    /// <param name="propertySelector">The property of object type <typeparamref name="T"/> to return.</param>
-    /// <returns>If <see cref="ISongEntry"/> is <typeparamref name="T"/>, the selected object <see cref="object"/>. Otherwise, null.</returns>
-    public object? GetPropertyValue<T>(Func<T, object?> propertySelector)
-    {
-        if (this is T songFormat)
-        {
-            return propertySelector(songFormat);
-        }
-
-        return null;
-    }
 }
