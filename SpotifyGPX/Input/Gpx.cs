@@ -21,7 +21,7 @@ public sealed partial class Gpx : GpsInputBase
     private List<GpsTrack> ParseTracks()
     {
         return Document.Descendants(InputNs + Track)
-            .Select((trk, index) => new GpsTrack( // For each track and its index, create a new GPXTrack
+            .Select((trk, index) => new GpsTrack( // For each track and its index, create a new GpsTrack
                 index,
                 trk.Element(InputNs + "name")?.Value,
                 TrackType.Gps,
@@ -34,9 +34,9 @@ public sealed partial class Gpx : GpsInputBase
                             double.Parse(trkpt.Attribute("lon")?.Value ?? throw new Exception($"GPX 'lon' cannot be null, check your GPX"))
                         ),
                         Time = DateTimeOffset.ParseExact(trkpt.Element(InputNs + "time")?.Value ?? throw new Exception($"GPX 'time' cannot be null, check your GPX"), TimeFormat, null, TimeStyle)
-                    }).ToList() // Send all points to List<GPXPoint>
+                    }).ToList() // Send all points to list
             ))
-            .ToList(); // Send all tracks to List<GPXTrack>
+            .ToList(); // Send all tracks to list
     }
 
     private List<GpsTrack> FilterTracks()

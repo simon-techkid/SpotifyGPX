@@ -28,11 +28,11 @@ public readonly struct SongPoint
     }
 
     /// <summary>
-    /// Create a new SongPoint pairing.
+    /// Create a new <see cref="SongPoint"/> pairing.
     /// </summary>
     /// <param name="index">The index of this SongPoint (in a created list).</param>
-    /// <param name="song">The SpotifyEntry (containing song data) of this pair's song.</param>
-    /// <param name="point">The GPXPoint (containing geospatial data) of this pair's point.</param>
+    /// <param name="song">The ISongEntry (containing song data) of this pair's song.</param>
+    /// <param name="point">The IGpsPoint (containing geospatial data) of this pair's point.</param>
     /// <param name="origin">The TrackInfo (track information) about the track from which this pair was created.</param>
     public SongPoint(int index, ISongEntry song, IGpsPoint point, TrackInfo origin)
     {
@@ -44,10 +44,10 @@ public readonly struct SongPoint
     }
 
     /// <summary>
-    /// Creates a SongPoint pairing with a new Coordinate (lat/lon), based on an existing SongPoint pairing.
+    /// Creates a <see cref="SongPoint"/> pairing with a new Coordinate (lat/lon), based on an existing SongPoint pairing.
     /// </summary>
-    /// <param name="oldPair">An existing SongPoint pairing.</param>
-    /// <param name="newCoord">The new coordinate for this SongPoint.</param>
+    /// <param name="oldPair">An existing <see cref="SongPoint"/> pairing.</param>
+    /// <param name="newCoord">The new <see cref="Coordinate"/> for this <see cref="SongPoint"/>.</param>
     /// <param name="relIndex">The index of this prediction in a set of predictions.</param>
     public SongPoint(SongPoint oldPair, Coordinate newCoord, int relIndex) // Used for prediction only
     {
@@ -142,7 +142,7 @@ public readonly struct SongPoint
     /// <returns>A single line (to be printed to the console), representing this pairing.</returns>
     public override string ToString()
     {
-        // Set both the song and point times to the UTC offset provided by the original GPX point
+        // Set both the song and point times to the UTC offset provided by the original GPS point
         string songTime = SongTime.ToString(Options.TimeOnly);
         string pointTime = PointTime.ToString(Options.TimeOnly);
 

@@ -16,7 +16,7 @@ public readonly struct GpsTrack : IEnumerable<IGpsPoint>
     /// </summary>
     /// <param name="index">The index of this track (in a series of tracks)</param>
     /// <param name="name">The friendly name of this track.</param>
-    /// <param name="type">The type of this track (GPX, Gap, or Combined).</param>
+    /// <param name="type">The type of this track (GPS, Gap, or Combined).</param>
     /// <param name="points">A list of the points comprising this track.</param>
     public GpsTrack(int? index, string? name, TrackType type, List<IGpsPoint> points)
     {
@@ -63,7 +63,7 @@ public readonly struct GpsTrack : IEnumerable<IGpsPoint>
     }
 
     /// <summary>
-    /// Converts this GPXTrack object to a string.
+    /// Converts this <see cref="GpsTrack"/> object to a string.
     /// </summary>
     /// <returns>A string, containing the name, number of points, start and end times, and type of the track.</returns>
     public override string ToString() // Display format for this track

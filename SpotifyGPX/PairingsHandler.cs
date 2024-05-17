@@ -22,8 +22,8 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
     /// <summary>
     /// Create a handler for pairing GPS information with Song information.
     /// </summary>
-    /// <param name="s">A series of Spotify playback records, used to associate a song with a point.</param>
-    /// <param name="t">A list of GPXTrack objects, used to associate songs with a track and position on Earth.</param>
+    /// <param name="s">A series of <see cref="ISongEntry"/> objects, used to associate a song with a point.</param>
+    /// <param name="t">A list of <see cref="GpsTrack"/> objects, used to associate songs with a track and position on Earth.</param>
     /// <param name="name">The name of this set of pairs.</param>
     /// <param name="silent">If true, do not print each pairing to the console upon creation.</param>
     /// <param name="predict">If true, create a DupeHandler for predicting duplicates in the resulting pair list.</param>
@@ -60,19 +60,19 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
     /// Pair songs with points (positions on Earth), by finding the closest gap of time between each.
     /// </summary>
     /// <param name="silent">If true, do not print each pairing to the console upon creation.</param>
-    /// <param name="songs">A series of Spotify playback records, used to associate a song with a point.</param>
-    /// <param name="tracks">A list of GPXTrack objects, used to associate songs with a track and position on Earth.</param>
-    /// <returns>A list of Song-Point pairs, each song and its point (on Earth), in a list.</returns>
+    /// <param name="songs">A series of <see cref="ISongEntry"/> song playback records, used to associate a song with a point.</param>
+    /// <param name="tracks">A list of <see cref="GpsTrack"/> objects, used to associate songs with a track and position on Earth.</param>
+    /// <returns>A list of <see cref="SongPoint"/> pairs, each song and its point (on Earth), in a list.</returns>
     private static List<SongPoint> PairPoints(bool silent, List<ISongEntry> songs, List<GpsTrack> tracks)
     {
-        // Correlate Spotify entries with the nearest GPX points
+        // Correlate Spotify entries with the nearest GPS points
 
         int index = 0; // Index of the pairing
 
-        return tracks // For each GPX track
+        return tracks // For each GPS track
         .SelectMany(track => songs // Get the list of SpotifyEntries
-        .Where(spotifyEntry => spotifyEntry.WithinTimeFrame(track.Start, track.End)) // If the SpotifyEntry falls within the boundaries of the track
-        .Select(spotifyEntry => // Select the Spotify entry if it falls in range of the GPX track
+        .Where(songEntry => songEntry.WithinTimeFrame(track.Start, track.End)) // If the song entry falls within the boundaries of the track
+        .Select(spotifyEntry => // Select the song entry if it falls in range of the GPS track
             {
                 IGpsPoint bestPoint = track.Points
                 .OrderBy(point => SongPoint.DisplacementCalculatorAbs(spotifyEntry.Time, point.Time))
@@ -100,7 +100,7 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
     public void WriteCounts()
     {
         WriteCounts(pair => pair.Origin, "track", "tracks"); // Write # of pairs per track
-        WriteCounts(pair => pair.Origin.Type, "type", "types"); // Write # of pairs in each type of track (GPX, Gap, Combined)
+        WriteCounts(pair => pair.Origin.Type, "type", "types"); // Write # of pairs in each type of track (Gps, Gap, Combined)
         //WriteCounts(pair => pair.Song.Spotify_Country, "country", "countries"); // Write # of pairs in each country
     }
 
@@ -126,7 +126,7 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
     /// </summary>
     public void WriteAverages()
     {
-        WriteAverages(pair => pair.Origin.Type, "track type", "track types"); // Calculate Accuracies by track type (GPX, Gap, Combined)
+        WriteAverages(pair => pair.Origin.Type, "track type", "track types"); // Calculate Accuracies by track type (Gps, Gap, Combined)
         WriteAverages(pair => pair.Origin, "track", "tracks"); // Calculate Accuracies by track
     }
 

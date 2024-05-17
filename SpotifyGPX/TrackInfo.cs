@@ -14,7 +14,7 @@ public readonly struct TrackInfo : IEquatable<TrackInfo>
     /// </summary>
     /// <param name="index">The index of this track (in a series of tracks).</param>
     /// <param name="name">The friendly name of this track.</param>
-    /// <param name="type">The type of this track (GPX, Gap, or Combined).</param>
+    /// <param name="type">The type of this track (Gps, Gap, or Combined).</param>
     public TrackInfo(int? index, string? name, TrackType type)
     {
         Indexx = index;
@@ -45,7 +45,7 @@ public readonly struct TrackInfo : IEquatable<TrackInfo>
     public readonly string Name => NodeName ?? $"T{Index}";
 
     /// <summary>
-    /// The type of track represented (GPX, Gap, or Combined).
+    /// The type of track represented (Gps, Gap, or Combined).
     /// </summary>
     public TrackType Type { get; }
 
