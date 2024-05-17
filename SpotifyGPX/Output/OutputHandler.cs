@@ -31,7 +31,7 @@ public partial class OutputHandler
     {
         List<OutFile> files = new();
 
-        bool supportsMulti = AllowsMultiTrack(format); // Determine whether the desired format can hold multiple GPX tracks worth of pairs
+        bool supportsMulti = AllowsMultiTrack(format); // Determine whether the desired format can hold multiple GPS tracks worth of pairs
 
         if (supportsMulti)
         {

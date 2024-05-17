@@ -87,7 +87,7 @@ public partial class InputHandler : IDisposable
     /// <summary>
     /// Gets all journey tracks from the given file.
     /// </summary>
-    /// <returns>A list of GPXTracks, each representing a collection of positions comprising a journey's path.</returns>
+    /// <returns>A list of <see cref="GpsTrack"/> objects, each representing a collection of positions comprising a journey's path.</returns>
     public List<GpsTrack> GetAllTracks()
     {
         return GpsInput.GetAllTracks();
@@ -96,7 +96,7 @@ public partial class InputHandler : IDisposable
     /// <summary>
     /// Gets user-selected journey track(s) from the given file.
     /// </summary>
-    /// <returns>A list of GPXTrack(s) based on user selection, each representing a collection of positions comprising a journey's path</returns>
+    /// <returns>A list of <see cref="GpsTrack"/> object(s) based on user selection, each representing a collection of positions comprising a journey's path</returns>
     public List<GpsTrack> GetSelectedTracks()
     {
         return GpsInput.GetSelectedTracks();
