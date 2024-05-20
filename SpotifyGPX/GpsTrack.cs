@@ -1,6 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -52,16 +53,6 @@ public readonly struct GpsTrack : IEnumerable<IGpsPoint>
     /// </summary>
     public readonly DateTimeOffset End { get; } // What time was the latest point logged?
 
-    public IEnumerator<IGpsPoint> GetEnumerator()
-    {
-        return Points.GetEnumerator();
-    }
-
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
-
     /// <summary>
     /// Converts this <see cref="GpsTrack"/> object to a string.
     /// </summary>
@@ -77,5 +68,50 @@ public readonly struct GpsTrack : IEnumerable<IGpsPoint>
         builder.AppendLine("   Type: {0}", Track.Type);
 
         return builder.ToString();
+    }
+
+    /// <summary>
+    /// Combine multiple tracks into a single track.
+    /// </summary>
+    /// <param name="allTracks">A variable number of GPXTrack objects.</param>
+    /// <returns>A single GPXTrack with data from each provided track.</returns>
+    /// <exception cref="Exception">No tracks provided to combine.</exception>
+    public static GpsTrack CombineTracks(params GpsTrack[] allTracks)
+    {
+        if (allTracks == null || allTracks.Length == 0)
+        {
+            throw new Exception("No tracks provided to combine!");
+        }
+
+        // Combine all points from all tracks
+        var combinedPoints = allTracks.SelectMany(track => track.Points);
+
+        // Create a new GpsTrack with combined points
+        GpsTrack combinedTrack = new(
+            allTracks.Length,
+            TrackInfo.CombineTrackNames(allTracks.First().Track, allTracks.Last().Track),
+            TrackType.Combined,
+            combinedPoints.ToList()
+        );
+
+        return combinedTrack;
+    }
+
+    public IGpsPoint this[int index]
+    {
+        get
+        {
+            return Points[index];
+        }
+    }
+
+    public IEnumerator<IGpsPoint> GetEnumerator()
+    {
+        return Points.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

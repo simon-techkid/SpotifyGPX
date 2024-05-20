@@ -12,7 +12,8 @@ public readonly struct Coordinate :
     IEquatable<Coordinate>,
     IComparable,
     IComparable<Coordinate>,
-    IFormattable
+    IFormattable,
+    IParsable<Coordinate>
 {
     /// <summary>
     /// Creates a coordinate object with a latitude and longitude.
@@ -96,12 +97,12 @@ public readonly struct Coordinate :
     }
 
     /// <summary>
-    /// Calculates the distance between two coordinates.
+    /// Calculates the distance between two coordinates, assuming the Earth is flat.
     /// </summary>
     /// <param name="c1">The first coordinate.</param>
     /// <param name="c2">The second coordinate.</param>
-    /// <returns>A double representing the distance between the two coordinates.</returns>
-    public static double CalculateDistance(Coordinate c1, Coordinate c2)
+    /// <returns>A <see langword="double"/> representing the flat distance between the two coordinates.</returns>
+    public static double operator %(Coordinate c1, Coordinate c2)
     {
         double latDiff = c2.Latitude - c1.Latitude;
         double lonDiff = c2.Longitude - c1.Longitude;
@@ -109,6 +110,51 @@ public readonly struct Coordinate :
         double distance = Math.Sqrt(latDiff * latDiff + lonDiff * lonDiff);
 
         return distance;
+    }
+
+    /// <summary>
+    /// Calculates the distance between two coordinates using the Haversine formula.
+    /// </summary>
+    /// <param name="c1">The first coordinate.</param>
+    /// <param name="c2">The second coordinate.</param>
+    /// <returns>A <see langword="double"/> representing the distance (in kilometers) between the two coordinates.</returns>
+    public static double operator ^(Coordinate c1, Coordinate c2)
+    {
+        const double R = 6371; // Radius of the Earth in km
+        double lat1Rad = ToRadians(c1.Latitude);
+        double lat2Rad = ToRadians(c2.Latitude);
+        double deltaLat = ToRadians(c2.Latitude - c1.Latitude);
+        double deltaLon = ToRadians(c2.Longitude - c1.Longitude);
+
+        double a = Math.Sin(deltaLat / 2) * Math.Sin(deltaLat / 2) +
+                   Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
+                   Math.Sin(deltaLon / 2) * Math.Sin(deltaLon / 2);
+        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+        return R * c; // Distance in km
+    }
+
+    /// <summary>
+    /// Calculates the bearing between two coordinates.
+    /// </summary>
+    /// <param name="c1">The first coordinate.</param>
+    /// <param name="c2">The second coordinate.</param>
+    /// <returns>A <see langword="double"/> representing the bearing (in degrees) between the first and the second coordinates.</returns>
+    public static double operator /(Coordinate c1, Coordinate c2)
+    {
+        double lat1Rad = ToRadians(c1.Latitude);
+        double lat2Rad = ToRadians(c2.Latitude);
+        double lon1Rad = ToRadians(c1.Longitude);
+        double lon2Rad = ToRadians(c2.Longitude);
+
+        double y = Math.Sin(lon2Rad - lon1Rad) * Math.Cos(lat2Rad);
+        double x = Math.Cos(lat1Rad) * Math.Sin(lat2Rad) -
+                   Math.Sin(lat1Rad) * Math.Cos(lat2Rad) * Math.Cos(lon2Rad - lon1Rad);
+
+        double bearingRad = Math.Atan2(y, x);
+        double bearingDeg = (bearingRad * 180.0 / Math.PI + 360.0) % 360.0; // Convert radians to degrees and normalize
+
+        return bearingDeg;
     }
 
     public object Clone()
@@ -128,9 +174,7 @@ public readonly struct Coordinate :
 
     public int CompareTo(Coordinate other)
     {
-        var latComparison = Latitude.CompareTo(other.Latitude);
-        if (latComparison != 0) return latComparison;
-        return Longitude.CompareTo(other.Longitude);
+        return (Latitude + Longitude).CompareTo(other.Latitude + other.Longitude);
     }
 
     public string ToString(string? format, IFormatProvider? formatProvider)
@@ -138,20 +182,69 @@ public readonly struct Coordinate :
         return $"Latitude: {Latitude.ToString(format, formatProvider)}, Longitude: {Longitude.ToString(format, formatProvider)}";
     }
 
-    public double CalculateDistance(Coordinate other)
+    /// <summary>
+    /// Parses a string representation of a coordinate in the format "latitude,longitude".
+    /// </summary>
+    /// <param name="input">The string representation of the coordinate.</param>
+    /// <returns>A <see cref="Coordinate"/> object parsed from the input string.</returns>
+    public static Coordinate Parse(string input, IFormatProvider? provider)
     {
-        const double R = 6371; // Radius of the Earth in km
-        double lat1Rad = ToRadians(Latitude);
-        double lat2Rad = ToRadians(other.Latitude);
-        double deltaLat = ToRadians(other.Latitude - Latitude);
-        double deltaLon = ToRadians(other.Longitude - Longitude);
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            throw new ArgumentException("Input string cannot be null or empty.");
+        }
 
-        double a = Math.Sin(deltaLat / 2) * Math.Sin(deltaLat / 2) +
-                    Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
-                    Math.Sin(deltaLon / 2) * Math.Sin(deltaLon / 2);
-        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        string[] parts = input.Split(',');
 
-        return R * c; // Distance in km
+        if (parts.Length != 2)
+        {
+            throw new FormatException("Input string must be in the format 'latitude,longitude'.");
+        }
+
+        if (!double.TryParse(parts[0], out double latitude) || !double.TryParse(parts[1], provider, out double longitude))
+        {
+            throw new FormatException("Latitude and longitude must be valid double values.");
+        }
+
+        return new Coordinate(latitude, longitude);
+    }
+
+    /// <summary>
+    /// Tries to parse a string representation of a coordinate in the format "latitude,longitude".
+    /// </summary>
+    /// <param name="input">The string representation of the coordinate.</param>
+    /// <param name="result">When this method returns, contains the parsed Coordinate object, if the parsing succeeds.</param>
+    /// <returns><see langword="true"/> if the parsing was successful; otherwise, <see langword="false"/>.</returns>
+    public static bool TryParse(string? input, IFormatProvider? provider, out Coordinate result)
+    {
+        result = default;
+
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return false;
+        }
+
+        string[] parts = input.Split(',');
+
+        if (parts.Length != 2)
+        {
+            return false;
+        }
+
+        if (!double.TryParse(parts[0], out double latitude) || !double.TryParse(parts[1], provider, out double longitude))
+        {
+            return false;
+        }
+
+        result = new Coordinate(latitude, longitude);
+        return true;
+    }
+
+    public static string CalculateCompassDirection(double bearingDeg)
+    {
+        string[] compassDirections = { "N", "NE", "E", "SE", "S", "SW", "W", "NW", "N" };
+        int index = (int)((bearingDeg + 22.5) / 45.0);
+        return compassDirections[index];
     }
 
     public static double ToRadians(double angle) => Math.PI * angle / 180.0;
@@ -162,5 +255,4 @@ public readonly struct Coordinate :
         latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
 
     public bool IsWithinBounds() => IsWithinBounds(Latitude, Longitude);
-
 }

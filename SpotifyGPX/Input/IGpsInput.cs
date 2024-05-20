@@ -58,7 +58,7 @@ public partial interface IGpsInput : IDisposable
         {
             // If the GPX contains more than one track, provide user parsing options:
 
-            GpsTrack combinedTrack = CombineTracks(AllTracks); // Generate a combined track (cohesive of all included tracks)
+            GpsTrack combinedTrack = GpsTrack.CombineTracks(AllTracks.ToArray()); // Generate a combined track (cohesive of all included tracks)
             AllTracks = CalculateGaps(AllTracks); // Add gaps between tracks as track options
             AllTracks.Add(combinedTrack); // Add the combined track to the end of the list
 
@@ -95,7 +95,7 @@ public partial interface IGpsInput : IDisposable
         while (true)
         {
             string input = Console.ReadLine() ?? string.Empty;
-            if (int.TryParse(input, out selectedTrackIndex) && IsValidTrackIndex(selectedTrackIndex, allTracks.Count))
+            if (int.TryParse(input, out selectedTrackIndex) && TrackInfo.IsValidTrackIndex(selectedTrackIndex, allTracks.Count))
             {
                 break; // Return this selection below
             }
@@ -117,28 +117,6 @@ public partial interface IGpsInput : IDisposable
     }
 
     /// <summary>
-    /// Combine a list of tracks into a single track.
-    /// </summary>
-    /// <param name="allTracks">A list of GPXTrack objects.</param>
-    /// <returns>A single GPXTrack with data from each in the list.</returns>
-    /// <exception cref="Exception">The list provided was null or contained no tracks.</exception>
-    private static GpsTrack CombineTracks(List<GpsTrack> allTracks)
-    {
-        if (allTracks == null || allTracks.Count == 0)
-        {
-            throw new Exception("No tracks provided to combine!");
-        }
-
-        // Combine all points from all tracks
-        var combinedPoints = allTracks.SelectMany(track => track.Points);
-
-        // Create a new GPXTrack with combined points
-        GpsTrack combinedTrack = new(allTracks.Count, CombinedOrGapTrackName(allTracks.First().Track, allTracks.Last().Track), TrackType.Combined, combinedPoints.ToList());
-
-        return combinedTrack;
-    }
-
-    /// <summary>
     /// Calculate all the gaps between tracks.
     /// </summary>
     /// <param name="allTracks">A list of GPXTrack objects.</param>
@@ -153,7 +131,7 @@ public partial interface IGpsInput : IDisposable
                     GpsTrack followingTrack = allTracks[index + 1]; // Get the track after the current track (next one)
                     IGpsPoint end = gpxTrack.Points.Last(); // Get the last point of the current track
                     IGpsPoint next = followingTrack.Points.First(); // Get the first point of the next track
-                    string gapName = CombinedOrGapTrackName(gpxTrack.Track, followingTrack.Track); // Create a name for the gap track based on the name of the current track and next track
+                    string gapName = TrackInfo.CombineTrackNames(gpxTrack.Track, followingTrack.Track); // Create a name for the gap track based on the name of the current track and next track
 
                     if (end.Time != next.Time)
                     {
@@ -170,22 +148,6 @@ public partial interface IGpsInput : IDisposable
             .OrderBy(track => track.Track.Index) // Order all tracks by index
             .ToList();
     }
-
-    /// <summary>
-    /// Creates a friendly name for a bridge track (combination or gap track) between GPXTrack objects.
-    /// </summary>
-    /// <param name="track1">The track before the break.</param>
-    /// <param name="track2">The track after the break.</param>
-    /// <returns>A name combining the names of the two given tracks.</returns>
-    private static string CombinedOrGapTrackName(TrackInfo track1, TrackInfo track2) => $"{track1.ToString()}-{track2.ToString()}";
-
-    /// <summary>
-    /// Determines whether a user-input track selection is valid.
-    /// </summary>
-    /// <param name="index">The user-provided index of a GPXTrack.</param>
-    /// <param name="totalTracks">The total number of tracks available for selection.</param>
-    /// <returns>True, if the user-provided index is an existing GPXTrack.</returns>
-    private static bool IsValidTrackIndex(int index, int totalTracks) => index >= 0 && index < totalTracks;
 
     /// <summary>
     /// The total number of GPS tracks in the source file.

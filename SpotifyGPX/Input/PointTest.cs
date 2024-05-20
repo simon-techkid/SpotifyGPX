@@ -10,16 +10,20 @@ public sealed partial class PointTest : RandomPointBase
 {
     protected override ParsePointsDelegate ParsePointsMethod => ParsePoints;
     public override IGpsInput.FilterTracksDelegate FilterTracksMethod => FilterTracks;
-    public override IGpsInput.ParseTracksDelegate ParseTracksMethod => PointsToTracks;
-    protected override DateOnly GeneratorStartDate => DateOnly.FromDateTime(DateTime.Now - TimeSpan.FromDays(2));
+    public override IGpsInput.ParseTracksDelegate ParseTracksMethod => ParseTracks;
+    protected override DateOnly GeneratorStartDate => DateOnly.FromDateTime(DateTime.Now - TimeSpan.FromDays(DaysPriorToTodayToGenerate));
     protected override DateOnly GeneratorEndDate => DateOnly.FromDateTime(DateTime.Now);
-    protected override TimeOnly DayStartTime => new(DriveStartHour, 0);
-    protected override TimeOnly DayEndTime => new(DriveEndHour, 0);
+    private int DriveStartHour => RandomGen.Next(DriveMinStartHour, DriveMaxStartHour);
+    private int DriveStartMinute => RandomGen.Next(DriveMinStartMinute, DriveMaxStartMinute);
+    private int DriveEndHour => RandomGen.Next(DriveMinEndHour, DriveMaxEndHour);
+    private int DriveEndMinute => RandomGen.Next(DriveMinEndMinute, DriveMaxEndMinute);
+    protected override TimeOnly DayStartTime => new(DriveStartHour, DriveStartMinute);
+    protected override TimeOnly DayEndTime => new(DriveEndHour, DriveEndMinute);
     protected override TimeSpan TimeZone => new(2, 0, 0);
-    protected override double CenterLatitude => 44.918516; // Libourne, France
-    protected override double CenterLongitude => -0.245090; // Libourne, France
-    protected override double GenerationRadius => 20;
-    protected override int PointPlacementIntervalSeconds => RandomGen.Next(15, 120); // simulate 15-120 second GPS point interval
+    protected override double CenterLatitude => CenterLat;
+    protected override double CenterLongitude => CenterLon;
+    protected override double GenerationRadius => CenterRadius;
+    protected override int PointPlacementIntervalSeconds => RandomGen.Next(MinPlacementSecs, MaxPlacementSecs); // simulate 15-120 second GPS point interval
 
     public PointTest() : base()
     {
@@ -27,26 +31,39 @@ public sealed partial class PointTest : RandomPointBase
 
     private List<IGpsPoint> ParsePoints()
     {
-        List<RandomPoint> random = ZipAll();
-
-        return random.Select((random, index) =>
-        {
-            return (IGpsPoint)new GenericPoint
+        return ZipAll()
+            .Select((random, index) =>
             {
-                Index = index,
-                Location = random.Location,
-                Time = random.Time
-            };
-        }).ToList();
+                return (IGpsPoint)new GenericPoint
+                {
+                    Index = index,
+                    Location = random.Location,
+                    Time = random.Time
+                };
+            }).ToList();
     }
 
-    private List<GpsTrack> PointsToTracks()
+    private List<GpsTrack> ParseTracks()
     {
-        return ZipAll().GroupBy(dt => dt.Time.Date).Select((day, index) =>
-        {
-            string tn = day.Key.ToString("yyyyMMdd");
-            return new GpsTrack(index, tn, TrackType.Gps, day.Select(point => (IGpsPoint)new GenericPoint { Location = point.Location, Time = point.Time }).ToList());
-        }).ToList();
+        return ZipAll()
+            .GroupBy(dt => dt.Time.Date)
+            .Select((day, trackIndex) =>
+            {
+                string tn = day.Key.ToString("yyyyMMdd");
+
+                List<IGpsPoint> dayPoints = day.Select((point, pointIndex) =>
+                {
+                    return (IGpsPoint)new GenericPoint
+                    {
+                        Index = pointIndex,
+                        Location = point.Location,
+                        Time = point.Time
+                    };
+                }).ToList();
+
+                return new GpsTrack(trackIndex, tn, TrackType.Gps, dayPoints);
+
+            }).ToList();
     }
 
     private List<GpsTrack> FilterTracks()

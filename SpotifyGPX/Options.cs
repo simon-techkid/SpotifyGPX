@@ -83,11 +83,12 @@ namespace SpotifyGPX
         {
             return new Dictionary<Formats, bool>
             {
-                { Formats.Csv, flags?.Contains("c") ?? false },
+                { Formats.Csv, flags?.Contains("c") ?? false }, // Set any value to true to export by default.
                 { Formats.Gpx, flags?.Contains("g") ?? false },
                 { Formats.Json, flags?.Contains("j") ?? false },
                 { Formats.JsonReport, flags?.Contains("r") ?? false },
                 { Formats.Kml, flags?.Contains("k") ?? false },
+                { Formats.Tsv, flags?.Contains("v") ?? false },
                 { Formats.Txt, flags?.Contains("t") ?? false },
                 { Formats.Xlsx, flags?.Contains("e") ?? false },
                 { Formats.Xspf, flags?.Contains("p") ?? false }
@@ -102,7 +103,7 @@ namespace SpotifyGPX
             get
             {
                 System.Text.StringBuilder builder = new();
-                builder.AppendLine("Usage: SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-c] [-g] [-j] [-k] [-p] [-t] [-r] [-e] [-x] [-pp [-pa]] [-s] [-h]");
+                builder.AppendLine("Usage: SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-c] [-g] [-j] [-k] [-p] [-v] [-t] [-r] [-e] [-x] [-pp [-pa]] [-s] [-h]");
                 builder.AppendLine("--spotify <spotify> --gps <gps> - Path to a Spotify playback history and GPS journey file");
                 builder.AppendLine("--pairs <pairs> - Path to a pairs file");
                 builder.AppendLine("-c - Export a CSV table of all the pairs");
@@ -110,6 +111,7 @@ namespace SpotifyGPX
                 builder.AppendLine("-j - Save off the relevant part of the Spotify json");
                 builder.AppendLine("-k - Export a KML from the calculated points");
                 builder.AppendLine("-p - Export a XSPF playlist of the songs");
+                builder.AppendLine("-v - Export a TSV table of all the pairs");
                 builder.AppendLine("-t - Export a plain text list of pairs");
                 builder.AppendLine("-r - Export a JsonReport of all the data used to compile the resulting pairings");
                 builder.AppendLine("-e - Export an Excel workbook of all pairings, grouped into worksheets for each track");
@@ -291,14 +293,67 @@ namespace SpotifyGPX.Input
 
     public partial class PointTest
     {
-        private const int DriveStartHour = 8; // Drive simulated start time, 8am/08:00
-        private const int DriveEndHour = 17; // Drive simulated end time, 5pm/17:00
+        // More options for PointTest available in the PointTest.cs file.
+
+        // Number of days of points prior to today to generate
+        private const double DaysPriorToTodayToGenerate = 3;
+
+        // Center point generation location - Libourne, France
+        private const double CenterLat = 44.918516;
+        private const double CenterLon = -0.245090;
+        private const int CenterRadius = 20; // Radius from center in kilometers
+        
+        // Point placement intervals
+        private const int MinPlacementSecs = 15; // Minimum GPS point placement interval in seconds
+        private const int MaxPlacementSecs = 120; // Maximum GPS point placement interval in seconds
+
+        // Drive start (randomness floor) time (currently 08:00) - depart at 08:00 at the earliest
+        private const int DriveMinStartHour = 8;
+        private const int DriveMinStartMinute = 0;
+
+        // Drive start (randomness ceiling) time (currently 10:30) - depart at 10:30 at the latest
+        private const int DriveMaxStartHour = 10;
+        private const int DriveMaxStartMinute = 30;
+
+        // This means that the drive will start anywhere between 08:00 and 10:30
+
+        // Drive end (randomness floor) time (currently 17:00) - arrive at 17:00 at the earliest
+        private const int DriveMinEndHour = 17;
+        private const int DriveMinEndMinute = 0;
+
+        // Drive end (randomness ceiling) time (currently 19:00) - arrive at 19:00 at the latest
+        private const int DriveMaxEndHour = 19;
+        private const int DriveMaxEndMinute = 0;
+
+        // This means that the drive will end anywhere between 17:00 and 19:00
     }
 
     public partial class SongTest
     {
-        private const int PlaybackStartHour = 7; // Music playback simulated start time, 7am/07:00
-        private const int PlaybackEndHour = 23; // Music playback simulated end time, 11pm/23:00
+        // More options for SongTest available in the SongTest.cs file.
+
+        // Number of days opf songs prior to today to generate
+        private const double DaysPriorToTodayToGenerate = 365;
+
+        // Number of unique artists and songs to generate
+        private const int ArtistsCount = 10;
+        private const int SongsCount = 100;
+        
+        // Song playback start (randomness floor) time (currently 07:00) - start playing at 07:00 at the earliest
+        private const int PlaybackMinStartHour = 5;
+        private const int PlaybackMinStartMinute = 0;
+
+        // Song playback start (randomness ceiling) time (currently 07:30) - start playing at 07:30 at the latest
+        private const int PlaybackMaxStartHour = 7;
+        private const int PlaybackMaxStartMinute = 30;
+
+        // Song playback end (randomness floor) time (currently 20:00) - stop playing at 20:00 at the earliest
+        private const int PlaybackMinEndHour = 20;
+        private const int PlaybackMinEndMinute = 0;
+
+        // Song playback end (randomness ceiling) time (currently 23:00) - stop playing at 23:00 at the latest
+        private const int PlaybackMaxEndHour = 23;
+        private const int PlaybackMaxEndMinute = 0;
     }
 
     public partial class Xspf
@@ -338,6 +393,7 @@ namespace SpotifyGPX.Output
                 Formats.Json => false,
                 Formats.JsonReport => true,
                 Formats.Kml => false,
+                Formats.Tsv => false,
                 Formats.Txt => false,
                 Formats.Xlsx => true,
                 Formats.Xspf => false,
@@ -355,6 +411,7 @@ namespace SpotifyGPX.Output
             { Formats.Json, (pairs, trackName) => new Json(pairs, trackName) },
             { Formats.JsonReport, (pairs, trackName) => new JsonReport(pairs, trackName) },
             { Formats.Kml, (pairs, trackName) => new Kml(pairs, trackName) },
+            { Formats.Tsv, (pairs, trackName) => new Tsv(pairs, trackName) },
             { Formats.Txt, (pairs, trackName) => new Txt(pairs, trackName) },
             { Formats.Xlsx, (pairs, trackName) => new Xlsx(pairs, trackName) },
             { Formats.Xspf, (pairs, trackName) => new Xspf(pairs, trackName) }
@@ -382,11 +439,6 @@ namespace SpotifyGPX.Output
                 new() { Heading = "Point Time", CellValue = pair => pair.PointTime.ToString() }
         };
 
-        protected override bool IncludeStylesheetHref => true;
-        protected override string StylesheetPath => $"{FormatName}.xslt";
-        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
-        protected override Encoding OutputEncoding => Encoding.UTF8;
-        protected override bool ForceUseOfSpecifiedSettings => false;
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
@@ -396,32 +448,18 @@ namespace SpotifyGPX.Output
         private static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance";
         private const string Schema = "http://www.topografix.com/GPX/1/0 http://wwwtopografix.com/GPX/1/0/gpx.xsd";
         private const string Waypoint = "wpt";
-        protected override bool IncludeStylesheetHref => true;
-        protected override string StylesheetPath => $"{FormatName}.xslt";
-        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
-        protected override bool ForceUseOfSpecifiedSettings => false;
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
     public partial class Json
     {
-        protected override bool IncludeStylesheetHref => true;
-        protected override string StylesheetPath => $"{FormatName}.xslt";
         protected override JsonSerializerOptions JsonOptions => Options.JsonOptions;
-        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
-        protected override Encoding OutputEncoding => Encoding.UTF8;
-        protected override bool ForceUseOfSpecifiedSettings => false;
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
     public partial class JsonReport
     {
-        protected override bool IncludeStylesheetHref => true;
-        protected override string StylesheetPath => $"{FormatName}.xslt";
         protected override JsonSerializerOptions JsonOptions => Options.JsonReportOptions;
-        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
-        protected override Encoding OutputEncoding => Encoding.UTF8;
-        protected override bool ForceUseOfSpecifiedSettings => false;
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
@@ -430,20 +468,28 @@ namespace SpotifyGPX.Output
         private static XNamespace Namespace => "http://www.opengis.net/kml/2.2";
         private static XNamespace Gx => "http://www.google.com/kml/ext/2.2";
         private const string Placemark = "Placemark";
-        protected override bool IncludeStylesheetHref => true;
-        protected override string StylesheetPath => $"{FormatName}.xslt";
-        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
-        protected override bool ForceUseOfSpecifiedSettings => false;
+        protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
+    }
+
+    public partial class Tsv
+    {
+        private const string Delimiter = "\t";
+
+        private readonly List<ColumnDefinition> columns = new()
+        {
+                new() { Heading = "Title", CellValue = pair => pair.Song.Song_Name },
+                new() { Heading = "Artist", CellValue = pair => pair.Song.Song_Artist },
+                new() { Heading = "Latitude", CellValue = pair => pair.Point.Location.Latitude },
+                new() { Heading = "Longitude", CellValue = pair => pair.Point.Location.Longitude },
+                new() { Heading = "Song Time", CellValue = pair => pair.SongTime.ToString() },
+                new() { Heading = "Point Time", CellValue = pair => pair.PointTime.ToString() }
+        };
+
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
     public partial class Txt
     {
-        protected override bool IncludeStylesheetHref => true;
-        protected override string StylesheetPath => $"{FormatName}.xslt";
-        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
-        protected override Encoding OutputEncoding => Encoding.UTF8;
-        protected override bool ForceUseOfSpecifiedSettings => false;
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
@@ -490,10 +536,6 @@ namespace SpotifyGPX.Output
         private static XNamespace Namespace => "http://xspf.org/ns/0/";
         private const string Track = "track";
         private const string Comment = "";
-        protected override bool IncludeStylesheetHref => true;
-        protected override string StylesheetPath => $"{FormatName}.xslt";
-        protected override ReaderOptions XmlReaderOptions => ReaderOptions.None;
-        protected override bool ForceUseOfSpecifiedSettings => false;
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 }

@@ -1,6 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
 using System;
+using System.Linq;
 
 namespace SpotifyGPX;
 
@@ -48,6 +49,27 @@ public readonly struct TrackInfo : IEquatable<TrackInfo>
     /// The type of track represented (Gps, Gap, or Combined).
     /// </summary>
     public TrackType Type { get; }
+
+    /// <summary>
+    /// Creates a combined name from a list of track names.
+    /// </summary>
+    /// <param name="tracks">At least one track name to combine.</param>
+    /// <returns>A string containing the representation of multiple tracks' names.</returns>
+    public static string CombineTrackNames(params TrackInfo[] tracks)
+    {
+        return string.Join("-", tracks.Select(track => track.ToString()));
+    }
+
+    /// <summary>
+    /// Determines whether a user-input track selection is valid.
+    /// </summary>
+    /// <param name="index">The user-provided index of a GPXTrack.</param>
+    /// <param name="totalTracks">The total number of tracks available for selection.</param>
+    /// <returns>True, if the user-provided index is an existing GPXTrack.</returns>
+    public static bool IsValidTrackIndex(int index, int totalTracks)
+    {
+        return index >= 0 && index < totalTracks;
+    }
 
     /// <summary>
     /// Converts this TrackInfo object to a string.

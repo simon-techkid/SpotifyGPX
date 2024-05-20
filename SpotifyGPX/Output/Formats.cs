@@ -33,6 +33,11 @@ public enum Formats
     Kml,
 
     /// <summary>
+    /// A tab separated values (TSV) file containing a pair per line.
+    /// </summary>
+    Tsv,
+
+    /// <summary>
     /// A plain text (TXT) file containing a string per pair.
     /// </summary>
     Txt,

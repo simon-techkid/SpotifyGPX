@@ -16,26 +16,27 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Provides instructions for serializing <typeparamref name="T"/> data to <see langword="byte"/>[] and saving it in the target format.
 /// </summary>
-/// <typeparam name="T">The source format type</typeparam>
+/// <typeparam name="T">The source format type.</typeparam>
 public abstract class SaveableBase<T> : IFileOutput
 {
+    protected SaveableBase(Func<IEnumerable<SongPoint>> pairs, string? trackName)
+    {
+        DataProvider = pairs;
+        Document = SaveAction(trackName);
+    }
+
     public abstract string FormatName { get; }
 
     /// <summary>
     /// The document in format <typeparamref name="T"/> that will be serialized and saved to the disk.
     /// </summary>
-    protected T Document => SaveAction(TrackName);
+    protected T Document { get; }
     public abstract int Count { get; }
 
     /// <summary>
     /// Provides access to the collection of <see cref="SongPoint"/> pairs to be saved to the document in format <typeparamref name="T"/>.
     /// </summary>
     protected Func<IEnumerable<SongPoint>> DataProvider { get; }
-
-    /// <summary>
-    /// Provides access to the name of the track to be saved to the document in format <typeparamref name="T"/>.
-    /// </summary>
-    private string? TrackName { get; }
 
     /// <summary>
     /// A delegate to access the contents of the document in format <typeparamref name="T"/>.
@@ -47,12 +48,6 @@ public abstract class SaveableBase<T> : IFileOutput
     /// Provides access to the document in format <typeparamref name="T"/> that will be serialized and saved to the disk.
     /// </summary>
     protected abstract DocumentAccessor SaveAction { get; }
-
-    protected SaveableBase(Func<IEnumerable<SongPoint>> pairs, string? trackName)
-    {
-        DataProvider = pairs;
-        TrackName = trackName;
-    }
 
     public void Save(string path)
     {
@@ -79,40 +74,51 @@ public abstract class SaveableBase<T> : IFileOutput
 /// <typeparam name="T">The source format type.</typeparam>
 public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>, ITransformableOutput
 {
+    protected SaveableAndTransformableBase(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
+    {
+    }
+
     /// <summary>
     /// The byte encoding of the exported document.
+    /// Default value: <see cref="Encoding.UTF8"/>, override to change.
     /// </summary>
-    protected abstract Encoding OutputEncoding { get; }
+    protected virtual Encoding OutputEncoding => Encoding.UTF8;
 
     /// <summary>
     /// The <see cref="ReaderOptions"/> when reading the converted XML before transformation.
+    /// Default value: <see cref="ReaderOptions.None"/>, override to change.
     /// </summary>
-    protected abstract ReaderOptions XmlReaderOptions { get; }
+    protected virtual ReaderOptions XmlReaderOptions => ReaderOptions.None;
 
     /// <summary>
     /// If true, and if an XSLT stylesheet doesn't exist, include a stylesheet reference in the exported XML conversion.
+    /// Default value: <see langword="true"/>, override to change.
     /// </summary>
-    protected abstract bool IncludeStylesheetHref { get; }
+    protected virtual bool IncludeStylesheetHref => true;
 
     /// <summary>
     /// Force the using of defined <see cref="XmlWriterSettings"/> <see cref="XmlSettings"/> for this transformation,
     /// instead of using <see cref="XmlWriterSettings"/> parsed from the XSLT stylesheet output tag.
+    /// Default value: <see langword="false"/>, override to change.
     /// </summary>
-    protected abstract bool ForceUseOfSpecifiedSettings { get; }
+    protected virtual bool ForceUseOfSpecifiedSettings => false;
 
     /// <summary>
     /// The reference to the XSLT stylesheet, if <see cref="IncludeStylesheetHref"/> is <see langword="true"/>.
     /// </summary>
-    protected XProcessingInstruction? StylesheetReference => IncludeStylesheetHref ? new("xml-stylesheet", $"href=\"{StylesheetPath}\" type=\"text/xsl\"") : null;
+    protected virtual XProcessingInstruction? ProcessingInstruction => IncludeStylesheetHref ? new("xml-stylesheet", $"href=\"{StylesheetPath}\" type=\"text/xsl\"") : null;
 
     /// <summary>
     /// The path to the target XSLT stylesheet for this XML (if <typeparamref name="T"/> is <see cref="XDocument"/>)
     /// or for this file in its XML transformed (<see cref="TransformToXml"/>) form.
+    /// Default value: <see cref="SaveableBase{T}.FormatName"/>.xslt, override to change.
     /// </summary>
-    protected abstract string StylesheetPath { get; }
+    protected virtual string StylesheetPath => $"{FormatName}.xslt";
 
     /// <summary>
     /// The settings for the writing of this XML document or XML transformation.
+    /// Must be overidden to be used for XML or XML transformed documents.
+    /// This <see cref="XmlSettings"/> encoding will be used as the override for <see cref="OutputEncoding"/>.
     /// </summary>
     protected abstract XmlWriterSettings XmlSettings { get; }
 
@@ -120,7 +126,6 @@ public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>,
     /// Transforms the document, in format <typeparamref name="T"/>, to XML and saves it to the disk.
     /// </summary>
     /// <param name="name">The file name of the target transformed document.</param>
-    /// <param name="xsltPath">The path to an XSLT stylesheet that, if it exists, will be used for transformation.</param>
     public virtual void TransformAndSave(string name)
     {
         string transformation;
@@ -149,10 +154,6 @@ public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>,
         XmlUrlResolver resolver = new();
         xslt.Load(xsltPath, settings, resolver);
         return xslt;
-    }
-
-    protected SaveableAndTransformableBase(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
-    {
     }
 
     protected virtual string TransformToXmlToStringWithXslt(XslCompiledTransform transformer)
@@ -191,7 +192,7 @@ public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>,
         using MemoryStream ms = new();
         using (XmlWriter xmlWriter = XmlWriter.Create(ms, XmlSettings))
         {
-            new XDocument(StylesheetReference, TransformToXml().Root).Save(xmlWriter);
+            new XDocument(ProcessingInstruction, TransformToXml().Root).Save(xmlWriter);
             xmlWriter.Flush();
         }
 
@@ -204,14 +205,14 @@ public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>,
 /// </summary>
 public abstract class JsonSaveable : SaveableAndTransformableBase<List<JsonDocument>>
 {
+    protected JsonSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
+    {
+    }
+
     /// <summary>
     /// The <see cref="JsonSerializerOptions"/> for the exported contents of this JSON document.
     /// </summary>
     protected abstract JsonSerializerOptions JsonOptions { get; }
-
-    protected JsonSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
-    {
-    }
 
     protected override byte[] ConvertToBytes()
     {
@@ -274,11 +275,11 @@ public abstract class JsonSaveable : SaveableAndTransformableBase<List<JsonDocum
 /// </summary>
 public abstract class XmlSaveable : SaveableAndTransformableBase<XDocument>
 {
-    protected override Encoding OutputEncoding => XmlSettings.Encoding;
-
     protected XmlSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
     {
     }
+
+    protected override Encoding OutputEncoding => XmlSettings.Encoding;
 
     protected override byte[] ConvertToBytes()
     {
@@ -301,9 +302,15 @@ public abstract class TxtSaveable : SaveableAndTransformableBase<string?[]>
     {
     }
 
+    /// <summary>
+    /// Default line ending for the TXT document.
+    /// Default value: <see cref="Environment.NewLine"/>, override to change.
+    /// </summary>
+    protected virtual string LineEnding => Environment.NewLine;
+
     protected override byte[] ConvertToBytes()
     {
-        string doc = string.Join(Environment.NewLine, Document);
+        string doc = string.Join(LineEnding, Document);
         return OutputEncoding.GetBytes(doc);
     }
 

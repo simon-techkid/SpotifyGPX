@@ -12,14 +12,13 @@ public abstract class RandomPointBase : RandomInputBase<RandomPoint>, IGpsInput
     {
     }
 
-    /* Skip track selection for random tracks
+    // Skip track selection for random tracks
+    /*
     public List<GpsTrack> GetSelectedTracks()
     {
         return AllTracks;
     }
     */
-
-    private const double EarthRadiusKm = 6371.0;
 
     protected delegate List<IGpsPoint> ParsePointsDelegate();
     protected abstract ParsePointsDelegate ParsePointsMethod { get; }
@@ -48,15 +47,15 @@ public abstract class RandomPointBase : RandomInputBase<RandomPoint>, IGpsInput
     /// </summary>
     protected abstract int PointPlacementIntervalSeconds { get; }
 
-    
-
     protected override List<RandomPoint> ZipAll()
     {
-        IEnumerable<DateTimeOffset> timestamps = 
+        IEnumerable<DateTimeOffset> timestamps =
             GenerateDateTimeOffsets()
             .Where(TimeCheck);
 
-        IEnumerable<Coordinate> coordinates = GenerateRandomCoordinates(GenerationRadius, timestamps.Count());
+        IEnumerable<Coordinate> coordinates =
+            GenerateRandomCoordinates(GenerationRadius, timestamps.Count())
+            .Where(coordinate => coordinate.IsWithinBounds());
 
         var zippedData = timestamps
             .Zip(coordinates, (time, location) => new { Time = time, Location = location });
@@ -91,29 +90,24 @@ public abstract class RandomPointBase : RandomInputBase<RandomPoint>, IGpsInput
 
     private Coordinate GenerateRandomCoordinate(double radiusKm)
     {
-        double distance = radiusKm * Math.Sqrt(RandomGen.NextDouble());
-        double angle = RandomGen.NextDouble() * 2 * Math.PI;
-        double distanceRadians = distance / EarthRadiusKm;
+        // Convert radius from kilometers to degrees
+        double radiusDegrees = radiusKm / 111.0;
 
-        double centerLatRadians = Coordinate.ToRadians(CenterLatitude);
-        double centerLonRadians = Coordinate.ToRadians(CenterLongitude);
+        // Generate a random distance within the radius
+        double distance = radiusDegrees * Math.Sqrt(RandomGen.NextDouble());
 
-        double newLat = Math.Asin(
-            Math.Sin(centerLatRadians) *
-            Math.Cos(distanceRadians) +
-            Math.Cos(centerLatRadians) *
-            Math.Sin(distanceRadians) *
-            Math.Cos(angle));
+        // Generate a random angle
+        double angle = 2 * Math.PI * RandomGen.NextDouble();
 
-        double newLon = centerLonRadians +
-                        Math.Atan2(Math.Sin(angle) *
-                        Math.Sin(distanceRadians) *
-                        Math.Cos(centerLatRadians),
-                                   Math.Cos(distanceRadians) -
-                                   Math.Sin(centerLatRadians) *
-                                   Math.Sin(newLat));
+        // Calculate the offsets from the center point
+        double offsetLat = distance * Math.Cos(angle);
+        double offsetLon = distance * Math.Sin(angle) / Math.Cos(CenterLatitude * Math.PI / 180);
 
-        return new Coordinate(Coordinate.ToDegrees(newLat), Coordinate.ToDegrees(newLon));
+        // Calculate the new latitude and longitude
+        double newLat = CenterLatitude + offsetLat;
+        double newLon = CenterLongitude + offsetLon;
+
+        return new Coordinate(newLat, newLon);
     }
 
     public int SourceTrackCount => AllPoints.GroupBy(point => point.Time.Date).Count();

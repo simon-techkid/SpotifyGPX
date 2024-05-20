@@ -12,9 +12,6 @@ public abstract class RandomSongBase : RandomInputBase<RandomSong>, ISongInput
     {
     }
 
-    public int SourceSongCount => 0;
-    public int ParsedSongCount => AllSongs.Count;
-
     public abstract ISongInput.ParseSongsDelegate ParseSongsMethod { get; }
     public abstract ISongInput.FilterSongsDelegate FilterSongsMethod { get; }
     protected List<ISongEntry> AllSongs => ParseSongsMethod();
@@ -134,6 +131,9 @@ public abstract class RandomSongBase : RandomInputBase<RandomSong>, ISongInput
             yield return list[RandomGen.Next(list.Count)];
         }
     }
+
+    public int SourceSongCount => 0;
+    public int ParsedSongCount => AllSongs.Count;
 }
 
 public struct RandomSong
