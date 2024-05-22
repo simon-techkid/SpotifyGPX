@@ -7,6 +7,6 @@
     <xsl:output method="html" version="1.0" encoding="UTF-8" omit-xml-declaration="no" indent="yes" media-type="text/html"/>
 
     <!-- TSV column delimiter -->
-    <xsl:variable name="delimiter" select="'&quot;&#44;&quot;'"/>
+    <xsl:variable name="delimiter" select="'&#9;'"/>
 
 </xsl:stylesheet>
