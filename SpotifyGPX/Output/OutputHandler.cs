@@ -46,7 +46,13 @@ public partial class OutputHandler
                 .Select(track => new OutFile(track, format, name, track.Key.ToString())));
         }
 
-        files.ForEach(file => file.Save(transform)); // Save each file to the disk
+        foreach (var file in files)
+        {
+            using (file)
+            {
+                file.Save(transform); // Save each file to the disk
+            }
+        }
 
         // Print the individual track results (number of pairs):
         LogExportResults(files, format);
@@ -63,7 +69,7 @@ public partial class OutputHandler
     /// <summary>
     /// Represents an output file.
     /// </summary>
-    private readonly struct OutFile
+    private readonly struct OutFile : IDisposable
     {
         /// <summary>
         /// Stages an output file, containing the given pairs, in the given format, with the specified names.
@@ -78,6 +84,7 @@ public partial class OutputHandler
             Handler = factory.CreateFileOutput(format, () => pairs, trackName);
             SourceName = name;
             TrackName = trackName;
+            ExportCount = Handler.Count;
             OriginalCount = pairs.Count();
         }
 
@@ -85,7 +92,7 @@ public partial class OutputHandler
         private string SourceName { get; }
         private string TrackName { get; }
         public int OriginalCount { get; }
-        public int ExportCount => Handler.Count;
+        public int ExportCount { get; }
         private string FinalName => $"{SourceName}_{TrackName}.{Handler.FormatName}";
         public string Result => $"{ExportCount}/{OriginalCount} ({TrackName})";
 
@@ -93,7 +100,7 @@ public partial class OutputHandler
         {
             AttemptSave(transform, FinalName);
         }
-
+        
         private void AttemptSave(bool transform, string fileName, int attempt = 0)
         {
             try
@@ -129,6 +136,11 @@ public partial class OutputHandler
             {
                 throw new Exception($"Error transforming {fileName} to XML: {ex}");
             }
+        }
+
+        public void Dispose()
+        {
+            Handler.Dispose();
         }
     }
 

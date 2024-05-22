@@ -302,7 +302,7 @@ namespace SpotifyGPX.Input
         private const double CenterLat = 44.918516;
         private const double CenterLon = -0.245090;
         private const int CenterRadius = 20; // Radius from center in kilometers
-        
+
         // Point placement intervals
         private const int MinPlacementSecs = 15; // Minimum GPS point placement interval in seconds
         private const int MaxPlacementSecs = 120; // Maximum GPS point placement interval in seconds
@@ -338,7 +338,7 @@ namespace SpotifyGPX.Input
         // Number of unique artists and songs to generate
         private const int ArtistsCount = 10;
         private const int SongsCount = 100;
-        
+
         // Song playback start (randomness floor) time (currently 07:00) - start playing at 07:00 at the earliest
         private const int PlaybackMinStartHour = 5;
         private const int PlaybackMinStartMinute = 0;

@@ -30,7 +30,7 @@ public abstract class SaveableBase<T> : IFileOutput
     /// <summary>
     /// The document in format <typeparamref name="T"/> that will be serialized and saved to the disk.
     /// </summary>
-    protected T Document { get; }
+    protected T Document { get; private set; }
     public abstract int Count { get; }
 
     /// <summary>
@@ -66,6 +66,18 @@ public abstract class SaveableBase<T> : IFileOutput
     /// </summary>
     /// <returns>This <see cref="Document"/>, as <see langword="byte"/>[].</returns>
     protected abstract byte[] ConvertToBytes();
+
+    /// <summary>
+    /// Clears the contents of the <see cref="Document"/> in preparation for disposal.
+    /// </summary>
+    /// <returns>A <typeparamref name="T"/> that has been cleared.</returns>
+    protected abstract T ClearDocument();
+
+    public virtual void Dispose()
+    {
+        Document = ClearDocument();
+        GC.SuppressFinalize(this);
+    }
 }
 
 /// <summary>
@@ -268,6 +280,11 @@ public abstract class JsonSaveable : SaveableAndTransformableBase<List<JsonDocum
 
         return xElement;
     }
+
+    protected override List<JsonDocument> ClearDocument()
+    {
+        return new();
+    }
 }
 
 /// <summary>
@@ -290,6 +307,11 @@ public abstract class XmlSaveable : SaveableAndTransformableBase<XDocument>
     protected override XDocument TransformToXml()
     {
         return Document;
+    }
+
+    protected override XDocument ClearDocument()
+    {
+        return new XDocument();
     }
 }
 
@@ -324,6 +346,11 @@ public abstract class TxtSaveable : SaveableAndTransformableBase<string?[]>
 
         return new XDocument(root);
     }
+
+    protected override string[] ClearDocument()
+    {
+        return Array.Empty<string>();
+    }
 }
 
 /// <summary>
@@ -338,5 +365,10 @@ public abstract class ByteSaveable : SaveableBase<byte[]>
     protected override byte[] ConvertToBytes()
     {
         return Document;
+    }
+
+    protected override byte[] ClearDocument()
+    {
+        return Array.Empty<byte>();
     }
 }

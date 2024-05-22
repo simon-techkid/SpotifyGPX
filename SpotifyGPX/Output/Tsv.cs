@@ -10,7 +10,7 @@ public sealed partial class Tsv : TxtSaveable
 {
     public override string FormatName => "tsv";
     protected override DocumentAccessor SaveAction => GetDocument;
-    
+
     public Tsv(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
     {
     }

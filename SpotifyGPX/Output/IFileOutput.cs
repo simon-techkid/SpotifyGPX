@@ -1,11 +1,13 @@
 ﻿// SpotifyGPX by Simon Field
 
+using System;
+
 namespace SpotifyGPX.Output;
 
 /// <summary>
 /// Interfaces with file output classes, unifying all formats that pairs can be written out as.
 /// </summary>
-public interface IFileOutput
+public interface IFileOutput : IDisposable
 {
     /// <summary>
     /// The name of this document's format, used in exported files' extensions.
