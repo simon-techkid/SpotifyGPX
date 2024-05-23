@@ -17,7 +17,6 @@ public sealed partial class Json : SongInputBase
     {
         using JsonNetDeserializer deserializer = new(path);
         AllEntries = deserializer.Deserialize<JsonDocument>(JsonOptions);
-        deserializer.Dispose();
     }
 
     private List<ISongEntry> ParseSongs()
@@ -95,16 +94,6 @@ public sealed partial class Json : SongInputBase
                 Spotify_Incognito = incognito
             };
         }).ToList()!;
-    }
-
-    private static JsonElement? TryGetProperty(string name, JsonElement parent)
-    {
-        return parent.TryGetProperty(name, out JsonElement property) ? property : null;
-    }
-
-    private static JsonElement ForceGetProperty(string name, JsonElement parent)
-    {
-        return parent.TryGetProperty(name, out JsonElement property) ? property : throw new Exception($"No {name} object found in {parent}");
     }
 
     private List<ISongEntry> FilterSongs()

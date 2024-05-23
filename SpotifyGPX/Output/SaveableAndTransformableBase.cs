@@ -3,10 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Xsl;
@@ -14,77 +11,11 @@ using System.Xml.Xsl;
 namespace SpotifyGPX.Output;
 
 /// <summary>
-/// Provides instructions for serializing <typeparamref name="T"/> data to <see langword="byte"/>[] and saving it in the target format.
+/// Provides instructions for serializing <typeparamref name="TDocument"/> data to <see langword="byte"/>[] and transforming and/or saving it in the target format.
 /// </summary>
-/// <typeparam name="T">The source format type.</typeparam>
-public abstract class SaveableBase<T> : IFileOutput
-{
-    protected SaveableBase(Func<IEnumerable<SongPoint>> pairs, string? trackName)
-    {
-        DataProvider = pairs;
-        Document = SaveAction(trackName);
-    }
-
-    public abstract string FormatName { get; }
-
-    /// <summary>
-    /// The document in format <typeparamref name="T"/> that will be serialized and saved to the disk.
-    /// </summary>
-    protected T Document { get; private set; }
-    public abstract int Count { get; }
-
-    /// <summary>
-    /// Provides access to the collection of <see cref="SongPoint"/> pairs to be saved to the document in format <typeparamref name="T"/>.
-    /// </summary>
-    protected Func<IEnumerable<SongPoint>> DataProvider { get; }
-
-    /// <summary>
-    /// A delegate to access the contents of the document in format <typeparamref name="T"/>.
-    /// </summary>
-    /// <returns></returns>
-    protected delegate T DocumentAccessor(string? trackName);
-
-    /// <summary>
-    /// Provides access to the document in format <typeparamref name="T"/> that will be serialized and saved to the disk.
-    /// </summary>
-    protected abstract DocumentAccessor SaveAction { get; }
-
-    public void Save(string path)
-    {
-        byte[] doc = ConvertToBytes();
-        Save(path, doc);
-    }
-
-    protected virtual void Save(string path, byte[] bytes)
-    {
-        using FileStream fileStream = new(path, FileMode.Create, FileAccess.Write);
-        fileStream.Write(bytes, 0, bytes.Length);
-    }
-
-    /// <summary>
-    /// Converts <typeparamref name="T"/> to <see langword="byte"/>[].
-    /// </summary>
-    /// <returns>This <see cref="Document"/>, as <see langword="byte"/>[].</returns>
-    protected abstract byte[] ConvertToBytes();
-
-    /// <summary>
-    /// Clears the contents of the <see cref="Document"/> in preparation for disposal.
-    /// </summary>
-    /// <returns>A <typeparamref name="T"/> that has been cleared.</returns>
-    protected abstract T ClearDocument();
-
-    public virtual void Dispose()
-    {
-        Document = ClearDocument();
-        GC.SuppressFinalize(this);
-    }
-}
-
-/// <summary>
-/// Provides instructions for serializing <typeparamref name="T"/> data to <see langword="byte"/>[] and transforming and/or saving it in the target format.
-/// </summary>
-/// <typeparam name="T">The source format type.</typeparam>
-public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>, ITransformableOutput
+/// <typeparam name="TDocument">The source format type.</typeparam>
+/// <typeparam name="THashed">The format type of the hashable portion of this document.</typeparam>
+public abstract partial class SaveableAndTransformableBase<TDocument, THashed> : SaveableBase<TDocument, THashed>, ITransformableOutput
 {
     protected SaveableAndTransformableBase(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
     {
@@ -121,7 +52,7 @@ public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>,
     protected virtual XProcessingInstruction? ProcessingInstruction => IncludeStylesheetHref ? new("xml-stylesheet", $"href=\"{StylesheetPath}\" type=\"text/xsl\"") : null;
 
     /// <summary>
-    /// The path to the target XSLT stylesheet for this XML (if <typeparamref name="T"/> is <see cref="XDocument"/>)
+    /// The path to the target XSLT stylesheet for this XML (if <typeparamref name="TDocument"/> is <see cref="XDocument"/>)
     /// or for this file in its XML transformed (<see cref="TransformToXml"/>) form.
     /// Default value: <see cref="SaveableBase{T}.FormatName"/>.xslt, override to change.
     /// </summary>
@@ -135,7 +66,7 @@ public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>,
     protected abstract XmlWriterSettings XmlSettings { get; }
 
     /// <summary>
-    /// Transforms the document, in format <typeparamref name="T"/>, to XML and saves it to the disk.
+    /// Transforms the document, in format <typeparamref name="TDocument"/>, to XML and saves it to the disk.
     /// </summary>
     /// <param name="name">The file name of the target transformed document.</param>
     public virtual void TransformAndSave(string name)
@@ -190,13 +121,13 @@ public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>,
     };
 
     /// <summary>
-    /// Converts <typeparamref name="T"/> to <see cref="XDocument"/>.
+    /// Converts <typeparamref name="TDocument"/> to <see cref="XDocument"/>.
     /// </summary>
-    /// <returns><typeparamref name="T"/> as an XML document, <see cref="XDocument"/>.</returns>
+    /// <returns><typeparamref name="TDocument"/> as an XML document, <see cref="XDocument"/>.</returns>
     protected abstract XDocument TransformToXml();
 
     /// <summary>
-    /// Converts <typeparamref name="T"/> to <see cref="XDocument"/> and then converts it to <see langword="string"/>.
+    /// Converts <typeparamref name="TDocument"/> to <see cref="XDocument"/> and then converts it to <see langword="string"/>.
     /// </summary>
     /// <returns>A <see langword="string"/>, representing the string representation of the XML <see cref="XDocument"/> of this file.</returns>.
     protected virtual string TransformToXmlToString()
@@ -209,166 +140,5 @@ public abstract partial class SaveableAndTransformableBase<T> : SaveableBase<T>,
         }
 
         return OutputEncoding.GetString(ms.ToArray());
-    }
-}
-
-/// <summary>
-/// Provides instructions for serializing and transforming JSON data using System.Text.Json.
-/// </summary>
-public abstract class JsonSaveable : SaveableAndTransformableBase<List<JsonDocument>>
-{
-    protected JsonSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
-    {
-    }
-
-    /// <summary>
-    /// The <see cref="JsonSerializerOptions"/> for the exported contents of this JSON document.
-    /// </summary>
-    protected abstract JsonSerializerOptions JsonOptions { get; }
-
-    protected override byte[] ConvertToBytes()
-    {
-        JsonArray allTracks = new();
-        Document.ForEach(doc => allTracks.Add(doc.RootElement));
-        JsonElement encapsulatedTracks = JsonDocument.Parse(allTracks.ToJsonString()).RootElement;
-        string document = JsonSerializer.Serialize(encapsulatedTracks, JsonOptions);
-
-        return OutputEncoding.GetBytes(document);
-    }
-
-    protected override XDocument TransformToXml()
-    {
-        XElement root = new("Root");
-
-        foreach (JsonDocument doc in Document)
-        {
-            JsonElement obj = doc.RootElement;
-            XElement element = JsonToXElement(obj);
-            root.Add(element);
-        }
-
-        return new XDocument(root);
-    }
-
-    private static XElement JsonToXElement(JsonElement element)
-    {
-        XElement xElement;
-
-        switch (element.ValueKind)
-        {
-            case JsonValueKind.Object:
-                xElement = new XElement("Object");
-                foreach (JsonProperty property in element.EnumerateObject())
-                {
-                    XElement childElement = JsonToXElement(property.Value);
-                    childElement.Name = property.Name;
-                    xElement.Add(childElement);
-                }
-                break;
-            case JsonValueKind.Array:
-                xElement = new XElement("Array");
-                foreach (JsonElement item in element.EnumerateArray())
-                {
-                    XElement childElement = JsonToXElement(item);
-                    xElement.Add(childElement);
-                }
-                break;
-            default:
-                xElement = new XElement("Value", element.ToString());
-                break;
-        }
-
-        return xElement;
-    }
-
-    protected override List<JsonDocument> ClearDocument()
-    {
-        return new();
-    }
-}
-
-/// <summary>
-/// Provides instructions for serializing and transforming XML data.
-/// </summary>
-public abstract class XmlSaveable : SaveableAndTransformableBase<XDocument>
-{
-    protected XmlSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
-    {
-    }
-
-    protected override Encoding OutputEncoding => XmlSettings.Encoding;
-
-    protected override byte[] ConvertToBytes()
-    {
-        string xmlString = TransformToXmlToString();
-        return OutputEncoding.GetBytes(xmlString);
-    }
-
-    protected override XDocument TransformToXml()
-    {
-        return Document;
-    }
-
-    protected override XDocument ClearDocument()
-    {
-        return new XDocument();
-    }
-}
-
-/// <summary>
-/// Provides instructions for serializing and transforming TXT data.
-/// </summary>
-public abstract class TxtSaveable : SaveableAndTransformableBase<string?[]>
-{
-    protected TxtSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
-    {
-    }
-
-    /// <summary>
-    /// Default line ending for the TXT document.
-    /// Default value: <see cref="Environment.NewLine"/>, override to change.
-    /// </summary>
-    protected virtual string LineEnding => Environment.NewLine;
-
-    protected override byte[] ConvertToBytes()
-    {
-        string doc = string.Join(LineEnding, Document);
-        return OutputEncoding.GetBytes(doc);
-    }
-
-    protected override XDocument TransformToXml()
-    {
-        XElement root = new("Root");
-
-        Document.Select(line => new XElement("Line", line))
-            .ToList()
-            .ForEach(root.Add);
-
-        return new XDocument(root);
-    }
-
-    protected override string[] ClearDocument()
-    {
-        return Array.Empty<string>();
-    }
-}
-
-/// <summary>
-/// Provides instructions for serializing an array of bytes.
-/// </summary>
-public abstract class ByteSaveable : SaveableBase<byte[]>
-{
-    protected ByteSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
-    {
-    }
-
-    protected override byte[] ConvertToBytes()
-    {
-        return Document;
-    }
-
-    protected override byte[] ClearDocument()
-    {
-        return Array.Empty<byte>();
     }
 }

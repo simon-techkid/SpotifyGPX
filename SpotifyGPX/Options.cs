@@ -131,7 +131,7 @@ namespace SpotifyGPX
 
     public partial struct SpotifyEntry
     {
-        private const TimeUsage timeUsage = TimeUsage.Start;
+        private static TimeUsage timeUsage => TimeUsage.End;
     }
 
     public partial struct XspfEntry
@@ -272,6 +272,8 @@ namespace SpotifyGPX.Input
     public partial class JsonReport
     {
         private static JsonSerializerOptions JsonOptions => Options.JsonReportOptions;
+
+        private static UsageSource TimeSource => UsageSource.Time;
 
         // Tolerance filters
         private static readonly Func<SongPoint, bool> pairFilter = pair => true; // No filtering for JsonReport song-point data
@@ -418,7 +420,7 @@ namespace SpotifyGPX.Output
         };
     }
 
-    public partial class SaveableAndTransformableBase<T>
+    public partial class SaveableAndTransformableBase<TDocument, THashed>
     {
         private const bool EnableDebugXsltTransformations = false;
         private const bool EnableXsltDocumentFunction = true;
@@ -444,10 +446,10 @@ namespace SpotifyGPX.Output
 
     public partial class Gpx
     {
-        private static XNamespace Namespace => "http://www.topografix.com/GPX/1/0";
         private static XNamespace Xsi => "http://www.w3.org/2001/XMLSchema-instance";
         private const string Schema = "http://www.topografix.com/GPX/1/0 http://wwwtopografix.com/GPX/1/0/gpx.xsd";
         private const string Waypoint = "wpt";
+        protected override XNamespace Namespace => "http://www.topografix.com/GPX/1/0";
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
@@ -465,9 +467,9 @@ namespace SpotifyGPX.Output
 
     public partial class Kml
     {
-        private static XNamespace Namespace => "http://www.opengis.net/kml/2.2";
         private static XNamespace Gx => "http://www.google.com/kml/ext/2.2";
         private const string Placemark = "Placemark";
+        protected override XNamespace Namespace => "http://www.opengis.net/kml/2.2";
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 
@@ -533,9 +535,9 @@ namespace SpotifyGPX.Output
 
     public partial class Xspf
     {
-        private static XNamespace Namespace => "http://xspf.org/ns/0/";
         private const string Track = "track";
         private const string Comment = "";
+        protected override XNamespace Namespace => "http://xspf.org/ns/0/";
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }
 }

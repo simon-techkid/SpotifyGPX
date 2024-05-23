@@ -38,6 +38,8 @@ public interface IPairInput : IDisposable
     /// </summary>
     FilterPairsDelegate FilterPairsMethod { get; }
 
+    bool Disposed { get; }
+
     /// <summary>
     /// The number of pairs in the source file.
     /// </summary>

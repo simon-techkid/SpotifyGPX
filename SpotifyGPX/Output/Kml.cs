@@ -33,8 +33,7 @@ public sealed partial class Kml : XmlSaveable
             )
         );
 
-        XmlHashProvider hasher = new();
-        string hash = hasher.ComputeHash(kmlPairs);
+        string hash = HashProvider.ComputeHash(kmlPairs);
 
         return new XDocument(
             new XElement(Namespace + "kml",

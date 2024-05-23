@@ -17,7 +17,6 @@ public sealed partial class GeoJson : GpsInputBase
     {
         using JsonNetDeserializer deserializer = new(path);
         Document = deserializer.GetDocument();
-        deserializer.Dispose();
     }
 
     private List<GpsTrack> ParseTracks()

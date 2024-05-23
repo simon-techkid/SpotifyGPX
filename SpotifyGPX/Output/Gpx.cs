@@ -30,8 +30,7 @@ public sealed partial class Gpx : XmlSaveable
             )
         );
 
-        XmlHashProvider hasher = new();
-        string hash = hasher.ComputeHash(gpxPairs);
+        string hash = HashProvider.ComputeHash(gpxPairs);
 
         return new XDocument(
             new XElement(Namespace + "gpx",

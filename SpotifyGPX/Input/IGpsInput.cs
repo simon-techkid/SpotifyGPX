@@ -149,6 +149,8 @@ public partial interface IGpsInput : IDisposable
             .ToList();
     }
 
+    bool Disposed { get; }
+
     /// <summary>
     /// The total number of GPS tracks in the source file.
     /// </summary>

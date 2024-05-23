@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text.Json;
 
@@ -21,7 +22,6 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
     {
         using JsonNetDeserializer deserializer = new(path);
         JsonObjects = deserializer.Deserialize<JsonDocument>(JsonOptions);
-        deserializer.Dispose();
         JsonTracksOnly = JsonObjects.Skip(1).ToList();
     }
 
@@ -96,21 +96,39 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
     {
         string songDescription = JsonTools.ForceGetProperty("Description", song).GetString() ?? string.Empty;
         int songIndex = JsonTools.ForceGetProperty("Index", song).GetInt32();
+
+        DateTimeOffset interpretedTime = JsonTools.ForceGetProperty("FriendlyTime", song).GetDateTimeOffset();
+        int songInterpretation = JsonTools.ForceGetProperty("CurrentInterpretation", song).GetInt32();
+
         DateTimeOffset songTime = JsonTools.ForceGetProperty("Time", song).GetDateTimeOffset();
+        int songCurrentUsage = JsonTools.ForceGetProperty("CurrentUsage", song).GetInt32();
+
         string? songArtist = JsonTools.ForceGetProperty("Song_Artist", song).GetString();
         string? songName = JsonTools.ForceGetProperty("Song_Name", song).GetString();
-        int songCurrentUsage = JsonTools.ForceGetProperty("CurrentUsage", song).GetInt32();
-        int songCurrentInterpretation = JsonTools.ForceGetProperty("CurrentInterpretation", song).GetInt32();
+
+        DateTimeOffset time = TimeSource switch
+        {
+            UsageSource.FriendlyTime => interpretedTime,
+            UsageSource.Time => songTime,
+            _ => throw new Exception("Invalid UsageSource")
+        };
+
+        int finalInterpretation = TimeSource switch
+        {
+            UsageSource.FriendlyTime => songInterpretation,
+            UsageSource.Time => songCurrentUsage,
+            _ => throw new Exception("Invalid UsageSource")
+        };
 
         ISongEntry songEntry = new GenericEntry()
         {
             Description = songDescription,
             Index = songIndex,
-            FriendlyTime = songTime,
+            FriendlyTime = time,
             Song_Artist = songArtist,
             Song_Name = songName,
-            CurrentUsage = (TimeUsage)songCurrentUsage,
-            CurrentInterpretation = (TimeInterpretation)songCurrentInterpretation
+            CurrentUsage = (TimeUsage)finalInterpretation,
+            CurrentInterpretation = (TimeInterpretation)finalInterpretation
         };
 
         return songEntry;
@@ -178,7 +196,20 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
     public bool VerifyHash()
     {
         JsonHashProvider hasher = new();
-        string? expectedHash = Header.TryGetProperty("SHA256Hash", out JsonElement hash) ? hash.GetString() : null;
+        string? expectedHash = JsonTools.TryGetProperty("SHA256Hash", Header)?.GetString();
         return hasher.VerifyHash(JsonTracksOnly, expectedHash);
+    }
+
+    private enum UsageSource
+    {
+        /// <summary>
+        /// Get the JsonReport's time from the FriendlyTime field.
+        /// </summary>
+        FriendlyTime,
+
+        /// <summary>
+        /// Get the JsonReport's time from the Time field.
+        /// </summary>
+        Time
     }
 }

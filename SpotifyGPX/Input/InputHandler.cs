@@ -9,7 +9,7 @@ namespace SpotifyGPX.Input;
 /// <summary>
 /// Handle various input file formats for taking in song and GPS information.
 /// </summary>
-public partial class InputHandler : IDisposable
+public partial class InputHandler : DisposableBase
 {
     private ISongInput SongInput { get; }
     private IGpsInput GpsInput { get; }
@@ -123,40 +123,22 @@ public partial class InputHandler : IDisposable
     /// </summary>
     private void VerifyAllHashes()
     {
-        RunHashVerificationForInput(SongInput);
-        RunHashVerificationForInput(GpsInput);
-        if (PairInput != null)
-        {
-            RunHashVerificationForInput(PairInput);
-        }
+        (SongInput as IHashVerifier)?.CheckHash();
+        (GpsInput as IHashVerifier)?.CheckHash();
+        (PairInput as IHashVerifier)?.CheckHash();
     }
 
-    public void Dispose()
+    protected override void DisposeClass()
     {
-        SongInput.Dispose();
-        GpsInput.Dispose();
-        PairInput?.Dispose();
+        if (!SongInput.Disposed)
+            SongInput.Dispose();
+
+        if (!GpsInput.Disposed)
+            GpsInput.Dispose();
+
+        if (PairInput != null && !PairInput.Disposed)
+            PairInput.Dispose();
+
         GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// Verify the hash of an input format, if it implements IHashVerifier.
-    /// </summary>
-    /// <param name="inputClass">The input class for the format in question.</param>
-    private static void RunHashVerificationForInput(object inputClass)
-    {
-        if (inputClass is IHashVerifier hashVerifier)
-        {
-            bool hashVerified = hashVerifier.VerifyHash();
-
-            if (hashVerified)
-            {
-                Console.WriteLine($"Hash verification successful for {inputClass.GetType().Name}.");
-            }
-            else
-            {
-                Console.WriteLine($"Hash verification failed for {inputClass.GetType().Name}.");
-            }
-        }
     }
 }

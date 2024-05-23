@@ -16,6 +16,11 @@ namespace SpotifyGPX;
 /// <typeparam name="T">The type of the object being hashed.</typeparam>
 public interface IHashProvider<T>
 {
+    /// <summary>
+    /// Compute a checksum hash for the given <typeparamref name="T"/> data.
+    /// </summary>
+    /// <param name="data">Data to be hashed, in format <typeparamref name="T"/>.</param>
+    /// <returns>A <see langword="string"/> representing a checksum for the given <typeparamref name="T"/> data.</returns>
     string ComputeHash(T data);
 }
 
@@ -25,32 +30,32 @@ public interface IHashProvider<T>
 /// <typeparam name="T">The type of the object being hashed.</typeparam>
 public interface IHashChecker<T>
 {
+    /// <summary>
+    /// Verify that the hash of the given <typeparamref name="T"/> data matches the expected hash.
+    /// </summary>
+    /// <param name="data">Data to be hashed, in format <typeparamref name="T"/>.</param>
+    /// <param name="expectedHash">A <see langword="string"/> representing the expected hash for the given <typeparamref name="T"/> data.</param>
+    /// <returns>True, if the calculated hash of the <typeparamref name="T"/> data matches the given expected hash. Otherwise, false.</returns>
     bool VerifyHash(T data, string expectedHash);
 }
 
 /// <summary>
-/// Central class supporting creating and verifying hashes given a specific format.
+/// Central class supporting creating and verifying hashes for documents of type <typeparamref name="T"/>.
+/// The document is converted to a <see langword="byte"/>[] before hashing.
 /// </summary>
 /// <typeparam name="T">The type of the object being hashed.</typeparam>
-public abstract class FormatHashProviderBase<T> : IHashProvider<T>, IHashChecker<T>
+public abstract class ByteFormatHashProviderBase<T> : IHashProvider<T>, IHashChecker<T>
 {
     /// <summary>
-    /// Serialize an object to a string so that the string can serve as the hashed payload.
+    /// Convert an object of type <typeparamref name="T"/> to a <see langword="byte"/>[] so that the byte array can serve as the hashed payload.
     /// </summary>
-    /// <param name="data">An object to be hashed.</param>
-    /// <returns>The object as a string.</returns>
-    protected abstract string SerializeData(T data);
+    /// <param name="data">An object of type <typeparamref name="T"/> to be converted to <see langword="byte"/>[].</param>
+    /// <returns>This document of type <typeparamref name="T"/> as a <see langword="byte"/>[].</returns>
+    protected abstract byte[] ConvertToBytes(T data);
 
-    /// <summary>
-    /// Calculates the SHA256 checksum hash for the given data.
-    /// </summary>
-    /// <param name="data">An object to be hashed.</param>
-    /// <returns>A string representing the SHA256 checksum of the data.</returns>
     public string ComputeHash(T data)
     {
-        string serializedData = SerializeData(data);
-
-        byte[] bytes = Encoding.UTF8.GetBytes(serializedData);
+        byte[] bytes = ConvertToBytes(data);
         byte[] hashBytes = SHA256.HashData(bytes);
 
         System.Text.StringBuilder builder = new();
@@ -61,12 +66,6 @@ public abstract class FormatHashProviderBase<T> : IHashProvider<T>, IHashChecker
         return builder.ToString();
     }
 
-    /// <summary>
-    /// Verifies that the hash of the given data matches the expected hash.
-    /// </summary>
-    /// <param name="data">An object to be hashed.</param>
-    /// <param name="expectedHash">The expected hash of the data object.</param>
-    /// <returns>True, if the hashes match. Otherwise, false.</returns>
     public bool VerifyHash(T data, string? expectedHash)
     {
         string actualHash = ComputeHash(data);
@@ -75,20 +74,77 @@ public abstract class FormatHashProviderBase<T> : IHashProvider<T>, IHashChecker
 }
 
 /// <summary>
-/// Serializes XML data to a string for hashing.
+/// Central class supporting stringifying objects of type <typeparamref name="T"/> prior to being hashed.
+/// The document is converted to a <see langword="string"/> before it is converted to a <see langword="byte"/>[] and hashed.
 /// </summary>
-public class XmlHashProvider : FormatHashProviderBase<IEnumerable<XElement>>
+/// <typeparam name="T">The type of the object being hashed.</typeparam>
+public abstract class StringFormatHashProviderBase<T> : ByteFormatHashProviderBase<T>
 {
-    protected override string SerializeData(IEnumerable<XElement> data)
+    protected StringFormatHashProviderBase(Encoding? encoding = null)
     {
-        return string.Join("", data.Select(element => element.ToString()));
+        HashedDataEncoding = encoding ?? Encoding.UTF8;
+    }
+
+    /// <summary>
+    /// Convert an object of type <typeparamref name="T"/> to a <see langword="string"/> so that the string can serve as the hashed payload.
+    /// </summary>
+    /// <param name="data">An object of type <typeparamref name="T"/> to be hashed.</param>
+    /// <returns>The object as a string.</returns>
+    protected abstract string ConvertToString(T data);
+
+    /// <summary>
+    /// The encoding of the document of type <typeparamref name="T"/> as a string to be hashed.
+    /// Default value: <see cref="Encoding.UTF8"/>, override to change.
+    /// </summary>
+    protected virtual Encoding HashedDataEncoding { get; }
+
+    protected override byte[] ConvertToBytes(T data)
+    {
+        string serializedData = ConvertToString(data);
+        return HashedDataEncoding.GetBytes(serializedData);
     }
 }
 
-public class JsonHashProvider : FormatHashProviderBase<IEnumerable<JsonDocument>>
+public class XmlHashProvider : StringFormatHashProviderBase<IEnumerable<XElement>>
 {
-    protected override string SerializeData(IEnumerable<JsonDocument> data)
+    public XmlHashProvider(Encoding? encoding = null) : base(encoding)
+    {
+    }
+
+    protected override string ConvertToString(IEnumerable<XElement> data)
+    {
+        return string.Join("", data.Select(data => data.ToString()));
+    }
+}
+
+public class JsonHashProvider : StringFormatHashProviderBase<List<JsonDocument>>
+{
+    public JsonHashProvider(Encoding? encoding = null) : base(encoding)
+    {
+    }
+
+    protected override string ConvertToString(List<JsonDocument> data)
     {
         return string.Join("", data.Select(document => document.RootElement.ToString()));
+    }
+}
+
+public class TxtHashProvider : StringFormatHashProviderBase<string?[]>
+{
+    public TxtHashProvider(Encoding? encoding = null) : base(encoding)
+    {
+    }
+
+    protected override string ConvertToString(string?[] data)
+    {
+        return string.Join("", data);
+    }
+}
+
+public class ByteHashProvider : ByteFormatHashProviderBase<byte[]>
+{
+    protected override byte[] ConvertToBytes(byte[] data)
+    {
+        return data;
     }
 }

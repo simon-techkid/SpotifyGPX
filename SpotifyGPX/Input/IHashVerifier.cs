@@ -1,5 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
+using System;
+
 namespace SpotifyGPX.Input;
 
 /// <summary>
@@ -12,4 +14,26 @@ public interface IHashVerifier
     /// </summary>
     /// <returns>True, if the checksum matches. Otherwise, false.</returns>
     bool VerifyHash();
+
+    /// <summary>
+    /// Verifies the hash of the file, and prints the result to the console.
+    /// </summary>
+    void CheckHash()
+    {
+        // If the object has been disposed, throw an exception.
+        ObjectDisposedException.ThrowIf(Disposed, this);
+
+        bool hashVerified = VerifyHash();
+
+        if (hashVerified)
+        {
+            Console.WriteLine($"[SHA] Hash verification successful for {GetType().FullName}.");
+        }
+        else
+        {
+            Console.WriteLine($"[SHA] Hash verification failed for {GetType().FullName}.");
+        }
+    }
+
+    bool Disposed { get; }
 }

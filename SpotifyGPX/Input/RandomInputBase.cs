@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace SpotifyGPX.Input;
 
-public abstract class RandomInputBase<T> : IDisposable
+public abstract class RandomInputBase<T> : DisposableBase
 {
     protected RandomInputBase()
     {
@@ -85,10 +85,8 @@ public abstract class RandomInputBase<T> : IDisposable
     /// <returns>An <see cref="IEnumerable{T}"/> of type <see cref="DateTimeOffset"/>.</returns>
     protected abstract IEnumerable<DateTimeOffset> GenerateDateTimeOffsets();
 
-    public virtual void Dispose()
+    protected override void DisposeClass()
     {
-        GC.SuppressFinalize(this);
-        return;
     }
 
     protected bool IsValidTimes()

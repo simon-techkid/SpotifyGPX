@@ -30,8 +30,7 @@ public sealed partial class Xspf : XmlSaveable
             CheckNullNode(Namespace + "link", pair.Song.GetPropertyValue<IUrlLinkableSong>(song => song.SongURL))
         ));
 
-        XmlHashProvider hasher = new();
-        string hash = hasher.ComputeHash(xspfPairs);
+        string hash = HashProvider.ComputeHash(xspfPairs);
 
         return new XDocument(
             new XElement(Namespace + "playlist",

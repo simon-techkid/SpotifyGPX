@@ -67,6 +67,8 @@ public partial interface ISongInput : IDisposable
         return filtered;
     }
 
+    bool Disposed { get; }
+
     /// <summary>
     /// The total number of songs in the given file.
     /// </summary>

@@ -1,12 +1,17 @@
 ﻿// SpotifyGPX by Simon Field
 
-using System;
 using System.IO;
 
 namespace SpotifyGPX.Input;
 
-public abstract class FileInputBase : IDisposable
+public abstract class FileInputBase : DisposableBase
 {
+    protected FileInputBase(string path)
+    {
+        FileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+        StreamReader = new StreamReader(FileStream);
+    }
+
     /// <summary>
     /// Serves as the reading stream for a file on the disk.
     /// </summary>
@@ -22,17 +27,10 @@ public abstract class FileInputBase : IDisposable
     /// </summary>
     protected abstract void DisposeDocument();
 
-    protected FileInputBase(string path)
-    {
-        FileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
-        StreamReader = new StreamReader(FileStream);
-    }
-
-    public virtual void Dispose()
+    protected override void DisposeClass()
     {
         StreamReader.Dispose();
         FileStream.Dispose();
         DisposeDocument();
-        GC.SuppressFinalize(this);
     }
 }

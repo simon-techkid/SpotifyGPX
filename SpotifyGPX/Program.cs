@@ -86,7 +86,6 @@ public partial class Program
         using (InputHandler input = new(inputPairs))
         {
             pairs = input.GetAllPairs();
-            input.Dispose();
         }
 
         return new PairingsHandler(pairs, Path.GetFileNameWithoutExtension(inputPairs));
@@ -106,8 +105,6 @@ public partial class Program
             // Step 2: Get list of songs played from the entries file
             songs = input.GetFilteredSongs(tracks);
             //songs = input.GetAllSongs(); // Unfiltered run
-
-            input.Dispose();
         }
 
         // Step 2.5: Get metadata for each song

@@ -35,8 +35,7 @@ public sealed partial class JsonReport : JsonSaveable
             })
             .ToList();
 
-        JsonHashProvider hasher = new();
-        string hash = hasher.ComputeHash(objects);
+        string hash = HashProvider.ComputeHash(objects);
 
         var header = new
         {
