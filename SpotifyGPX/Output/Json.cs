@@ -21,7 +21,7 @@ public sealed partial class Json : JsonSaveable
         IEnumerable<SongPoint> Pairs = DataProvider();
 
         List<JsonDocument> objects = Pairs
-            .Select(pair => JsonDocument.Parse(JsonSerializer.Serialize(pair.Song)))
+            .Select(pair => JsonDocument.Parse(JsonSerializer.Serialize(pair.Song.GetObject<SpotifyEntry>())))
             .ToList();
 
         return objects;

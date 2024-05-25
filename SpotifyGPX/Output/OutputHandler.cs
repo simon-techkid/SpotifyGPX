@@ -100,7 +100,7 @@ public partial class OutputHandler
         {
             AttemptSave(transform, FinalName);
         }
-        
+
         private void AttemptSave(bool transform, string fileName, int attempt = 0)
         {
             try
