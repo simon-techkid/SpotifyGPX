@@ -42,6 +42,7 @@ public partial class Program
             // Step 4: Write the pairing job's pair counts and averages
             pairedEntries.WriteCounts();
             pairedEntries.WriteAverages();
+            pairedEntries.CheckEasterEggs();
         }
         catch (Exception ex)
         {

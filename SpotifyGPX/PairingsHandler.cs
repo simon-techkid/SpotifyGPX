@@ -56,13 +56,6 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
         Name = name;
     }
 
-    /// <summary>
-    /// Pair songs with points (positions on Earth), by finding the closest gap of time between each.
-    /// </summary>
-    /// <param name="silent">If true, do not print each pairing to the console upon creation.</param>
-    /// <param name="songs">A series of <see cref="ISongEntry"/> song playback records, used to associate a song with a point.</param>
-    /// <param name="tracks">A list of <see cref="GpsTrack"/> objects, used to associate songs with a track and position on Earth.</param>
-    /// <returns>A list of <see cref="SongPoint"/> pairs, each song and its point (on Earth), in a list.</returns>
     private static List<SongPoint> PairPoints(bool silent, List<ISongEntry> songs, List<GpsTrack> tracks)
     {
         // Correlate Spotify entries with the nearest GPS points
@@ -104,13 +97,6 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
         //WriteCounts(pair => pair.Song.Spotify_Country, "country", "countries"); // Write # of pairs in each country
     }
 
-    /// <summary>
-    /// Write the number of pairs in each group (based on a selector) to the console.
-    /// </summary>
-    /// <typeparam name="T">The object of a pair by which all pairs should be grouped.</typeparam>
-    /// <param name="groupingSelector">The grouping selector, the parameter of each pair by which the collection of pairs should be grouped.</param>
-    /// <param name="nameSingular">The name of one of these groups.</param>
-    /// <param name="nameMultiple">The name of multiple of these groups.</param>
     private void WriteCounts<T>(Func<SongPoint, T> groupingSelector, string nameSingular, string nameMultiple)
     {
         var groupedPairs = Pairs.GroupBy(groupingSelector); // Group all the song-point pairs by the specified selector
@@ -130,13 +116,6 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
         WriteAverages(pair => pair.Origin, "track", "tracks"); // Calculate Accuracies by track
     }
 
-    /// <summary>
-    /// Write the average accuracies (in seconds, between each song and point in a pair) to the console in groups (based on a selector).
-    /// </summary>
-    /// <typeparam name="T">The object of a pair by which all pairs should be grouped.</typeparam>
-    /// <param name="groupingSelector">The grouping selector, the parameter of each pair by which the collection of pairs should be grouped.</param>
-    /// <param name="nameSingular">The name of one of these groups.</param>
-    /// <param name="nameMultiple">The name of multiple of these groups.</param>
     private void WriteAverages<T>(Func<SongPoint, T> groupingSelector, string nameSingular, string nameMultiple)
     {
         var groupedPairs = Pairs.GroupBy(groupingSelector); // Group all the song-point pairs by the specified selector
@@ -145,6 +124,19 @@ public partial class PairingsHandler : IEnumerable<SongPoint>
         string objName = groupCount == 1 ? nameSingular : nameMultiple;
 
         Console.WriteLine($"[PAIR] Average Accuracy for {groupCount} {objName}: {accuraciesJoined}");
+    }
+
+    /// <summary>
+    /// Check all the pairings for Easter eggs.
+    /// </summary>
+    public void CheckEasterEggs()
+    {
+        WriteEggs(new SongEasterEggs());
+    }
+
+    private void WriteEggs<T>(EasterEggs<T> egg)
+    {
+        egg.CheckAllPairsForEggs(Pairs);
     }
 
     public IEnumerator<SongPoint> GetEnumerator()
