@@ -42,7 +42,6 @@ public partial class Program
         bool pointPredict = flags.Contains("pp");
         bool autoPredict = flags.Contains("pa");
         bool grabApiData = flags.Contains("a");
-        bool silent = flags.Contains("s");
         bool transform = flags.Contains("x");
 
         Dictionary<Formats, bool> exportOptions = GetExportOptions(flags);

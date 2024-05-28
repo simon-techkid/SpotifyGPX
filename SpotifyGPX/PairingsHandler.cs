@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SpotifyGPX;
 
@@ -69,30 +70,123 @@ public partial class PairingsHandler : StringBroadcasterBase, IEnumerable<SongPo
     /// <returns>A list of Song-Point pairs, each song and its point (on Earth), in a list.</returns>
     private List<SongPoint> PairPoints(List<ISongEntry> songs, List<GpsTrack> tracks)
     {
-        // Correlate Spotify entries with the nearest GPS points
-
         int index = 0; // Index of the pairing
+        List<SongPoint> pairs = new();
 
-        return tracks // For each GPS track
-        .SelectMany(track => songs // Get the list of SpotifyEntries
-        .Where(songEntry => songEntry.WithinTimeFrame(track.Start, track.End)) // If the song entry falls within the boundaries of the track
-        .Select(spotifyEntry => // Select the song entry if it falls in range of the GPS track
+        // Preprocess tracks to sort points by time
+        List<GpsTrack> preprocessedTracks = tracks.Select(track =>
+        {
+            track.Points.Sort((p1, p2) => p1.Time.CompareTo(p2.Time));
+            return track;
+        }).ToList();
+
+        BCaster.Broadcast($"Preprocessed {preprocessedTracks.Count} tracks", Observation.LogLevel.Debug);
+
+        foreach (ISongEntry song in songs)
+        {
+            // Filter tracks that are within the song's time frame
+            List<GpsTrack> relevantTracks = preprocessedTracks
+                .Where(track => song.WithinTimeFrame(track.Start, track.End))
+                .ToList();
+
+            BCaster.Broadcast($"Found {relevantTracks.Count} relevant tracks for '{song.ToString()}'", Observation.LogLevel.Debug);
+
+            List<Task> tasks = new();
+            foreach (GpsTrack track in relevantTracks)
             {
-                IGpsPoint bestPoint = track.Points
-                .OrderBy(point => SongPoint.DisplacementCalculatorAbs(spotifyEntry.Time, point.Time))
-                .First();
+                tasks.Add(Task.Run(() =>
+                {
+                    // Use binary search to find the closest point
+                    if (!TryFindClosestPoint(track.Points, song.Time, out IGpsPoint? bestPoint, out double accuracy))
+                    {
+                        BCaster.BroadcastError(new Exception($"Unable to find close point for {song}, its accuracy ({accuracy}) to the closest point is higher than tolerated ceiling ({MaximumAbsAccuracy})!"));
+                        return;
+                    }
+                    else if (bestPoint == null)
+                    {
+                        BCaster.BroadcastError(new Exception($"Closest point is null for {song}!"));
+                        return;
+                    }
 
-                SongPoint pair = new(index, spotifyEntry, bestPoint, track.Track);
+                    SongPoint pair = new(index, song, bestPoint, track.Track);
 
-                BCaster.Broadcast(pair.ToString(), Observation.LogLevel.Pair); // Notify observers when a pair is created
+                    BCaster.Broadcast($"{pair.ToString()}", Observation.LogLevel.Pair);
 
-                index++; // Add to the index of all pairings regardless of track
+                    lock (pairs)
+                    {
+                        pairs.Add(pair);
+                        index++;
+                    }
+                }));
+            }
 
-                return pair;
-            })
-        )
-        .Where(pair => MaximumAbsAccuracy == null || pair.AbsAccuracy <= MaximumAbsAccuracy) // Only create pairings with accuracy equal to or below max allowed accuracy
-        .ToList();
+            Task[] pointsToPair = tasks.ToArray();
+
+            BCaster.Broadcast($"Waiting for {pointsToPair.Length} pairs to be created for '{song.ToString()}'", Observation.LogLevel.Debug);
+
+            Task.WaitAll(pointsToPair);
+
+            BCaster.Broadcast($"{pointsToPair.Length} pairs created for '{song.ToString()}'", Observation.LogLevel.Debug);
+        }
+
+        return pairs;
+    }
+
+    private static bool TryFindClosestPoint(List<IGpsPoint> points, DateTimeOffset songTime, out IGpsPoint? nearestPoint, out double accuracy)
+    {
+        nearestPoint = null;
+
+        if (points == null || points.Count == 0)
+        {
+            throw new Exception("The points list cannot be null or empty.");
+        }
+
+        int left = 0;
+        int right = points.Count - 1;
+
+        // Perform binary search to narrow down the closest point by time
+        while (left < right)
+        {
+            int mid = left + (right - left) / 2;
+
+            if (points[mid].Time < songTime)
+            {
+                left = mid + 1;
+            }
+            else
+            {
+                right = mid;
+            }
+        }
+
+        // At this point, left is the smallest index with points[left].Time >= songTime
+        if (left == 0)
+        {
+            nearestPoint = points[0];
+            accuracy = SongPoint.DisplacementCalculatorAbs(points[0].Time, songTime);
+            return true;
+        }
+
+        // If the song time is greater than the last point, return the last point
+        if (left >= points.Count)
+        {
+            nearestPoint = points[points.Count - 1];
+            accuracy = SongPoint.DisplacementCalculatorAbs(points[points.Count - 1].Time, songTime);
+            return true;
+        }
+
+        double leftDisplacement = SongPoint.DisplacementCalculatorAbs(points[left].Time, songTime);
+        double rightDisplacement = SongPoint.DisplacementCalculatorAbs(points[left - 1].Time, songTime);
+
+        nearestPoint = leftDisplacement < rightDisplacement ? points[left] : points[left - 1];
+        accuracy = Math.Min(leftDisplacement, rightDisplacement);
+
+        if (MaximumAbsAccuracy != null && accuracy > MaximumAbsAccuracy)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>

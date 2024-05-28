@@ -106,7 +106,7 @@ namespace SpotifyGPX
             get
             {
                 System.Text.StringBuilder builder = new();
-                builder.AppendLine("Usage: SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-c] [-g] [-j] [-k] [-p] [-v] [-t] [-r] [-e] [-x] [-pp [-pa]] [-s] [-h]");
+                builder.AppendLine("Usage: SpotifyGPX [--spotify <spotify> --gps <gps>] [--pairs <pairs>] [-c] [-g] [-j] [-k] [-p] [-v] [-t] [-r] [-e] [-x] [-pp [-pa]] [-h]");
                 builder.AppendLine("--spotify <spotify> --gps <gps> - Path to a Spotify playback history and GPS journey file");
                 builder.AppendLine("--pairs <pairs> - Path to a pairs file");
                 builder.AppendLine("-c - Export a CSV table of all the pairs");
@@ -120,7 +120,6 @@ namespace SpotifyGPX
                 builder.AppendLine("-e - Export an Excel workbook of all pairings, grouped into worksheets for each track");
                 builder.AppendLine("-x - Export an XML conversion of each file exported (combine this with other format export flags)");
                 builder.AppendLine("-pp - Predict new positions for duplicate points (use with -pa for automatic prediction of all duplicate positions)");
-                builder.AppendLine("-s - Do not print out each newly created Song-Point pairing upon creation");
                 builder.AppendLine("-h - Print the help instructions");
                 return builder.ToString();
             }
