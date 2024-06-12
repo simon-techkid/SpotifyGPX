@@ -84,6 +84,7 @@ namespace SpotifyGPX
             return new Dictionary<Formats, bool>
             {
                 { Formats.Csv, flags?.Contains("c") ?? false }, // Set any value to true to export by default.
+                { Formats.FolderedKml, flags?.Contains("f") ?? false },
                 { Formats.Gpx, flags?.Contains("g") ?? false },
                 { Formats.Json, flags?.Contains("j") ?? false },
                 { Formats.JsonReport, flags?.Contains("r") ?? false },
@@ -391,6 +392,7 @@ namespace SpotifyGPX.Output
             return format switch
             {
                 Formats.Csv => false,
+                Formats.FolderedKml => true,
                 Formats.Gpx => false,
                 Formats.Json => false,
                 Formats.JsonReport => true,
@@ -409,6 +411,7 @@ namespace SpotifyGPX.Output
         private readonly Dictionary<Formats, FileOutputCreator> creators = new()
         {
             { Formats.Csv, (pairs, trackName) => new Csv(pairs, trackName) },
+            { Formats.FolderedKml, (pairs, trackName) => new FolderedKml(pairs, trackName) },
             { Formats.Gpx, (pairs, trackName) => new Gpx(pairs, trackName) },
             { Formats.Json, (pairs, trackName) => new Json(pairs, trackName) },
             { Formats.JsonReport, (pairs, trackName) => new JsonReport(pairs, trackName) },
@@ -469,6 +472,15 @@ namespace SpotifyGPX.Output
     {
         private static XNamespace Gx => "http://www.google.com/kml/ext/2.2";
         private const string Placemark = "Placemark";
+        protected override XNamespace Namespace => "http://www.opengis.net/kml/2.2";
+        protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
+    }
+
+    public partial class FolderedKml
+    {
+        private static XNamespace Gx => "http://www.google.com/kml/ext/2.2";
+        private const string Placemark = "Placemark";
+        private const string Folder = "Folder";
         protected override XNamespace Namespace => "http://www.opengis.net/kml/2.2";
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
     }

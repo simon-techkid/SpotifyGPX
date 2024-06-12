@@ -18,10 +18,9 @@ public sealed partial class JsonReport : JsonSaveable
 
     private List<JsonDocument> GetDocument(string? trackName)
     {
-        IEnumerable<SongPoint> Pairs = DataProvider();
+        IEnumerable<IGrouping<TrackInfo, SongPoint>> tracks = GroupedDataProvider(pair => pair.Origin);
 
-        List<JsonDocument> objects = Pairs
-            .GroupBy(pair => pair.Origin) // Group the pairs by track (JsonReport supports multiTrack)
+        List<JsonDocument> objects = tracks
             .Select(track =>
             {
                 var json = new
@@ -40,7 +39,8 @@ public sealed partial class JsonReport : JsonSaveable
         var header = new
         {
             Created = DateTimeOffset.Now.ToUniversalTime(),
-            Total = Pairs.Count(),
+            Tracks = tracks.Count(),
+            Total = tracks.SelectMany(track => track).Count(),
             SHA256Hash = hash
         };
 

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SpotifyGPX.Output;
 
@@ -26,6 +27,14 @@ public abstract class SaveableBase<TDocument, THashed> : DisposableBase, IFileOu
     /// </summary>
     protected TDocument Document { get; private set; }
     public abstract int Count { get; }
+
+    /// <summary>
+    /// Provides access to the collection of <see cref="SongPoint"/> pairs, grouped by the given grouper of type <typeparamref name="TGroup"/>, to be saved to the document in format <typeparamref name="TDocument"/>.
+    /// </summary>
+    /// <typeparam name="TGroup">The object type of the object belonging to <see cref="SongPoint"/> to group by.</typeparam>
+    /// <param name="grouper">The object belonging to <see cref="SongPoint"/> to group by.</param>
+    /// <returns>A collection of <see cref="SongPoint"/> grouped by <typeparamref name="TGroup"/>.</returns>
+    protected IEnumerable<IGrouping<TGroup, SongPoint>> GroupedDataProvider<TGroup>(Func<SongPoint, TGroup> grouper) => DataProvider().GroupBy(grouper);
 
     /// <summary>
     /// Provides access to the collection of <see cref="SongPoint"/> pairs to be saved to the document in format <typeparamref name="TDocument"/>.

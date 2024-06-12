@@ -13,6 +13,11 @@ public enum Formats
     Csv,
 
     /// <summary>
+    /// A foldered KML file containing song-point pairs as placemarks, and tracks as folders.
+    /// </summary>
+    FolderedKml,
+
+    /// <summary>
     /// A GPX file containing song-point pairs as waypoints.
     /// </summary>
     Gpx,

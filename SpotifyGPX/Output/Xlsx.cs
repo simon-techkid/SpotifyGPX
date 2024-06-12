@@ -130,11 +130,11 @@ public partial class Xlsx : ByteSaveable
 
     private int GetPackage()
     {
-        IEnumerable<SongPoint> pairs = DataProvider();
+        IEnumerable<IGrouping<TrackInfo, SongPoint>> tracks = GroupedDataProvider(pair => pair.Origin);
 
         int totalPairs = 0;
 
-        foreach (IGrouping<TrackInfo, SongPoint> track in pairs.GroupBy(pair => pair.Origin).ToList())
+        foreach (IGrouping<TrackInfo, SongPoint> track in tracks)
         {
             string trackGuid = Guid.NewGuid().ToString().AsSpan(0, 8).ToString();
             string trackName = track.Key.ToString();
