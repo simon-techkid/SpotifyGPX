@@ -10,13 +10,12 @@ namespace SpotifyGPX.Output;
 public sealed partial class JsonReport : JsonSaveable
 {
     public override string FormatName => nameof(JsonReport).ToLower();
-    protected override DocumentAccessor SaveAction => GetDocument;
 
     public JsonReport(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
     {
     }
 
-    private List<JsonDocument> GetDocument(string? trackName)
+    protected override List<JsonDocument> GetDocument(string? trackName)
     {
         IEnumerable<IGrouping<TrackInfo, SongPoint>> tracks = GroupedDataProvider(pair => pair.Origin);
 

@@ -15,7 +15,6 @@ public partial class Xlsx : ByteSaveable
 {
     public override string FormatName => nameof(Xlsx).ToLower();
     private ExcelPackage Package { get; set; }
-    protected override DocumentAccessor SaveAction => GetDocument;
 
     public Xlsx(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
     {
@@ -24,7 +23,7 @@ public partial class Xlsx : ByteSaveable
         Count = GetPackage();
     }
 
-    private byte[] GetDocument(string? trackName)
+    protected override byte[] GetDocument(string? trackName)
     {
         return Package.GetAsByteArray();
     }

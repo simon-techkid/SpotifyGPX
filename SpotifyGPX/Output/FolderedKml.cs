@@ -10,13 +10,12 @@ namespace SpotifyGPX.Output;
 public sealed partial class FolderedKml : XmlSaveable
 {
     public override string FormatName => "kml";
-    protected override DocumentAccessor SaveAction => GetDocument;
 
     public FolderedKml(Func<IEnumerable<SongPoint>> pairs, string trackName) : base(pairs, trackName)
     {
     }
 
-    private XDocument GetDocument(string? trackName)
+    protected override XDocument GetDocument(string? trackName)
     {
         IEnumerable<IGrouping<TrackInfo, SongPoint>> groups = GroupedDataProvider(pair => pair.Origin);
 

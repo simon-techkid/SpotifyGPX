@@ -9,13 +9,12 @@ namespace SpotifyGPX.Output;
 public sealed partial class Csv : TxtSaveable
 {
     public override string FormatName => nameof(Csv).ToLower();
-    protected override DocumentAccessor SaveAction => GetDocument;
 
     public Csv(Func<IEnumerable<SongPoint>> pairs, string? trackName) : base(pairs, trackName)
     {
     }
 
-    private string[] GetDocument(string? trackName)
+    protected override string[] GetDocument(string? trackName)
     {
         IEnumerable<SongPoint> pairs = DataProvider();
 

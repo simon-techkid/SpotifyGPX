@@ -10,13 +10,12 @@ namespace SpotifyGPX.Output;
 public sealed partial class Kml : XmlSaveable
 {
     public override string FormatName => nameof(Kml).ToLower();
-    protected override DocumentAccessor SaveAction => GetDocument;
 
     public Kml(Func<IEnumerable<SongPoint>> pairs, string trackName) : base(pairs, trackName)
     {
     }
 
-    private XDocument GetDocument(string? trackName)
+    protected override XDocument GetDocument(string? trackName)
     {
         IEnumerable<SongPoint> pairs = DataProvider();
 

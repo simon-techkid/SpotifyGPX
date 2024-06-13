@@ -14,10 +14,10 @@ namespace SpotifyGPX.Output;
 /// <typeparam name="THashed">The format type of the hashable portion of this document.</typeparam>
 public abstract class SaveableBase<TDocument, THashed> : DisposableBase, IFileOutput
 {
-    protected SaveableBase(Func<IEnumerable<SongPoint>> pairs, string? trackName)
+    protected SaveableBase(Func<IEnumerable<SongPoint>> pairs, string? trackName = null)
     {
         DataProvider = pairs;
-        Document = SaveAction(trackName);
+        Document = GetDocument(trackName);
     }
 
     public abstract string FormatName { get; }
@@ -42,15 +42,9 @@ public abstract class SaveableBase<TDocument, THashed> : DisposableBase, IFileOu
     protected Func<IEnumerable<SongPoint>> DataProvider { get; }
 
     /// <summary>
-    /// A delegate to access the contents of the document in format <typeparamref name="TDocument"/>.
-    /// </summary>
-    /// <returns></returns>
-    protected delegate TDocument DocumentAccessor(string? trackName);
-
-    /// <summary>
     /// Provides access to the document in format <typeparamref name="TDocument"/> that will be serialized and saved to the disk.
     /// </summary>
-    protected abstract DocumentAccessor SaveAction { get; }
+    protected abstract TDocument GetDocument(string? trackName);
 
     public void Save(string path)
     {
