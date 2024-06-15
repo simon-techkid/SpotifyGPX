@@ -13,10 +13,10 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
     private List<JsonDocument> JsonObjects { get; }
     private JsonElement Header => JsonObjects.First().RootElement;
     private List<JsonDocument> JsonTracksOnly { get; }
-    public override IPairInput.ParsePairsDelegate ParsePairsMethod => GetFromJObject;
-    public override IPairInput.FilterPairsDelegate FilterPairsMethod => FilterPairs;
-    public override ISongInput.FilterSongsDelegate FilterSongsMethod => FilterSongs;
-    public override IGpsInput.FilterTracksDelegate FilterTracksMethod => FilterTracks;
+    public override List<SongPoint> ParsePairsMethod() => GetFromJObject();
+    public override List<SongPoint> FilterPairsMethod() => FilterPairs();
+    public override List<ISongEntry> FilterSongsMethod() => FilterSongs();
+    public override List<GpsTrack> FilterTracksMethod() => FilterTracks();
 
     public JsonReport(string path) : base(path)
     {

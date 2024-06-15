@@ -12,8 +12,8 @@ public abstract class RandomSongBase : RandomInputBase<RandomSong>, ISongInput
     {
     }
 
-    public abstract ISongInput.ParseSongsDelegate ParseSongsMethod { get; }
-    public abstract ISongInput.FilterSongsDelegate FilterSongsMethod { get; }
+    public abstract List<ISongEntry> ParseSongsMethod();
+    public abstract List<ISongEntry> FilterSongsMethod();
     protected List<ISongEntry> AllSongs => ParseSongsMethod();
 
     protected override List<RandomSong> ZipAll()

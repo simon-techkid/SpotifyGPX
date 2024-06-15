@@ -20,10 +20,9 @@ public abstract class RandomPointBase : RandomInputBase<RandomPoint>, IGpsInput
     }
     */
 
-    protected delegate List<IGpsPoint> ParsePointsDelegate();
-    protected abstract ParsePointsDelegate ParsePointsMethod { get; }
-    public abstract IGpsInput.ParseTracksDelegate ParseTracksMethod { get; }
-    public abstract IGpsInput.FilterTracksDelegate FilterTracksMethod { get; }
+    public abstract List<GpsTrack> ParseTracksMethod();
+    public abstract List<GpsTrack> FilterTracksMethod();
+    protected abstract List<IGpsPoint> ParsePointsMethod();
     protected List<IGpsPoint> AllPoints => ParsePointsMethod();
     protected List<GpsTrack> AllTracks => ParseTracksMethod();
 

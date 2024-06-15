@@ -10,8 +10,8 @@ namespace SpotifyGPX.Input;
 public sealed partial class Xspf : SongInputBase, IHashVerifier
 {
     private XDocument Document { get; }
-    public override ISongInput.ParseSongsDelegate ParseSongsMethod => ParseSongs;
-    public override ISongInput.FilterSongsDelegate FilterSongsMethod => FilterSongs;
+    public override List<ISongEntry> ParseSongsMethod() => ParseSongs();
+    public override List<ISongEntry> FilterSongsMethod() => FilterSongs();
 
     public Xspf(string path) : base(path)
     {

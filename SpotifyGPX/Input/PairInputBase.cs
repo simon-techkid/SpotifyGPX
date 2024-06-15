@@ -17,27 +17,25 @@ public abstract class PairInputBase : FileInputBase, ISongInput, IGpsInput, IPai
 
     // Pairs
 
-    public abstract IPairInput.ParsePairsDelegate ParsePairsMethod { get; }
-    public abstract IPairInput.FilterPairsDelegate FilterPairsMethod { get; }
+    public abstract List<SongPoint> ParsePairsMethod();
+    public abstract List<SongPoint> FilterPairsMethod();
     protected List<SongPoint> AllPairs => ParsePairsMethod();
     public abstract int SourcePairCount { get; }
     public virtual int ParsedPairCount => AllPairs.Count;
 
     // Songs
 
-    public virtual ISongInput.ParseSongsDelegate ParseSongsMethod => GetAllSongs;
-    public abstract ISongInput.FilterSongsDelegate FilterSongsMethod { get; }
+    public List<ISongEntry> ParseSongsMethod() => AllSongs;
+    public abstract List<ISongEntry> FilterSongsMethod();
     protected List<ISongEntry> AllSongs => AllPairs.Select(pair => pair.Song).ToList();
-    protected List<ISongEntry> GetAllSongs() => AllSongs;
     public abstract int SourceSongCount { get; }
     public int ParsedSongCount => AllPairs.Select(pair => pair.Song).Count();
 
     // GPS Points
 
-    public virtual IGpsInput.ParseTracksDelegate ParseTracksMethod => GetAllTracks;
-    public abstract IGpsInput.FilterTracksDelegate FilterTracksMethod { get; }
+    public List<GpsTrack> ParseTracksMethod() => AllTracks;
+    public abstract List<GpsTrack> FilterTracksMethod();
     protected List<GpsTrack> AllTracks => AllPairs.GroupBy(pair => pair.Origin).Select(type => new GpsTrack(type.Key.Index, type.Key.Name, type.Key.Type, type.Select(pair => pair.Point).ToList())).ToList();
-    protected virtual List<GpsTrack> GetAllTracks() => AllTracks;
     public abstract int SourcePointCount { get; }
     public int ParsedPointCount => AllPairs.Select(pair => pair.Point).Count();
     public abstract int SourceTrackCount { get; }

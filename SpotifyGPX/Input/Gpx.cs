@@ -10,8 +10,8 @@ namespace SpotifyGPX.Input;
 public sealed partial class Gpx : GpsInputBase
 {
     private XDocument Document { get; set; }
-    public override IGpsInput.ParseTracksDelegate ParseTracksMethod => ParseTracks;
-    public override IGpsInput.FilterTracksDelegate FilterTracksMethod => FilterTracks;
+    public override List<GpsTrack> ParseTracksMethod() => ParseTracks();
+    public override List<GpsTrack> FilterTracksMethod() => FilterTracks();
 
     public Gpx(string path) : base(path)
     {

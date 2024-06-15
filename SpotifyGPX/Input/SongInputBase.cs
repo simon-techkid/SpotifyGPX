@@ -18,9 +18,8 @@ public abstract partial class SongInputBase : FileInputBase, ISongInput
     /// </summary>
     protected virtual TimeInterpretation Interpretation => DefaultInterpretation;
 
-    public abstract ISongInput.ParseSongsDelegate ParseSongsMethod { get; }
-
-    public abstract ISongInput.FilterSongsDelegate FilterSongsMethod { get; }
+    public abstract List<ISongEntry> ParseSongsMethod();
+    public abstract List<ISongEntry> FilterSongsMethod();
 
     // All Songs
     protected List<ISongEntry> AllSongs => ParseSongsMethod();

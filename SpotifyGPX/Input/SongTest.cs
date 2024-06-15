@@ -8,8 +8,8 @@ namespace SpotifyGPX.Input;
 
 public sealed partial class SongTest : RandomSongBase
 {
-    public override ISongInput.ParseSongsDelegate ParseSongsMethod => ParseSongs;
-    public override ISongInput.FilterSongsDelegate FilterSongsMethod => FilterSongs;
+    public override List<ISongEntry> ParseSongsMethod() => ParseSongs();
+    public override List<ISongEntry> FilterSongsMethod() => FilterSongs();
     protected override DateOnly GeneratorStartDate => DateOnly.FromDateTime(DateTime.Now - TimeSpan.FromDays(DaysPriorToTodayToGenerate));
     protected override DateOnly GeneratorEndDate => DateOnly.FromDateTime(DateTime.Now);
     private int PlaybackStartHour => RandomGen.Next(PlaybackMinStartHour, PlaybackMaxStartHour);

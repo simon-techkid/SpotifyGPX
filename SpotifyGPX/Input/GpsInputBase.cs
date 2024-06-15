@@ -14,9 +14,8 @@ public abstract class GpsInputBase : FileInputBase, IGpsInput
     {
     }
 
-    public abstract IGpsInput.FilterTracksDelegate FilterTracksMethod { get; }
-
-    public abstract IGpsInput.ParseTracksDelegate ParseTracksMethod { get; }
+    public abstract List<GpsTrack> ParseTracksMethod();
+    public abstract List<GpsTrack> FilterTracksMethod();
 
     /// <summary>
     /// Access all tracks in this GPS data file.

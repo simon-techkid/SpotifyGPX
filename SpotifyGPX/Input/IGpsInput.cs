@@ -12,39 +12,26 @@ namespace SpotifyGPX.Input;
 public partial interface IGpsInput : IDisposable
 {
     /// <summary>
+    /// Provides access to a method that parses the <see cref="GpsTrack"/> objects from the file.
+    /// </summary>
+    public List<GpsTrack> ParseTracksMethod();
+
+    /// <summary>
     /// Gets all GPS tracks as <see cref="GpsTrack"/> objects from this file.
     /// </summary>
     /// <returns>A <see cref="List{T}"/> of <see cref="GpsTrack"/> objects.</returns>
-    List<GpsTrack> GetAllTracks() => ParseTracksMethod();
+    public List<GpsTrack> GetAllTracks() => ParseTracksMethod();
 
     /// <summary>
-    /// A <see langword="delegate"/> providing a method that parses the tracks in the file.
+    /// Provides access to a method that parses and filters the <see cref="GpsTrack"/> objects based on file-specific filters.
     /// </summary>
-    /// <returns>A <see cref="List{T}"/> of <see cref="GpsTrack"/> objects.</returns>
-
-    public delegate List<GpsTrack> ParseTracksDelegate();
-
-    /// <summary>
-    /// Provides access to a method that parses the <see cref="GpsTrack"/> objects from the file.
-    /// </summary>
-    ParseTracksDelegate ParseTracksMethod { get; }
+    public List<GpsTrack> FilterTracksMethod();
 
     /// <summary>
     /// Gets filtered GPS tracks as <see cref="GpsTrack"/> objects, with file-specific filters, from this file.
     /// </summary>
     /// <returns>A <see cref="List{T}"/> of <see cref="GpsTrack"/> objects.</returns>
     List<GpsTrack> GetFilteredTracks() => FilterTracksMethod();
-
-    /// <summary>
-    /// A <see langword="delegate"/> providing a method that parses and filters the <see cref="GpsTrack"/> based on file-specific filters.
-    /// </summary>
-    /// <returns></returns>
-    public delegate List<GpsTrack> FilterTracksDelegate();
-
-    /// <summary>
-    /// Provides access to a method that parses and filters the <see cref="GpsTrack"/> objects based on file-specific filters.
-    /// </summary>
-    FilterTracksDelegate FilterTracksMethod { get; }
 
     /// <summary>
     /// Gets tracks based on user-selection.
@@ -149,25 +136,25 @@ public partial interface IGpsInput : IDisposable
             .ToList();
     }
 
-    bool Disposed { get; }
+    public bool Disposed { get; }
 
     /// <summary>
     /// The total number of GPS tracks in the source file.
     /// </summary>
-    int SourceTrackCount { get; }
+    public int SourceTrackCount { get; }
 
     /// <summary>
     /// The total number of GPS points in the source file.
     /// </summary>
-    int SourcePointCount { get; }
+    public int SourcePointCount { get; }
 
     /// <summary>
     /// The total number of GPS track objects parsed from the source file to <see cref="GpsTrack"/> objects.
     /// </summary>
-    int ParsedTrackCount { get; }
+    public int ParsedTrackCount { get; }
 
     /// <summary>
     /// The total number of GPS points parsed from the source file to <see cref="IGpsPoint"/> objects.
     /// </summary>
-    int ParsedPointCount { get; }
+    public int ParsedPointCount { get; }
 }

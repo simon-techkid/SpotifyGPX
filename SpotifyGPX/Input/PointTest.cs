@@ -8,9 +8,9 @@ namespace SpotifyGPX.Input;
 
 public sealed partial class PointTest : RandomPointBase
 {
-    protected override ParsePointsDelegate ParsePointsMethod => ParsePoints;
-    public override IGpsInput.FilterTracksDelegate FilterTracksMethod => FilterTracks;
-    public override IGpsInput.ParseTracksDelegate ParseTracksMethod => ParseTracks;
+    protected override List<IGpsPoint> ParsePointsMethod() => ParsePoints();
+    public override List<GpsTrack> ParseTracksMethod() => ParseTracks();
+    public override List<GpsTrack> FilterTracksMethod() => FilterTracks();
     protected override DateOnly GeneratorStartDate => DateOnly.FromDateTime(DateTime.Now - TimeSpan.FromDays(DaysPriorToTodayToGenerate));
     protected override DateOnly GeneratorEndDate => DateOnly.FromDateTime(DateTime.Now);
     private int DriveStartHour => RandomGen.Next(DriveMinStartHour, DriveMaxStartHour);
