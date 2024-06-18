@@ -10,7 +10,7 @@ namespace SpotifyGPX.Input;
 /// </summary>
 public abstract partial class SongInputBase : FileInputBase, ISongInput
 {
-    protected SongInputBase(string path, Broadcaster bcaster) : base(path, bcaster)
+    protected SongInputBase(string path, StringBroadcaster bcaster) : base(path, bcaster)
     {
     }
 

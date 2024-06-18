@@ -13,7 +13,7 @@ namespace SpotifyGPX.Output;
 /// </summary>
 public abstract class XmlSaveable : SaveableAndTransformableBase<XDocument, IEnumerable<XElement>>
 {
-    protected XmlSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName, Broadcaster bcast) : base(pairs, bcast, trackName)
+    protected XmlSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName, StringBroadcaster bcast) : base(pairs, bcast, trackName)
     {
     }
 

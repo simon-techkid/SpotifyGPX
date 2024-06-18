@@ -15,7 +15,7 @@ public sealed partial class Json : SongInputBase
     public override List<ISongEntry> ParseSongsMethod() => ParseSongs();
     public override List<ISongEntry> FilterSongsMethod() => FilterSongs();
 
-    public Json(string path, Broadcaster bcast) : base(path, bcast)
+    public Json(string path, StringBroadcaster bcast) : base(path, bcast)
     {
         using JsonNetDeserializer deserializer = new(path, bcast);
         AllEntries = deserializer.Deserialize<JsonDocument>(JsonOptions);

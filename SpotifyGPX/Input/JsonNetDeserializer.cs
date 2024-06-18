@@ -12,7 +12,7 @@ public class JsonNetDeserializer : FileInputBase
     private string? Document { get; set; }
     protected override string FormatName => nameof(JsonNetDeserializer);
 
-    public JsonNetDeserializer(string path, Broadcaster bcast) : base(path, bcast)
+    public JsonNetDeserializer(string path, StringBroadcaster bcast) : base(path, bcast)
     {
         Document = StreamReader.ReadToEnd();
     }

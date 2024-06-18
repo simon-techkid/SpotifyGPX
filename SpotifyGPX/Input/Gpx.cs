@@ -15,7 +15,7 @@ public sealed partial class Gpx : GpsInputBase
     public override List<GpsTrack> ParseTracksMethod() => ParseTracks();
     public override List<GpsTrack> FilterTracksMethod() => FilterTracks();
 
-    public Gpx(string path, Broadcaster bcast) : base(path, bcast)
+    public Gpx(string path, StringBroadcaster bcast) : base(path, bcast)
     {
         Document = XDocument.Load(StreamReader, loadOptions);
     }

@@ -22,7 +22,7 @@ public partial class InputHandler : DisposableBase
     /// <param name="songPath">The path to a file containing Spotify playback records.</param>
     /// <param name="gpsPath">The path to a file containing GPS journey data.</param>
     /// <exception cref="Exception">A provided file does not exist.</exception>
-    public InputHandler(string? songPath, string? gpsPath, Broadcaster bcast) : base(bcast)
+    public InputHandler(string? songPath, string? gpsPath, StringBroadcaster bcast) : base(bcast)
     {
         if (!File.Exists(songPath) || songPath == null)
         {
@@ -49,7 +49,7 @@ public partial class InputHandler : DisposableBase
     /// </summary>
     /// <param name="pairPath">The path to a file containing pairing data</param>
     /// <exception cref="Exception">A provided file does not exist.</exception>
-    public InputHandler(string? pairPath, Broadcaster bcast) : base(bcast)
+    public InputHandler(string? pairPath, StringBroadcaster bcast) : base(bcast)
     {
         if (!File.Exists(pairPath) || pairPath == null)
         {

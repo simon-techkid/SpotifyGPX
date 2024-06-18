@@ -5,9 +5,9 @@ using System;
 
 namespace SpotifyGPX;
 
-public abstract class DisposableBase : BroadcasterBase, IDisposable
+public abstract class DisposableBase : StringBroadcasterBase, IDisposable
 {
-    protected DisposableBase(Broadcaster bcast) : base(bcast) { }
+    protected DisposableBase(StringBroadcaster bcast) : base(bcast) { }
 
     /// <summary>
     /// Indicates whether the class has been disposed of.
@@ -24,6 +24,7 @@ public abstract class DisposableBase : BroadcasterBase, IDisposable
         ObjectDisposedException.ThrowIf(Disposed, this);
         DisposeClass();
         Disposed = true;
+        BCaster.Broadcast("Object disposed", Observation.LogLevel.Debug);
         GC.SuppressFinalize(this);
     }
 }

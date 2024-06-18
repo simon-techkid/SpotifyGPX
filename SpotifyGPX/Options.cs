@@ -3,6 +3,7 @@
 using OfficeOpenXml.Table;
 using SpotifyGPX.Broadcasting;
 using SpotifyGPX.Input;
+using SpotifyGPX.Observation;
 using SpotifyGPX.Output;
 using System;
 using System.Collections.Generic;
@@ -158,7 +159,7 @@ namespace SpotifyGPX.Input
 {
     public partial class InputHandler
     {
-        private static ISongInput CreateSongInput(string path, Broadcaster bcaster)
+        private static ISongInput CreateSongInput(string path, StringBroadcaster bcaster)
         {
             string extension = Path.GetExtension(path).ToLower();
 
@@ -173,7 +174,7 @@ namespace SpotifyGPX.Input
             };
         }
 
-        private static IGpsInput CreateGpsInput(string path, Broadcaster bcaster)
+        private static IGpsInput CreateGpsInput(string path, StringBroadcaster bcaster)
         {
             string extension = Path.GetExtension(path).ToLower();
 
@@ -188,7 +189,7 @@ namespace SpotifyGPX.Input
             };
         }
 
-        private static IPairInput CreatePairInput(string path, Broadcaster bcaster)
+        private static IPairInput CreatePairInput(string path, StringBroadcaster bcaster)
         {
             string extension = Path.GetExtension(path).ToLower();
 
@@ -555,5 +556,26 @@ namespace SpotifyGPX.Output
         private const string Comment = "";
         protected override XNamespace Namespace => "http://xspf.org/ns/0/";
         protected override XmlWriterSettings XmlSettings => Options.XmlSettings;
+    }
+}
+
+namespace SpotifyGPX.Broadcasting
+{
+    public partial class Broadcaster<T>
+    {
+        private const LogLevel DefaultForMessages = LogLevel.Info;
+    }
+}
+
+namespace SpotifyGPX.Observation
+{
+    public partial class ConsoleObserver
+    {
+        protected override Func<LogLevel, bool> MessageMatch => lvl => lvl >= LogLevel.Pair;
+    }
+
+    public partial class FileObserver
+    {
+        protected override Func<LogLevel, bool> MessageMatch => lvl => lvl >= LogLevel.Debug;
     }
 }

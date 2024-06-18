@@ -15,7 +15,7 @@ public sealed partial class GeoJson : GpsInputBase
     public override List<GpsTrack> ParseTracksMethod() => ParseTracks();
     public override List<GpsTrack> FilterTracksMethod() => FilterTracks();
 
-    public GeoJson(string path, Broadcaster bcast) : base(path, bcast)
+    public GeoJson(string path, StringBroadcaster bcast) : base(path, bcast)
     {
         using JsonNetDeserializer deserializer = new(path, bcast);
         Document = deserializer.GetDocument();

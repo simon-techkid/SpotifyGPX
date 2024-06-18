@@ -17,7 +17,7 @@ public partial class Xlsx : ByteSaveable
     public override string FormatName => nameof(Xlsx).ToLower();
     private ExcelPackage Package { get; set; }
 
-    public Xlsx(Func<IEnumerable<SongPoint>> pairs, string? trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
+    public Xlsx(Func<IEnumerable<SongPoint>> pairs, string? trackName, StringBroadcaster bcast) : base(pairs, trackName, bcast)
     {
         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         Package = new();

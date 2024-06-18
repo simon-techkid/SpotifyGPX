@@ -15,7 +15,7 @@ public sealed partial class Kml : GpsInputBase
     public override List<GpsTrack> ParseTracksMethod() => ParseTracks();
     public override List<GpsTrack> FilterTracksMethod() => FilterTracks();
 
-    public Kml(string path, Broadcaster bcast) : base(path, bcast)
+    public Kml(string path, StringBroadcaster bcast) : base(path, bcast)
     {
         Document = XDocument.Load(StreamReader, loadOptions);
     }

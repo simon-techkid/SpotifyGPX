@@ -12,7 +12,7 @@ public sealed partial class Kml : XmlSaveable
 {
     public override string FormatName => nameof(Kml).ToLower();
 
-    public Kml(Func<IEnumerable<SongPoint>> pairs, string trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
+    public Kml(Func<IEnumerable<SongPoint>> pairs, string trackName, StringBroadcaster bcast) : base(pairs, trackName, bcast)
     {
     }
 

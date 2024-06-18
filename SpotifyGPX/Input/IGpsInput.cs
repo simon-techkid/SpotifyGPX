@@ -12,7 +12,7 @@ namespace SpotifyGPX.Input;
 /// </summary>
 public partial interface IGpsInput : IDisposable
 {
-    public Broadcaster BCaster { get; }
+    public StringBroadcaster BCaster { get; }
 
     /// <summary>
     /// Provides access to a method that parses the <see cref="GpsTrack"/> objects from the file.
@@ -95,7 +95,7 @@ public partial interface IGpsInput : IDisposable
                 return FilterFunc(allTracks).ToList();
             }
 
-            BCaster.Broadcast("Invalid input. Please enter a valid track number.");
+            BCaster.BroadcastError(new Exception("Invalid input. Please enter a valid track number."));
         }
 
         // If the user selected a specific track index, return that

@@ -15,7 +15,7 @@ namespace SpotifyGPX.Output;
 /// <typeparam name="THashed">The format type of the hashable portion of this document.</typeparam>
 public abstract class SaveableBase<TDocument, THashed> : DisposableBase, IFileOutput
 {
-    protected SaveableBase(Func<IEnumerable<SongPoint>> pairs, Broadcaster bcast, string? trackName = null) : base(bcast)
+    protected SaveableBase(Func<IEnumerable<SongPoint>> pairs, StringBroadcaster bcast, string? trackName = null) : base(bcast)
     {
         DataProvider = pairs;
         Document = GetDocument(trackName);

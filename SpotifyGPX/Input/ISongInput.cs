@@ -12,7 +12,7 @@ namespace SpotifyGPX.Input;
 /// </summary>
 public partial interface ISongInput : IDisposable
 {
-    public Broadcaster BCaster { get; }
+    public StringBroadcaster BCaster { get; }
 
     /// <summary>
     /// Provides access to the method that parses the <see cref="ISongEntry"/> objects from the file.

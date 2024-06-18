@@ -8,7 +8,7 @@ namespace SpotifyGPX.Input;
 
 public abstract class RandomInputBase<T> : DisposableBase
 {
-    protected RandomInputBase(Broadcaster bcast) : base(bcast)
+    protected RandomInputBase(StringBroadcaster bcast) : base(bcast)
     {
         RandomGen = RandomSeed.HasValue ? new Random(RandomSeed.Value) : new Random();
     }

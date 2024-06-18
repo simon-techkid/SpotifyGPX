@@ -11,7 +11,7 @@ namespace SpotifyGPX;
 /// <summary>
 /// Handle SongPoint pairings, including list calculation, generation, operations, and exporting.
 /// </summary>
-public partial class PairingsHandler : BroadcasterBase, IEnumerable<SongPoint>
+public partial class PairingsHandler : StringBroadcasterBase, IEnumerable<SongPoint>
 {
     private List<SongPoint> Pairs { get; set; }
 
@@ -23,7 +23,7 @@ public partial class PairingsHandler : BroadcasterBase, IEnumerable<SongPoint>
     /// <summary>
     /// Create a handler for pairing GPS information with Song information.
     /// </summary>
-    public PairingsHandler(string name, Broadcaster bcast) : base(bcast)
+    public PairingsHandler(string name, StringBroadcaster bcast) : base(bcast)
     {
         Pairs = new();
         Name = name;
@@ -34,7 +34,7 @@ public partial class PairingsHandler : BroadcasterBase, IEnumerable<SongPoint>
     /// </summary>
     /// <param name="pairs">An existing pairs list.</param>
     /// <param name="name">The name of this set of pairs.</param>
-    public PairingsHandler(List<SongPoint> pairs, string name, Broadcaster bcast) : base(bcast)
+    public PairingsHandler(List<SongPoint> pairs, string name, StringBroadcaster bcast) : base(bcast)
     {
         Pairs = pairs;
         Name = name;
@@ -84,7 +84,7 @@ public partial class PairingsHandler : BroadcasterBase, IEnumerable<SongPoint>
 
                 SongPoint pair = new(index, spotifyEntry, bestPoint, track.Track);
 
-                BCaster.Broadcast(pair.ToString()); // Notify observers when a pair is created
+                BCaster.Broadcast(pair.ToString(), Observation.LogLevel.Pair); // Notify observers when a pair is created
 
                 index++; // Add to the index of all pairings regardless of track
 

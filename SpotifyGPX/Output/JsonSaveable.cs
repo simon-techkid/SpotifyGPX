@@ -14,7 +14,7 @@ namespace SpotifyGPX.Output;
 /// </summary>
 public abstract class JsonSaveable : SaveableAndTransformableBase<List<JsonDocument>, List<JsonDocument>>
 {
-    protected JsonSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName, Broadcaster bcast) : base(pairs, bcast, trackName)
+    protected JsonSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName, StringBroadcaster bcast) : base(pairs, bcast, trackName)
     {
     }
 

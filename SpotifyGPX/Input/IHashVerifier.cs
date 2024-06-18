@@ -10,7 +10,7 @@ namespace SpotifyGPX.Input;
 /// </summary>
 public interface IHashVerifier
 {
-    public Broadcaster BCaster { get; }
+    public StringBroadcaster BCaster { get; }
 
     /// <summary>
     /// Verifies whether checksum included in the document matches the document's contents.

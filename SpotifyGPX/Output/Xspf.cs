@@ -12,7 +12,7 @@ public sealed partial class Xspf : XmlSaveable
 {
     public override string FormatName => nameof(Xspf).ToLower();
 
-    public Xspf(Func<IEnumerable<SongPoint>> pairs, string trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
+    public Xspf(Func<IEnumerable<SongPoint>> pairs, string trackName, StringBroadcaster bcast) : base(pairs, trackName, bcast)
     {
     }
 

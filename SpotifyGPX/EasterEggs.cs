@@ -7,9 +7,9 @@ using System.Linq;
 
 namespace SpotifyGPX;
 
-public abstract class EasterEggs<T> : BroadcasterBase
+public abstract class EasterEggs<T> : StringBroadcasterBase
 {
-    protected EasterEggs(Broadcaster bcast) : base(bcast) { }
+    protected EasterEggs(StringBroadcaster bcast) : base(bcast) { }
 
     protected override string BroadcasterPrefix => "EGG";
 
@@ -70,7 +70,7 @@ public abstract class EasterEggs<T> : BroadcasterBase
 
 public class SongEasterEggs : EasterEggs<ISongEntry>
 {
-    public SongEasterEggs(Broadcaster bcast) : base(bcast) { }
+    public SongEasterEggs(StringBroadcaster bcast) : base(bcast) { }
 
     protected override Func<ISongEntry, bool>[] EggParameters => new Func<ISongEntry, bool>[]
     {

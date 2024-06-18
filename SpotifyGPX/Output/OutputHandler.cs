@@ -12,7 +12,7 @@ namespace SpotifyGPX.Output;
 /// <summary>
 /// Handle various output file formats for exporting pairs
 /// </summary>
-public partial class OutputHandler : BroadcasterBase
+public partial class OutputHandler : StringBroadcasterBase
 {
     private IEnumerable<SongPoint> Pairs { get; } // Hold the pairs list that will be exported
 
@@ -20,7 +20,7 @@ public partial class OutputHandler : BroadcasterBase
     /// Creates a handler for exporting output files
     /// </summary>
     /// <param name="pairs">A list of pairs to send to a file.</param>
-    public OutputHandler(IEnumerable<SongPoint> pairs, Broadcaster bcast) : base(bcast)
+    public OutputHandler(IEnumerable<SongPoint> pairs, StringBroadcaster bcast) : base(bcast)
     {
         Pairs = pairs;
     }
@@ -82,7 +82,7 @@ public partial class OutputHandler : BroadcasterBase
         /// <param name="format">The format of the output file.</param>
         /// <param name="name">The prefix of the output file name.</param>
         /// <param name="trackName">The name of the track represented in this file (if this file only has one track).</param>
-        public OutFile(IEnumerable<SongPoint> pairs, Formats format, string name, string trackName, Broadcaster bcast)
+        public OutFile(IEnumerable<SongPoint> pairs, Formats format, string name, string trackName, StringBroadcaster bcast)
         {
             var factory = new FileOutputFactory();
             Handler = factory.CreateFileOutput(format, () => pairs, trackName, bcast);
@@ -116,13 +116,13 @@ public partial class OutputHandler : BroadcasterBase
             {
                 if (attempt <= MaxRetries)
                 {
-                    Handler.BCaster.Broadcast($"Error writing {fileName}: {ex.Message}. Retrying...");
+                    Handler.BCaster.BroadcastError(new Exception($"Error writing {fileName}. Retrying...", ex));
                     Thread.Sleep(RetryDelayMs);
                     AttemptSave(transform, fileName, ++attempt);
                 }
                 else
                 {
-                    Handler.BCaster.Broadcast($"Failed to save {fileName} after {MaxRetries} attempts.");
+                    Handler.BCaster.BroadcastError(new Exception($"Failed to save {fileName} after {MaxRetries} attempts.", ex));
                 }
             }
         }
@@ -138,7 +138,7 @@ public partial class OutputHandler : BroadcasterBase
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error transforming {fileName} to XML: {ex}");
+                Handler.BCaster.BroadcastError(new Exception($"Error transforming {fileName} to XML", ex));
             }
         }
 

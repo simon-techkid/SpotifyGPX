@@ -17,15 +17,15 @@ public partial class Program
     {
         const string BroadcasterPrefix = "MAIN";
 
-        Broadcaster BCast = new()
+        StringBroadcaster BCast = new()
         {
             Type = BroadcasterPrefix
         };
 
-        ConsoleObserver? Console = new();
+        ConsoleObserver Console = new(LogLevel.Pair);
         IDisposable ConsoleUnsubscriber = BCast.Subscribe(Console);
 
-        FileObserver File = new("log.txt", System.Text.Encoding.UTF8);
+        FileObserver File = new("log.txt", System.Text.Encoding.UTF8, LogLevel.Debug);
         IDisposable FileUnsubscriber = BCast.Subscribe(File);
 
         var (options, flags) = ArgumentParser.Parse(args);
@@ -86,7 +86,7 @@ public partial class Program
         return;
     }
 
-    private static PairingsHandler GetPairedEntries(string? inputPairs, string? inputSpotify, string? inputGps, ref Broadcaster BCast, bool grabApiData, bool predictPoints, bool autoPredictPoints)
+    private static PairingsHandler GetPairedEntries(string? inputPairs, string? inputSpotify, string? inputGps, ref StringBroadcaster BCast, bool grabApiData, bool predictPoints, bool autoPredictPoints)
     {
         if (inputPairs != null)
             return PairFromPairs(inputPairs, ref BCast);
@@ -96,7 +96,7 @@ public partial class Program
             throw new Exception("Neither song and GPS nor pairings files provided!");
     }
 
-    private static PairingsHandler PairFromPairs(string inputPairs, ref Broadcaster BCast)
+    private static PairingsHandler PairFromPairs(string inputPairs, ref StringBroadcaster BCast)
     {
         List<SongPoint> pairs = new();
 
@@ -109,7 +109,7 @@ public partial class Program
         return pairer;
     }
 
-    private static PairingsHandler PairFromSongsAndPoints(string inputSongs, string inputGps, ref Broadcaster BCast, bool grabApiData, bool pointPredict, bool autoPredictPoints)
+    private static PairingsHandler PairFromSongsAndPoints(string inputSongs, string inputGps, ref StringBroadcaster BCast, bool grabApiData, bool pointPredict, bool autoPredictPoints)
     {
         // Step 0: Get input handler based on file paths
         List<GpsTrack> tracks = new();

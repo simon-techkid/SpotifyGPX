@@ -11,7 +11,7 @@ public sealed partial class Tsv : TxtSaveable
 {
     public override string FormatName => "tsv";
 
-    public Tsv(Func<IEnumerable<SongPoint>> pairs, string? trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
+    public Tsv(Func<IEnumerable<SongPoint>> pairs, string? trackName, StringBroadcaster bcast) : base(pairs, trackName, bcast)
     {
     }
 

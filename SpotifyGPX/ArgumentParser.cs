@@ -40,7 +40,7 @@ public partial class ArgumentParser
         return (options, flags);
     }
 
-    public static void PrintHelp(Broadcaster bcast)
+    public static void PrintHelp(StringBroadcaster bcast)
     {
         bcast.Type = "HELP";
         bcast.Broadcast(Help);

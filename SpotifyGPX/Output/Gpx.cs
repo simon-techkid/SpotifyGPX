@@ -12,7 +12,7 @@ public sealed partial class Gpx : XmlSaveable
 {
     public override string FormatName => nameof(Gpx).ToLower();
 
-    public Gpx(Func<IEnumerable<SongPoint>> pairs, string trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
+    public Gpx(Func<IEnumerable<SongPoint>> pairs, string trackName, StringBroadcaster bcast) : base(pairs, trackName, bcast)
     {
     }
 

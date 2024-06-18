@@ -9,7 +9,7 @@ namespace SpotifyGPX.Input;
 
 public abstract class RandomPointBase : RandomInputBase<RandomPoint>, IGpsInput
 {
-    protected RandomPointBase(Broadcaster bcast) : base(bcast)
+    protected RandomPointBase(StringBroadcaster bcast) : base(bcast)
     {
     }
 

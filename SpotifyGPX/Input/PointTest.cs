@@ -27,7 +27,7 @@ public sealed partial class PointTest : RandomPointBase
     protected override double GenerationRadius => CenterRadius;
     protected override int PointPlacementIntervalSeconds => RandomGen.Next(MinPlacementSecs, MaxPlacementSecs); // simulate 15-120 second GPS point interval
 
-    public PointTest(Broadcaster bcast) : base(bcast)
+    public PointTest(StringBroadcaster bcast) : base(bcast)
     {
     }
 

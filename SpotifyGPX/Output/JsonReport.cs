@@ -12,7 +12,7 @@ public sealed partial class JsonReport : JsonSaveable
 {
     public override string FormatName => nameof(JsonReport).ToLower();
 
-    public JsonReport(Func<IEnumerable<SongPoint>> pairs, string? trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
+    public JsonReport(Func<IEnumerable<SongPoint>> pairs, string? trackName, StringBroadcaster bcast) : base(pairs, trackName, bcast)
     {
     }
 

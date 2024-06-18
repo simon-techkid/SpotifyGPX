@@ -11,7 +11,7 @@ public sealed partial class Txt : TxtSaveable
 {
     public override string FormatName => nameof(Txt).ToLower();
 
-    public Txt(Func<IEnumerable<SongPoint>> pairs, string? trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
+    public Txt(Func<IEnumerable<SongPoint>> pairs, string? trackName, StringBroadcaster bcast) : base(pairs, trackName, bcast)
     {
     }
 

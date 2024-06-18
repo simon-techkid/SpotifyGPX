@@ -11,7 +11,7 @@ namespace SpotifyGPX.Output;
 /// </summary>
 public abstract class ByteSaveable : SaveableBase<byte[], byte[]>
 {
-    protected ByteSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName, Broadcaster bcast) : base(pairs, bcast, trackName)
+    protected ByteSaveable(Func<IEnumerable<SongPoint>> pairs, string? trackName, StringBroadcaster bcast) : base(pairs, bcast, trackName)
     {
     }
 

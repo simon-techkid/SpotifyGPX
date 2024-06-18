@@ -6,21 +6,34 @@ using System.Text;
 
 namespace SpotifyGPX.Observation;
 
-public class FileObserver : Observer, IDisposable
+public partial class FileObserver : Observer<string>, IDisposable
 {
     private string FilePath { get; }
     private Encoding Encoding { get; }
+    public override LogLevel Level { get; }
     private System.Text.StringBuilder Document { get; set; }
-    public FileObserver(string filePath, Encoding encoding) : base()
+
+    public FileObserver(string filePath, Encoding encoding, LogLevel level) : base()
     {
         FilePath = filePath;
         Encoding = encoding;
+        Level = level;
         Document = new();
     }
-    protected override string CompletionMessage => "All files have been saved.";
+
     protected override void HandleMessage(string message)
     {
         Document.AppendLine(message);
+    }
+
+    protected override void HandleException(Exception exception)
+    {
+        Document.AppendLine(exception.ToString());
+    }
+
+    protected override void HandleCompletion()
+    {
+        Console.WriteLine("All files have been saved.");
     }
 
     public void Dispose()

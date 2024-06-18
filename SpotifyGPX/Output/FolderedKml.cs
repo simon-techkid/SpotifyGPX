@@ -12,7 +12,7 @@ public sealed partial class FolderedKml : XmlSaveable
 {
     public override string FormatName => "kml";
 
-    public FolderedKml(Func<IEnumerable<SongPoint>> pairs, string trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
+    public FolderedKml(Func<IEnumerable<SongPoint>> pairs, string trackName, StringBroadcaster bcast) : base(pairs, trackName, bcast)
     {
     }
 

@@ -7,7 +7,7 @@ namespace SpotifyGPX.Input;
 
 public abstract class FileInputBase : DisposableBase
 {
-    protected FileInputBase(string path, Broadcaster bcaster) : base(bcaster)
+    protected FileInputBase(string path, StringBroadcaster bcaster) : base(bcaster)
     {
         FileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
         StreamReader = new StreamReader(FileStream);

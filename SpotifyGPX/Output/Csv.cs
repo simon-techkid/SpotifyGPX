@@ -11,7 +11,7 @@ public sealed partial class Csv : TxtSaveable
 {
     public override string FormatName => nameof(Csv).ToLower();
 
-    public Csv(Func<IEnumerable<SongPoint>> pairs, string? trackName, Broadcaster bcast) : base(pairs, trackName, bcast)
+    public Csv(Func<IEnumerable<SongPoint>> pairs, string? trackName, StringBroadcaster bcast) : base(pairs, trackName, bcast)
     {
     }
 

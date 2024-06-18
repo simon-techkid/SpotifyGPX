@@ -9,7 +9,7 @@ namespace SpotifyGPX.Input;
 
 public abstract class RandomSongBase : RandomInputBase<RandomSong>, ISongInput
 {
-    protected RandomSongBase(Broadcaster bcast) : base(bcast)
+    protected RandomSongBase(StringBroadcaster bcast) : base(bcast)
     {
     }
 

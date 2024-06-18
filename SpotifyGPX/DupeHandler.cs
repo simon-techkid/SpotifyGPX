@@ -10,7 +10,7 @@ namespace SpotifyGPX;
 /// <summary>
 /// Handle duplicate coordinate placements by shifting them to other locations.
 /// </summary>
-public partial class DupeHandler : BroadcasterBase
+public partial class DupeHandler : StringBroadcasterBase
 {
     private List<SongPoint> Pairs { get; }
 
@@ -18,7 +18,7 @@ public partial class DupeHandler : BroadcasterBase
     /// Create a handler for duplicate positions.
     /// </summary>
     /// <param name="pairs">A list of pairs to be searched for duplicate positions.</param>
-    public DupeHandler(List<SongPoint> pairs, Broadcaster bcast) : base(bcast)
+    public DupeHandler(List<SongPoint> pairs, StringBroadcaster bcast) : base(bcast)
     {
         Pairs = pairs;
     }
@@ -32,7 +32,7 @@ public partial class DupeHandler : BroadcasterBase
     {
         if (Pairs.Count < MinimumMatchingCoords)
         {
-            BCaster.Broadcast($"Point prediction cannot be run when there are less than {MinimumMatchingCoords} pairs");
+            BCaster.BroadcastError(new Exception($"Point prediction cannot be run when there are less than {MinimumMatchingCoords} pairs"));
             return Pairs;
         }
 
@@ -114,19 +114,19 @@ public partial class DupeHandler : BroadcasterBase
                 {
                     if (startIndex < 0 || startIndex >= Pairs.Count)
                     {
-                        BCaster.Broadcast($"Invalid startIndex: {startIndex}. Must be between 0 and {maximumAllowedIndex}.");
+                        BCaster.BroadcastError(new Exception($"Invalid startIndex: {startIndex}. Must be between 0 and {maximumAllowedIndex}."));
                         isValidInput = false;
                         break;
                     }
                     else if (endIndex < 0 || endIndex >= Pairs.Count)
                     {
-                        BCaster.Broadcast($"Invalid endIndex: {endIndex}. Must be between 0 and {maximumAllowedIndex}.");
+                        BCaster.BroadcastError(new Exception($"Invalid endIndex: {endIndex}. Must be between 0 and {maximumAllowedIndex}."));
                         isValidInput = false;
                         break;
                     }
                     else if (endIndex - startIndex == 0)
                     {
-                        BCaster.Broadcast($"Invalid range: {startIndex}-{endIndex}. Range must include at least one element.");
+                        BCaster.BroadcastError(new Exception($"Invalid range: {startIndex}-{endIndex}. Range must include at least one element."));
                         isValidInput = false;
                         break;
                     }
@@ -136,7 +136,7 @@ public partial class DupeHandler : BroadcasterBase
                 }
                 else
                 {
-                    BCaster.Broadcast($"Invalid input: '{dupe}'. Please enter start and end indexes separated by a dash.");
+                    BCaster.BroadcastError(new Exception($"Invalid input: '{dupe}'. Please enter start and end indexes separated by a dash."));
                     isValidInput = false;
                     break;
                 }

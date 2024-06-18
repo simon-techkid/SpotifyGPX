@@ -8,9 +8,9 @@ namespace SpotifyGPX.Output;
 
 public partial class FileOutputFactory
 {
-    private delegate IFileOutput FileOutputCreator(Func<IEnumerable<SongPoint>> pairs, string trackName, Broadcaster bcast);
+    private delegate IFileOutput FileOutputCreator(Func<IEnumerable<SongPoint>> pairs, string trackName, StringBroadcaster bcast);
 
-    public IFileOutput CreateFileOutput(Formats format, Func<IEnumerable<SongPoint>> pairs, string trackName, Broadcaster bcast)
+    public IFileOutput CreateFileOutput(Formats format, Func<IEnumerable<SongPoint>> pairs, string trackName, StringBroadcaster bcast)
     {
         if (creators.TryGetValue(format, out FileOutputCreator? creator) && creator != null)
         {

@@ -17,7 +17,7 @@ public sealed partial class Csv : SongInputBase
     public override List<ISongEntry> ParseSongsMethod() => ParseSongs();
     public override List<ISongEntry> FilterSongsMethod() => FilterSongs();
 
-    public Csv(string path, Broadcaster bcast) : base(path, bcast)
+    public Csv(string path, StringBroadcaster bcast) : base(path, bcast)
     {
         Document = ReadAllLines();
     }

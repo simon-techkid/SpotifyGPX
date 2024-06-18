@@ -11,7 +11,7 @@ namespace SpotifyGPX.Input;
 /// </summary>
 public abstract class GpsInputBase : FileInputBase, IGpsInput
 {
-    protected GpsInputBase(string path, Broadcaster bcast) : base(path, bcast)
+    protected GpsInputBase(string path, StringBroadcaster bcast) : base(path, bcast)
     {
     }
 

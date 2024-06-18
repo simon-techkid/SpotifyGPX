@@ -26,7 +26,7 @@ public sealed partial class SongTest : RandomSongBase
     protected override int UniqueArtistsCount => ArtistsCount; // simulate 10 unique artists
     protected override int UniqueSongsCount => SongsCount; // simulate 100 unique songs across 10 artists
 
-    public SongTest(Broadcaster bcast) : base(bcast)
+    public SongTest(StringBroadcaster bcast) : base(bcast)
     {
     }
 

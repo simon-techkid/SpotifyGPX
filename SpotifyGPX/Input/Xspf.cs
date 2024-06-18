@@ -15,7 +15,7 @@ public sealed partial class Xspf : SongInputBase, IHashVerifier
     public override List<ISongEntry> ParseSongsMethod() => ParseSongs();
     public override List<ISongEntry> FilterSongsMethod() => FilterSongs();
 
-    public Xspf(string path, Broadcaster bcast) : base(path, bcast)
+    public Xspf(string path, StringBroadcaster bcast) : base(path, bcast)
     {
         Document = XDocument.Load(StreamReader, loadOptions);
     }

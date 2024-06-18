@@ -20,7 +20,7 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
     public override List<ISongEntry> FilterSongsMethod() => FilterSongs();
     public override List<GpsTrack> FilterTracksMethod() => FilterTracks();
 
-    public JsonReport(string path, Broadcaster bcast) : base(path, bcast)
+    public JsonReport(string path, StringBroadcaster bcast) : base(path, bcast)
     {
         using JsonNetDeserializer deserializer = new(path, bcast);
         JsonObjects = deserializer.Deserialize<JsonDocument>(JsonOptions);
@@ -177,7 +177,7 @@ public sealed partial class JsonReport : PairInputBase, IHashVerifier
 
         // Output missing indexes
         string missing = string.Join(", ", missingIndexes.Select(index => index.ToString()));
-        BCaster.Broadcast($"Missing indexes: {missing}");
+        BCaster.BroadcastError(new Exception($"Missing indexes: {missing}"));
         throw new Exception($"Track {trackIndex} in JsonReport expected to have {expectedCount} pairs, but had {indexes.Count}");
     }
 
