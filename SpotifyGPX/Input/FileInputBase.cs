@@ -10,6 +10,7 @@ public abstract class FileInputBase : DisposableBase
     protected FileInputBase(string path, StringBroadcaster bcaster) : base(bcaster)
     {
         FileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+        BCaster.Broadcast($"New file stream opened for reading '{path}'.", Observation.LogLevel.Debug);
         StreamReader = new StreamReader(FileStream);
     }
 

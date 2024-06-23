@@ -85,6 +85,9 @@ public partial interface IGpsInput : IDisposable
         while (true)
         {
             string input = Console.ReadLine() ?? string.Empty;
+
+            BCaster.Broadcast($"Read '{input}' as user input from console.", Observation.LogLevel.Debug);
+
             if (int.TryParse(input, out selectedTrackIndex) && TrackInfo.IsValidTrackIndex(selectedTrackIndex, allTracks.Count))
             {
                 break; // Return this selection below

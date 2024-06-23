@@ -59,6 +59,7 @@ public abstract class SaveableBase<TDocument, THashed> : DisposableBase, IFileOu
     {
         using FileStream fileStream = new(path, FileMode.Create, FileAccess.Write);
         fileStream.Write(bytes, 0, bytes.Length);
+        BCaster.Broadcast($"New file stream opened for writing {bytes.Length} bytes to {path}.", Observation.LogLevel.Debug);
     }
 
     /// <summary>
