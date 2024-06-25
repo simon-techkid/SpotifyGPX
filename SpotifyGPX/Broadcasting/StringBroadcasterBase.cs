@@ -12,5 +12,8 @@ public abstract class StringBroadcasterBase : BroadcasterBase<string>
         BCaster.Type = BroadcasterPrefix;
     }
 
+    /// <summary>
+    /// The prefix for the broadcaster, displayed as a prefix for all broadcast strings.
+    /// </summary>
     protected abstract string BroadcasterPrefix { get; }
 }

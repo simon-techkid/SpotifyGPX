@@ -12,63 +12,43 @@ namespace SpotifyGPX;
 /// <summary>
 /// Handle SongPoint pairings, including list calculation, generation, operations, and exporting.
 /// </summary>
-public partial class PairingsHandler : StringBroadcasterBase, IEnumerable<SongPoint>
+public abstract partial class PairingsHandler : StringBroadcasterBase, IEnumerable<SongPoint>
 {
-    private List<SongPoint> Pairs { get; set; }
+    protected List<SongPoint> Pairs { get; set; }
 
     /// <summary>
     /// The name of this set of pairings.
     /// </summary>
-    public string Name { get; }
+    public abstract string Name { get; }
 
     /// <summary>
     /// Create a handler for pairing GPS information with Song information.
     /// </summary>
-    public PairingsHandler(string name, StringBroadcaster bcast) : base(bcast)
+    protected PairingsHandler(StringBroadcaster bcast) : base(bcast)
     {
         Pairs = new();
-        Name = name;
     }
 
     /// <summary>
-    /// Explicitly create a PairingsHandler using an existing pairs list.
+    /// Calculate a set (list) of <see cref="SongPoint"/> objects given a list of <see cref="ISongEntry"/> and <see cref="GpsTrack"/> objects.
     /// </summary>
-    /// <param name="pairs">An existing pairs list.</param>
-    /// <param name="name">The name of this set of pairs.</param>
-    public PairingsHandler(List<SongPoint> pairs, string name, StringBroadcaster bcast) : base(bcast)
-    {
-        Pairs = pairs;
-        Name = name;
-    }
+    /// <param name="s">A list of songs in the form of <see cref="ISongEntry"/> objects.</param>
+    /// <param name="t">A list of GPS tracks in the form of <see cref="GpsTrack"/> objects.</param>
+    public virtual void CalculatePairings(List<ISongEntry> s, List<GpsTrack> t) => Pairs = PairPoints(s, t);
 
-    public void CalculatePairings(List<ISongEntry> s, List<GpsTrack> t, bool predict, bool autoPredict)
-    {
-        if (predict == true)
-        {
-            // Let's predict some points!
-            DupeHandler dupes = new(PairPoints(s, t), BCaster);
-            Pairs = dupes.GetDupes(autoPredict);
-        }
-        else
-        {
-            // Nah, just use the verbatim points
-            Pairs = PairPoints(s, t);
-        }
-    }
-
-    public void CalculatePairings(List<SongPoint> pairs)
-    {
-        Pairs = pairs;
-    }
+    /// <summary>
+    /// Calculate a set (list) of <see cref="SongPoint"/> objects given an existing list of <see cref="SongPoint"/> objects.
+    /// </summary>
+    /// <param name="pairs">A list of pairs in the form of <see cref="SongPoint"/> objects.</param>
+    public virtual void CalculatePairings(List<SongPoint> pairs) => Pairs = pairs;
 
     /// <summary>
     /// Pair songs with points (positions on Earth), by finding the closest gap of time between each.
     /// </summary>
-    /// <param name="silent">If true, do not print each pairing to the console upon creation.</param>
     /// <param name="songs">A series of Spotify playback records, used to associate a song with a point.</param>
     /// <param name="tracks">A list of GPXTrack objects, used to associate songs with a track and position on Earth.</param>
     /// <returns>A list of Song-Point pairs, each song and its point (on Earth), in a list.</returns>
-    private List<SongPoint> PairPoints(List<ISongEntry> songs, List<GpsTrack> tracks)
+    protected List<SongPoint> PairPoints(List<ISongEntry> songs, List<GpsTrack> tracks)
     {
         int index = 0; // Index of the pairing
         List<SongPoint> pairs = new();

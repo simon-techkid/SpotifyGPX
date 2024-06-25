@@ -1,13 +1,10 @@
 ﻿// SpotifyGPX by Simon Field
 
-using SpotifyGPX.Api;
 using SpotifyGPX.Broadcasting;
-using SpotifyGPX.Input;
 using SpotifyGPX.Observation;
 using SpotifyGPX.Output;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace SpotifyGPX;
 
@@ -47,7 +44,7 @@ public partial class Program
         Dictionary<Formats, bool> exportOptions = GetExportOptions(flags);
 
         // Create a list of paired songs and points
-        PairingsHandler pairedEntries = new(string.Empty, BCast);
+        PairingsHandler pairedEntries;
 
         try
         {
@@ -87,50 +84,15 @@ public partial class Program
 
     private static PairingsHandler GetPairedEntries(string? inputPairs, string? inputSpotify, string? inputGps, ref StringBroadcaster BCast, bool grabApiData, bool predictPoints, bool autoPredictPoints)
     {
+        PairingsFactory factory;
+
         if (inputPairs != null)
-            return PairFromPairs(inputPairs, ref BCast);
+            factory = new PairingsFromPairings(inputPairs, BCast, predictPoints, autoPredictPoints);
         else if (inputSpotify != null && inputGps != null)
-            return PairFromSongsAndPoints(inputSpotify, inputGps, ref BCast, grabApiData, predictPoints, autoPredictPoints);
+            factory = new PairingsFromSongsAndPoints(inputSpotify, inputGps, grabApiData, predictPoints, autoPredictPoints, BCast);
         else
             throw new Exception("Neither song and GPS nor pairings files provided!");
-    }
 
-    private static PairingsHandler PairFromPairs(string inputPairs, ref StringBroadcaster BCast)
-    {
-        List<SongPoint> pairs = new();
-
-        using (InputHandler input = new(inputPairs, BCast))
-        {
-            pairs = input.GetAllPairs();
-        }
-
-        PairingsHandler pairer = new(pairs, Path.GetFileNameWithoutExtension(inputPairs), BCast);
-        return pairer;
-    }
-
-    private static PairingsHandler PairFromSongsAndPoints(string inputSongs, string inputGps, ref StringBroadcaster BCast, bool grabApiData, bool pointPredict, bool autoPredictPoints)
-    {
-        // Step 0: Get input handler based on file paths
-        List<GpsTrack> tracks = new();
-        List<ISongEntry> songs = new();
-
-        using (InputHandler input = new(inputSongs, inputGps, BCast))
-        {
-            // Step 1: Get list of GPS tracks from the GPS file
-            tracks = input.GetSelectedTracks();
-
-            // Step 2: Get list of songs played from the entries file
-            songs = input.GetFilteredSongs(tracks);
-            //songs = input.GetAllSongs(); // Unfiltered run
-        }
-
-        // Step 2.5: Get metadata for each song
-        if (grabApiData)
-            songs = new EntryMatcher(songs).MatchEntries();
-
-        // Step 3: Create list of songs and points paired as close as possible to one another
-        PairingsHandler pairer = new(Path.GetFileNameWithoutExtension(inputGps), BCast);
-        pairer.CalculatePairings(songs, tracks, pointPredict, autoPredictPoints);
-        return pairer;
+        return factory.GetHandler();
     }
 }

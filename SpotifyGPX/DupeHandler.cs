@@ -10,25 +10,27 @@ namespace SpotifyGPX;
 /// <summary>
 /// Handle duplicate coordinate placements by shifting them to other locations.
 /// </summary>
-public partial class DupeHandler : StringBroadcasterBase
+public abstract partial class DupeHandler : PairingsHandler
 {
-    private List<SongPoint> Pairs { get; }
+    public override string Name { get; }
 
-    /// <summary>
-    /// Create a handler for duplicate positions.
-    /// </summary>
-    /// <param name="pairs">A list of pairs to be searched for duplicate positions.</param>
-    public DupeHandler(List<SongPoint> pairs, StringBroadcaster bcast) : base(bcast)
+    protected DupeHandler(string name, StringBroadcaster bcast) : base(bcast)
     {
-        Pairs = pairs;
+        Name = name;
     }
 
-    /// <summary>
-    /// Run prediction (dupe calculation) using the pairs list this DupeHandler was initialized with.
-    /// </summary>
-    /// <param name="autoPredict">If true, do not ask user for pair indexes of dupes.</param>
-    /// <returns>A list of pairs with the formerly duplicate positioned pairs shifted.</returns>
-    public List<SongPoint> GetDupes(bool autoPredict)
+    public override void CalculatePairings(List<ISongEntry> s, List<GpsTrack> t)
+    {
+        CalculatePairings(PairPoints(s, t));
+    }
+
+    public override void CalculatePairings(List<SongPoint> pairs)
+    {
+        Pairs = pairs;
+        Pairs = GetDupes();
+    }
+
+    private List<SongPoint> GetDupes()
     {
         if (Pairs.Count < MinimumMatchingCoords)
         {
@@ -36,31 +38,18 @@ public partial class DupeHandler : StringBroadcasterBase
             return Pairs;
         }
 
-        BCaster.Broadcast($"Autopredict is {(autoPredict == true ? "enabled, automatically predicting" : "disabled, you will be prompted")}");
-        return PredictPoints(autoPredict);
+        return PredictPoints();
     }
 
-    /// <summary>
-    /// Find and handle duplicate coordinate positions.
-    /// </summary>
-    /// <param name="autoPredict">If true, shift all duplicate positions regardless of user intent. If false, ask the user for index ranges of duplicates.</param>
-    /// <returns>The original pairs list, with duplicate coordinates shifted.</returns>
-    private List<SongPoint> PredictPoints(bool autoPredict)
+    protected abstract List<(int, int)> GetDupeIndexes();
+
+    private List<SongPoint> PredictPoints()
     {
         BCaster.Broadcast("Scanning for duplicate entries:");
         var dupes = GroupDuplicates();
         PrintDuplicates(dupes);
 
-        List<(int startIndex, int endIndex)> specDupes = new();
-
-        if (autoPredict == true)
-        {
-            specDupes = GetAllDupes();
-        }
-        else
-        {
-            specDupes = GetDupesFromUser();
-        }
+        List<(int startIndex, int endIndex)> specDupes = GetDupeIndexes();
 
         List<Dupe> parsedDupes = specDupes.Select(dupe =>
         {
@@ -76,87 +65,6 @@ public partial class DupeHandler : StringBroadcasterBase
         return ApplyPredictions(parsedDupes);
     }
 
-    /// <summary>
-    /// Get the start and end indexes of pairs (sharing the same coordinates) in a series.
-    /// </summary>
-    /// <returns>A list containing each duplicate coordinate group's start and end index as an integer.</returns>
-    private List<(int, int)> GetAllDupes()
-    {
-        var dupes = GroupDuplicates();
-
-        return dupes.Select(dupe => (dupe.First().Index, dupe.Last().Index)).ToList();
-    }
-
-    /// <summary>
-    /// Ask the user to provide start and end indexes for a series of pairs.
-    /// </summary>
-    /// <returns>A list containing each duplicate coordinate group's start and end index as an integer.</returns>
-    private List<(int, int)> GetDupesFromUser()
-    {
-        List<(int startIndex, int endIndex)> specDupes = new();
-
-        bool isValidInput = false;
-
-        BCaster.Broadcast("Write the start and end indexes (separated by a dash) of each of your dupes, with dupes separated by commas: ");
-        while (!isValidInput)
-        {
-            string dupeDefinition = Console.ReadLine() ?? string.Empty;
-
-            string[] selectedDupes = dupeDefinition.Split(",");
-
-            foreach (string dupe in selectedDupes)
-            {
-                int maximumAllowedIndex = Pairs.Count - 1;
-
-                string[] indexes = dupe.Split("-");
-
-                if (indexes.Length == 2 && int.TryParse(indexes[0], out int startIndex) && int.TryParse(indexes[1], out int endIndex))
-                {
-                    if (startIndex < 0 || startIndex >= Pairs.Count)
-                    {
-                        BCaster.BroadcastError(new Exception($"Invalid startIndex: {startIndex}. Must be between 0 and {maximumAllowedIndex}."));
-                        isValidInput = false;
-                        break;
-                    }
-                    else if (endIndex < 0 || endIndex >= Pairs.Count)
-                    {
-                        BCaster.BroadcastError(new Exception($"Invalid endIndex: {endIndex}. Must be between 0 and {maximumAllowedIndex}."));
-                        isValidInput = false;
-                        break;
-                    }
-                    else if (endIndex - startIndex == 0)
-                    {
-                        BCaster.BroadcastError(new Exception($"Invalid range: {startIndex}-{endIndex}. Range must include at least one element."));
-                        isValidInput = false;
-                        break;
-                    }
-
-                    specDupes.Add((startIndex, endIndex));
-                    isValidInput = true; // Input is valid only if all conditions pass
-                }
-                else
-                {
-                    BCaster.BroadcastError(new Exception($"Invalid input: '{dupe}'. Please enter start and end indexes separated by a dash."));
-                    isValidInput = false;
-                    break;
-                }
-            }
-
-            if (isValidInput)
-            {
-                break;
-            }
-        }
-
-        return specDupes;
-    }
-
-    /// <summary>
-    /// Get the next coordinate after a specified index in a pairs list.
-    /// </summary>
-    /// <param name="pairs">The list of pairs.</param>
-    /// <param name="endIndex">The index of the last pair in a duplicate.</param>
-    /// <returns>The coordinate following the last duplicate, the next unique coordinate.</returns>
     private static Coordinate GetNextUniqueCoord(List<SongPoint> pairs, int endIndex)
     {
         int nextIndex = endIndex + 1;
@@ -164,11 +72,6 @@ public partial class DupeHandler : StringBroadcasterBase
         return pairs[nextIndex < lastIndex ? nextIndex : endIndex].Point.Location;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="parsedDupes"></param>
-    /// <returns></returns>
     private List<SongPoint> ApplyPredictions(List<Dupe> parsedDupes)
     {
         return Pairs
@@ -195,18 +98,8 @@ public partial class DupeHandler : StringBroadcasterBase
             .ToList();
     }
 
-    /// <summary>
-    /// An object representing a series of pairs' matching coordinates.
-    /// </summary>
     private readonly struct Dupe
     {
-        /// <summary>
-        /// Creates a Dupe object, representing a cluster of pairs with matching coordinates.
-        /// </summary>
-        /// <param name="startIndex">The index of the first pair (in a list) with a shared coordinate.</param>
-        /// <param name="endIndex">The index of the last pair (in a list) with a shared coordinate.</param>
-        /// <param name="first">The first coordinate of the dupe, the coordinate shared among all pairs in this group.</param>
-        /// <param name="next">The next unique coordinate, taken from the pair just after this dupe.</param>
         public Dupe(int startIndex, int endIndex, Coordinate first, Coordinate next)
         {
             StartIndex = startIndex;
@@ -252,7 +145,7 @@ public partial class DupeHandler : StringBroadcasterBase
     /// Finds and groups pairs sharing the same coordinate.
     /// </summary>
     /// <returns>An IGrouping, with TKey as Coordinate (the shared coordinate), and TElement as SongPoint (the SongPoint implicated).</returns>
-    private List<IGrouping<Coordinate, SongPoint>> GroupDuplicates()
+    protected List<IGrouping<Coordinate, SongPoint>> GroupDuplicates()
     {
         // Create list of grouped duplicate coordinate values from final points list
         return Pairs
@@ -262,10 +155,6 @@ public partial class DupeHandler : StringBroadcasterBase
             .ToList(); // Send the resulting dupes to a list
     }
 
-    /// <summary>
-    /// Prints each group of shared-coordinate pairs to the console.
-    /// </summary>
-    /// <param name="dupes">An IGrouping, with TKey as Coordinate (the shared coordinate), and TElement as SongPoint (the SongPoint implicated).</param>
     private void PrintDuplicates(List<IGrouping<Coordinate, SongPoint>> dupes)
     {
         foreach (var dupe in dupes)
@@ -275,13 +164,6 @@ public partial class DupeHandler : StringBroadcasterBase
         }
     }
 
-    /// <summary>
-    /// Calculates an array of a specified number of equally-spaced coordinates (in a line) between two given coordinates.
-    /// </summary>
-    /// <param name="start">The start point of the line array.</param>
-    /// <param name="end">The end point of the line array.</param>
-    /// <param name="dupeCount">The number of points to calculate between the start and end points.</param>
-    /// <returns></returns>
     private static Coordinate[] GetIntermediates(Coordinate start, Coordinate end, int dupeCount)
     {
         // Parse start coordinate and end coordinate to lat and lon doubles

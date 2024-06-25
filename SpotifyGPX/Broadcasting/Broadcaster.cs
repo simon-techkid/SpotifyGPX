@@ -7,13 +7,22 @@ using System.Linq;
 
 namespace SpotifyGPX.Broadcasting;
 
-public abstract partial class Broadcaster<T>
+public abstract partial class Broadcaster<T> : ICloneable
 {
+    /// <summary>
+    /// The observers of this broadcaster of type <typeparamref name="T"/>.
+    /// </summary>
     public List<Observation.IObserver<T>> Observers { get; set; }
+
+    /// <summary>
+    /// The hash code of this broadcaster of type <typeparamref name="T"/>.
+    /// </summary>
+    public int HashCode { get; }
 
     protected Broadcaster()
     {
         Observers = new();
+        HashCode = GetHashCode();
     }
 
     /// <summary>
@@ -81,10 +90,14 @@ public abstract partial class Broadcaster<T>
     {
         Observers.Add(observer);
 
-        IDisposable? additional = observer as IDisposable ?? null;
+        AdditionalSubscriptionInstructions();
 
-        return new Unsubscriber(observer, Observers, additional);
+        IDisposable? additionalUnsubscriptionInstructions = observer as IDisposable ?? null;
+
+        return new Unsubscriber(observer, Observers, additionalUnsubscriptionInstructions);
     }
+
+    protected virtual void AdditionalSubscriptionInstructions() { }
 
     private class Unsubscriber : IDisposable
     {
@@ -108,4 +121,6 @@ public abstract partial class Broadcaster<T>
             }
         }
     }
+
+    public abstract object Clone();
 }
