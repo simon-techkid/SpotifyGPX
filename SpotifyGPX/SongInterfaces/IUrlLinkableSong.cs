@@ -1,6 +1,6 @@
 ﻿// SpotifyGPX by Simon Field
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.SongInterfaces;
 
 /// <summary>
 /// Provides access to URLs of songs.

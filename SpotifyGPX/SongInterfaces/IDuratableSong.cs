@@ -2,7 +2,7 @@
 
 using System;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.SongInterfaces;
 
 /// <summary>
 /// Provides access to song playback durations.

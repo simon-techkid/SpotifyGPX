@@ -2,7 +2,7 @@
 
 using System;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.PointEntry;
 
 public struct GeoJsonPoint : IGpsPoint
 {

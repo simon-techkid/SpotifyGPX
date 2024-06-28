@@ -2,7 +2,7 @@
 
 using SpotifyGPX.Broadcasting;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.Pairings;
 
 public class PairerVanilla : PairingsHandler
 {

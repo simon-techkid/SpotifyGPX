@@ -2,9 +2,9 @@
 
 using System;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.PointEntry;
 
-public struct GenericPoint : IGpsPoint
+public struct GpxPoint : IGpsPoint
 {
     public int Index { get; set; }
     public Coordinate Location { get; set; }

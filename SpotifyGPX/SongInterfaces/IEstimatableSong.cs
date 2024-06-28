@@ -3,7 +3,7 @@
 using SpotifyGPX.Input;
 using System;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.SongInterfaces;
 
 /// <summary>
 /// Provides access to estimated start/end times for a song.

@@ -2,11 +2,12 @@
 
 using SpotifyGPX.Api;
 using SpotifyGPX.Input;
+using SpotifyGPX.SongInterfaces;
 using System;
 using System.Linq;
 using System.Text.Json.Serialization;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.SongEntry;
 
 public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, ISpotifyApiCompat, ISpotifyApiProportionable, IUrlLinkableSong, IAlbumableSong
 {

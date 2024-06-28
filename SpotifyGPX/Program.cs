@@ -3,6 +3,7 @@
 using SpotifyGPX.Broadcasting;
 using SpotifyGPX.Observation;
 using SpotifyGPX.Output;
+using SpotifyGPX.Pairings;
 using System;
 using System.Collections.Generic;
 

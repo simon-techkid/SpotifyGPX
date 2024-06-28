@@ -1,6 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
 using SpotifyGPX.Broadcasting;
+using SpotifyGPX.SongEntry;
 using System;
 using System.Collections.Generic;
 using System.Linq;

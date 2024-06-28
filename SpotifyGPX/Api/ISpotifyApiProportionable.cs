@@ -1,5 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.SongInterfaces;
+
 namespace SpotifyGPX.Api;
 
 /// <summary>

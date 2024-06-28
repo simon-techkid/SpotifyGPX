@@ -1,9 +1,10 @@
 ﻿// SpotifyGPX by Simon Field
 
 using SpotifyGPX.Input;
+using SpotifyGPX.SongInterfaces;
 using System;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.SongEntry;
 
 public partial struct XspfEntry : ISongEntry, IEstimatableSong
 {

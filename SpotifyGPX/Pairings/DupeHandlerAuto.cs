@@ -4,7 +4,7 @@ using SpotifyGPX.Broadcasting;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.Pairings;
 
 public class DupeHandlerAuto : DupeHandler
 {

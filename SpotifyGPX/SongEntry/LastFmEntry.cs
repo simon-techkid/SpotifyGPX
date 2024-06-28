@@ -3,7 +3,7 @@
 using SpotifyGPX.Input;
 using System;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.SongEntry;
 
 public partial struct LastFmEntry : ISongEntry
 {

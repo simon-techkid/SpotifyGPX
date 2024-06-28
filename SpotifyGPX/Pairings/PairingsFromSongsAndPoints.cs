@@ -6,7 +6,7 @@ using SpotifyGPX.Input;
 using System.Collections.Generic;
 using System.IO;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.Pairings;
 
 public class PairingsFromSongsAndPoints : PairingsFactory
 {

@@ -3,7 +3,7 @@
 using SpotifyGPX.Broadcasting;
 using System;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.Pairings;
 
 public abstract class PairingsFactory : StringBroadcasterBase
 {

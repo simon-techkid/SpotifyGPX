@@ -5,6 +5,8 @@ using SpotifyGPX.Broadcasting;
 using SpotifyGPX.Input;
 using SpotifyGPX.Observation;
 using SpotifyGPX.Output;
+using SpotifyGPX.PointEntry;
+using SpotifyGPX.SongEntry;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -124,33 +126,6 @@ namespace SpotifyGPX
                 return builder.ToString();
             }
         }
-    }
-
-    public partial struct LastFmEntry
-    {
-        private const TimeUsage timeUsage = TimeUsage.Start;
-    }
-
-    public partial struct SpotifyEntry
-    {
-        private static TimeUsage timeUsage => TimeUsage.End;
-    }
-
-    public partial struct XspfEntry
-    {
-        private const TimeUsage timeUsage = TimeUsage.Start;
-    }
-
-    public partial class PairingsHandler
-    {
-        protected override string BroadcasterPrefix => "PAIR";
-        private static double? MaximumAbsAccuracy => null; // Greatest accepted error (in seconds) between song and point time (null = allow all pairings regardless of accuracy)
-    }
-
-    public partial class DupeHandler
-    {
-        protected override string BroadcasterPrefix => "DUPE";
-        private const int MinimumMatchingCoords = 2; // Minimum number of matching coordinates to be considered a duplicate
     }
 }
 
@@ -576,5 +551,38 @@ namespace SpotifyGPX.Observation
     public partial class FileObserver
     {
         protected override Func<LogLevel, bool> MessageMatch => lvl => lvl >= LogLevel.Debug;
+    }
+}
+
+namespace SpotifyGPX.Pairings
+{
+    public partial class PairingsHandler
+    {
+        protected override string BroadcasterPrefix => "PAIR";
+        private static double? MaximumAbsAccuracy => null; // Greatest accepted error (in seconds) between song and point time (null = allow all pairings regardless of accuracy)
+    }
+
+    public partial class DupeHandler
+    {
+        protected override string BroadcasterPrefix => "DUPE";
+        private const int MinimumMatchingCoords = 2; // Minimum number of matching coordinates to be considered a duplicate
+    }
+}
+
+namespace SpotifyGPX.SongEntry
+{
+    public partial struct LastFmEntry
+    {
+        private const TimeUsage timeUsage = TimeUsage.Start;
+    }
+
+    public partial struct SpotifyEntry
+    {
+        private static TimeUsage timeUsage => TimeUsage.End;
+    }
+
+    public partial struct XspfEntry
+    {
+        private const TimeUsage timeUsage = TimeUsage.Start;
     }
 }

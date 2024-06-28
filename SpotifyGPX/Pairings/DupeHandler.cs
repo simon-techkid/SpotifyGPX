@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.Pairings;
 
 /// <summary>
 /// Handle duplicate coordinate placements by shifting them to other locations.

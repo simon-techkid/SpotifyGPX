@@ -7,7 +7,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SpotifyGPX;
+namespace SpotifyGPX.Pairings;
 
 /// <summary>
 /// Handle SongPoint pairings, including list calculation, generation, operations, and exporting.

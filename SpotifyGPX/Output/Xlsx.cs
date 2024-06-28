@@ -5,6 +5,7 @@ using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.Style;
 using OfficeOpenXml.Table;
 using SpotifyGPX.Broadcasting;
+using SpotifyGPX.SongInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
