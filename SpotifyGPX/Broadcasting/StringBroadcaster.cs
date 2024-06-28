@@ -1,17 +1,26 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Observation;
+
 namespace SpotifyGPX.Broadcasting;
 
 public class StringBroadcaster : Broadcaster<string>
 {
     public string Type { get; set; } = "INFO";
 
-    protected override string BroadcastHandler(string message)
+    protected override string BroadcastHandler(string message, LogLevel l)
     {
         return $"[{Type}] {message}";
-        //return $"[{HashCode}] [{Type}] {message}";
-        // optionally, show the hash code of the broadcaster
-        // When observers handle LogLevel, allow Debug observer to see hash codes
+    }
+
+    protected override string LevelHandler(string message, LogLevel l)
+    {
+        if (l == LogLevel.Debug)
+        {
+            return $"[OBSERVER-{HashCode}] [{l.ToString().ToUpper()}] {message}";
+        }
+
+        return message;
     }
 
     protected override void AdditionalSubscriptionInstructions()

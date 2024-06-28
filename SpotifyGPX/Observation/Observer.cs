@@ -64,7 +64,7 @@ public abstract class Observer<T> : IObserver<T>
     /// <summary>
     /// Handles a new message produced by the observable sequence.
     /// </summary>
-    /// <param name="message"></param>
+    /// <param name="message">The message of type <typeparamref name="T"/> to take in.</param>
     protected abstract void HandleMessage(T message);
 
     /// <summary>
