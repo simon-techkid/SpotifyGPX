@@ -182,6 +182,11 @@ public readonly struct Coordinate :
         return $"Latitude: {Latitude.ToString(format, formatProvider)}, Longitude: {Longitude.ToString(format, formatProvider)}";
     }
 
+    public override string ToString()
+    {
+        return ToString(null, null);
+    }
+
     /// <summary>
     /// Parses a string representation of a coordinate in the format "latitude,longitude".
     /// </summary>

@@ -1,10 +1,12 @@
 ﻿// SpotifyGPX by Simon Field
 
-using SpotifyGPX.Api;
+using SpotifyGPX.Api.Geocoding.MapQuest;
+using SpotifyGPX.Api.SpotifyAPI;
 using SpotifyGPX.Broadcasting;
 using SpotifyGPX.Input;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SpotifyGPX.Pairings;
 
@@ -38,7 +40,13 @@ public class PairingsFromSongsAndPoints : PairingsFactory
         }
 
         if (GrabApiData)
-            songs = new EntryMatcher(songs).MatchEntries();
+        {
+            songs = new SpotifyEntryMatcher(songs, BCaster).MatchEntries();
+
+            List<IGpsPoint> gpsPoints = tracks.SelectMany(t => t.Points).ToList();
+
+            gpsPoints = new GeocoderMapQuest(gpsPoints, BCaster).MatchEntries();
+        }
 
         pairer.CalculatePairings(songs, tracks);
         return pairer;

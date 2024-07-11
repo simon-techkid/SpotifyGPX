@@ -541,19 +541,6 @@ namespace SpotifyGPX.Broadcasting
     }
 }
 
-namespace SpotifyGPX.Observation
-{
-    public partial class ConsoleObserver
-    {
-        protected override Func<LogLevel, bool> MessageMatch => lvl => lvl >= LogLevel.Pair;
-    }
-
-    public partial class FileObserver
-    {
-        protected override Func<LogLevel, bool> MessageMatch => lvl => lvl >= LogLevel.Debug;
-    }
-}
-
 namespace SpotifyGPX.Pairings
 {
     public partial class PairingsHandler

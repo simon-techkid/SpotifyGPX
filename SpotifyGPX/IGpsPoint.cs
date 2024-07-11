@@ -1,5 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
+using SpotifyGPX.Api;
+using SpotifyGPX.Api.Geocoding;
 using System;
 
 namespace SpotifyGPX;
@@ -8,8 +10,15 @@ namespace SpotifyGPX;
 /// Interfaces with structs designated for GPS point records.
 /// All structs encapsulating GPS point records must implement this interface.
 /// </summary>
-public interface IGpsPoint : IInterfaceFront<IGpsPoint>
+public interface IGpsPoint :
+    IInterfaceFront<IGpsPoint>,
+    IApiMetadataRecordable<Coordinate, IGpsMetadata>
 {
+    /// <summary>
+    /// The description of this point, as printed to description fields.
+    /// </summary>
+    public string Description { get; }
+
     /// <summary>
     /// Unique identifier of this GPS point in a list.
     /// </summary>

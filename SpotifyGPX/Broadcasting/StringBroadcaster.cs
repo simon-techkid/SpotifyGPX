@@ -8,16 +8,16 @@ public class StringBroadcaster : Broadcaster<string>
 {
     public string Type { get; set; } = "INFO";
 
-    protected override string BroadcastHandler(string message, LogLevel l)
+    protected override string HandleMessageBasedOnMessageLogLevel(string message, LogLevel l)
     {
         return $"[{Type}] {message}";
     }
 
-    protected override string LevelHandler(string message, LogLevel l)
+    protected override string HandleMessageBasedOnObserverLogLevelAndMessageLogLevel(string message, LogLevel messageLevel, LogLevel observerLevel)
     {
-        if (l == LogLevel.Debug)
+        if (observerLevel == LogLevel.Debug)
         {
-            return $"[OBSERVER-{HashCode}] [{l.ToString().ToUpper()}] {message}";
+            return $"[OBSERVER-{HashCode}] [{messageLevel.ToString().ToUpper()}] {message}";
         }
 
         return message;

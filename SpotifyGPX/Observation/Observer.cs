@@ -82,7 +82,7 @@ public abstract class Observer<T> : IObserver<T>
     /// <summary>
     /// Determines whether or not a message should be handled by this observer based on the log level of the message.
     /// </summary>
-    protected abstract Func<LogLevel, bool> MessageMatch { get; }
+    protected virtual Func<LogLevel, bool> MessageMatch => lvl => lvl >= Level;
 
     /// <summary>
     /// Writes a new message to the observer if <see cref="Silent"/> is <see langword="false"/> or <see cref="IgnoreSilent"/> is <see langword="true"/>.

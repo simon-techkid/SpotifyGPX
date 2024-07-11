@@ -23,6 +23,9 @@
 
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="7.1.1" />
+    <PackageReference Include="Geocoding.Core" Version="4.0.1" />
+    <PackageReference Include="Geocoding.Google" Version="4.0.1" />
+    <PackageReference Include="Geocoding.MapQuest" Version="4.0.1" />
     <PackageReference Include="SpotifyAPI.Web" Version="7.1.1" />
     <PackageReference Include="SpotifyAPI.Web.Auth" Version="7.1.1" />
   </ItemGroup>

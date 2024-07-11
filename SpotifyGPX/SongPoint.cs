@@ -21,6 +21,7 @@ public readonly struct SongPoint
             builder.AppendLine("At this position: {0}", PointTime.ToString(Options.ISO8601Offset));
             builder.AppendLine("Song {0}", $"{Song.TimeName}: {SongTime.ToString(Options.ISO8601Offset)}");
             builder.AppendLine("Song Details:" + Environment.NewLine + "{0}", Song.Description);
+            builder.AppendLine("Point Details:" + Environment.NewLine + "{0}", Point.Description);
             builder.AppendLine("Predicted Index: {0}", PredictedIndex != null ? PredictedIndex : null);
 
             return builder.ToString();

@@ -1,6 +1,7 @@
 ﻿// SpotifyGPX by Simon Field
 
 using SpotifyGPX.Api;
+using SpotifyGPX.Api.SpotifyAPI;
 using SpotifyGPX.Input;
 using SpotifyGPX.SongInterfaces;
 using System;
@@ -9,12 +10,17 @@ using System.Text.Json.Serialization;
 
 namespace SpotifyGPX.SongEntry;
 
-public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, ISpotifyApiCompat, ISpotifyApiProportionable, IUrlLinkableSong, IAlbumableSong
+public partial struct SpotifyEntry :
+    ISongEntry,
+    IEstimatableSong,
+    IUrlLinkableSong,
+    IAlbumableSong,
+    IApiMetadataRecordable<string, SpotifyApiEntry?>
 {
     public readonly override string ToString() => $"{Song_Artist} - {Song_Name}";
 
     [JsonIgnore]
-    public string Description
+    public readonly string Description
     {
         get
         {
@@ -24,8 +30,26 @@ public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, ISpotifyApiCo
             builder.AppendLine("Skipped: {0}", Song_Skipped);
             builder.AppendLine("Shuffle: {0}", Song_Shuffle);
             builder.AppendLine("IP Address: {0}", Spotify_IP);
+            builder.AppendLine("Country: {0}", Spotify_Country);
             builder.AppendLine("Listened: {0}%", PercentListened);
-            builder.Append("Country: {0}", Spotify_Country);
+            builder.AppendLine("Metadata: " + Environment.NewLine + "{0}", MetadataDesc);
+
+            return builder.ToString();
+        }
+    }
+
+    private readonly string? MetadataDesc
+    {
+        get
+        {
+            if (Metadata == null)
+                return null;
+
+            StringBuilder builder = new();
+
+            builder.AppendLine("Full Duration: {0}", Metadata?.DurationSpan.ToString(Options.TimeSpan));
+            builder.AppendLine("Popularity: {0}", Metadata?.Popularity);
+            builder.AppendLine("Genres: {0}", Metadata?.GetGenres());
 
             return builder.ToString();
         }
@@ -112,6 +136,8 @@ public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, ISpotifyApiCo
     [JsonIgnore]
     public readonly string? Song_ID => Song_URI?.Split(':').Last();
 
+    public readonly string? GetEntryCode() => Song_ID;
+
     /// <summary>
     /// The URL of this song.
     /// </summary>
@@ -189,7 +215,7 @@ public partial struct SpotifyEntry : ISongEntry, IEstimatableSong, ISpotifyApiCo
     public bool? Spotify_Incognito { get; set; }
 
     [JsonIgnore]
-    public decimal? PercentListened => Metadata?.Duration != null ? Math.Round(((decimal)Time_Played / (decimal)Metadata?.Duration!) * 100, 0) : null;
+    public readonly decimal? PercentListened => Metadata?.Duration != null ? Math.Round(Time_Played / (decimal)Metadata?.Duration! * 100, 0) : null;
 
     [JsonIgnore]
     public SpotifyApiEntry? Metadata { get; set; }

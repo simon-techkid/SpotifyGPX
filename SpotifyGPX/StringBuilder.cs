@@ -44,10 +44,29 @@ public class StringBuilder : IFormatProvider, ICustomFormatter
     }
 
     /// <summary>
+    /// Trims the trailing newlines from the builder.
+    /// </summary>
+    /// <returns>The StringBuilder instance with trailing newlines removed.</returns>
+    private void TrimEndNewlines()
+    {
+        string newline = Environment.NewLine;
+        int newlineLength = newline.Length;
+
+        while (builder.Length >= newlineLength && builder.ToString(builder.Length - newlineLength, newlineLength) == newline)
+        {
+            builder.Length -= newlineLength;
+        }
+    }
+
+    /// <summary>
     /// Converts this StringBuilder to a string.
     /// </summary>
     /// <returns>This StringBuilder, as a string.</returns>
-    public override string ToString() => builder.ToString();
+    public override string ToString()
+    {
+        TrimEndNewlines();
+        return builder.ToString();
+    }
 
     public object? GetFormat(Type? formatType)
     {

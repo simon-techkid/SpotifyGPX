@@ -10,7 +10,7 @@ namespace SpotifyGPX;
 /// <summary>
 /// A journey track, with a name, type, and series of points representing the path on Earth of the journey. 
 /// </summary>
-public readonly struct GpsTrack : IEnumerable<IGpsPoint>
+public struct GpsTrack : IEnumerable<IGpsPoint>
 {
     /// <summary>
     /// Creates a GPXTrack, holding a series of points.
@@ -41,7 +41,7 @@ public readonly struct GpsTrack : IEnumerable<IGpsPoint>
     /// <summary>
     /// A series of points that comprise this track (journey).
     /// </summary>
-    public readonly List<IGpsPoint> Points { get; } // Where and when were all the points in this track taken?
+    public List<IGpsPoint> Points { get; set; } // Where and when were all the points in this track taken?
 
     /// <summary>
     /// The time and date at which this track's earliest point was taken.
@@ -97,7 +97,7 @@ public readonly struct GpsTrack : IEnumerable<IGpsPoint>
         return combinedTrack;
     }
 
-    public IGpsPoint this[int index]
+    public readonly IGpsPoint this[int index]
     {
         get
         {

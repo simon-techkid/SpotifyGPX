@@ -1,9 +1,10 @@
 ﻿// SpotifyGPX by Simon Field
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SpotifyGPX.Api;
+namespace SpotifyGPX.Api.SpotifyAPI;
 
 /// <summary>
 /// A record of a Spotify song's metadata.
@@ -29,6 +30,11 @@ public partial struct SpotifyApiEntry
     /// The track length in milliseconds.
     /// </summary>
     public int Duration { get; set; }
+
+    /// <summary>
+    /// <see cref="Duration"/> parsed to a <see cref="TimeSpan"/>.
+    /// </summary>
+    public readonly TimeSpan DurationSpan => TimeSpan.FromMilliseconds(Duration);
 
     /// <summary>
     /// The popularity of the track. The value will be between 0 and 100, with 100 being the most popular.
