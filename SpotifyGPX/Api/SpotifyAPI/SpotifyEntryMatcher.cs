@@ -16,6 +16,7 @@ public partial class SpotifyEntryMatcher :
     protected override string BroadcasterPrefix => "SPOTIFY";
     protected override Func<string, bool> CustomFilter => id => !string.IsNullOrEmpty(id);
     protected override string NameOfEntity => "Spotify";
+    protected override Func<SpotifyEntry, ISongEntry> Converter => entry => (ISongEntry)entry;
 
     public SpotifyEntryMatcher(List<ISongEntry> songs, StringBroadcaster bcaster) : base(songs, bcaster) { }
 

@@ -18,6 +18,7 @@ public abstract partial class GeocoderHandler<TResponse> :
     ApiMetadataHandler<IGpsPoint, Coordinate, IGpsMetadata, IGpsPoint>
 {
     protected override string NameOfEntity => "location";
+    protected override Func<IGpsPoint, IGpsPoint> Converter => x => x;
 
     /// <summary>
     /// The maximum number of coordinates to request from the API in a single batch.

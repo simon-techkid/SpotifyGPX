@@ -16,7 +16,7 @@ namespace SpotifyGPX.Api;
 public abstract class ApiMetadataHandler<TImplementer, TIdentifier, TMetadata, TCast> :
     StringBroadcasterBase
     where TIdentifier : notnull, IEquatable<TIdentifier>
-    where TImplementer : IApiMetadataRecordable<TIdentifier, TMetadata>, TCast
+    where TImplementer : IApiMetadataRecordable<TIdentifier, TMetadata>
 {
     private readonly List<TImplementer> _entries;
 
@@ -54,9 +54,14 @@ public abstract class ApiMetadataHandler<TImplementer, TIdentifier, TMetadata, T
     protected virtual IEqualityComparer<TIdentifier> EqualityComparer => EqualityComparer<TIdentifier>.Default;
 
     /// <summary>
+    /// The required converter from <typeparamref name="TImplementer"/> to <typeparamref name="TCast"/>.
+    /// </summary>
+    protected abstract Func<TImplementer, TCast> Converter { get; }
+
+    /// <summary>
     /// Match the objects of type <typeparamref name="TImplementer"/> with their respective API metadata of type <typeparamref name="TMetadata"/>.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>A list of <typeparamref name="TCast"/> objects.</returns>
     public List<TCast> MatchEntries()
     {
         List<TImplementer> entries = _entries;
@@ -95,7 +100,7 @@ public abstract class ApiMetadataHandler<TImplementer, TIdentifier, TMetadata, T
             entries[i] = entry;
         }
 
-        return entries.Cast<TCast>().ToList();
+        return entries.Select(entry => Converter(entry)).ToList();
     }
 
     /// <summary>
